@@ -121,7 +121,7 @@ public class LobbyManager : MonoBehaviour
             //  *** TOGGLE VISUALS ***
 
             // Enabling the correct character image
-            toggle_image.sprite = character_images[a];
+            toggle_image.sprite = character_images[lobby_client[id].character_selected.Value];
 
             // Making the image the correct transparency (half transparent when character is not ready;
             toggle_image.color = (lobby_client[id].ready.Value) ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 1f, 1f, 0.3f);
@@ -135,17 +135,23 @@ public class LobbyManager : MonoBehaviour
         // Make it do something when you are trying to press "Ready" with a character that your opponent has selected;
     }
 
-    // Those happen when clicking on character select toggles
-    public void ToggleRobber() 
+    // This happens when clicking on character select toggles
+    public void ToggleStartingCharacter(int character_id)
     {
-        if (refreshing_toggles) return;
-        lobby_client[owner_id].SetCharacter(lobby_client[owner_id], 0);
-    }
+        Debug.Log("LobbyManager: toggle " + character_id + " was clicked. Refreshing toggles: " + refreshing_toggles);
 
-    public void ToggleGhost()
-    {
-        if (refreshing_toggles) return;
-        lobby_client[owner_id].SetCharacter(lobby_client[owner_id], 1);
+        // making sure if only triggers when you set a toggle to "on"
+        if (lobby_panel[owner_id].starting_character_toggles[character_id].isOn == false)
+        {
+            Debug.Log("LobbyManager: the " + character_id + " toggle is deselected");
+            return;
+        }
+        else
+        {
+            if (refreshing_toggles) return;
+            lobby_client[owner_id].SetCharacter(lobby_client[owner_id], character_id);
+        }
+
     }
 
     public void ButtonReady() // This happens when "Ready" button is being pressed

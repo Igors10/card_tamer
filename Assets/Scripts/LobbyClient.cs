@@ -95,7 +95,7 @@ public class LobbyClient : NetworkBehaviour   // Look into registering the clien
     {
         client.character_selected.Value = character_id;
 
-        Debug.Log("LobbyClient: " + nickname.Value + " has selected " + (character_id == 0 ? "robber" : "ghost"));
+        Debug.Log("LobbyClient: " + nickname.Value + " has selected character "+ character_id);
     }
 
     [ServerRpc(RequireOwnership = false)]

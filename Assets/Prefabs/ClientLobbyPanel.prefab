@@ -339,8 +339,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5, y: 130}
-  m_SizeDelta: {x: 790, y: 200}
+  m_AnchoredPosition: {x: -5, y: 201.36049}
+  m_SizeDelta: {x: 790, y: 57.2691}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1208381936121897189
 CanvasRenderer:
@@ -435,7 +435,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 0, w: -5.2227783}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1564,6 +1564,7 @@ MonoBehaviour:
   starting_character_toggles:
   - {fileID: 4443319554259350411}
   - {fileID: 360149089361312626}
+  - {fileID: 8096227866330541418}
   toggle_sprites:
   - {fileID: -1426335459638590297, guid: 2a6cb811950c2be4189c8c12015843c7, type: 3}
   - {fileID: 1996365636236837626, guid: c70490c2ba229194e96da1b88a138ae3, type: 3}
