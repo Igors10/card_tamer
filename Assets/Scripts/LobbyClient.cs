@@ -1,7 +1,9 @@
-using UnityEngine;
+using FishNet;
+using FishNet.Managing.Scened;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using TMPro;
+using UnityEngine;
 
 public class LobbyClient : NetworkBehaviour   // Look into registering the client correctly
 {
@@ -58,7 +60,10 @@ public class LobbyClient : NetworkBehaviour   // Look into registering the clien
         character_selected.OnChange += OnCharacterChanged;
     }
 
-    //[ServerRpc(RequireOwnership = false)]
+    /// <summary>
+    /// Assigns id to the client in the lobby
+    /// </summary>
+    /// <param name="client"> </param>
     void SetLobbyID(LobbyClient client)
     {
         if (!IsServer) return;
@@ -111,7 +116,22 @@ public class LobbyClient : NetworkBehaviour   // Look into registering the clien
         Debug.Log("LobbyClient: " + nickname.Value + (ready.Value ? "ready" : "not ready"));
     }
 
+    /// <summary>
+    /// Launches the gameplay scene and puts both clients in it
+    /// </summary>
+    [Server]
+    public void StartMatch()
+    {
+        if (!IsServer) return;
 
+        // Replace current (lobby) with gameplay for ALL connected clients
+        var sld = new SceneLoadData("Board")
+        {
+            ReplaceScenes = ReplaceOption.All
+        };
+
+        InstanceFinder.SceneManager.LoadGlobalScenes(sld);
+    }
     private void OnDestroy()
     {
         // unsubscribe

@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
+using System.Net.Sockets;
 
 //[DefaultExecutionOrder(-1000)]
 public class LobbyManager : MonoBehaviour
@@ -29,6 +30,10 @@ public class LobbyManager : MonoBehaviour
         start_button.onClick.AddListener(StartTheGame);
     }
 
+    /// <summary>
+    /// Refreshes information in the scene based on the client synchronized info
+    /// </summary>
+    /// <param name="panel_id"></param>
     public void Refresh(int panel_id)
     {
         Debug.Log("LobbyManager: panel " + panel_id + " refreshed");
@@ -48,6 +53,9 @@ public class LobbyManager : MonoBehaviour
         RefreshToggles(panel_id);
     }
 
+    /// <summary>
+    /// Refreshes the "ready" button based on players that are ready
+    /// </summary>
     void RefreshReadyButton()
     {
         if (lobby_client[0] == null || lobby_client[1] == null)
@@ -82,71 +90,43 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Refreshes character select toggles based on client info
+    /// </summary>
+    /// <param name="id"></param>
     void RefreshToggles(int id)
     {
         //  *** TOGGLE STATES ***
         refreshing_toggles = true;
 
-        Toggle ghost_toggle = lobby_panel[id].g_toggle;
-        Toggle robber_toggle = lobby_panel[id].r_toggle;
+        List<Toggle> toggles = lobby_panel[id].starting_character_toggles;
+        List<Sprite> character_images = lobby_panel[id].toggle_sprites;
+        Image toggle_image = lobby_panel[id].toggle_image;
 
-        // Making the player unable to interact with opponents toggles
-        if (id == owner_id)
+        for (int a = 0; a < toggles.Count; a++)
         {
-            ghost_toggle.interactable = true;
-            robber_toggle.interactable = true;
-        }
-        else
-        {
-            ghost_toggle.interactable = false;
-            robber_toggle.interactable = false;
-        }
+            // Making the player unable to interact with opponents toggles
+            toggles[a].interactable = (id == owner_id);
 
-        // Making the player unable to deselect the character (you can only switch between two of them)
-        if (lobby_client[owner_id].character_selected.Value == 0)
-        {
-            robber_toggle.interactable = false;
-        }
-        else if (lobby_client[owner_id].character_selected.Value == 1)
-        {
-            ghost_toggle.interactable = false;
-        }
+            // Making the player unable to deselect the character (you can only switch between two of them)
+            if (lobby_client[owner_id].character_selected.Value == a) toggles[a].interactable = false;
 
-        // Deactivating the toggles once ready
-        ghost_toggle.gameObject.SetActive(!lobby_client[id].ready.Value);
-        robber_toggle.gameObject.SetActive(!lobby_client[id].ready.Value);
+            // Deactivating the toggles once ready
+            toggles[a].gameObject.SetActive(!lobby_client[id].ready.Value);
 
-        // Syncing the states of toggles 
-        robber_toggle.isOn = (lobby_client[id].character_selected.Value == 0) ? true : false;
-        ghost_toggle.isOn = (lobby_client[id].character_selected.Value == 1) ? true : false;
+            // Syncing the states of toggles between clients
+            toggles[a].isOn = (lobby_client[id].character_selected.Value == a);
 
-        //  *** TOGGLE VISUALS ***
 
-        // Enabling the correct character image
-        if (lobby_client[id].character_selected.Value == 0)
-        {
-            lobby_panel[id].toggle_images[0].gameObject.SetActive(true);
-            lobby_panel[id].toggle_images[1].gameObject.SetActive(false);
+            //  *** TOGGLE VISUALS ***
+
+            // Enabling the correct character image
+            toggle_image.sprite = character_images[a];
+
+            // Making the image the correct transparency (half transparent when character is not ready;
+            toggle_image.color = (lobby_client[id].ready.Value) ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 1f, 1f, 0.3f);
         }
-        else if (lobby_client[id].character_selected.Value == 1)
-        {
-            lobby_panel[id].toggle_images[0].gameObject.SetActive(false);
-            lobby_panel[id].toggle_images[1].gameObject.SetActive(true);
-        }
-
-        // Making the image the correct transparency
-        if (lobby_client[id].ready.Value)
-        {
-            lobby_panel[id].toggle_images[0].color = new Color(1f, 1f, 1f, 1f);
-            lobby_panel[id].toggle_images[1].color = new Color(1f, 1f, 1f, 1f);
-        }
-        else if (lobby_client[id].ready.Value == false)
-        {
-            lobby_panel[id].toggle_images[0].color = new Color(1f, 1f, 1f, 0.3f);
-            lobby_panel[id].toggle_images[1].color = new Color(1f, 1f, 1f, 0.3f);
-        }
-
+       
         refreshing_toggles = false;
     }
 
@@ -189,9 +169,15 @@ public class LobbyManager : MonoBehaviour
     {
         Debug.Log("LobbyManager: the game is starting");
 
-        // Logic for starting the game (probably will have to call a function in the lobby client so that the scene can be changed in Fishnet way)
+        lobby_client[0].StartMatch();
+        lobby_client[1].StartMatch();
     }
 
+    /// <summary>
+    /// Registering and putting a new client in the list whenever a new client joins
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="is_owner"></param>
     public void RegisterClient(LobbyClient client, bool is_owner)
     {
         Debug.Log("LobbyManager: client " + client.lobby_id.Value + " is being registered");
