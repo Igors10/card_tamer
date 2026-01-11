@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Scratch
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   speed: 2
-  power: 2
-  ability_description: 
-  ability_name: Scratch
-  is_passive: 0
+  power: 0
+  abilityDescription: Scratch!
+  abilityName: 
+  isPassive: 0

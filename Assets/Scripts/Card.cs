@@ -6,50 +6,22 @@ public class Card : MonoBehaviour
 {
     [Header("CreatureData")]
     public CreatureObj cardData;
-    // delete
-    [SerializeField] float rotation_z;
-    [SerializeField] float hearts_z;
-
+    
     [Header("Prefabs")]
     public GameObject activeAbility;
     [SerializeField] GameObject heart;
 
     [Header("Healthbar")]
     int damageToHP; // how much hp is currently missing
-    Image[] hearts = new Image[10];
+    [SerializeField]Image[] hearts = new Image[10];
     [SerializeField] TextMeshProUGUI healthText;
-    [SerializeField] Transform healthField;
-    [SerializeField] float heartSpacing;
-    [SerializeField] RectTransform heartsObject;
 
     [Header("refs")]
-    Ability[] abilities = new Ability[2];
+    public Ability[] abilities = new Ability[2];
     [SerializeField] RectTransform rt;
     [SerializeField] Image cardSprite;
     [SerializeField] TextMeshProUGUI nameText;
    
-
-    private void Start()
-    {
-        initHP();
-    }
-
-    /// <summary>
-    /// Creates the hearts in the hp field and puts them in the 'hearts' array
-    /// </summary>
-    void initHP()
-    {
-        for (int a = 1; a < hearts.Length + 1; a++)
-        {
-            float newHeartY = healthText.rectTransform.position.y;
-            float newHeartX = healthText.rectTransform.position.x;
-            newHeartX += (a % 2 == 0) ? heartSpacing * a : heartSpacing * -a - 10;
-            Vector2 newHeartPosition = new Vector2(newHeartX, newHeartY);
-            GameObject newHeart = Instantiate(heart, newHeartPosition, Quaternion.identity, heartsObject.transform);
-            hearts[a - 1] = newHeart.GetComponent<Image>();
-            Debug.Log("Card: new hearts local position is: " + newHeart.transform.localPosition);
-        }
-    }
 
     /// <summary>
     ///  makes all the card data and visuals match the creature data and current state
@@ -69,30 +41,42 @@ public class Card : MonoBehaviour
         healthText.text = currentHP.ToString();
 
         // HEALTH (heart visuals)
-       
-        for (int a = hearts.Length - 1; a > -1; a--)
+        for (int a = hearts.Length - 1; a >= 0; a--)
         {
             // Showing amount of hearts corresponding to max hp value
-            //hearts[a].gameObject.SetActive(a <= cardData.health);
+            hearts[a].gameObject.SetActive(a < cardData.health);
 
             // Coloring hearts black according to damage taken
-            //Color heartColor = (cardData.health - damageToHP < a) ? new Color(1f, 1f, 1f, 1f) : new Color(0f,0f,0f,1f);
+            Color fullHeartColor = new Color(1f, 1f, 1f, 1f);
+            Color emptyHeartColor = new Color(0f, 0f, 0f, 1f);
+            Color heartColor = (cardData.health - damageToHP < a) ? fullHeartColor : emptyHeartColor;
         }
 
         // ABILITIES
 
     }
 
+    /// <summary>
+    /// Rotates the card clockwise
+    /// </summary>
+    /// <param name="rotationAngle"></param>
+    public void RotateCard(float rotationAngle)
+    {
+        transform.localRotation = Quaternion.Euler(0f, 0f, rotationAngle);
+    }
+
+    /// <summary>
+    /// Assign abilities from cardData
+    /// </summary>
+    public void AssignAbilies()
+    {
+        for (int i = 0; i < abilities.Length; i++) { abilities[i].InitAbility(cardData.ability[i]); }
+    }
+
     public void AssignCardData(CreatureObj newCardData)
     {
         cardData = newCardData;
+        AssignAbilies();
         Refresh();
-    }
-
-    private void Update()
-    {
-        heartsObject.localRotation = Quaternion.Euler(0f, 0f, rt.localRotation.eulerAngles.z);
-        rotation_z = rt.localRotation.eulerAngles.z;
-        hearts_z = heartsObject.transform.localRotation.eulerAngles.z;
     }
 }

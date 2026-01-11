@@ -43,7 +43,7 @@ public class HandManager : MonoBehaviour
         for (int a = 0; a < cardCount; a++) 
         {
             float rotationAngle = fanSpread * (a - (cardCount - 1) / 2f);
-            cardsInHand[a].transform.localRotation = Quaternion.Euler(0f, 0f, rotationAngle);
+            cardsInHand[a].RotateCard(rotationAngle);
 
             float horizontalOffset = cardSpacing * (a - (cardCount - 1) / 2f);
 

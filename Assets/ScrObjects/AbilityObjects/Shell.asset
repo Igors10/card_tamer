@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   speed: 1
   power: 1
-  ability_description: Gain 2 block
-  ability_name: Shell
-  is_passive: 0
+  abilityDescription: +2 defense
+  abilityName: 
+  isPassive: 0
