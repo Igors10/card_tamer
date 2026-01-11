@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8545ef02531faa45ad6deda723251a0, type: 3}
   m_Name: Bellrat
   m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
-  creature_name: Bellrat
+  creatureName: 
   health: 5
-  creature_sprite: {fileID: 3626663542620517944, guid: d81de541ef346134caf2518d01a30a6f, type: 3}
-  foot_type: 2
+  creatureSprite: {fileID: 3626663542620517944, guid: d81de541ef346134caf2518d01a30a6f, type: 3}
+  foodType: 0
   cost: 2
   ability:
   - {fileID: 11400000, guid: 87564fb9c6aedca4b9a3f1d40e9a9598, type: 2}

@@ -78,7 +78,7 @@ MonoBehaviour:
   _teleportThreshold: 1
   <PrefabId>k__BackingField: 65535
   <SpawnableCollectionId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 15917416040659914307
+  <AssetPathHash>k__BackingField: 7557736790651056874
   <SceneId>k__BackingField: 0
   SerializedTransformProperties:
     Position: {x: 0, y: 0, z: 0}
@@ -100,8 +100,5 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 9104239517301537433}
   _networkObjectCache: {fileID: 0}
-  lobby_id: 0
-  ready: 0
-  deck_id: 0
+  is_host: 0
   client_panel: {fileID: 0}
-  nickname_text: {fileID: 0}

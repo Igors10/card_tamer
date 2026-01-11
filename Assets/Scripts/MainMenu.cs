@@ -6,11 +6,11 @@ using TMPro;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] ConnectionScript connection_script;
+    [SerializeField] ConnectionScript connectionScript;
 
-    [SerializeField] GameObject main_menu;
-    [SerializeField] GameObject lobby_menu;
-    [SerializeField] TMP_InputField nickname_field;
+    [SerializeField] GameObject mainMenu;
+    [SerializeField] GameObject lobbyMenu;
+    [SerializeField] TMP_InputField nicknameField;
 
     // Join Button
     // Create Button
@@ -21,23 +21,23 @@ public class MainMenu : MonoBehaviour
 
     public void JoinButton()
     {
-        connection_script.JoinServer();
+        connectionScript.JoinServer();
         SwitchToLobby();
     }
 
     public void CreateButton()
     {
-        connection_script.CreateServer();
-        connection_script.JoinServer();
+        connectionScript.CreateServer();
+        connectionScript.JoinServer();
         SwitchToLobby();
     }
 
     void SwitchToLobby()
     {
-        main_menu.SetActive(false);
-        lobby_menu.SetActive(true);
+        mainMenu.SetActive(false);
+        lobbyMenu.SetActive(true);
 
-        GameData.nickname = nickname_field.text; // saving the nickname
+        GameData.nickname = nicknameField.text; // saving the nickname
     }
 
 

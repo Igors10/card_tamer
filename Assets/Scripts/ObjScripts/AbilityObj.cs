@@ -5,7 +5,7 @@ public class AbilityObj : ScriptableObject
 {
     public int speed;
     public int power;
-    public string ability_description;
-    public string ability_name;
-    public bool is_passive;
+    public string abilityDescription;
+    public string abilityName;
+    public bool isPassive;
 }

@@ -6,43 +6,43 @@ using TMPro;
 
 public class ConnectionScript : MonoBehaviour
 {
-    public static ConnectionScript connection_manager;
+    public static ConnectionScript connectionManager;
     public int nextID = 0;
 
-    NetworkManager network_manager;
+    NetworkManager networkManager;
     Tugboat tugboat;
-    [SerializeField] TMP_InputField input_field;
+    [SerializeField] TMP_InputField inputField;
 
     private void Awake()
     {
-        connection_manager = this;
+        connectionManager = this;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        network_manager = GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
-        tugboat = network_manager.GetComponentInParent<Tugboat>();
+        networkManager = GameObject.Find("NetworkManager").GetComponent<NetworkManager>();
+        tugboat = networkManager.GetComponentInParent<Tugboat>();
 
-        if (network_manager == null) Debug.Log("ConnectionScript: network manager is null");
+        if (networkManager == null) Debug.Log("ConnectionScript: network manager is null");
         if (tugboat == null) Debug.Log("ConnectionScript: tugboat is null");
     }
 
     public void CreateServer()
     {
         //Creating a server
-        network_manager.ServerManager.StartConnection();
+        networkManager.ServerManager.StartConnection();
     }
 
     void GetIP()
     {
-        if (input_field.text == "")
+        if (inputField.text == "")
         {
             tugboat.SetClientAddress("localhost");
         }
         else
         {
-            tugboat.SetClientAddress(input_field.text);
+            tugboat.SetClientAddress(inputField.text);
         }
     }
 
@@ -52,6 +52,6 @@ public class ConnectionScript : MonoBehaviour
         GetIP();
 
         //Joining as client
-        network_manager.ClientManager.StartConnection();
+        networkManager.ClientManager.StartConnection();
     }
 }
