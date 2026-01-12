@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class Card : MonoBehaviour
 {
@@ -33,6 +34,10 @@ public class Card : MonoBehaviour
     float cardRotation = 0f;
     int hierarchyIndex = 0;
 
+    [Header("Drag")]
+    [HideInInspector] public bool isDragged;
+    float dragFollowSpeed = 0.15f;
+
     private void Start()
     {
         SetScales();
@@ -42,6 +47,40 @@ public class Card : MonoBehaviour
     {
         defaultScale = transform.localScale;
         highlightedScale = defaultScale * 1.5f;
+    }
+
+    private void Update()
+    {
+        Drag();
+    }
+
+    /// <summary>
+    /// Rotates the card clockwise
+    /// </summary>
+    /// <param name="rotationAngle"></param>
+    public void RotateCard(float rotationAngle)
+    {
+        transform.localRotation = Quaternion.Euler(0f, 0f, rotationAngle);
+        cardRotation = rotationAngle;
+    }
+
+    // ===============
+    // Initialize
+    // ===============
+
+    /// <summary>
+    /// Assign abilities from cardData
+    /// </summary>
+    public void AssignAbilies()
+    {
+        for (int i = 0; i < abilities.Length; i++) { abilities[i].InitAbility(cardData.ability[i]); }
+    }
+
+    public void AssignCardData(CreatureObj newCardData)
+    {
+        cardData = newCardData;
+        AssignAbilies();
+        Refresh();
     }
 
     /// <summary>
@@ -74,30 +113,10 @@ public class Card : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Rotates the card clockwise
-    /// </summary>
-    /// <param name="rotationAngle"></param>
-    public void RotateCard(float rotationAngle)
-    {
-        transform.localRotation = Quaternion.Euler(0f, 0f, rotationAngle);
-        cardRotation = rotationAngle;
-    }
-
-    /// <summary>
-    /// Assign abilities from cardData
-    /// </summary>
-    public void AssignAbilies()
-    {
-        for (int i = 0; i < abilities.Length; i++) { abilities[i].InitAbility(cardData.ability[i]); }
-    }
-
-    public void AssignCardData(CreatureObj newCardData)
-    {
-        cardData = newCardData;
-        AssignAbilies();
-        Refresh();
-    }
+   
+    // ====================
+    // Hover Over
+    // ====================
 
     /// <summary>
     /// Function triggers whenever player is hovering over a card with their mouse
@@ -129,5 +148,35 @@ public class Card : MonoBehaviour
 
         // resetting visuals when mouse leaves the card
         if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals();
+    }
+    
+
+    // ====================
+    // Drag
+    // ====================
+
+    public void StartDrag()
+    {
+        isDragged = true;
+        GameManager.instance.handManager.activeCard = this;
+        GameManager.instance.fieldManager.EnableSpawnPoints(true);
+    }
+
+    public void EndDrag()
+    {
+        isDragged = false;
+        OnHover(false);
+        GameManager.instance.fieldManager.PlayCard();
+        GameManager.instance.handManager.activeCard = null;
+    }
+
+    /// <summary>
+    /// Drags the card around with mouse cursor
+    /// </summary>
+    public void Drag()
+    {
+        if (isDragged == false) return;
+
+        transform.position = Vector2.Lerp(transform.position, Input.mousePosition, dragFollowSpeed);
     }
 }

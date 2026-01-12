@@ -6,6 +6,7 @@ public class HandManager : MonoBehaviour
     [Header("refs")]
     public List<Card> cardsInHand = new List<Card>();
     public GameObject hand;
+    public Card activeCard; // card currently being dragged
 
     [Header("Card fan params")]
     [SerializeField] float fanSpread;

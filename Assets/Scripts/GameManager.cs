@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
     [Header("Managers")]
     public HandManager handManager;
     public CardGenerator cardGenerator;
+    public FieldManager fieldManager;
     void Start()
     {
         // Making GameManager accessible from anywhere
