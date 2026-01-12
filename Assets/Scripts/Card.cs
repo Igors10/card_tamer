@@ -21,7 +21,28 @@ public class Card : MonoBehaviour
     [SerializeField] RectTransform rt;
     [SerializeField] Image cardSprite;
     [SerializeField] TextMeshProUGUI nameText;
-   
+    [SerializeField] GameObject cardVisual;
+
+    [Header("highlight")]
+    [SerializeField] GameObject glowEffect;
+    Vector3 defaultScale = new Vector3();
+    Vector3 highlightedScale = new Vector3();
+    float highlightOffsetY = 220f;
+    Vector3 originalHandPosition = new Vector3();
+    Vector3 highlightedHandPosition = new Vector3();
+    float cardRotation = 0f;
+    int hierarchyIndex = 0;
+
+    private void Start()
+    {
+        SetScales();
+    }
+
+    void SetScales()
+    {
+        defaultScale = transform.localScale;
+        highlightedScale = defaultScale * 1.5f;
+    }
 
     /// <summary>
     ///  makes all the card data and visuals match the creature data and current state
@@ -51,9 +72,6 @@ public class Card : MonoBehaviour
             Color emptyHeartColor = new Color(0f, 0f, 0f, 1f);
             Color heartColor = (cardData.health - damageToHP < a) ? fullHeartColor : emptyHeartColor;
         }
-
-        // ABILITIES
-
     }
 
     /// <summary>
@@ -63,6 +81,7 @@ public class Card : MonoBehaviour
     public void RotateCard(float rotationAngle)
     {
         transform.localRotation = Quaternion.Euler(0f, 0f, rotationAngle);
+        cardRotation = rotationAngle;
     }
 
     /// <summary>
@@ -78,5 +97,37 @@ public class Card : MonoBehaviour
         cardData = newCardData;
         AssignAbilies();
         Refresh();
+    }
+
+    /// <summary>
+    /// Function triggers whenever player is hovering over a card with their mouse
+    /// </summary>
+    /// <param name="mouseOver"></param>
+    public void OnHover(bool mouseOver)
+    {
+        // Putting the card in "reading mode" when hovering over it in hand
+        // Scale
+        transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
+        // Rotation
+        transform.localRotation = (mouseOver) ? Quaternion.Euler(0f, 0f, 0f) : Quaternion.Euler(0f, 0f, cardRotation);
+        // Position
+        if (mouseOver) 
+        {
+            originalHandPosition = cardVisual.transform.position;
+            highlightedHandPosition = originalHandPosition + new Vector3(0f, highlightOffsetY, 0f);
+            cardVisual.transform.position = highlightedHandPosition;
+        }
+        else
+        {
+            cardVisual.transform.position = originalHandPosition;
+        }
+        // Rendering over other cards
+        if (mouseOver) { hierarchyIndex = transform.GetSiblingIndex(); transform.SetAsLastSibling(); }
+        else transform.SetSiblingIndex(hierarchyIndex);
+        // Enable glow effect
+        glowEffect.SetActive(mouseOver);
+
+        // resetting visuals when mouse leaves the card
+        if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals();
     }
 }

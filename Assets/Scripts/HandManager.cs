@@ -9,13 +9,8 @@ public class HandManager : MonoBehaviour
 
     [Header("Card fan params")]
     [SerializeField] float fanSpread;
-    [SerializeField] float cardSpacing = 100f;
+    [SerializeField] float cardSpacing = 200f;
     [SerializeField] float verticalSpacing = 10f;
-
-    private void Start()
-    {
-        
-    }
 
     /// <summary>
     /// Adds a card to player's hand
@@ -29,7 +24,7 @@ public class HandManager : MonoBehaviour
     /// <summary>
     /// Makes the cards in hand render in a fancy fan spread way
     /// </summary>
-    void UpdateHandVisuals()
+    public void UpdateHandVisuals()
     {
         int cardCount = cardsInHand.Count;
 
