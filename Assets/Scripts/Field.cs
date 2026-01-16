@@ -3,11 +3,12 @@ using UnityEngine;
 
 public class Field : MonoBehaviour
 {
-    public GameObject[] units = new GameObject[2];
+    public Unit[] units = new Unit[2];
 
     [Header("refs")]
     [SerializeField] SpriteRenderer spawnPoint;
     [SerializeField] SpriteRenderer sprite;
+    public Transform[] unitSlots = new Transform[2];
 
     [Header("Highlight")]
     Color defaultColor;
@@ -27,11 +28,17 @@ public class Field : MonoBehaviour
     /// Makes the field being available for playing cards on it
     /// </summary>
     /// <param name="enable"></param>
-    public void EnableSpawnPoint(bool enable)
+    public void EnableSpawnSlot(int spawnSlot)
     {
-        if (units[0] != null || units[1] != null) return;
+        if (units[spawnSlot] != null) return;
 
-        spawnPoint.gameObject.SetActive(enable);
+        unitSlots[spawnSlot].gameObject.SetActive(true);
+    }
+
+    public void DisableSpawnSlots()
+    {
+        unitSlots[0].gameObject.SetActive(false);
+        unitSlots[1].gameObject.SetActive(false);
     }
 
     private void Update()
@@ -77,7 +84,14 @@ public class Field : MonoBehaviour
         if (cardIsOver == false) return;
 
         // spawn a creature
+        GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);
+
+        // moving card to field cards
+        GameManager.instance.handManager.AddCardToField(cardPlayed);
+
         Debug.Log("Field: a " + cardPlayed.cardData.name + " has been spawned");
         HighlightField(false);
     }
+
+    
 }

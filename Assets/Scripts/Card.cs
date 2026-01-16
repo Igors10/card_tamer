@@ -13,7 +13,7 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject heart;
 
     [Header("Healthbar")]
-    int damageToHP; // how much hp is currently missing
+    [HideInInspector] public int damageToHP; // how much hp is currently missing
     [SerializeField]Image[] hearts = new Image[10];
     [SerializeField] TextMeshProUGUI healthText;
 
@@ -92,7 +92,7 @@ public class Card : MonoBehaviour
         nameText.text = cardData.name;
 
         // SPRITE
-        cardSprite.sprite = cardData.creatureSprite;
+        cardSprite.sprite = cardData.cardSprite;
 
         // HEALTH (number)
         int currentHP = cardData.health - damageToHP;
@@ -159,14 +159,14 @@ public class Card : MonoBehaviour
     {
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;
-        GameManager.instance.fieldManager.EnableSpawnPoints(true);
+        GameManager.instance.fieldManager.EnableSpawnSlots();
     }
 
     public void EndDrag()
     {
         isDragged = false;
         OnHover(false);
-        GameManager.instance.fieldManager.PlayCard();
+        GameManager.instance.fieldManager.PlayCard(this);
         GameManager.instance.handManager.activeCard = null;
     }
 

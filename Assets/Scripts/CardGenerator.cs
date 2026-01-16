@@ -48,7 +48,7 @@ public class CardGenerator : MonoBehaviour
         newCard.AssignCardData(cardData);
 
         // Adding new card to the hand
-        GameManager.instance.handManager.AddCard(newCard);
+        GameManager.instance.handManager.AddCardToHand(newCard);
     }
 
     private void Update()

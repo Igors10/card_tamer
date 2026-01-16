@@ -5,6 +5,7 @@ public class HandManager : MonoBehaviour
 {
     [Header("refs")]
     public List<Card> cardsInHand = new List<Card>();
+    public List<Card> cardsOnField = new List<Card>();
     public GameObject hand;
     public Card activeCard; // card currently being dragged
 
@@ -16,9 +17,21 @@ public class HandManager : MonoBehaviour
     /// <summary>
     /// Adds a card to player's hand
     /// </summary>
-    public void AddCard(Card cardToAdd)
+    public void AddCardToHand(Card card)
     {
-        cardsInHand.Add(cardToAdd);
+        cardsInHand.Add(card);
+        UpdateHandVisuals();
+    }
+
+    /// <summary>
+    /// Moves a card from player's hand to cards currently on the field
+    /// </summary>
+    /// <param name="card"></param>
+    public void AddCardToField(Card card)
+    {
+        cardsInHand.Remove(card);
+        cardsOnField.Add(card);
+        card.gameObject.SetActive(false);
         UpdateHandVisuals();
     }
 

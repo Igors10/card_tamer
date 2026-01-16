@@ -349,6 +349,7 @@ MonoBehaviour:
   - {fileID: 1122556828}
   - {fileID: 1913578581}
   - {fileID: 609287280}
+  unitPrefab: {fileID: 4710258510420537553, guid: 9442b25799403874e92553fab53de198, type: 3}
 --- !u!1 &570817578
 GameObject:
   m_ObjectHideFlags: 0
@@ -1231,6 +1232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandManager
   cardsInHand: []
+  cardsOnField: []
   hand: {fileID: 1649722222}
   activeCard: {fileID: 0}
   fanSpread: 8

@@ -13,4 +13,8 @@ public class GameManager : MonoBehaviour
         // Making GameManager accessible from anywhere
         instance = this;
     }
+
+    // Moving camera angles??
+
+    //Battle camera- (Position[0, 8, -7], Rotation[40, 0, 0])
 }

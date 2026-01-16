@@ -6,7 +6,8 @@ public class CreatureObj : ScriptableObject
 {
     public string creatureName;
     public int health;
-    public Sprite creatureSprite;
+    public Sprite cardSprite;
+    public Sprite unitSprite;
     public FoodType foodType;
     public int cost;
     public AbilityObj[] ability = new AbilityObj[2];
