@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class FieldManager : MonoBehaviour
 {
+    [Header("refs")]
     public Field[] fields = new Field[4];
 
     [Header("prefabs")]

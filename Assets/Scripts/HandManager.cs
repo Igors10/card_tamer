@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class HandManager : MonoBehaviour
@@ -9,10 +10,16 @@ public class HandManager : MonoBehaviour
     public GameObject hand;
     public Card activeCard; // card currently being dragged
 
-    [Header("Card fan params")]
+    [Header("Fan spread params")]
     [SerializeField] float fanSpread;
     [SerializeField] float cardSpacing = 200f;
     [SerializeField] float verticalSpacing = 10f;
+
+    [Header("Hand hide params")]
+    [SerializeField] RectTransform handShownPos;
+    [SerializeField] RectTransform handHiddenPos;
+    [SerializeField] float handHideDistance;
+    [SerializeField] float handHideSpeed;
 
     /// <summary>
     /// Adds a card to player's hand
@@ -59,6 +66,66 @@ public class HandManager : MonoBehaviour
             float normalizedPosition = 2f * a / (cardCount - 1) - 1f; 
             float verticalOffset = verticalSpacing * (1 - normalizedPosition * normalizedPosition);
             cardsInHand[a].transform.localPosition = new Vector3(horizontalOffset, verticalOffset, 0f);
+        }
+    }
+
+    /// <summary>
+    /// Hides the hand a little below the screen. Shows when player lowers mouse below certain point
+    /// </summary>
+    void HandHiding()
+    {
+        if (GameManager.instance.state != GameState.PLACING) return;
+
+        Vector3 targetPos = (Input.mousePosition.y > handHideDistance) ? handHiddenPos.position : handShownPos.position;
+        RectTransform handRT = hand.GetComponent<RectTransform>();
+        handRT.position = Vector2.Lerp(transform.position, targetPos, handHideSpeed); // << make this lerp
+    }
+
+    private void Update()
+    {
+        HandHiding();
+    }
+
+    public void HandState(GameState state)
+    {
+        // resetting hand state
+        for (int i = 0; i < cardsInHand.Count; i++)
+        {
+            cardsInHand[i].gameObject.SetActive(false);
+        }
+        for (int i = 0; i < cardsOnField.Count; i++)
+        {
+            cardsOnField[i].gameObject.SetActive(false);
+        }
+
+        // switching to new hand state
+        switch (state)
+        {
+            case GameState.PLACING:
+
+                // Activating the hand
+                for (int i = 0; i < cardsInHand.Count; i++)
+                {
+                    cardsInHand[i].gameObject.SetActive(true);
+                }
+                UpdateHandVisuals();
+
+                break;
+            case GameState.PLANNING:
+
+                // Activating field cards
+                for (int i = 0; i < cardsOnField.Count; i++)
+                {
+                    cardsOnField[i].gameObject.SetActive(true);
+                }
+
+                break;
+            case GameState.EXECUTING:
+                break;
+            case GameState.BATTLING:
+                break;
+            case GameState.BUYING:
+                break;
         }
     }
 }
