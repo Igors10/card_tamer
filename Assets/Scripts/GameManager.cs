@@ -19,7 +19,9 @@ public class GameManager : MonoBehaviour
     [Header("Game State")]
     public GameState currentState;
     public List<GameStateData> gameStates = new List<GameStateData>();
-    public bool yourTurn;
+    [HideInInspector] public bool yourTurn;
+    [HideInInspector] public bool endStateReady;
+    [HideInInspector] public bool opponentEndStateReady; // debug thing
 
     [Header("Managers")]
     public HandManager handManager;
@@ -28,11 +30,15 @@ public class GameManager : MonoBehaviour
 
     [Header("refs")]
     [SerializeField] TextMeshProUGUI hintMessage;
-    void Start()
+    [SerializeField] ReadyButton readyButton;
+
+    private void Awake()
     {
         // Making GameManager accessible from anywhere
         instance = this;
-
+    }
+    void Start()
+    {
         StartTurn();
     }
 
@@ -40,6 +46,9 @@ public class GameManager : MonoBehaviour
     {
         // Changing the state
         currentState = newState;
+
+        // Setting the button correctly
+        readyButton.InitButtonState();
 
         // Applying new state to the game
         switch (currentState)
@@ -66,11 +75,14 @@ public class GameManager : MonoBehaviour
     void DebugStateInput()
     {
         if (Input.GetKeyDown(KeyCode.Space)) StartTurn();
+
+        if (Input.GetKeyDown(KeyCode.O)) opponentEndStateReady = true;
     }
 
     public void EndTurn()
     {
         yourTurn = false;
+        readyButton.gameObject.SetActive(false);
 
         hintMessage.text = "It's your opponents turn (space to skip)";
     }
@@ -78,25 +90,33 @@ public class GameManager : MonoBehaviour
     public void StartTurn()
     {
         yourTurn = true;
+        readyButton.gameObject.SetActive(true);
 
-        hintMessage.text = gameStates[(int)currentState].defaultHintText;
+        hintMessage.text = GetState().defaultHintText;
+    }
+
+    /// <summary>
+    /// Checks if a game needs to transition to next game state
+    /// </summary>
+    void CheckEndState()
+    {
+        if (endStateReady && opponentEndStateReady) FinishCurrentState();
+    }
+
+    public GameStateData GetState()
+    {
+        return gameStates[(int)currentState];
     }
 
     void FinishCurrentState()
     {
-        switch (currentState)
-        {
-            case GameState.PLACING:
-                break;
-            case GameState.PLANNING:
-                break;
-            case GameState.EXECUTING:
-                break;
-            case GameState.BATTLING:
-                break;
-            case GameState.BUYING:
-                break;
-        }
+        // resetting turn logic values
+        opponentEndStateReady = false;
+        endStateReady = false;
+
+        // Deciding which next state should be
+        GameState nextGameState = ((int)currentState + 1 < gameStates.Count) ? (GameState)(currentState + 1) : GameState.PLACING;
+        TransitionGameState(nextGameState);
     }
     // Moving camera angles??
 

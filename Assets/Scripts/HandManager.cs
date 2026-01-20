@@ -20,6 +20,7 @@ public class HandManager : MonoBehaviour
     [SerializeField] RectTransform handShownPos;
     [SerializeField] RectTransform handHiddenPos;
     [SerializeField] float handHideDistance;
+    [SerializeField] float handHideDistanceVertical;
     [SerializeField] float handHideSpeed;
 
     /// <summary>
@@ -80,13 +81,16 @@ public class HandManager : MonoBehaviour
         float hideSpeed = 0;
 
         // Deciding if hand should go up, down or not move
+        // Hand goes down (hides)
         if (Input.mousePosition.y >= handHideDistance && handRT.transform.position.y > handHiddenPos.transform.position.y)
         {
             hideSpeed = -handHideSpeed;
             // Making the hand movement speed increase exponentially
             hideSpeed *= Mathf.Abs(handRT.transform.position.y - handHiddenPos.transform.position.y);
         }
-        else if (Input.mousePosition.y < handHideDistance && handRT.transform.position.y < handShownPos.transform.position.y)
+        // Hand goes up (shows)
+        else if (Input.mousePosition.y < handHideDistance && Mathf.Abs(hand.transform.position.x - Input.mousePosition.x) < handHideDistanceVertical 
+            && handRT.transform.position.y < handShownPos.transform.position.y)
         {
             hideSpeed = handHideSpeed;
             // Making the hand movement speed increase exponentially
