@@ -126,19 +126,19 @@ public class Card : MonoBehaviour
     {
         // Putting the card in "reading mode" when hovering over it in hand
         // Scale
-        transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
+        cardVisual.transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
         // Rotation
         transform.localRotation = (mouseOver) ? Quaternion.Euler(0f, 0f, 0f) : Quaternion.Euler(0f, 0f, cardRotation);
         // Position
         if (mouseOver) 
         {
-            originalHandPosition = cardVisual.transform.position;
-            highlightedHandPosition = originalHandPosition + new Vector3(0f, highlightOffsetY, 0f);
+            //originalHandPosition = cardVisual.transform.position;
+            highlightedHandPosition = cardVisual.transform.position + new Vector3(0f, highlightOffsetY, 0f);
             cardVisual.transform.position = highlightedHandPosition;
         }
         else
         {
-            cardVisual.transform.position = originalHandPosition;
+            cardVisual.transform.position = transform.position;
         }
         // Rendering over other cards
         if (mouseOver) { hierarchyIndex = transform.GetSiblingIndex(); transform.SetAsLastSibling(); }

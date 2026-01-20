@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-
+using System.Collections;
+using NUnit.Framework.Constraints;
 public class HandManager : MonoBehaviour
 {
     [Header("refs")]
@@ -72,18 +73,34 @@ public class HandManager : MonoBehaviour
     /// <summary>
     /// Hides the hand a little below the screen. Shows when player lowers mouse below certain point
     /// </summary>
-    void HandHiding()
+    void HandHidingCheck()
     {
-        if (GameManager.instance.state != GameState.PLACING) return;
-
-        Vector3 targetPos = (Input.mousePosition.y > handHideDistance) ? handHiddenPos.position : handShownPos.position;
+        if (GameManager.instance.currentState != GameState.PLACING) return;
         RectTransform handRT = hand.GetComponent<RectTransform>();
-        handRT.position = Vector2.Lerp(transform.position, targetPos, handHideSpeed); // << make this lerp
+        float hideSpeed = 0;
+
+        // Deciding if hand should go up, down or not move
+        if (Input.mousePosition.y >= handHideDistance && handRT.transform.position.y > handHiddenPos.transform.position.y)
+        {
+            hideSpeed = -handHideSpeed;
+            // Making the hand movement speed increase exponentially
+            hideSpeed *= Mathf.Abs(handRT.transform.position.y - handHiddenPos.transform.position.y);
+        }
+        else if (Input.mousePosition.y < handHideDistance && handRT.transform.position.y < handShownPos.transform.position.y)
+        {
+            hideSpeed = handHideSpeed;
+            // Making the hand movement speed increase exponentially
+            hideSpeed *= Mathf.Abs(handRT.transform.position.y - handShownPos.transform.position.y);
+        }
+        else hideSpeed = 0f;
+
+        // Actually moving the hand
+        handRT.transform.position += new Vector3(0f, hideSpeed, 0f);
     }
 
     private void Update()
     {
-        HandHiding();
+        HandHidingCheck();
     }
 
     public void HandState(GameState state)

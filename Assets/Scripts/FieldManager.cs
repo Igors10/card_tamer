@@ -14,6 +14,8 @@ public class FieldManager : MonoBehaviour
     /// <param name="spawnSlot"></param>
     public void EnableSpawnSlots(int spawnSlot = 1)
     {
+        if (!GameManager.instance.yourTurn) return;
+
         for (int i = 0;  i < fields.Length; i++)
         {
             fields[i].EnableSpawnSlot(spawnSlot);

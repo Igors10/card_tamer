@@ -91,6 +91,9 @@ public class Field : MonoBehaviour
 
         Debug.Log("Field: a " + cardPlayed.cardData.name + " has been spawned");
         HighlightField(false);
+
+        // Ending the turn after playing a card
+        GameManager.instance.EndTurn();
     }
 
     

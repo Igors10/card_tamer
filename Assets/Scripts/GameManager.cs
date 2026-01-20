@@ -1,4 +1,7 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using TMPro;
+using System.Collections.Generic;
 
 public enum GameState
 {
@@ -13,25 +16,33 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    public GameState state;
+    [Header("Game State")]
+    public GameState currentState;
+    public List<GameStateData> gameStates = new List<GameStateData>();
+    public bool yourTurn;
 
     [Header("Managers")]
     public HandManager handManager;
     public CardGenerator cardGenerator;
     public FieldManager fieldManager;
+
+    [Header("refs")]
+    [SerializeField] TextMeshProUGUI hintMessage;
     void Start()
     {
         // Making GameManager accessible from anywhere
         instance = this;
+
+        StartTurn();
     }
 
     public void TransitionGameState(GameState newState)
     {
         // Changing the state
-        state = newState;
+        currentState = newState;
 
         // Applying new state to the game
-        switch (state)
+        switch (currentState)
         {
             case GameState.PLACING:
                 break;
@@ -47,9 +58,33 @@ public class GameManager : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        DebugStateInput();
+    }
+
+    void DebugStateInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Space)) StartTurn();
+    }
+
+    public void EndTurn()
+    {
+        yourTurn = false;
+
+        hintMessage.text = "It's your opponents turn (space to skip)";
+    }
+
+    public void StartTurn()
+    {
+        yourTurn = true;
+
+        hintMessage.text = gameStates[(int)currentState].defaultHintText;
+    }
+
     void FinishCurrentState()
     {
-        switch (state)
+        switch (currentState)
         {
             case GameState.PLACING:
                 break;
