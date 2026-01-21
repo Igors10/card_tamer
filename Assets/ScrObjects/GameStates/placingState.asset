@@ -17,3 +17,6 @@ MonoBehaviour:
   buttonColor: {r: 0.6745098, g: 0.9450981, b: 0.5764706, a: 1}
   pressedButtonText: Placing ready
   pressedButtonColor: {r: 0.6075471, g: 0.6075471, b: 0.6075471, a: 1}
+  cameraPosition: {x: 0, y: 10, z: -2}
+  cameraRotation: {x: 60, y: 0, z: 0}
+  cameraSize: 74

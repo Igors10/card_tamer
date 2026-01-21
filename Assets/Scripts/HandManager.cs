@@ -7,7 +7,6 @@ public class HandManager : MonoBehaviour
 {
     [Header("refs")]
     public List<Card> cardsInHand = new List<Card>();
-    public List<Card> cardsOnField = new List<Card>();
     public GameObject hand;
     public Card activeCard; // card currently being dragged
 
@@ -39,7 +38,8 @@ public class HandManager : MonoBehaviour
     public void AddCardToField(Card card)
     {
         cardsInHand.Remove(card);
-        cardsOnField.Add(card);
+        GameManager.instance.planningManager.cardsOnField.Add(card);
+        card.transform.SetParent(GameManager.instance.planningManager.fieldHand.transform, false);
         card.gameObject.SetActive(false);
         UpdateHandVisuals();
     }
@@ -105,48 +105,5 @@ public class HandManager : MonoBehaviour
     private void Update()
     {
         HandHidingCheck();
-    }
-
-    public void HandState(GameState state)
-    {
-        // resetting hand state
-        for (int i = 0; i < cardsInHand.Count; i++)
-        {
-            cardsInHand[i].gameObject.SetActive(false);
-        }
-        for (int i = 0; i < cardsOnField.Count; i++)
-        {
-            cardsOnField[i].gameObject.SetActive(false);
-        }
-
-        // switching to new hand state
-        switch (state)
-        {
-            case GameState.PLACING:
-
-                // Activating the hand
-                for (int i = 0; i < cardsInHand.Count; i++)
-                {
-                    cardsInHand[i].gameObject.SetActive(true);
-                }
-                UpdateHandVisuals();
-
-                break;
-            case GameState.PLANNING:
-
-                // Activating field cards
-                for (int i = 0; i < cardsOnField.Count; i++)
-                {
-                    cardsOnField[i].gameObject.SetActive(true);
-                }
-
-                break;
-            case GameState.EXECUTING:
-                break;
-            case GameState.BATTLING:
-                break;
-            case GameState.BUYING:
-                break;
-        }
     }
 }

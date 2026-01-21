@@ -10,4 +10,9 @@ public class GameStateData : ScriptableObject
     public Color buttonColor;
     public string pressedButtonText;
     public Color pressedButtonColor;
+
+    // Camera Viewpoint
+    public Vector3 cameraPosition;
+    public Vector3 cameraRotation;
+    public float cameraSize;
 }

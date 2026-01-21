@@ -23,11 +23,13 @@ public class Card : MonoBehaviour
     [SerializeField] Image cardSprite;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] GameObject cardVisual;
+    public OrderMarker orderMarker;
 
     [Header("highlight")]
     [SerializeField] GameObject glowEffect;
     Vector3 defaultScale = new Vector3();
     Vector3 highlightedScale = new Vector3();
+    Vector3 dragScale = new Vector3();
     float highlightOffsetY = 220f;
     Vector3 originalHandPosition = new Vector3();
     Vector3 highlightedHandPosition = new Vector3();
@@ -47,6 +49,7 @@ public class Card : MonoBehaviour
     {
         defaultScale = transform.localScale;
         highlightedScale = defaultScale * 1.5f;
+        dragScale = defaultScale * 1.1f;
     }
 
     private void Update()
@@ -124,30 +127,38 @@ public class Card : MonoBehaviour
     /// <param name="mouseOver"></param>
     public void OnHover(bool mouseOver)
     {
-        // Putting the card in "reading mode" when hovering over it in hand
-        // Scale
-        cardVisual.transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
-        // Rotation
-        transform.localRotation = (mouseOver) ? Quaternion.Euler(0f, 0f, 0f) : Quaternion.Euler(0f, 0f, cardRotation);
-        // Position
-        if (mouseOver) 
+        if (GameManager.instance.currentState == GameState.PLACING)
         {
-            //originalHandPosition = cardVisual.transform.position;
-            highlightedHandPosition = cardVisual.transform.position + new Vector3(0f, highlightOffsetY, 0f);
-            cardVisual.transform.position = highlightedHandPosition;
-        }
-        else
-        {
-            cardVisual.transform.position = transform.position;
-        }
-        // Rendering over other cards
-        if (mouseOver) { hierarchyIndex = transform.GetSiblingIndex(); transform.SetAsLastSibling(); }
-        else transform.SetSiblingIndex(hierarchyIndex);
-        // Enable glow effect
-        glowEffect.SetActive(mouseOver);
+            // Putting the card in "reading mode" when hovering over it in hand
+            // Scale
+            cardVisual.transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
+            // Rotation
+            transform.localRotation = (mouseOver) ? Quaternion.Euler(0f, 0f, 0f) : Quaternion.Euler(0f, 0f, cardRotation);
+            // Position
+            if (mouseOver)
+            {
+                //originalHandPosition = cardVisual.transform.position;
+                highlightedHandPosition = cardVisual.transform.position + new Vector3(0f, highlightOffsetY, 0f);
+                cardVisual.transform.position = highlightedHandPosition;
+            }
+            else
+            {
+                cardVisual.transform.position = transform.position;
+            }
+            // Rendering over other cards
+            if (mouseOver) { hierarchyIndex = transform.GetSiblingIndex(); transform.SetAsLastSibling(); }
+            else transform.SetSiblingIndex(hierarchyIndex);
+            // Enable glow effect
+            glowEffect.SetActive(mouseOver);
 
-        // resetting visuals when mouse leaves the card
-        if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals();
+            // resetting visuals when mouse leaves the card
+            if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals();
+        }
+        else if (GameManager.instance.currentState == GameState.PLANNING)
+        {
+            // highlights unit
+        }
+
     }
     
 
@@ -160,14 +171,34 @@ public class Card : MonoBehaviour
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;
         GameManager.instance.fieldManager.EnableSpawnSlots();
+
+        if (GameManager.instance.currentState == GameState.PLANNING)
+        {
+            // making the card appear above other cards and be bigger while dragged
+            transform.localScale = dragScale;
+            transform.SetAsLastSibling();
+        }
     }
 
     public void EndDrag()
     {
         isDragged = false;
         OnHover(false);
-        GameManager.instance.fieldManager.PlayCard(this);
-        GameManager.instance.handManager.activeCard = null;
+
+        if (GameManager.instance.currentState == GameState.PLACING)
+        {
+            GameManager.instance.fieldManager.PlayCard(this);
+            GameManager.instance.handManager.activeCard = null;
+        }
+        else if (GameManager.instance.currentState == GameState.PLANNING)
+        {
+            // card size back to default
+            transform.localScale = defaultScale;
+
+            // sorting cards based on their position
+            GameManager.instance.planningManager.SortCards();
+            GameManager.instance.planningManager.UpdateFieldHandVisuals();
+        }
     }
 
     /// <summary>

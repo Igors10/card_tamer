@@ -12,4 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 852c92fdaa1431d44a8024e8bef7a987, type: 3}
   m_Name: planningState
   m_EditorClassIdentifier: Assembly-CSharp::GameStateData
-  defaultHintText: 
+  defaultHintText: Choose order of action for your cards
+  buttonText: Finish planning
+  buttonColor: {r: 0.6745098, g: 0.9450981, b: 0.5764706, a: 1}
+  pressedButtonText: Wait for your opponent
+  pressedButtonColor: {r: 0.4490565, g: 0.4490565, b: 0.4490565, a: 1}
+  cameraPosition: {x: 0, y: 7, z: -7}
+  cameraRotation: {x: 40, y: 0, z: 0}
+  cameraSize: 84

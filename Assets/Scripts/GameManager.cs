@@ -19,14 +19,16 @@ public class GameManager : MonoBehaviour
     [Header("Game State")]
     public GameState currentState;
     public List<GameStateData> gameStates = new List<GameStateData>();
+    public List<GameObject> gameStateUI = new List<GameObject>();
     [HideInInspector] public bool yourTurn;
-    [HideInInspector] public bool endStateReady;
-    [HideInInspector] public bool opponentEndStateReady; // debug thing
+    public bool endStateReady;
+    public bool opponentEndStateReady; // debug thing
 
     [Header("Managers")]
     public HandManager handManager;
     public CardGenerator cardGenerator;
     public FieldManager fieldManager;
+    public PlanningManager planningManager;
 
     [Header("refs")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -44,11 +46,16 @@ public class GameManager : MonoBehaviour
 
     public void TransitionGameState(GameState newState)
     {
+        Debug.Log("GameManager: Transitioning to state: " + newState.ToString());
+
         // Changing the state
         currentState = newState;
 
         // Setting the button correctly
         readyButton.InitButtonState();
+
+        // Moving the camera
+        Camera.main.GetComponent<Viewpoint>().ChangeViewpoint(GetState());
 
         // Applying new state to the game
         switch (currentState)
@@ -56,6 +63,9 @@ public class GameManager : MonoBehaviour
             case GameState.PLACING:
                 break;
             case GameState.PLANNING:
+                // Making field cards appear correctly
+                planningManager.UpdateFieldHandVisuals();
+
                 break;
             case GameState.EXECUTING:
                 break;
@@ -81,14 +91,21 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
+        Debug.Log("GameManager: Ending the turn");
+
         yourTurn = false;
         readyButton.gameObject.SetActive(false);
 
         hintMessage.text = "It's your opponents turn (space to skip)";
+
+        // debug solution for transitioning states
+        CheckEndState();
     }
 
     public void StartTurn()
     {
+        Debug.Log("GameManager: Starting the turn");
+
         yourTurn = true;
         readyButton.gameObject.SetActive(true);
 
@@ -103,6 +120,17 @@ public class GameManager : MonoBehaviour
         if (endStateReady && opponentEndStateReady) FinishCurrentState();
     }
 
+    /// <summary>
+    /// Enabling or disabling all in-game interaction UI
+    /// </summary>
+    /// <param name="enable"></param>
+    public void EnableUI(bool enable)
+    {
+        readyButton.gameObject.SetActive(enable);
+        hintMessage.gameObject.SetActive(enable);
+        gameStateUI[(int)currentState].SetActive(enable);
+    }
+
     public GameStateData GetState()
     {
         return gameStates[(int)currentState];
@@ -110,15 +138,16 @@ public class GameManager : MonoBehaviour
 
     void FinishCurrentState()
     {
+        Debug.Log("GameManager: wrapping up state: " + currentState.ToString());
         // resetting turn logic values
         opponentEndStateReady = false;
         endStateReady = false;
+
+        // disabling current state UI 
+        EnableUI(false);
 
         // Deciding which next state should be
         GameState nextGameState = ((int)currentState + 1 < gameStates.Count) ? (GameState)(currentState + 1) : GameState.PLACING;
         TransitionGameState(nextGameState);
     }
-    // Moving camera angles??
-
-    //Battle camera- (Position[0, 8, -7], Rotation[40, 0, 0])
 }

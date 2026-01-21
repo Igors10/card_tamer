@@ -31,14 +31,14 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         buttonGlow.SetActive(false);
 
         // game state specific button click effects
-        if (GameManager.instance.currentState == GameState.PLACING)
-        {
-            GameManager.instance.EndTurn();
-            GameManager.instance.endStateReady = true;
-            button.interactable = false;
-            buttonText.text = GameManager.instance.GetState().pressedButtonText;
-            sprite.color = GameManager.instance.GetState().pressedButtonColor;
-        }
+       
+        GameManager.instance.endStateReady = true;
+        button.interactable = false;
+        buttonText.text = GameManager.instance.GetState().pressedButtonText;
+        sprite.color = GameManager.instance.GetState().pressedButtonColor;
+
+        // ending the turn
+        GameManager.instance.EndTurn();
     }
 
     /// <summary>
