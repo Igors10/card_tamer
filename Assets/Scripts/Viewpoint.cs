@@ -47,7 +47,7 @@ public class Viewpoint : MonoBehaviour
         // enable the big text with next state name
         stateTransitionObj.SetActive(true);
         stateTransitionText.color = Color.black;
-        stateTransitionText.text = GameManager.instance.GetState().name;
+        stateTransitionText.text = GameManager.instance.GetState().stateName;
 
         float t = 0;
 

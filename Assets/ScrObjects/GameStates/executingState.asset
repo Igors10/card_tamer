@@ -12,4 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 852c92fdaa1431d44a8024e8bef7a987, type: 3}
   m_Name: executingState
   m_EditorClassIdentifier: Assembly-CSharp::GameStateData
-  defaultHintText: 
+  defaultHintText: Pick one of the abilities
+  stateName: Executing
+  buttonText: Use ability
+  buttonColor: {r: 0.64705884, g: 0.909804, b: 0.5529412, a: 1}
+  pressedButtonText: Wait for your opponent
+  pressedButtonColor: {r: 0.3433962, g: 0.3433962, b: 0.3433962, a: 1}
+  cameraPosition: {x: 0, y: 10, z: 3}
+  cameraRotation: {x: 80, y: 0, z: 0}
+  cameraSize: 74

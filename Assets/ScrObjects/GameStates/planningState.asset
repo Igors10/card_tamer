@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: planningState
   m_EditorClassIdentifier: Assembly-CSharp::GameStateData
   defaultHintText: Choose order of action for your cards
+  stateName: Planning
   buttonText: Finish planning
   buttonColor: {r: 0.6745098, g: 0.9450981, b: 0.5764706, a: 1}
   pressedButtonText: Wait for your opponent

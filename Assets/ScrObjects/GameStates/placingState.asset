@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: placingState
   m_EditorClassIdentifier: Assembly-CSharp::GameStateData
   defaultHintText: Choose a card and place it on an empty field
+  stateName: Placing
   buttonText: Finish placing
   buttonColor: {r: 0.6745098, g: 0.9450981, b: 0.5764706, a: 1}
   pressedButtonText: Placing ready

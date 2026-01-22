@@ -49,6 +49,7 @@ GameObject:
   - component: {fileID: 2346475230964795392}
   - component: {fileID: 1244629303200040647}
   - component: {fileID: 6226093976021590089}
+  - component: {fileID: 8585581551969793057}
   m_Layer: 5
   m_Name: active_ability
   m_TagString: Untagged
@@ -143,6 +144,24 @@ MonoBehaviour:
   noPowerEffectWidth: 150
   passiveEffectX: 0
   passiveEffectWidth: 200
+  glowOutline: {fileID: 8585581551969793057}
+  glowReadyColor: {r: 0.9960785, g: 0.9960785, b: 0, a: 1}
+  glowChosenColor: {r: 0.26793393, g: 0.79622644, b: 0.2568957, a: 1}
+--- !u!114 &8585581551969793057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2588659275681599809}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
+  m_EffectColor: {r: 1, g: 0.996743, b: 0, a: 1}
+  m_EffectDistance: {x: 3, y: -3}
+  m_UseGraphicAlpha: 1
 --- !u!1 &4489056611481119470
 GameObject:
   m_ObjectHideFlags: 0

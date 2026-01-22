@@ -12,6 +12,7 @@ public class Unit : MonoBehaviour
     [SerializeField] Image sprite;
     [SerializeField] TextMeshProUGUI healthValue;
     [HideInInspector] public Field currentField;
+    [SerializeField] OrderMarker orderMarker;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
@@ -23,20 +24,24 @@ public class Unit : MonoBehaviour
     [Header("movement")]
     [HideInInspector] public bool readyToMove; 
 
-    public void UseAbility(Ability ability_to_use)
-    {
-
-    }
-
+ 
     public void InitUnit(Card cardToInitialize, Field field)
     {
         // Getting card data
         card = cardToInitialize;
+        cardToInitialize.unit = this;
         sprite.sprite = card.cardData.unitSprite;
         RefreshUnitVisuals();
 
         // Setting field position
         currentField = field;
+    }
+
+    public void EnableOrderMarker(bool enable, int orderNumber = 0)
+    {
+        orderMarker.gameObject.SetActive(enable);
+
+        if (orderNumber != 0) orderMarker.SetNumber(orderNumber);
     }
 
     void RefreshUnitVisuals()

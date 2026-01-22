@@ -1,13 +1,16 @@
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class Ability : MonoBehaviour
+public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 {
     [Header("AbilityData")]
     public AbilityObj abilityData;
 
     [Header("Attributes")]
+    bool ready;
     bool active;
     [SerializeField] TextMeshProUGUI name;
     [SerializeField] GameObject speedIcon;
@@ -26,7 +29,27 @@ public class Ability : MonoBehaviour
     [SerializeField] float noPowerEffectWidth;
     [SerializeField] float passiveEffectX;
     [SerializeField] float passiveEffectWidth;
-    
+
+    [Header("Input juice params")]
+    [SerializeField] Outline glowOutline;
+    [SerializeField] Color glowReadyColor;
+    [SerializeField] Color glowChosenColor;
+    Vector3 defaultScale;
+    Vector3 highlightedScale;
+    Vector3 pressedScale;
+
+    void Start()
+    {
+        // setting scales 
+        defaultScale = transform.localScale;
+        highlightedScale = defaultScale * 1.2f;
+        pressedScale = defaultScale * 0.8f;
+    }
+
+    // ====================
+    // Initialization
+    // ====================
+
     /// <summary>
     /// Applying data from ability scriptable object to this ability instance
     /// </summary>
@@ -74,6 +97,54 @@ public class Ability : MonoBehaviour
         // applying formating (making it take as much space as possible if some other elements are disabled)
         effectDesc.transform.localPosition = new Vector3(effectX, effectDesc.transform.localPosition.y, 0f);
         effectDesc.rectTransform.sizeDelta = new Vector2(effectWidth, effectDesc.rectTransform.sizeDelta.y);
+
+    }
+
+    // ====================
+    // Input
+    // ====================
+
+    /// <summary>
+    /// Makes ability be ready to be clicked on and used
+    /// </summary>
+    /// <param name="isActive"></param>
+    public void Activate(bool isActive)
+    {
+        if (active == false) return; // cannot activate a passive ability
+
+        ready = isActive;
+        glowOutline.enabled = isActive;
+    }
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OnHover(true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        OnHover(false);
+    }
+
+    void OnHover(bool mouseOver)
+    {
+        if (!ready) return;
+        transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (!ready) return;
+        transform.localScale = pressedScale;
+        
+    }
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (!ready) return;
+        transform.localScale = defaultScale;
+
+        glowOutline.gameObject.SetActive(true);
+        glowOutline.effectColor = glowChosenColor;
+        glowOutline.effectDistance = new Vector2(4, -4); // temp
 
     }
 }

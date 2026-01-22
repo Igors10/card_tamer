@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     public CardGenerator cardGenerator;
     public FieldManager fieldManager;
     public PlanningManager planningManager;
+    public ExecuteManager executeManager;
 
     [Header("refs")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -68,6 +69,9 @@ public class GameManager : MonoBehaviour
 
                 break;
             case GameState.EXECUTING:
+                // passing cards in the correct order to executing manager
+                executeManager.LoadCardStack(planningManager.cardsOnField);
+
                 break;
             case GameState.BATTLING:
                 break;

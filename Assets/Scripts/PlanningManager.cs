@@ -31,6 +31,7 @@ public class PlanningManager : MonoBehaviour
             // Making order markers have correct numbers
             card.orderMarker.gameObject.SetActive(true);
             card.orderMarker.SetNumber(i + 1);
+            card.unit.EnableOrderMarker(true, i + 1);
 
             // Applying slight random rotation to cards
             int randomAngle = Random.Range(-cardRotationIntensity, cardRotationIntensity);

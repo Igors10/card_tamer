@@ -33,6 +33,7 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         // game state specific button click effects
        
         GameManager.instance.endStateReady = true;
+        GameManager.instance.opponentEndStateReady = true; /// temp
         button.interactable = false;
         buttonText.text = GameManager.instance.GetState().pressedButtonText;
         sprite.color = GameManager.instance.GetState().pressedButtonColor;

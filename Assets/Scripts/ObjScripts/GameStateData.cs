@@ -4,6 +4,7 @@ using UnityEngine;
 public class GameStateData : ScriptableObject 
 {
     public string defaultHintText;
+    public string stateName;
 
     // Button
     public string buttonText;

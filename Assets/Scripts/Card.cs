@@ -24,11 +24,12 @@ public class Card : MonoBehaviour
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] GameObject cardVisual;
     public OrderMarker orderMarker;
+    [HideInInspector] public Unit unit;
 
     [Header("highlight")]
     [SerializeField] GameObject glowEffect;
     Vector3 defaultScale = new Vector3();
-    Vector3 highlightedScale = new Vector3();
+    [HideInInspector] public Vector3 highlightedScale = new Vector3();
     Vector3 dragScale = new Vector3();
     float highlightOffsetY = 220f;
     Vector3 originalHandPosition = new Vector3();
@@ -209,5 +210,18 @@ public class Card : MonoBehaviour
         if (isDragged == false) return;
 
         transform.position = Vector2.Lerp(transform.position, Input.mousePosition, dragFollowSpeed);
+    }
+
+
+    // ====================
+    // Abilities
+    // ====================
+
+    /// <summary>
+    /// Makes both abilites be available for choosing
+    /// </summary>
+    public void ActivateAbilities()
+    {
+        foreach (Ability ability in abilities) { ability.Activate(true); }
     }
 }
