@@ -8,14 +8,16 @@ public class ExecuteManager : MonoBehaviour
     [SerializeField] NextCardButton nextCardButton;
     [SerializeField] Transform nextCardPos;
     [SerializeField] Transform revealedCardPos;
-    [SerializeField] GameObject cardStackObj;
+    public GameObject cardStackObj;
 
     // cards
-    List<Card> plannedCardStack = new List<Card>();
-    public Card currentCard;
+    [HideInInspector] public List<Card> plannedCardStack = new List<Card>();
+    [HideInInspector] public Card currentCard;
 
+    [Header("revealed card params")]
     [HideInInspector] public bool readyRevealCard = false;
-    float readyCardScale;
+    float readyCardScale = 0.6f;
+    Vector3 revealedCardScale = new Vector3(2f, 2f, 1f);
 
     public void LoadCardStack(List<Card> newCardStack)
     {
@@ -28,9 +30,15 @@ public class ExecuteManager : MonoBehaviour
     {
         readyRevealCard = false;
 
+        // positioning the card
         currentCard.transform.localPosition = revealedCardPos.localPosition;
-        currentCard.transform.localScale = currentCard.highlightedScale;
+        currentCard.transform.localScale = revealedCardScale;
+
+        // making card's abilities be ready to be clicked on
         currentCard.ActivateAbilities();
+
+        // highlighting the unit
+        currentCard.unit.HighlightUnit(true);
     }
 
     void NextCardReady(Card card)
@@ -42,7 +50,7 @@ public class ExecuteManager : MonoBehaviour
 
         // making scale and position match the button
         card.transform.localScale = new Vector3(readyCardScale, readyCardScale, card.transform.localScale.z);
-        card.transform.localPosition = nextCardButton.transform.localPosition;
+        card.transform.localPosition = nextCardPos.localPosition;
 
         readyRevealCard = true;
         nextCardButton.glow.SetActive(true);

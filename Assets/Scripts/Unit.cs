@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class Unit : MonoBehaviour
-{
+public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
+{   
     // Card this unit is represents on the board
     [HideInInspector] public Card card;
 
@@ -12,7 +13,8 @@ public class Unit : MonoBehaviour
     [SerializeField] Image sprite;
     [SerializeField] TextMeshProUGUI healthValue;
     [HideInInspector] public Field currentField;
-    [SerializeField] OrderMarker orderMarker;
+    public OrderMarker orderMarker;
+    [SerializeField] Image unitHighlight;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
@@ -21,10 +23,21 @@ public class Unit : MonoBehaviour
     [Header("health")]
     [SerializeField] Color healthValueColor = new Color(0.86f, 0.63f, 0.83f, 1f);
 
-    [Header("movement")]
-    [HideInInspector] public bool readyToMove; 
+    [Header("movement and input")]
+    [HideInInspector] public bool readyToMove = false;
+    bool isDragged = false;
+    float dragFollowSpeed = 0.15f;
+    Vector3 hoveredScale;
+    Vector3 defaultScale;
+    Vector3 moveStartingPos;
 
- 
+    void Start()
+    {
+        // set scales
+        defaultScale = transform.localScale;
+        hoveredScale = defaultScale * 1.2f;
+    }
+
     public void InitUnit(Card cardToInitialize, Field field)
     {
         // Getting card data
@@ -55,13 +68,66 @@ public class Unit : MonoBehaviour
         powerUI.SetActive(false);
     }
 
+    public void HighlightUnit(bool isHighlighted)
+    {
+        unitHighlight.gameObject.SetActive(isHighlighted);
+    }
+
+
+    // ===============
+    // INPUT
+    // ===============
     void ShowCard()
     {
 
     }
 
-    public void OnHover()
+    public void OnHover(bool mouseOver)
     {
+        if (!readyToMove) return;
+    }
 
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OnHover(true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        OnHover(false);
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (!readyToMove) return;
+        
+        moveStartingPos = transform.position;
+        
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (!readyToMove) return;
+
+        Ray ray = Camera.main.ScreenPointToRay(eventData.position);
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            transform.position = hit.point;
+        }
+    }
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (!readyToMove) return;
+        
+         // Checking if unit ended drag around an empty active slot 
+         if (GameManager.instance.fieldManager.CheckUnitMove(this) == false)
+         { 
+                // if there was no slot put unit back
+                transform.position = moveStartingPos;
+         }
+
+         OnHover(false);
+        
     }
 }

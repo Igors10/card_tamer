@@ -294,7 +294,8 @@ MonoBehaviour:
   unitSlots:
   - {fileID: 1834922723511255949}
   - {fileID: 4852818631720023202}
-  highlighColor: {r: 0.5307606, g: 0.93962264, b: 0.52299744, a: 1}
+  highlighColor: {r: 0.45805532, g: 0.9622642, b: 0.44845137, a: 1}
+  dimHighlightColor: {r: 0.7631157, g: 0.85660374, b: 0.7612459, a: 1}
   highlightSpawnPointColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!65 &6785720502724929698
 BoxCollider:

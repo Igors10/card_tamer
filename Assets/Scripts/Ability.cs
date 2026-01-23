@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -8,10 +9,11 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
 {
     [Header("AbilityData")]
     public AbilityObj abilityData;
+    [HideInInspector] public Card card;
 
     [Header("Attributes")]
     bool ready;
-    bool active;
+    bool passive;
     [SerializeField] TextMeshProUGUI name;
     [SerializeField] GameObject speedIcon;
     [SerializeField] GameObject powerIcon;
@@ -34,9 +36,15 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [SerializeField] Outline glowOutline;
     [SerializeField] Color glowReadyColor;
     [SerializeField] Color glowChosenColor;
+    Vector2 glowDefaultSize = new Vector2(3, -3);
+    Vector2 glowChosenSize = new Vector2(4, -4);
     Vector3 defaultScale;
     Vector3 highlightedScale;
     Vector3 pressedScale;
+    bool selected = false;
+    // saved unit position
+    Field savedField;
+    int savedSlot;
 
     void Start()
     {
@@ -53,15 +61,19 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     /// <summary>
     /// Applying data from ability scriptable object to this ability instance
     /// </summary>
-    public void InitAbility(AbilityObj ability)
+    public void InitAbility(AbilityObj ability, Card cardAssignTo)
     {
         abilityData = ability;
+
+        // Getting reference to the card
+        card = cardAssignTo;
 
         // NAME
         name.text = abilityData.name;
 
-        // BACKGROUND
+        // PASSIVE OR ACTIVE
         background.enabled = !abilityData.isPassive; // passive abilities can be identified by not having a colored background
+        passive = abilityData.isPassive;
 
         // SPEED
         speedIcon.SetActive(abilityData.isPassive == false);
@@ -110,7 +122,7 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     /// <param name="isActive"></param>
     public void Activate(bool isActive)
     {
-        if (active == false) return; // cannot activate a passive ability
+        if (passive) return; // cannot activate a passive ability
 
         ready = isActive;
         glowOutline.enabled = isActive;
@@ -127,24 +139,46 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     void OnHover(bool mouseOver)
     {
-        if (!ready) return;
+        if (!ready || selected) return;
         transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!ready) return;
+        if (!ready || selected) return;
         transform.localScale = pressedScale;
-        
     }
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (!ready) return;
-        transform.localScale = defaultScale;
+        if (!ready || selected) return; 
+        SelectAbility(true);
+    }
 
-        glowOutline.gameObject.SetActive(true);
-        glowOutline.effectColor = glowChosenColor;
-        glowOutline.effectDistance = new Vector2(4, -4); // temp
+    public void SelectAbility(bool isSelected)
+    {
+        // resetting units position
+        if (savedField != null) GameManager.instance.fieldManager.MoveUnit(card.unit, savedField, savedSlot, false);
 
+        // resets the abilities in case another ability was selected
+        if (isSelected) card.ResetAbilities();
+
+        // marking as selected
+        selected = isSelected;
+
+        // applying selected effects
+        glowOutline.enabled = isSelected;
+        glowOutline.effectColor = (isSelected) ? glowChosenColor : glowReadyColor;
+        glowOutline.effectDistance = (isSelected) ? glowChosenSize : glowDefaultSize;
+        transform.localScale = (isSelected) ? highlightedScale : defaultScale;
+
+        // Highlighting fields for movement
+        if (isSelected) GameManager.instance.fieldManager.EnableMoveSlots(card.unit.currentField, abilityData.speed);
+
+        // Making the unit ready to move
+        card.unit.readyToMove = isSelected;
+
+        // Saving units starting position
+        savedField = card.unit.currentField;
+        savedSlot = GameManager.instance.fieldManager.GetUnitSlot(card.unit);
     }
 }

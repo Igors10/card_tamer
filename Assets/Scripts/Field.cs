@@ -13,7 +13,8 @@ public class Field : MonoBehaviour
     [Header("Highlight")]
     Color defaultColor;
     Color defaultSpawnPointColor;
-    [SerializeField] Color highlighColor;
+    [SerializeField] Color highlighColor; // used for highlighting tiles that are available for spawning
+    [SerializeField] Color dimHighlightColor; // used for highlighting tiles that are available for moving
     [SerializeField] Color highlightSpawnPointColor;
     bool cardIsOver;
 
@@ -28,17 +29,23 @@ public class Field : MonoBehaviour
     /// Makes the field being available for playing cards on it
     /// </summary>
     /// <param name="enable"></param>
-    public void EnableSpawnSlot(int spawnSlot)
+    public void EnableSpawnSlot(int spawnSlot = 0) 
     {
-        if (units[spawnSlot] != null) return;
+        // for moving units it first checks the front slot
+        if (spawnSlot == 0 && units[spawnSlot] != null)
+        { spawnSlot = 1; } // checking the backslot if front is taken
 
+        if (spawnSlot == 1 && units[spawnSlot] != null) return; // both slots (or back one for spawning) are not available 
+
+        // activating needed slot
         unitSlots[spawnSlot].gameObject.SetActive(true);
     }
 
-    public void DisableSpawnSlots()
+    public void DisableAllSlots()
     {
         unitSlots[0].gameObject.SetActive(false);
         unitSlots[1].gameObject.SetActive(false);
+        MoveHighlightField(false);
     }
 
     private void Update()
@@ -51,7 +58,7 @@ public class Field : MonoBehaviour
     /// </summary>
     void IsCardOver()
     {
-        if (!spawnPoint.gameObject.activeSelf) return; // only matters when a card is being dragged
+        if (!unitSlots[1].gameObject.activeSelf || GameManager.instance.currentState != GameState.PLACING) return; // only matters when a card is being dragged during placing state
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -69,10 +76,15 @@ public class Field : MonoBehaviour
         }
     }
 
-    void HighlightField(bool highlight)
+    void HighlightField(bool highlight) // highlights the field when spawning cards from hand
     {
         sprite.color = (highlight) ? highlighColor : defaultColor;
         spawnPoint.color = (highlight) ? highlightSpawnPointColor : defaultSpawnPointColor;
+    }
+
+    public void MoveHighlightField(bool highlight) // highlights the field when moving units 
+    {
+        sprite.color = (highlight) ? dimHighlightColor : defaultColor;
     }
 
     /// <summary>

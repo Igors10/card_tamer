@@ -77,7 +77,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void AssignAbilies()
     {
-        for (int i = 0; i < abilities.Length; i++) { abilities[i].InitAbility(cardData.ability[i]); }
+        for (int i = 0; i < abilities.Length; i++) { abilities[i].InitAbility(cardData.ability[i], this); }
     }
 
     public void AssignCardData(CreatureObj newCardData)
@@ -158,6 +158,7 @@ public class Card : MonoBehaviour
         else if (GameManager.instance.currentState == GameState.PLANNING)
         {
             // highlights unit
+            // unit.HighlightUnit(mouseOver);
         }
 
     }
@@ -171,7 +172,9 @@ public class Card : MonoBehaviour
     {
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;
-        GameManager.instance.fieldManager.EnableSpawnSlots();
+
+        if (GameManager.instance.currentState == GameState.PLACING) 
+            GameManager.instance.fieldManager.EnableSpawnSlots();
 
         if (GameManager.instance.currentState == GameState.PLANNING)
         {
@@ -223,5 +226,15 @@ public class Card : MonoBehaviour
     public void ActivateAbilities()
     {
         foreach (Ability ability in abilities) { ability.Activate(true); }
+    }
+
+    /// <summary>
+    /// Deselectes both abilities and cancels any field highlighted slots
+    /// </summary>
+    public void ResetAbilities()
+    {
+        foreach (Ability ability in abilities) { ability.SelectAbility(false); }
+
+        GameManager.instance.fieldManager.DisableAllSlots();
     }
 }

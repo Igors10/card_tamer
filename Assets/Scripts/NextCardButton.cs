@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -12,7 +13,12 @@ public class NextCardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     {
         // set scales
         defaultGlowScale = glow.transform.localScale;
-        highlightedGlowScale = defaultGlowScale * 1.2f;
+        highlightedGlowScale = defaultGlowScale * 1.05f;
+    }
+
+    void OnEnable()
+    {
+        ShowUnitOrder(false);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -27,8 +33,24 @@ public class NextCardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     void OnHover(bool mouseOver)
     {
-        if (!GameManager.instance.executeManager.readyRevealCard) return;
-        glow.transform.localScale = (mouseOver) ? highlightedGlowScale : defaultGlowScale;
+        // Applying glow
+        if (GameManager.instance.executeManager.readyRevealCard)
+        {
+            glow.transform.localScale = (mouseOver) ? highlightedGlowScale : defaultGlowScale;
+        }
+        else
+        {
+            ShowUnitOrder(mouseOver);
+        }
+    }
+
+    void ShowUnitOrder(bool isShown)
+    {
+        // Showing units' order of action
+        for (int i = 0; i < GameManager.instance.executeManager.plannedCardStack.Count; i++)
+        {
+            GameManager.instance.executeManager.plannedCardStack[i].unit.orderMarker.gameObject.SetActive(isShown);
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
