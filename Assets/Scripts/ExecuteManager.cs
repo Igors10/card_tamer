@@ -23,7 +23,7 @@ public class ExecuteManager : MonoBehaviour
     {
         plannedCardStack.Clear();
         plannedCardStack.AddRange(newCardStack);
-        NextCardReady(plannedCardStack[0]);
+        //NextCardReady(plannedCardStack[0]);
     }
 
     public void RevealCard()
@@ -41,18 +41,26 @@ public class ExecuteManager : MonoBehaviour
         currentCard.unit.HighlightUnit(true);
     }
 
-    void NextCardReady(Card card)
+    public void NextCardReady()
     {
-        currentCard = card;
+        currentCard = plannedCardStack[0];
         // putting card under execute state UI and activating it
-        card.transform.SetParent(nextCardButton.transform, false);
-        card.gameObject.SetActive(true);
+        currentCard.transform.SetParent(nextCardButton.transform, false);
+        currentCard.gameObject.SetActive(true);
 
         // making scale and position match the button
-        card.transform.localScale = new Vector3(readyCardScale, readyCardScale, card.transform.localScale.z);
-        card.transform.localPosition = nextCardPos.localPosition;
+        currentCard.transform.localScale = new Vector3(readyCardScale, readyCardScale, currentCard.transform.localScale.z);
+        currentCard.transform.localPosition = nextCardPos.localPosition;
 
         readyRevealCard = true;
         nextCardButton.glow.SetActive(true);
+    }
+
+    public void StopRevealCard()
+    {
+        currentCard.unit.HighlightUnit(false);
+        currentCard.gameObject.SetActive(false);
+        plannedCardStack.Remove(plannedCardStack[0]);
+        currentCard = null;
     }
 }

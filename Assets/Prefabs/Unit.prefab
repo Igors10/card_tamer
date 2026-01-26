@@ -503,7 +503,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.24, y: 1.96}
+  m_AnchoredPosition: {x: 1.24, y: 0.79}
   m_SizeDelta: {x: 2, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8589008067954515711
@@ -743,7 +743,7 @@ MonoBehaviour:
   orderMarker: {fileID: 4916268673209803088}
   unitHighlight: {fileID: 1532540125114350394}
   powerUI: {fileID: 3795751108397365226}
-  powerValue: {fileID: 5127801466722683596}
+  powerValue: {fileID: 532405815697476448}
   healthValueColor: {r: 0.86, g: 0.63, b: 0.83, a: 1}
   readyToMove: 0
 --- !u!1 &4769408951669579870

@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using TMPro;
 
 public class Field : MonoBehaviour
 {
@@ -9,6 +10,11 @@ public class Field : MonoBehaviour
     [SerializeField] SpriteRenderer spawnPoint;
     [SerializeField] SpriteRenderer sprite;
     public Transform[] unitSlots = new Transform[2];
+
+    [Header("Block")]
+    [SerializeField] GameObject blockObj;
+    [SerializeField] TextMeshProUGUI blockValue;
+    [HideInInspector] public int currentBlock;
 
     [Header("Highlight")]
     Color defaultColor;
@@ -108,5 +114,32 @@ public class Field : MonoBehaviour
         if (!GameManager.instance.opponentEndStateReady) GameManager.instance.EndTurn();
     }
 
-    
+    public void RefreshFieldVisuals()
+    {
+        if (currentBlock > 0)
+        {
+            blockObj.SetActive(true);
+            blockValue.text = currentBlock.ToString();
+        }
+        else blockObj.SetActive(false);
+    }
+
+    /// <summary>
+    /// Adds block to this field
+    /// </summary>
+    /// <param name="block"></param>
+    public void GainBlock(int block)
+    {
+        currentBlock += block;
+        RefreshFieldVisuals();
+    }
+
+    /// <summary>
+    /// Resets all temporary field attributes (like block) at the end of round
+    /// </summary>
+    void FieldEndRound()
+    {
+        currentBlock = 0;
+        RefreshFieldVisuals();
+    }
 }

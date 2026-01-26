@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -14,29 +15,42 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private void Start()
     {
-        InitButtonState();
+        UpdateButtonState();
     }
 
-    public void InitButtonState()
+    public void UpdateButtonState(string customButtonText = null)
     {
         button.gameObject.SetActive(true);
         button.interactable = true;
-        buttonText.text = GameManager.instance.GetState().buttonText;
+        buttonText.text = (customButtonText == null) ? GameManager.instance.GetState().buttonText : customButtonText;
         sprite.color = GameManager.instance.GetState().buttonColor;
     }
 
     public void ButtonClick()
     {
+        // game state specific button click effects
+        switch (GameManager.instance.currentState)
+        {
+            // PLACING AND PLANNING
+            default:
+
+                GameManager.instance.endStateReady = true;
+                GameManager.instance.opponentEndStateReady = true; /// temp
+                button.interactable = false;
+                buttonText.text = GameManager.instance.GetState().pressedButtonText;
+                sprite.color = GameManager.instance.GetState().pressedButtonColor;
+                break;
+
+            case GameState.EXECUTING:
+
+                GameManager.instance.fieldManager.DisableAllSlots();
+                GameManager.instance.executeManager.currentCard.UseSelectedAbility();
+
+                break;
+        }
+
         // general buttom clicks effects
         buttonGlow.SetActive(false);
-
-        // game state specific button click effects
-       
-        GameManager.instance.endStateReady = true;
-        GameManager.instance.opponentEndStateReady = true; /// temp
-        button.interactable = false;
-        buttonText.text = GameManager.instance.GetState().pressedButtonText;
-        sprite.color = GameManager.instance.GetState().pressedButtonColor;
 
         // ending the turn
         GameManager.instance.EndTurn();

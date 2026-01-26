@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
 
     [Header("refs")]
     [SerializeField] TextMeshProUGUI hintMessage;
-    [SerializeField] ReadyButton readyButton;
+    public ReadyButton readyButton;
 
     private void Awake()
     {
@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
         currentState = newState;
 
         // Setting the button correctly
-        readyButton.InitButtonState();
+        readyButton.UpdateButtonState();
 
         // Moving the camera
         Camera.main.GetComponent<Viewpoint>().ChangeViewpoint(GetState());
@@ -72,6 +72,9 @@ public class GameManager : MonoBehaviour
                 // passing cards in the correct order to executing manager
                 executeManager.LoadCardStack(planningManager.cardsOnField);
 
+                // button is only available after choosing an ability
+                readyButton.gameObject.SetActive(false);
+
                 break;
             case GameState.BATTLING:
                 break;
@@ -79,6 +82,8 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        // temp
+        StartTurn();
     }
 
     private void Update()
@@ -88,7 +93,7 @@ public class GameManager : MonoBehaviour
 
     void DebugStateInput()
     {
-        if (Input.GetKeyDown(KeyCode.Space)) StartTurn();
+        if (Input.GetKeyDown(KeyCode.Space) && !yourTurn) StartTurn();
 
         if (Input.GetKeyDown(KeyCode.O)) opponentEndStateReady = true;
     }
@@ -102,6 +107,14 @@ public class GameManager : MonoBehaviour
 
         hintMessage.text = "It's your opponents turn (space to skip)";
 
+        // state specific effects
+        switch (currentState)
+        {
+            case GameState.EXECUTING:
+                executeManager.StopRevealCard();
+                break;
+        }
+
         // debug solution for transitioning states
         CheckEndState();
     }
@@ -114,6 +127,14 @@ public class GameManager : MonoBehaviour
         readyButton.gameObject.SetActive(true);
 
         hintMessage.text = GetState().defaultHintText;
+
+        // state specific effects
+        switch (GameManager.instance.currentState)
+        {
+            case GameState.EXECUTING:
+                executeManager.NextCardReady();
+                break;
+        }
     }
 
     /// <summary>

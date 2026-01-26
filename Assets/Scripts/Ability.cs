@@ -41,7 +41,7 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     Vector3 defaultScale;
     Vector3 highlightedScale;
     Vector3 pressedScale;
-    bool selected = false;
+    [HideInInspector] public bool selected = false;
     // saved unit position
     Field savedField;
     int savedSlot;
@@ -112,6 +112,30 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     }
 
+    // =====================
+    // Effect
+    // =====================
+
+
+    /// <summary>
+    /// Applies the effect of the ability to the unit(s)
+    /// </summary>
+    public void UseAbility()
+    {
+        Debug.Log("Ability: " + card.name + " uses " + abilityData.name);
+
+        // Gaining power if any
+        if (abilityData.power > 0)
+            card.GainPower(abilityData.power);
+
+        // Gaining block if any
+        if (abilityData.block > 0) 
+            card.unit.currentField.GainBlock(abilityData.block);
+
+        // Effect
+        // find a way to have different effects here
+    }
+
     // ====================
     // Input
     // ====================
@@ -180,5 +204,9 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         // Saving units starting position
         savedField = card.unit.currentField;
         savedSlot = GameManager.instance.fieldManager.GetUnitSlot(card.unit);
+
+        // Enables 'use' button
+        string buttonText = "Use " + name.text;
+        GameManager.instance.readyButton.UpdateButtonState(buttonText);
     }
 }

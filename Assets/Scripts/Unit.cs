@@ -18,7 +18,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
-    [SerializeField] GameObject powerValue;
+    [SerializeField] TextMeshProUGUI powerValue;
 
     [Header("health")]
     [SerializeField] Color healthValueColor = new Color(0.86f, 0.63f, 0.83f, 1f);
@@ -57,7 +57,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (orderNumber != 0) orderMarker.SetNumber(orderNumber);
     }
 
-    void RefreshUnitVisuals()
+    public void RefreshUnitVisuals()
     {
         // HEALTH
         int currentHP = card.cardData.health - card.damageToHP;
@@ -65,7 +65,13 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         healthValue.text = currentHP.ToString();
 
         // POWER
-        powerUI.SetActive(false);
+        if (card.currentPower > 0)
+        {
+            powerUI.SetActive(true);
+            powerValue.text = card.currentPower.ToString();
+        }
+        else powerUI.SetActive(false);
+       
     }
 
     public void HighlightUnit(bool isHighlighted)
@@ -73,7 +79,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         unitHighlight.gameObject.SetActive(isHighlighted);
     }
 
-
+    
     // ===============
     // INPUT
     // ===============

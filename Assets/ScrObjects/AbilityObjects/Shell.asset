@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   speed: 1
   power: 1
+  block: 2
   abilityDescription: +2 defense
   abilityName: 
   isPassive: 0

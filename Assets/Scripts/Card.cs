@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.Rendering;
 
 public class Card : MonoBehaviour
 {
@@ -40,6 +41,9 @@ public class Card : MonoBehaviour
     [Header("Drag")]
     [HideInInspector] public bool isDragged;
     float dragFollowSpeed = 0.15f;
+
+    [Header("Gameplay")]
+    [HideInInspector] public int currentPower = 0;
 
     private void Start()
     {
@@ -237,4 +241,40 @@ public class Card : MonoBehaviour
 
         GameManager.instance.fieldManager.DisableAllSlots();
     }
+
+    // =====================
+    // Gameplay
+    // =====================
+
+    /// <summary>
+    /// Adds this much power to current unit power amount
+    /// </summary>
+    /// <param name="power"></param>
+    public void GainPower(int power)
+    {
+        Debug.Log("Card: " + cardData.name + "gains " + power + " power.");
+
+        currentPower += power;
+        unit.RefreshUnitVisuals();
+    }
+
+    /// <summary>
+    /// Goes through list of this cards abilities and triggers one flagged as selected
+    /// </summary>
+    public void UseSelectedAbility()
+    {
+        foreach (Ability ability in abilities) if (ability.selected) ability.UseAbility();
+    }
+
+    /// <summary>
+    /// Triggers at the end of round and resets all temporary card's attributes (like hp or power)
+    /// </summary>
+    public void CardEndRound()
+    {
+        currentPower = 0;
+        damageToHP = 0;
+
+        unit.RefreshUnitVisuals();
+    }
+
 }
