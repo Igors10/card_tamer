@@ -46,7 +46,7 @@ public class Viewpoint : MonoBehaviour
 
         // enable the big text with next state name
         stateTransitionObj.SetActive(true);
-        stateTransitionText.color = Color.black;
+        stateTransitionText.color = new Color(stateTransitionText.color.r, stateTransitionText.color.g, stateTransitionText.color.b, 1f);
         stateTransitionText.text = GameManager.instance.GetState().stateName;
 
         float t = 0;
@@ -65,7 +65,7 @@ public class Viewpoint : MonoBehaviour
             // making state name gradually disapper
             float fadeT = Mathf.Clamp01((t - 0.7f) / 0.3f);
             float alpha = Mathf.Lerp(1f, 0f, fadeT);
-            stateTransitionText.color = new Color(0f, 0f, 0f, alpha);
+            stateTransitionText.color = new Color(stateTransitionText.color.r, stateTransitionText.color.g, stateTransitionText.color.b, alpha);
 
             yield return null;
         }
@@ -82,7 +82,7 @@ public class Viewpoint : MonoBehaviour
 
         // resetting and disabling the big text with next state name
         stateTransitionObj.SetActive(false);
-        stateTransitionText.color = Color.black;
+  
 
         // turning the UI back on
         GameManager.instance.EnableUI(true);
