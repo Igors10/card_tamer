@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
 using TMPro.EditorUtilities;
+using UnityEngine.VFX;
 
 public enum GameState
 {
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
     public PlanningManager planningManager;
     public ExecuteManager executeManager;
     public ManagerUI managerUI;
+    public VFXManager VFXmanager;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;

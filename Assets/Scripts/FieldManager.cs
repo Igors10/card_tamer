@@ -4,6 +4,7 @@ public class FieldManager : MonoBehaviour
 {
     [Header("refs")]
     public Field[] fields = new Field[4];
+    [SerializeField] ParticleSystem spawnVFX;
 
     [Header("prefabs")]
     [SerializeField] GameObject unitPrefab;
@@ -91,6 +92,9 @@ public class FieldManager : MonoBehaviour
         Unit newUnit = newUnitObj.GetComponent<Unit>();
         field.units[nextEmptySlot] = newUnit;
         newUnit.InitUnit(cardToSpawn, field);
+
+        // Plays spawning "poof" VFX
+        GameManager.instance.VFXmanager.PlayVFX(newUnitObj.transform.position, spawnVFX);
     }
 
     public int GetUnitSlot(Unit unit)
