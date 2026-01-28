@@ -74,25 +74,42 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
        
     }
 
+    /// <summary>
+    /// Visually highlightes the unit
+    /// </summary>
+    /// <param name="isHighlighted"></param>
     public void HighlightUnit(bool isHighlighted)
     {
         unitHighlight.gameObject.SetActive(isHighlighted);
     }
 
-    
+    /// <summary>
+    /// Makes card appear above the unit, so that player can read it
+    /// </summary>
+    void ViewCard(bool isViewed)
+    {
+        if (GameManager.instance.currentState == GameState.PLANNING)
+        {
+            card.HightlightCard(isViewed);
+        }
+        else
+        {
+            GameManager.instance.managerUI.PreviewCard(isViewed, this);
+        }
+    }
+
     // ===============
     // INPUT
     // ===============
-    void ShowCard()
-    {
-
-    }
 
     public void OnHover(bool mouseOver)
     {
-        if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this 
+        // nothing happens when unit is selected during execute state
+        if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this
             && GameManager.instance.executeManager.readyRevealCard == false) return;
 
+
+        ViewCard(mouseOver);
         HighlightUnit(mouseOver);
     }
 

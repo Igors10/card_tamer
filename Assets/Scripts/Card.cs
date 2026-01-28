@@ -154,7 +154,7 @@ public class Card : MonoBehaviour
             if (mouseOver) { hierarchyIndex = transform.GetSiblingIndex(); transform.SetAsLastSibling(); }
             else transform.SetSiblingIndex(hierarchyIndex);
             // Enable glow effect
-            glowEffect.SetActive(mouseOver);
+            //HightlightCard(mouseOver);
 
             // resetting visuals when mouse leaves the card
             if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals();
@@ -162,11 +162,15 @@ public class Card : MonoBehaviour
         else if (GameManager.instance.currentState == GameState.PLANNING)
         {
             // highlights unit
-            // unit.HighlightUnit(mouseOver);
+            //unit.HighlightUnit(mouseOver);
         }
 
     }
     
+    public void HightlightCard(bool isHightlighted)
+    {
+        glowEffect.SetActive(isHightlighted);
+    }
 
     // ====================
     // Drag

@@ -83,9 +83,8 @@ public class Viewpoint : MonoBehaviour
         // resetting and disabling the big text with next state name
         stateTransitionObj.SetActive(false);
   
-
         // turning the UI back on
-        GameManager.instance.EnableUI(true);
+        GameManager.instance.managerUI.EnableUI(true);
 
         Debug.Log("Viewpoint: viewpoint transition complete");
     }

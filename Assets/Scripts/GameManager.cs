@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using UnityEditor.ShaderGraph.Internal;
+using TMPro.EditorUtilities;
 
 public enum GameState
 {
@@ -31,14 +32,12 @@ public class GameManager : MonoBehaviour
     public FieldManager fieldManager;
     public PlanningManager planningManager;
     public ExecuteManager executeManager;
+    public ManagerUI managerUI;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
     public ReadyButton readyButton;
-    [SerializeField] GameObject gameplayUI;
-    [SerializeField] TextMeshProUGUI turnMessage;
-    [SerializeField] Color yourTurnColor;
-    [SerializeField] Color oppTurnColor;
+   
 
     private void Awake()
     {
@@ -96,26 +95,11 @@ public class GameManager : MonoBehaviour
         DebugStateInput();
     }
 
-    /// <summary>
-    /// Changes hint text on the top of UI
-    /// </summary>
-    /// <param name="hintText"></param>
-    public void NewHint(string hintText)
-    {
-        hintMessage.text = hintText;
-    }
-
     void DebugStateInput()
     {
         if (Input.GetKeyDown(KeyCode.Space) && !yourTurn) StartTurn();
 
         if (Input.GetKeyDown(KeyCode.O)) opponentEndStateReady = true;
-    }
-
-    void UpdateTurnMessage()
-    {
-        turnMessage.color = (yourTurn) ? yourTurnColor : oppTurnColor;
-        turnMessage.text = (yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
     }
 
     public void EndTurn()
@@ -126,8 +110,8 @@ public class GameManager : MonoBehaviour
 
         // updating UI
         readyButton.gameObject.SetActive(false);
-        NewHint("It's your opponents turn (space to skip)");
-        UpdateTurnMessage();
+        managerUI.NewHint("It's your opponents turn (space to skip)");
+        managerUI.UpdateTurnMessage();
 
         // state specific effects
         switch (currentState)
@@ -152,8 +136,8 @@ public class GameManager : MonoBehaviour
 
         // updating UI
         readyButton.gameObject.SetActive(true);
-        NewHint(GetState().defaultHintText);
-        UpdateTurnMessage();
+        managerUI.NewHint(GetState().defaultHintText);
+        managerUI.UpdateTurnMessage();
 
         // state specific effects
         switch (GameManager.instance.currentState)
@@ -179,17 +163,6 @@ public class GameManager : MonoBehaviour
         else if (opponentEndStateReady) StartTurn();
     }
 
-    /// <summary>
-    /// Enabling or disabling all in-game interaction UI
-    /// </summary>
-    /// <param name="enable"></param>
-    public void EnableUI(bool enable)
-    {
-        //readyButton.gameObject.SetActive(enable);
-        //hintMessage.gameObject.SetActive(enable);
-        gameplayUI.SetActive(enable);
-        gameStateUI[(int)currentState].SetActive(enable);
-    }
 
     public GameStateData GetState()
     {
@@ -204,7 +177,7 @@ public class GameManager : MonoBehaviour
         endStateReady = false;
 
         // disabling current state UI 
-        EnableUI(false);
+        managerUI.EnableUI(false);
 
         // Deciding which next state should be
         GameState nextGameState = ((int)currentState + 1 < gameStates.Count) ? (GameState)(currentState + 1) : GameState.PLACING;

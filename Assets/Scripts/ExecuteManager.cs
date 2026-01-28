@@ -40,7 +40,7 @@ public class ExecuteManager : MonoBehaviour
         currentCard.unit.HighlightUnit(true);
 
         // Telling player to choose an ability
-        GameManager.instance.NewHint("Pick one of card's abilities");
+        GameManager.instance.managerUI.NewHint("Pick one of card's abilities");
     }
 
     public void NextCardReady()
