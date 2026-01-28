@@ -23,7 +23,6 @@ public class ExecuteManager : MonoBehaviour
     {
         plannedCardStack.Clear();
         plannedCardStack.AddRange(newCardStack);
-        //NextCardReady(plannedCardStack[0]);
     }
 
     public void RevealCard()
@@ -39,6 +38,9 @@ public class ExecuteManager : MonoBehaviour
 
         // highlighting the unit
         currentCard.unit.HighlightUnit(true);
+
+        // Telling player to choose an ability
+        GameManager.instance.NewHint("Pick one of card's abilities");
     }
 
     public void NextCardReady()

@@ -90,7 +90,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public void OnHover(bool mouseOver)
     {
-        if (!readyToMove) return;
+        if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this 
+            && GameManager.instance.executeManager.readyRevealCard == false) return;
+
+        HighlightUnit(mouseOver);
     }
 
     public void OnPointerEnter(PointerEventData eventData)

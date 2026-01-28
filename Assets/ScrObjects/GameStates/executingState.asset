@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 852c92fdaa1431d44a8024e8bef7a987, type: 3}
   m_Name: executingState
   m_EditorClassIdentifier: Assembly-CSharp::GameStateData
-  defaultHintText: Pick one of the abilities
+  defaultHintText: Click on the card stack in the bottom left to reveal your next
+    card
   stateName: Executing
   buttonText: Use ability
   buttonColor: {r: 0.64705884, g: 0.909804, b: 0.5529412, a: 1}

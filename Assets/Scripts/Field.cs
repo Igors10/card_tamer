@@ -110,8 +110,8 @@ public class Field : MonoBehaviour
         Debug.Log("Field: a " + cardPlayed.cardData.name + " has been spawned");
         HighlightField(false);
 
-        // Ending the turn after playing a card if opponent hasn't finished putting their cards
-        if (!GameManager.instance.opponentEndStateReady) GameManager.instance.EndTurn();
+        // Ending the turn after playing a card 
+        GameManager.instance.EndTurn();
     }
 
     public void RefreshFieldVisuals()

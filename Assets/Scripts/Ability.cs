@@ -207,6 +207,10 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
         // Enables 'use' button
         string buttonText = "Use " + name.text;
+        GameManager.instance.readyButton.gameObject.SetActive(isSelected);
         GameManager.instance.readyButton.UpdateButtonState(buttonText);
+
+        // Telling the player to click "use ability"
+        GameManager.instance.NewHint("Move the creature (or keep the position as it is) and click 'use' when ready");
     }
 }

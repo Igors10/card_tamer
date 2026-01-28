@@ -2,6 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Internal;
 
 public enum GameState
 {
@@ -31,9 +32,13 @@ public class GameManager : MonoBehaviour
     public PlanningManager planningManager;
     public ExecuteManager executeManager;
 
-    [Header("refs")]
+    [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
     public ReadyButton readyButton;
+    [SerializeField] GameObject gameplayUI;
+    [SerializeField] TextMeshProUGUI turnMessage;
+    [SerializeField] Color yourTurnColor;
+    [SerializeField] Color oppTurnColor;
 
     private void Awake()
     {
@@ -91,6 +96,15 @@ public class GameManager : MonoBehaviour
         DebugStateInput();
     }
 
+    /// <summary>
+    /// Changes hint text on the top of UI
+    /// </summary>
+    /// <param name="hintText"></param>
+    public void NewHint(string hintText)
+    {
+        hintMessage.text = hintText;
+    }
+
     void DebugStateInput()
     {
         if (Input.GetKeyDown(KeyCode.Space) && !yourTurn) StartTurn();
@@ -98,20 +112,31 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.O)) opponentEndStateReady = true;
     }
 
+    void UpdateTurnMessage()
+    {
+        turnMessage.color = (yourTurn) ? yourTurnColor : oppTurnColor;
+        turnMessage.text = (yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
+    }
+
     public void EndTurn()
     {
         Debug.Log("GameManager: Ending the turn");
 
         yourTurn = false;
-        readyButton.gameObject.SetActive(false);
 
-        hintMessage.text = "It's your opponents turn (space to skip)";
+        // updating UI
+        readyButton.gameObject.SetActive(false);
+        NewHint("It's your opponents turn (space to skip)");
+        UpdateTurnMessage();
 
         // state specific effects
         switch (currentState)
         {
             case GameState.EXECUTING:
                 executeManager.StopRevealCard();
+
+                // checking if there are any more cards prepared
+                if (executeManager.plannedCardStack.Count <= 0) endStateReady = true;
                 break;
         }
 
@@ -124,25 +149,34 @@ public class GameManager : MonoBehaviour
         Debug.Log("GameManager: Starting the turn");
 
         yourTurn = true;
-        readyButton.gameObject.SetActive(true);
 
-        hintMessage.text = GetState().defaultHintText;
+        // updating UI
+        readyButton.gameObject.SetActive(true);
+        NewHint(GetState().defaultHintText);
+        UpdateTurnMessage();
 
         // state specific effects
         switch (GameManager.instance.currentState)
         {
+            case GameState.PLACING:
+                // disables "finish placing" button if there are no units on player's side
+                if (planningManager.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
+                break;
+
             case GameState.EXECUTING:
                 executeManager.NextCardReady();
+                readyButton.gameObject.SetActive(false);
                 break;
         }
     }
 
     /// <summary>
-    /// Checks if a game needs to transition to next game state
+    /// Transitions to next state if both players are finished with current one, or restarts the turn if only opponent is finished
     /// </summary>
     void CheckEndState()
     {
         if (endStateReady && opponentEndStateReady) FinishCurrentState();
+        else if (opponentEndStateReady) StartTurn();
     }
 
     /// <summary>
@@ -151,8 +185,9 @@ public class GameManager : MonoBehaviour
     /// <param name="enable"></param>
     public void EnableUI(bool enable)
     {
-        readyButton.gameObject.SetActive(enable);
-        hintMessage.gameObject.SetActive(enable);
+        //readyButton.gameObject.SetActive(enable);
+        //hintMessage.gameObject.SetActive(enable);
+        gameplayUI.SetActive(enable);
         gameStateUI[(int)currentState].SetActive(enable);
     }
 
