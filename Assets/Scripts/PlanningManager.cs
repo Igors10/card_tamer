@@ -5,7 +5,6 @@ using static UnityEngine.Rendering.GPUSort;
 public class PlanningManager : MonoBehaviour
 {
     [Header("refs")]
-    public List<Card> cardsOnField = new List<Card>();
     public GameObject fieldHand;
     [SerializeField] Transform firstCardPosition;
 
@@ -16,12 +15,12 @@ public class PlanningManager : MonoBehaviour
     /// <summary>
     /// Makes cards appear in the correct order on the UI
     /// </summary>
-    public void UpdateFieldHandVisuals()
+    public void UpdateFieldHandVisuals(Player player)
     {
-        for (int i = 0; i < cardsOnField.Count; i++)
+        for (int i = 0; i < player.cardsOnField.Count; i++)
         {
             // Activating card
-            Card card = cardsOnField[i];
+            Card card = player.cardsOnField[i];
             card.gameObject.SetActive(true);
 
             // Positioning cards
@@ -42,8 +41,8 @@ public class PlanningManager : MonoBehaviour
     /// <summary>
     /// Sorts the cards based on their X coordinate (smallest X first).
     /// </summary>
-    public void SortCards()
+    public void SortCards(Player player)
     {
-        cardsOnField.Sort((a, b) => a.transform.localPosition.x.CompareTo(b.transform.localPosition.x));
+        player.cardsOnField.Sort((a, b) => a.transform.localPosition.x.CompareTo(b.transform.localPosition.x));
     }
 }

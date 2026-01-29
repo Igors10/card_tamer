@@ -73,11 +73,11 @@ public class FieldManager : MonoBehaviour
     /// <summary>
     /// Places a unit on a field from played card
     /// </summary>
-    public void PlayCard(Card cardToPlay)
+    public void PlayCard(Card cardToPlay, Player player)
     {
         for (int i = 0;i < fields.Length;i++)
         {
-            fields[i].PlayCard(cardToPlay);
+            fields[i].PlayCard(cardToPlay, player);
         }
         DisableAllSlots();
     }

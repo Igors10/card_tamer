@@ -122,7 +122,7 @@ public class LobbyClient : NetworkBehaviour   // Look into registering the clien
     [Server]
     public void StartMatch()
     {
-        if (!IsServer) return;
+        if (!IsServerInitialized) return;
 
         // Replace current (lobby) with gameplay for ALL connected clients
         var sld = new SceneLoadData("Board")

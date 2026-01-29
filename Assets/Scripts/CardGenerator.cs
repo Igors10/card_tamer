@@ -31,9 +31,10 @@ public class CardGenerator : MonoBehaviour
 
     void CreateStartingHand(int cardAmount)
     {
+        // Creating starting hand for the player
         for (int a = 0; a <  cardAmount; a++)
         {
-            CreateCard(PickRandomCard());
+            CreateCard(PickRandomCard(), GameManager.instance.player);
         }
     }
 
@@ -41,19 +42,19 @@ public class CardGenerator : MonoBehaviour
     /// Creates card gameObject from chosen card data
     /// </summary>
     /// <param name="cardData"></param>
-    void CreateCard(CreatureObj cardData)
+    void CreateCard(CreatureObj cardData, Player player)
     {
         GameObject newCardObject = Instantiate(cardPrefab, transform.position, Quaternion.identity, handManager.hand.transform);
         Card newCard = newCardObject.GetComponent<Card>();
-        newCard.AssignCardData(cardData);
+        newCard.AssignCardData(cardData, player);
 
         // Adding new card to the hand
-        GameManager.instance.handManager.AddCardToHand(newCard);
+        GameManager.instance.handManager.AddCardToHand(newCard, player);
     }
 
     private void Update()
     {
         // temp solution for adding cards to hand
-        if (Input.GetKeyDown(KeyCode.A)) CreateCard(PickRandomCard());
+        if (Input.GetKeyDown(KeyCode.A)) CreateCard(PickRandomCard(), GameManager.instance.player);
     }
 }

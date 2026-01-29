@@ -90,7 +90,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         if (GameManager.instance.currentState == GameState.PLANNING)
         {
-            card.HightlightCard(isViewed);
+            card.HighlightCard(isViewed);
         }
         else
         {

@@ -25,49 +25,51 @@ public class HandManager : MonoBehaviour
     /// <summary>
     /// Adds a card to player's hand
     /// </summary>
-    public void AddCardToHand(Card card)
+    public void AddCardToHand(Card card, Player player)
     {
-        cardsInHand.Add(card);
-        UpdateHandVisuals();
+        player.cardsInHand.Add(card);
+        UpdateHandVisuals(player);
     }
 
     /// <summary>
     /// Moves a card from player's hand to cards currently on the field
     /// </summary>
     /// <param name="card"></param>
-    public void AddCardToField(Card card)
+    public void AddCardToField(Card card, Player player)
     {
-        cardsInHand.Remove(card);
-        GameManager.instance.planningManager.cardsOnField.Add(card);
+        player.cardsInHand.Remove(card);
+        GameManager.instance.player.cardsOnField.Add(card);
         card.transform.SetParent(GameManager.instance.planningManager.fieldHand.transform, false);
         card.gameObject.SetActive(false);
-        UpdateHandVisuals();
+        UpdateHandVisuals(player);
     }
 
     /// <summary>
     /// Makes the cards in hand render in a fancy fan spread way
     /// </summary>
-    public void UpdateHandVisuals()
+    public void UpdateHandVisuals(Player player)
     {
-        int cardCount = cardsInHand.Count;
+        if (player.isAI) return;
+
+        int cardCount = player.cardsInHand.Count;
 
         if (cardCount == 1)
         {
-            cardsInHand[0].transform.localPosition = Vector3.zero;
-            cardsInHand[0].transform.localRotation = Quaternion.identity;
+            player.cardsInHand[0].transform.localPosition = Vector3.zero;
+            player.cardsInHand[0].transform.localRotation = Quaternion.identity;
             return;
         }
 
         for (int a = 0; a < cardCount; a++) 
         {
             float rotationAngle = fanSpread * (a - (cardCount - 1) / 2f);
-            cardsInHand[a].RotateCard(rotationAngle);
+            player.cardsInHand[a].RotateCard(rotationAngle);
 
             float horizontalOffset = cardSpacing * (a - (cardCount - 1) / 2f);
 
             float normalizedPosition = 2f * a / (cardCount - 1) - 1f; 
             float verticalOffset = verticalSpacing * (1 - normalizedPosition * normalizedPosition);
-            cardsInHand[a].transform.localPosition = new Vector3(horizontalOffset, verticalOffset, 0f);
+            player.cardsInHand[a].transform.localPosition = new Vector3(horizontalOffset, verticalOffset, 0f);
         }
     }
 

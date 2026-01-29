@@ -25,7 +25,7 @@ public class ManagerUI : MonoBehaviour
 
         // Passing correct data to the card and positioning it above the unit
         if (!enable) return;
-        previewCard.AssignCardData(unit.card.cardData);
+        previewCard.AssignCardData(unit.card.cardData, unit.card.player);
         previewCard.transform.position = Camera.main.WorldToScreenPoint(unit.transform.position);
         previewCard.transform.position += cardPreviewOffset;
     }

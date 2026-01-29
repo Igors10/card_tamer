@@ -26,6 +26,7 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject cardVisual;
     public OrderMarker orderMarker;
     [HideInInspector] public Unit unit;
+    public Player player;
 
     [Header("highlight")]
     [SerializeField] GameObject glowEffect;
@@ -84,11 +85,13 @@ public class Card : MonoBehaviour
         for (int i = 0; i < abilities.Length; i++) { abilities[i].InitAbility(cardData.ability[i], this); }
     }
 
-    public void AssignCardData(CreatureObj newCardData)
+    public void AssignCardData(CreatureObj newCardData, Player owner)
     {
         cardData = newCardData;
         AssignAbilies();
         Refresh();
+
+        player = owner;
     }
 
     /// <summary>
@@ -157,17 +160,17 @@ public class Card : MonoBehaviour
             //HightlightCard(mouseOver);
 
             // resetting visuals when mouse leaves the card
-            if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals();
+            if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.player);
         }
         else if (GameManager.instance.currentState == GameState.PLANNING)
         {
+            // ??? for whatever reason this part only works before changing order of cards ???
             // highlights unit
-            //unit.HighlightUnit(mouseOver);
+            //HighlightCard(mouseOver);
         }
-
     }
     
-    public void HightlightCard(bool isHightlighted)
+    public void HighlightCard(bool isHightlighted)
     {
         glowEffect.SetActive(isHightlighted);
     }
@@ -199,7 +202,7 @@ public class Card : MonoBehaviour
 
         if (GameManager.instance.currentState == GameState.PLACING)
         {
-            GameManager.instance.fieldManager.PlayCard(this);
+            GameManager.instance.fieldManager.PlayCard(this, GameManager.instance.player);
             GameManager.instance.handManager.activeCard = null;
         }
         else if (GameManager.instance.currentState == GameState.PLANNING)
@@ -208,8 +211,8 @@ public class Card : MonoBehaviour
             transform.localScale = defaultScale;
 
             // sorting cards based on their position
-            GameManager.instance.planningManager.SortCards();
-            GameManager.instance.planningManager.UpdateFieldHandVisuals();
+            GameManager.instance.planningManager.SortCards(player);
+            GameManager.instance.planningManager.UpdateFieldHandVisuals(player);
         }
     }
 

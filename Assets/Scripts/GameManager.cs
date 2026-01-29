@@ -39,6 +39,11 @@ public class GameManager : MonoBehaviour
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
     public ReadyButton readyButton;
+
+    [Header("players")]
+    public Player player;
+    public Player opponent;
+    public int startingMaxHealth;
    
 
     private void Awake()
@@ -71,12 +76,12 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.PLANNING:
                 // Making field cards appear correctly
-                planningManager.UpdateFieldHandVisuals();
+                planningManager.UpdateFieldHandVisuals(player);
 
                 break;
             case GameState.EXECUTING:
                 // passing cards in the correct order to executing manager
-                executeManager.LoadCardStack(planningManager.cardsOnField);
+                executeManager.LoadCardStack(player.cardsOnField);
 
                 // button is only available after choosing an ability
                 readyButton.gameObject.SetActive(false);
@@ -146,7 +151,7 @@ public class GameManager : MonoBehaviour
         {
             case GameState.PLACING:
                 // disables "finish placing" button if there are no units on player's side
-                if (planningManager.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
+                if (player.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
                 break;
 
             case GameState.EXECUTING:

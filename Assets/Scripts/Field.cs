@@ -97,7 +97,7 @@ public class Field : MonoBehaviour
     /// Plays a creature on this field if a card is over it
     /// </summary>
     /// <param name="cardPlayed"></param>
-    public void PlayCard(Card cardPlayed)
+    public void PlayCard(Card cardPlayed, Player player)
     {
         if (cardIsOver == false || units[1] != null) return;
 
@@ -105,7 +105,7 @@ public class Field : MonoBehaviour
         GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);
 
         // moving card to field cards
-        GameManager.instance.handManager.AddCardToField(cardPlayed);
+        GameManager.instance.handManager.AddCardToField(cardPlayed, player);
 
         Debug.Log("Field: a " + cardPlayed.cardData.name + " has been spawned");
         HighlightField(false);
