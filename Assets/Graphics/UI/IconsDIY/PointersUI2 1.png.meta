@@ -1,16 +1,19 @@
 fileFormatVersion: 2
-guid: 4b9b9113b49b89b4a8c65a074d547809
+guid: c257603bf2b504a41bb86628eb5ffc37
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5724434075687567835
-    second: polro_0
+      213: 4925036182379834198
+    second: PointersUI2_0
   - first:
-      213: -1751014329670425968
-    second: polro_1
+      213: -3254664092362475335
+    second: PointersUI2_1
   - first:
-      213: 6780076609546799717
-    second: polro_2
+      213: 706630287023161031
+    second: PointersUI2_2
+  - first:
+      213: 8165831400845940636
+    second: PointersUI2_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +55,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -106,13 +109,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: polro_0
+      name: PointersUI2_0
       rect:
         serializedVersion: 2
-        x: 47
-        y: 42
-        width: 134
-        height: 99
+        x: 50
+        y: 170
+        width: 56
+        height: 36
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,20 +124,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd1cf756676417f40800000000000000
-      internalID: 5724434075687567835
+      spriteID: 65b22bc505e395440800000000000000
+      internalID: 4925036182379834198
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: polro_1
+      name: PointersUI2_1
       rect:
         serializedVersion: 2
-        x: 54
-        y: 94
-        width: 137
-        height: 91
+        x: 187
+        y: 158
+        width: 52
+        height: 54
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,20 +146,42 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 09220639eb523b7e0800000000000000
-      internalID: -1751014329670425968
+      spriteID: 9b8f38f704c15d2d0800000000000000
+      internalID: -3254664092362475335
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: polro_2
+      name: PointersUI2_2
       rect:
         serializedVersion: 2
-        x: 96
+        x: 63
+        y: 89
+        width: 60
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ce3c8d80847ec900800000000000000
+      internalID: 706630287023161031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PointersUI2_3
+      rect:
+        serializedVersion: 2
+        x: 188
         y: 64
-        width: 138
-        height: 170
+        width: 52
+        height: 41
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,8 +190,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 56ac8f501cba71e50800000000000000
-      internalID: 6780076609546799717
+      spriteID: c971727056cd25170800000000000000
+      internalID: 8165831400845940636
       vertices: []
       indices: 
       edges: []
@@ -185,9 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      polro_0: 5724434075687567835
-      polro_1: -1751014329670425968
-      polro_2: 6780076609546799717
+      PointersUI2_0: 4925036182379834198
+      PointersUI2_1: -3254664092362475335
+      PointersUI2_2: 706630287023161031
+      PointersUI2_3: 8165831400845940636
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8545ef02531faa45ad6deda723251a0, type: 3}
+  m_Name: Shell Cat
+  m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
+  creatureName: 
+  health: 6
+  cardSprite: {fileID: 3335118451146226057, guid: 97f2059514e90544f81a70a88a66fc12, type: 3}
+  unitSprite: {fileID: 21300000, guid: e68fa1e8e67cf22438b41a78a052d016, type: 3}
+  foodType: 1
+  cost: 0
+  ability:
+  - {fileID: 11400000, guid: 15dcf653347a56349aad9dd777de8657, type: 2}
+  - {fileID: 11400000, guid: 2fe7b715e9945ab4e8e21bb82950ba0c, type: 2}
+  doodleSprite: {fileID: 21300000, guid: dd164147787261a429978aed0321bd44, type: 3}
+  audio:
+  - {fileID: 8300000, guid: 673d3a5e26d1fa149956f5414b6e71ff, type: 3}
+  - {fileID: 8300000, guid: 9b4ccd00e885b1342b6ef09fbf951d7b, type: 3}
