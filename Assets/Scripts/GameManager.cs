@@ -54,8 +54,6 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        
-
         // in offline matches player always goes first
         if (playerConfig.offlineMatch) StartTurn();
     }
@@ -81,6 +79,9 @@ public class GameManager : MonoBehaviour
             case GameState.PLANNING:
                 // Making field cards appear correctly
                 planningManager.UpdateFieldHandVisuals(player);
+
+                // Making AI shuffle the cards
+                if (playerConfig.offlineMatch) opponent.StartTurn();
 
                 break;
             case GameState.EXECUTING:
@@ -168,10 +169,11 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Transitions to next state if both players are finished with current one, or restarts the turn if only opponent is finished
     /// </summary>
-    void CheckEndState()
+    public void CheckEndState()
     {
         if (endStateReady && opponentEndStateReady) FinishCurrentState();
         else if (opponentEndStateReady) StartTurn();
+        else opponent.StartTurn();
     }
 
 

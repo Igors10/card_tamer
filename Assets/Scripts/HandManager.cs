@@ -8,6 +8,7 @@ public class HandManager : MonoBehaviour
     [Header("refs")]
     public List<Card> cardsInHand = new List<Card>();
     public GameObject hand;
+    public GameObject opponentHand;
     public Card activeCard; // card currently being dragged
 
     [Header("Fan spread params")]
@@ -38,7 +39,7 @@ public class HandManager : MonoBehaviour
     public void AddCardToField(Card card, Player player)
     {
         player.cardsInHand.Remove(card);
-        GameManager.instance.player.cardsOnField.Add(card);
+        player.cardsOnField.Add(card);
         card.transform.SetParent(GameManager.instance.planningManager.fieldHand.transform, false);
         card.gameObject.SetActive(false);
         UpdateHandVisuals(player);

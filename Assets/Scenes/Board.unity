@@ -561,7 +561,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.22, y: 0, z: 0.583}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: -1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1750382872}
@@ -1112,7 +1112,7 @@ MonoBehaviour:
   hintMessage: {fileID: 1043674312}
   readyButton: {fileID: 1972340611}
   player: {fileID: 1425032168}
-  opponent: {fileID: 0}
+  opponent: {fileID: 1541516079}
   startingMaxHealth: 12
   playerConfig: {fileID: 11400000, guid: 4830222a87a796a489eb0184e93624f0, type: 2}
 --- !u!1 &606257367
@@ -2675,6 +2675,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1490732176}
     m_Modifications:
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: isAI
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: 'fields.Array.data[0]'
       value: 
       objectReference: {fileID: 1750382873}
@@ -2737,13 +2741,45 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8551844874858225478, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1541516080}
   m_SourcePrefab: {fileID: 100100000, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
 --- !u!4 &1541516077 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5787719754676156524, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
   m_PrefabInstance: {fileID: 1541516076}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1541516078 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8551844874858225478, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+  m_PrefabInstance: {fileID: 1541516076}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1541516079 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+  m_PrefabInstance: {fileID: 1541516076}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541516078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 862bf0e23248b0546b44c3756c846bd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
+--- !u!114 &1541516080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1541516078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ac058475c58aff43b1fb51e4b3e7ed1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIOpponent
+  config: {fileID: 11400000, guid: 50164c7aa9a65054f8d3a84dfa775606, type: 2}
 --- !u!1001 &1550686062
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3053,6 +3089,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HandManager
   cardsInHand: []
   hand: {fileID: 1649722222}
+  opponentHand: {fileID: 1820820545}
   activeCard: {fileID: 0}
   fanSpread: 8
   cardSpacing: -200
@@ -3199,6 +3236,41 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1820820545
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1820820546}
+  m_Layer: 5
+  m_Name: OpponentHand
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1820820546
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1820820545}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1878616678}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1822293211
 GameObject:
   m_ObjectHideFlags: 0
@@ -3417,6 +3489,7 @@ RectTransform:
   - {fileID: 1649722223}
   - {fileID: 1391243420}
   - {fileID: 2124064077}
+  - {fileID: 1820820546}
   m_Father: {fileID: 1955103754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class FieldManager : MonoBehaviour
 {
@@ -71,6 +73,22 @@ public class FieldManager : MonoBehaviour
     // ================
 
     /// <summary>
+    /// Find all lines with empty backlines
+    /// </summary>
+    /// <param name="potentialFields"></param>
+    /// <returns></returns>
+    public List<Field> FindEmptyFields(Field[] potentialFields)
+    {
+        List<Field> fieldsToReturn = new List<Field>();
+        for (int i = 0; i < potentialFields.Length; i++)
+        {
+            if (potentialFields[i].units[1] == null) fieldsToReturn.Add(potentialFields[i]);
+        }
+
+        return fieldsToReturn;
+    }
+
+    /// <summary>
     /// Places a unit on a field from played card
     /// </summary>
     public void PlayCard(Card cardToPlay, Player player)
@@ -82,16 +100,16 @@ public class FieldManager : MonoBehaviour
         DisableAllSlots();
     }
 
-    public void SpawnUnit(Card cardToSpawn, Field field)
+    public void SpawnUnit(Card cardToSpawn, Field fieldToSpawnOn)
     {
         // checking if field is full already
-        if (field.units[1] != null) { Debug.Log("Field: cannot spawn unit, field is already full"); return; }
+        if (fieldToSpawnOn.units[1] != null) { Debug.Log("Field: cannot spawn unit, field is already full"); return; }
 
         int nextEmptySlot = 1; // always spawns units at the back slot
-        GameObject newUnitObj = Instantiate(unitPrefab, field.unitSlots[nextEmptySlot].transform.position, Quaternion.identity, this.gameObject.transform);
+        GameObject newUnitObj = Instantiate(unitPrefab, fieldToSpawnOn.unitSlots[nextEmptySlot].transform.position, Quaternion.identity, this.gameObject.transform);
         Unit newUnit = newUnitObj.GetComponent<Unit>();
-        field.units[nextEmptySlot] = newUnit;
-        newUnit.InitUnit(cardToSpawn, field);
+        fieldToSpawnOn.units[nextEmptySlot] = newUnit;
+        newUnit.InitUnit(cardToSpawn, fieldToSpawnOn);
 
         // Plays spawning "poof" VFX
         GameManager.instance.VFXmanager.PlayVFX(newUnitObj.transform.position, spawnVFX);

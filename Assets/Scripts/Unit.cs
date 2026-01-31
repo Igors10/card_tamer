@@ -88,7 +88,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// </summary>
     void ViewCard(bool isViewed)
     {
-        if (GameManager.instance.currentState == GameState.PLANNING)
+        if (GameManager.instance.currentState == GameState.PLANNING && card.player == GameManager.instance.player)
         {
             card.HighlightCard(isViewed);
         }

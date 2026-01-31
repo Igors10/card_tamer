@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class ManagerUI : MonoBehaviour
 {
@@ -28,6 +29,11 @@ public class ManagerUI : MonoBehaviour
         previewCard.AssignCardData(unit.card.cardData, unit.card.player);
         previewCard.transform.position = Camera.main.WorldToScreenPoint(unit.transform.position);
         previewCard.transform.position += cardPreviewOffset;
+
+        // If preview is away from the screen, move it down
+        RectTransform cardRT = previewCard.GetComponent<RectTransform>();
+        float cardTopY = cardRT.position.y + (1f - cardRT.pivot.y) * cardRT.rect.height;
+        if (cardTopY > Screen.height) previewCard.transform.position -= cardPreviewOffset * 2f;
     }
 
 
