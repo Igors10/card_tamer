@@ -13,7 +13,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
     RectTransform rect;
     Coroutine currentAnim;
 
-    [SerializeField] CreatureObj doodleData;
+    public CreatureObj doodleData;
 
 
     void Start()

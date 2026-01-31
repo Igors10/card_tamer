@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
     public Player player;
     public Player opponent;
     public int startingMaxHealth;
+    public PlayerConfigObj playerConfig;
    
 
     private void Awake()
@@ -53,7 +54,10 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        StartTurn();
+        
+
+        // in offline matches player always goes first
+        if (playerConfig.offlineMatch) StartTurn();
     }
 
     public void TransitionGameState(GameState newState)

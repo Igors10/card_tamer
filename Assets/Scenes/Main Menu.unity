@@ -2177,6 +2177,9 @@ MonoBehaviour:
   menus:
   - {fileID: 2100761808}
   - {fileID: 1714089435}
+  startingCardChoice: {fileID: 4146348353068205542}
+  startingSpecialChoice: {fileID: 575732156}
+  playerConfigObj: {fileID: 11400000, guid: 4830222a87a796a489eb0184e93624f0, type: 2}
 --- !u!4 &1253801476
 Transform:
   m_ObjectHideFlags: 0

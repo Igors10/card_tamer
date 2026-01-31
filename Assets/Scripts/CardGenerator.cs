@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Collections.Generic;
  
 public class CardGenerator : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class CardGenerator : MonoBehaviour
     private void Start()
     {
         handManager = GameManager.instance.handManager;
-        CreateStartingHand(startingCardNumber);
+        CreateStartingHand(GameManager.instance.playerConfig.startingCards);
     }
 
     /// <summary>
@@ -29,12 +30,12 @@ public class CardGenerator : MonoBehaviour
         return mainList.cardList[randomCard_ID];
     }
 
-    void CreateStartingHand(int cardAmount)
+    void CreateStartingHand(List<CreatureObj> startingCardList)
     {
         // Creating starting hand for the player
-        for (int a = 0; a <  cardAmount; a++)
+        for (int a = 0; a <  startingCardList.Count; a++)
         {
-            CreateCard(PickRandomCard(), GameManager.instance.player);
+            CreateCard(startingCardList[a], GameManager.instance.player);
         }
     }
 

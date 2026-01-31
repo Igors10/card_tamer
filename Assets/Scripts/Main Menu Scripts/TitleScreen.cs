@@ -9,7 +9,9 @@ public class TitleScreen : MonoBehaviour
     public CardList cardlist;
     public AudioSource titleAudioSource;
     public GameObject[] menus = new GameObject[0];
-
+    [SerializeField] MenuChoice startingCardChoice;
+    [SerializeField] MenuChoice startingSpecialChoice;
+    [SerializeField] PlayerConfigObj playerConfigObj;
 
     private void Awake()
     {
@@ -59,6 +61,24 @@ public class TitleScreen : MonoBehaviour
     /// </summary>
     public void StartOfflineMatch()
     {
+        // resetting player card config
+        playerConfigObj.ResetCardConfig();
+
+        // Saving chosen cards
+        for (int i = 0; i < 4; i++)
+        {
+            CreatureObj chosenCard = startingCardChoice.GetCurrentChoice().GetComponent<MenuDoodle>().doodleData;
+            playerConfigObj.startingCards.Add(chosenCard);
+        }
+
+        // Saving chosen special card
+        CreatureObj chosenSpecial = startingSpecialChoice.GetCurrentChoice().GetComponent<MenuDoodle>().doodleData;
+        playerConfigObj.startingCards.Add(chosenSpecial);
+
+        // Flagging match as offline
+        playerConfigObj.offlineMatch = true;
+
+        // Starting the match
         SceneManager.LoadScene("Board");
     }
 }

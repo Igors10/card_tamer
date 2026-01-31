@@ -141,10 +141,10 @@ MonoBehaviour:
   background: {fileID: 1244629303200040647}
   defaultEffectX: 60
   defaultEffectWidth: 105
-  noPowerEffectX: 30
-  noPowerEffectWidth: 150
+  noPowerEffectX: 40
+  noPowerEffectWidth: 180
   passiveEffectX: 0
-  passiveEffectWidth: 200
+  passiveEffectWidth: 240
   glowOutline: {fileID: 8585581551969793057}
   glowReadyColor: {r: 0.9960785, g: 0.9960785, b: 0, a: 1}
   glowChosenColor: {r: 0.26793393, g: 0.79622644, b: 0.2568957, a: 1}
