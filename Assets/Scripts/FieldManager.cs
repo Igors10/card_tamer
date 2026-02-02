@@ -1,11 +1,12 @@
 using NUnit.Framework;
-using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
 
 public class FieldManager : MonoBehaviour
 {
     [Header("refs")]
-    public Field[] fields = new Field[4];
+    //public Field[] fields = new Field[4];
     [SerializeField] ParticleSystem spawnVFX;
 
     [Header("prefabs")]
@@ -14,13 +15,20 @@ public class FieldManager : MonoBehaviour
     [Header("unit moving")]
     [SerializeField] float moveTriggerThreshold;
 
+    Field[] GetCurrentPlayerFields()
+    {
+        return GameManager.instance.yourTurn ? GameManager.instance.player.fields : GameManager.instance.opponent.fields;
+    }
+
     /// <summary>
     /// Making chosen spawnslot visible indicating that a card can be placed there
     /// </summary>
     /// <param name="spawnSlot"></param>
     public void EnableSpawnSlots(int spawnSlot = 1)
     {
-        if (!GameManager.instance.yourTurn) return;
+        Field[] fields = GetCurrentPlayerFields();
+
+        //if (!GameManager.instance.yourTurn) return;
 
         for (int i = 0;  i < fields.Length; i++)
         {
@@ -35,6 +43,8 @@ public class FieldManager : MonoBehaviour
     /// <param name="movingRange"></param>
     public void EnableMoveSlots(Field fieldStart, int movingRange)
     {
+        Field[] fields = GetCurrentPlayerFields();
+
         // resetting the slots
         DisableAllSlots();
 
@@ -62,6 +72,8 @@ public class FieldManager : MonoBehaviour
     /// </summary>
     public void DisableAllSlots()
     {
+        Field[] fields = GetCurrentPlayerFields();
+
         for (int i = 0; i < fields.Length; i++)
         {
             fields[i].DisableAllSlots();
@@ -93,11 +105,19 @@ public class FieldManager : MonoBehaviour
     /// </summary>
     public void PlayCard(Card cardToPlay, Player player)
     {
+        Field[] fields = GetCurrentPlayerFields();
+
         for (int i = 0;i < fields.Length;i++)
         {
-            fields[i].PlayCard(cardToPlay, player);
+            if (fields[i].PlayCard(cardToPlay, player))
+            {
+                // End the turn if a card was spawned
+                DisableAllSlots();
+                GameManager.instance.EndTurn();
+                return;
+            }
         }
-        DisableAllSlots();
+        
     }
 
     public void SpawnUnit(Card cardToSpawn, Field fieldToSpawnOn)
@@ -149,6 +169,8 @@ public class FieldManager : MonoBehaviour
     /// <param name="movingUnit"></param>
     public bool CheckUnitMove(Unit movingUnit)
     {
+        Field[] fields = GetCurrentPlayerFields();
+
         Debug.Log("FieldManager: checking if "+movingUnit.name+" is dropped on one of the unit slots");
         foreach (Field field in fields)
         {

@@ -94,12 +94,12 @@ public class Field : MonoBehaviour
     }
 
     /// <summary>
-    /// Plays a creature on this field if a card is over it
+    /// Plays a creature on this field if a card is over it, returns true if a card was played on this field
     /// </summary>
     /// <param name="cardPlayed"></param>
-    public void PlayCard(Card cardPlayed, Player player)
+    public bool PlayCard(Card cardPlayed, Player player)
     {
-        if (cardIsOver == false || units[1] != null) return;
+        if (cardIsOver == false || units[1] != null) return false;
 
         // spawn a creature
         GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);
@@ -110,8 +110,8 @@ public class Field : MonoBehaviour
         Debug.Log("Field: a " + cardPlayed.cardData.name + " has been spawned");
         HighlightField(false);
 
-        // Ending the turn after playing a card 
-        GameManager.instance.EndTurn();
+        // Returns true if the unit was spawned
+        return true;
     }
 
     public void RefreshFieldVisuals()

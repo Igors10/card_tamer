@@ -181,10 +181,12 @@ public class Card : MonoBehaviour
 
     public void StartDrag()
     {
+        if (player != GameManager.instance.player) return;
+
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;
 
-        if (GameManager.instance.currentState == GameState.PLACING) 
+        if (GameManager.instance.currentState == GameState.PLACING && GameManager.instance.yourTurn) 
             GameManager.instance.fieldManager.EnableSpawnSlots();
 
         if (GameManager.instance.currentState == GameState.PLANNING)

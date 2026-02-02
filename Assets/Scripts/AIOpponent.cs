@@ -42,14 +42,16 @@ public class AIOpponent : MonoBehaviour
         {
             case GameState.PLACING:
                 StartCoroutine(PlaceRandomCard());
-
                 break;
+
             case GameState.PLANNING:
                 PlanCards();
+                break;
 
-                break;
             case GameState.EXECUTING:
+                StartCoroutine(ResolvePlannedCard());
                 break;
+
             case GameState.BATTLING:
                 break;
             case GameState.BUYING:
@@ -124,6 +126,44 @@ public class AIOpponent : MonoBehaviour
 
         // after cards are shuffled opponent is ready to move to next game phase
         GameManager.instance.opponentEndStateReady = true;
+    }
+
+    // =========================================================
+    // =================== EXECUTING============================
+
+    IEnumerator ResolvePlannedCard()
+    {
+        yield return new WaitForSeconds(config.executingRevealDelay); // REVEALS THE CARD
+
+        // Prepares the card and reveals it immideately
+        GameManager.instance.executeManager.NextCardReady();
+        GameManager.instance.executeManager.RevealCard();
+
+        yield return new WaitForSeconds(config.executingAbilityDelay); // SELECTS AN ABILITY
+        Card cardResolving = GameManager.instance.executeManager.currentCard;
+
+        // Getting all cards active abilities
+        List<Ability> cardAbilities = new List<Ability>();
+        for (int i = 0; i < cardResolving.abilities.Length; i++)
+        {
+            if (cardResolving.abilities[i].abilityData.isPassive == false) cardAbilities.Add(cardResolving.abilities[i]);
+        }
+
+        // Picking one random card's active ability
+        int randomAbility = Random.Range(0, cardAbilities.Count);
+        Ability abilityToUse = cardAbilities[randomAbility];
+        abilityToUse.SelectAbility(true);
+
+        yield return new WaitForSeconds(config.executingAbilityDelay); // MOVES THE UNIT
+
+
+        yield return new WaitForSeconds(config.executingAbilityDelay); // USES AN ABILITY
+        abilityToUse.UseAbility();
+        GameManager.instance.executeManager.StopRevealCard();
+        cardResolving.ResetAbilities();
+
+        yield return new WaitForSeconds(config.executingAbilityDelay); // ENDS THE TURN
+        AIEndTurn();
     }
 
     // =========================================================

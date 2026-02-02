@@ -19,10 +19,10 @@ public class ExecuteManager : MonoBehaviour
     float readyCardScale = 0.6f;
     Vector3 revealedCardScale = new Vector3(2f, 2f, 1f);
 
-    public void LoadCardStack(List<Card> newCardStack)
+    public void LoadCardStack(List<Card> newCardStack, Player player)
     {
-        plannedCardStack.Clear();
-        plannedCardStack.AddRange(newCardStack);
+        player.plannedCardStack.Clear();
+        player.plannedCardStack.AddRange(newCardStack);
     }
 
     public void RevealCard()
@@ -34,7 +34,9 @@ public class ExecuteManager : MonoBehaviour
         currentCard.transform.localScale = revealedCardScale;
 
         // making card's abilities be ready to be clicked on
-        currentCard.ActivateAbilities();
+        if (GameManager.instance.yourTurn) currentCard.ActivateAbilities();
+        // if its not player's turn mirror the card to appear on the opponents side of the screen
+        else currentCard.transform.localPosition = new Vector2(Screen.width - currentCard.transform.localPosition.x, currentCard.transform.localPosition.y);
 
         // highlighting the unit
         currentCard.unit.HighlightUnit(true);
@@ -45,7 +47,10 @@ public class ExecuteManager : MonoBehaviour
 
     public void NextCardReady()
     {
-        currentCard = plannedCardStack[0];
+        // Getting next prepared card of current player
+        Player currentPlayer = GameManager.instance.GetCurrentPlayer();
+        currentCard = currentPlayer.plannedCardStack[0];
+
         // putting card under execute state UI and activating it
         currentCard.transform.SetParent(nextCardButton.transform, false);
         currentCard.gameObject.SetActive(true);
@@ -60,9 +65,13 @@ public class ExecuteManager : MonoBehaviour
 
     public void StopRevealCard()
     {
+        Player currentPlayer = GameManager.instance.GetCurrentPlayer();
+
         currentCard.unit.HighlightUnit(false);
         currentCard.gameObject.SetActive(false);
-        plannedCardStack.Remove(plannedCardStack[0]);
+
+        Debug.Log("ExecuteManager: cards left in a stack:" + currentPlayer.plannedCardStack.Count);
+        currentPlayer.plannedCardStack.Remove(currentPlayer.plannedCardStack[0]);
         currentCard = null;
     }
 }

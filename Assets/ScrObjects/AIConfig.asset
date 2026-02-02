@@ -20,7 +20,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4b5818845656d0146a6e4397b4f61b9d, type: 2}
   - {fileID: 11400000, guid: cf6467b59938c77408c9e64a4fd63ab2, type: 2}
   placingDelay: 1
-  executingRevealDelay: 0
-  executingAbilityDelay: 0
+  executingRevealDelay: 1.5
+  executingAbilityDelay: 2
   battlingDelay: 0
   buyingDelay: 0

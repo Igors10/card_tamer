@@ -86,7 +86,8 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.EXECUTING:
                 // passing cards in the correct order to executing manager
-                executeManager.LoadCardStack(player.cardsOnField);
+                executeManager.LoadCardStack(player.cardsOnField, player);
+                executeManager.LoadCardStack(opponent.cardsOnField, opponent);
 
                 // button is only available after choosing an ability
                 readyButton.gameObject.SetActive(false);
@@ -118,13 +119,6 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameManager: Ending the turn");
 
-        yourTurn = false;
-
-        // updating UI
-        readyButton.gameObject.SetActive(false);
-        managerUI.NewHint("It's your opponents turn (space to skip)");
-        managerUI.UpdateTurnMessage();
-
         // state specific effects
         switch (currentState)
         {
@@ -132,9 +126,17 @@ public class GameManager : MonoBehaviour
                 executeManager.StopRevealCard();
 
                 // checking if there are any more cards prepared
-                if (executeManager.plannedCardStack.Count <= 0) endStateReady = true;
+                if (player.plannedCardStack.Count <= 0) endStateReady = true;
                 break;
         }
+
+        yourTurn = false;
+
+        // updating UI
+        readyButton.gameObject.SetActive(false);
+        managerUI.NewHint("It's your opponents turn (space to skip)");
+        managerUI.UpdateTurnMessage();
+
 
         // debug solution for transitioning states
         CheckEndState();
@@ -176,7 +178,16 @@ public class GameManager : MonoBehaviour
         else opponent.StartTurn();
     }
 
-
+    /// <summary>
+    /// Returns player object whos turn it is currently
+    /// </summary>
+    /// <returns></returns>
+    public Player GetCurrentPlayer()
+    {
+        Player playerToReturn = (yourTurn) ? player : opponent;
+        Debug.Log("GameManager: gives away player object, it is player's turn: " + yourTurn);
+        return playerToReturn;
+    }
     public GameStateData GetState()
     {
         return gameStates[(int)currentState];

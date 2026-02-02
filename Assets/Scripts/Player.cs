@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public int health;
     public List<Card> cardsInHand = new List<Card>();
     public List<Card> cardsOnField = new List<Card>();
+    public List<Card> plannedCardStack = new List<Card>();
     public Field[] fields = new Field[4];
     AIOpponent AIplayer;
     public bool isAI;
@@ -30,10 +31,6 @@ public class Player : MonoBehaviour
 
         // heatlh
         health = GameManager.instance.startingMaxHealth;
-
-        // fields
-        if (this == GameManager.instance.player)
-        GameManager.instance.fieldManager.fields = fields;
     }
 
     public void StartTurn()

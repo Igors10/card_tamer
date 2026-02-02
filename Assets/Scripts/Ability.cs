@@ -163,18 +163,18 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     void OnHover(bool mouseOver)
     {
-        if (!ready || selected) return;
+        if ((!ready || selected) && !GameManager.instance.yourTurn) return;
         transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (!ready || selected) return;
+        if ((!ready || selected) && !GameManager.instance.yourTurn) return;
         transform.localScale = pressedScale;
     }
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (!ready || selected) return; 
+        if ((!ready || selected) && !GameManager.instance.yourTurn) return; 
         SelectAbility(true);
     }
 
@@ -205,12 +205,15 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         savedField = card.unit.currentField;
         savedSlot = GameManager.instance.fieldManager.GetUnitSlot(card.unit);
 
-        // Enables 'use' button
-        string buttonText = "Use " + name.text;
-        GameManager.instance.readyButton.gameObject.SetActive(isSelected);
-        GameManager.instance.readyButton.UpdateButtonState(buttonText);
+        if (GameManager.instance.yourTurn)
+        {
+            // Enables 'use' button
+            string buttonText = "Use " + name.text;
+            GameManager.instance.readyButton.gameObject.SetActive(isSelected);
+            GameManager.instance.readyButton.UpdateButtonState(buttonText);
 
-        // Telling the player to click "use ability"
-        GameManager.instance.managerUI.NewHint("Move the creature (or keep the position as it is) and click 'use' when ready");
+            // Telling the player to click "use ability"
+            GameManager.instance.managerUI.NewHint("Move the creature (or keep the position as it is) and click 'use' when ready");
+        }
     }
 }
