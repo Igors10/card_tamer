@@ -60,7 +60,7 @@ public class ExecuteManager : MonoBehaviour
         currentCard.transform.localPosition = nextCardPos.localPosition;
 
         readyRevealCard = true;
-        nextCardButton.glow.SetActive(true);
+        if (GameManager.instance.yourTurn) nextCardButton.glow.SetActive(true);
     }
 
     public void StopRevealCard()
@@ -73,5 +73,8 @@ public class ExecuteManager : MonoBehaviour
         Debug.Log("ExecuteManager: cards left in a stack:" + currentPlayer.plannedCardStack.Count);
         currentPlayer.plannedCardStack.Remove(currentPlayer.plannedCardStack[0]);
         currentCard = null;
+
+        // Checking if there are any cards left to resolve
+        if (currentPlayer.plannedCardStack.Count == 0) currentPlayer.endStateReady = true;
     }
 }

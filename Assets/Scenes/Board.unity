@@ -901,11 +901,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 898b4414e6a4c2940be778eee07df6dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FieldManager
-  fields:
-  - {fileID: 2142139855037226898}
-  - {fileID: 1122556828}
-  - {fileID: 1913578581}
-  - {fileID: 609287280}
   spawnVFX: {fileID: 4870619945361379286, guid: 6a7fda63d9505c64c9197548b9f36ec3, type: 3}
   unitPrefab: {fileID: 4710258510420537553, guid: 9442b25799403874e92553fab53de198, type: 3}
   moveTriggerThreshold: 1
@@ -1097,11 +1092,9 @@ MonoBehaviour:
   - {fileID: 1878616677}
   - {fileID: 1389799260}
   - {fileID: 243512484}
-  - {fileID: 1389799260}
+  - {fileID: 1205934170}
   - {fileID: 1389799260}
   yourTurn: 0
-  endStateReady: 0
-  opponentEndStateReady: 0
   handManager: {fileID: 1715698343}
   cardGenerator: {fileID: 925892070}
   fieldManager: {fileID: 547639881}
@@ -2340,6 +2333,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 907750e53f32b134482e6313800a7df5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Field
+--- !u!1 &1205934170
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1205934171}
+  m_Layer: 5
+  m_Name: BattleUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1205934171
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1205934170}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1955103754}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1342840476
 GameObject:
   m_ObjectHideFlags: 0
@@ -3654,6 +3682,7 @@ RectTransform:
   - {fileID: 1041707585}
   - {fileID: 243512485}
   - {fileID: 2043235229}
+  - {fileID: 1205934171}
   m_Father: {fileID: 385122623}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

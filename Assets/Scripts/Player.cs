@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
     public Field[] fields = new Field[4];
     AIOpponent AIplayer;
     public bool isAI;
+    public bool endStateReady = false;
 
     [Header("resources")]
     [HideInInspector] public int berries = 1;

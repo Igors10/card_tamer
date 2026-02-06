@@ -24,8 +24,6 @@ public class GameManager : MonoBehaviour
     public List<GameStateData> gameStates = new List<GameStateData>();
     public List<GameObject> gameStateUI = new List<GameObject>();
     [HideInInspector] public bool yourTurn;
-    public bool endStateReady;
-    public bool opponentEndStateReady; // debug thing
 
     [Header("Managers")]
     public HandManager handManager;
@@ -112,7 +110,7 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && !yourTurn) StartTurn();
 
-        if (Input.GetKeyDown(KeyCode.O)) opponentEndStateReady = true;
+        if (Input.GetKeyDown(KeyCode.O)) opponent.endStateReady = true;
     }
 
     public void EndTurn()
@@ -125,8 +123,6 @@ public class GameManager : MonoBehaviour
             case GameState.EXECUTING:
                 executeManager.StopRevealCard();
 
-                // checking if there are any more cards prepared
-                if (player.plannedCardStack.Count <= 0) endStateReady = true;
                 break;
         }
 
@@ -173,8 +169,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void CheckEndState()
     {
-        if (endStateReady && opponentEndStateReady) FinishCurrentState();
-        else if (opponentEndStateReady) StartTurn();
+        if (player.endStateReady && opponent.endStateReady) FinishCurrentState();
+        else if (opponent.endStateReady) StartTurn();
         else opponent.StartTurn();
     }
 
@@ -197,8 +193,8 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameManager: wrapping up state: " + currentState.ToString());
         // resetting turn logic values
-        opponentEndStateReady = false;
-        endStateReady = false;
+        opponent.endStateReady = false;
+        player.endStateReady = false;
 
         // disabling current state UI 
         managerUI.EnableUI(false);

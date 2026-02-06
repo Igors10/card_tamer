@@ -163,18 +163,18 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
     void OnHover(bool mouseOver)
     {
-        if ((!ready || selected) && !GameManager.instance.yourTurn) return;
+        if (!ready || selected || !GameManager.instance.yourTurn) return;
         transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if ((!ready || selected) && !GameManager.instance.yourTurn) return;
+        if (!ready || selected || !GameManager.instance.yourTurn) return;
         transform.localScale = pressedScale;
     }
     public void OnPointerUp(PointerEventData eventData)
     {
-        if ((!ready || selected) && !GameManager.instance.yourTurn) return; 
+        if (!ready || selected || !GameManager.instance.yourTurn) return; 
         SelectAbility(true);
     }
 
@@ -199,7 +199,7 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         if (isSelected) GameManager.instance.fieldManager.EnableMoveSlots(card.unit.currentField, abilityData.speed);
 
         // Making the unit ready to move
-        card.unit.readyToMove = isSelected;
+        card.unit.readyToMove = isSelected; // Instance not set to an instance of an object
 
         // Saving units starting position
         savedField = card.unit.currentField;

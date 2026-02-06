@@ -34,7 +34,7 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             // PLACING AND PLANNING
             default:
 
-                GameManager.instance.endStateReady = true;
+                GameManager.instance.player.endStateReady = true;
                 button.interactable = false;
                 buttonText.text = GameManager.instance.GetState().pressedButtonText;
                 sprite.color = GameManager.instance.GetState().pressedButtonColor;
