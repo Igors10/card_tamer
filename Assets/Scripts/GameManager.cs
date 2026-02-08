@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour
 
                 break;
             case GameState.BATTLING:
-                //battleManager.InitBattleLine();
+                battleManager.ResetBattleVals();
 
                 break;
             case GameState.BUYING:

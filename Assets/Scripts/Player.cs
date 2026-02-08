@@ -10,14 +10,20 @@ public class Player : MonoBehaviour
     public List<Card> cardsOnField = new List<Card>();
     public List<Card> plannedCardStack = new List<Card>();
     public Field[] fields = new Field[4];
+    public bool endStateReady = false;
+
+    [Header("config")]
     AIOpponent AIplayer;
     public bool isAI;
-    public bool endStateReady = false;
+    public Color playerColor;
 
     [Header("resources")]
     [HideInInspector] public int berries = 1;
     [HideInInspector] public int meat = 1;
     [HideInInspector] public int fish = 1;
+
+    [Header("battle vals")]
+    [HideInInspector] public int currentLinePower;
 
     private void Start()
     {

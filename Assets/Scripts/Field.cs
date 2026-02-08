@@ -8,7 +8,7 @@ public class Field : MonoBehaviour
 
     [Header("refs")]
     [SerializeField] SpriteRenderer spawnPoint;
-    [SerializeField] SpriteRenderer sprite;
+    public SpriteRenderer sprite;
     public Transform[] unitSlots = new Transform[2];
     [SerializeField] GameObject fieldUI;
 
