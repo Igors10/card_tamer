@@ -10,6 +10,7 @@ public class Field : MonoBehaviour
     [SerializeField] SpriteRenderer spawnPoint;
     [SerializeField] SpriteRenderer sprite;
     public Transform[] unitSlots = new Transform[2];
+    [SerializeField] GameObject fieldUI;
 
     [Header("Block")]
     [SerializeField] GameObject blockObj;
@@ -22,6 +23,7 @@ public class Field : MonoBehaviour
     [SerializeField] Color highlighColor; // used for highlighting tiles that are available for spawning
     [SerializeField] Color dimHighlightColor; // used for highlighting tiles that are available for moving
     [SerializeField] Color highlightSpawnPointColor;
+    [SerializeField] Color fadedColor;
     bool cardIsOver;
 
     private void Start()
@@ -52,6 +54,22 @@ public class Field : MonoBehaviour
         unitSlots[0].gameObject.SetActive(false);
         unitSlots[1].gameObject.SetActive(false);
         MoveHighlightField(false);
+    }
+
+    /// <summary>
+    /// Making the field and its units fade out a little
+    /// </summary>
+    /// <param name="isFadeOut"></param>
+    public void FadeOut(bool isFadeOut)
+    {
+        sprite.color = (isFadeOut) ? fadedColor : defaultColor;
+        fieldUI.SetActive(!isFadeOut);
+
+        // fading units
+        foreach (Unit unit in units)
+        {
+             if (unit != null) { unit.faded = isFadeOut; unit.RefreshUnitVisuals(); }
+        }
     }
 
     private void Update()

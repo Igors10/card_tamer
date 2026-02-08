@@ -44,10 +44,10 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
                 GameManager.instance.fieldManager.DisableAllSlots();
                 GameManager.instance.executeManager.currentCard.UseSelectedAbility();
+                break;
 
-                // ending the turn
-                //if (!GameManager.instance.opponentEndStateReady) GameManager.instance.EndTurn();
-                //else GameManager.instance.StartTurn();
+            case GameState.BATTLING:
+                
 
                 break;
         }

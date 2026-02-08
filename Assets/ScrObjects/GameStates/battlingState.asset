@@ -19,6 +19,6 @@ MonoBehaviour:
   buttonColor: {r: 0.6745098, g: 0.9450981, b: 0.5764706, a: 1}
   pressedButtonText: Wait for your opponent to roll
   pressedButtonColor: {r: 0.4188679, g: 0.4188679, b: 0.4188679, a: 1}
-  cameraPosition: {x: 0, y: 11, z: 3}
+  cameraPosition: {x: -7, y: 11, z: 3}
   cameraRotation: {x: 80, y: 0, z: 0}
   cameraSize: 84

@@ -88,4 +88,23 @@ public class Viewpoint : MonoBehaviour
 
         Debug.Log("Viewpoint: viewpoint transition complete");
     }
+
+    public IEnumerator MoveCamera(Vector3 targetPosition, float moveSpeed)
+    {
+        float t = 0;
+        Vector3 startingPosition = transform.position;
+
+        while (t <= 1) 
+        {
+            t += Time.deltaTime * moveSpeed;
+            float coolT = t * t;
+
+            // moving the camera
+            transform.position = Vector3.Lerp(startingPosition, targetPosition, coolT);
+            yield return null;
+        }
+
+        // snapping to correct settings for precision
+        transform.position = targetPosition;
+    }
 }

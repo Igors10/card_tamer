@@ -31,6 +31,11 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     Vector3 defaultScale;
     Vector3 moveStartingPos;
 
+    [Header("unit visuals")]
+    [HideInInspector] public bool faded = false;
+    [SerializeField] float fadedAlpha;
+    [SerializeField] GameObject unitUI;
+
     void Start()
     {
         // set scales
@@ -71,7 +76,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             powerValue.text = card.currentPower.ToString();
         }
         else powerUI.SetActive(false);
-       
+
+        // FADE
+        unitUI.SetActive(!faded);
+        sprite.color = (faded) ? new Color(sprite.color.r, sprite.color.g, sprite.color.b, fadedAlpha) : new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
     }
 
     /// <summary>

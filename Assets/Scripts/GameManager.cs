@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour
     public ExecuteManager executeManager;
     public ManagerUI managerUI;
     public VFXManager VFXmanager;
+    public BattleManager battleManager;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -67,6 +68,7 @@ public class GameManager : MonoBehaviour
         readyButton.UpdateButtonState();
 
         // Moving the camera
+        if (currentState != GameState.BATTLING)
         Camera.main.GetComponent<Viewpoint>().ChangeViewpoint(GetState());
 
         // Applying new state to the game
@@ -92,6 +94,8 @@ public class GameManager : MonoBehaviour
 
                 break;
             case GameState.BATTLING:
+                //battleManager.InitBattleLine();
+
                 break;
             case GameState.BUYING:
                 break;
@@ -160,6 +164,10 @@ public class GameManager : MonoBehaviour
             case GameState.EXECUTING:
                 executeManager.NextCardReady();
                 readyButton.gameObject.SetActive(false);
+                break;
+
+            case GameState.BATTLING:
+                battleManager.NextLine();
                 break;
         }
     }
