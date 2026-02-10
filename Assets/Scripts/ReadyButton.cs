@@ -9,7 +9,7 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 {
     [Header("refs")]
     [SerializeField] TextMeshProUGUI buttonText;
-    [SerializeField] Button button;
+    public Button button;
     [SerializeField] Image sprite;
     [SerializeField] GameObject buttonGlow;
 
@@ -47,8 +47,6 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 break;
 
             case GameState.BATTLING:
-                
-
                 break;
         }
 

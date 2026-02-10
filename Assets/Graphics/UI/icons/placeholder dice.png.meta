@@ -1,0 +1,344 @@
+fileFormatVersion: 2
+guid: f7166e1ee79cca44d99dab79f5c32468
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4898078389235781618
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_0
+  - first:
+      213: 7186787799328912413
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_1
+  - first:
+      213: -1763314561964542272
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_2
+  - first:
+      213: -5794255705059751303
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_3
+  - first:
+      213: 6873302888864206200
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_4
+  - first:
+      213: 663982842151309356
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_5
+  - first:
+      213: 6474674686149884419
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_6
+  - first:
+      213: -1635320449475826422
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_7
+  - first:
+      213: -8199021215667505562
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_8
+  - first:
+      213: -5720601969335892864
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_9
+  - first:
+      213: 5622342011995241469
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_10
+  - first:
+      213: -2566346495220003268
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_11
+  - first:
+      213: -9127354555657506546
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_12
+  - first:
+      213: -7066307265391522164
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_13
+  - first:
+      213: -6545211752082563445
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_14
+  - first:
+      213: -4392375757292097376
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_15
+  - first:
+      213: -3619082719365169303
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_16
+  - first:
+      213: 7994557760752321684
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_17
+  - first:
+      213: -891210791275256272
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_18
+  - first:
+      213: -4252672956471653849
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_19
+  - first:
+      213: 3812999878579705947
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_20
+  - first:
+      213: -7018630425309170115
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_21
+  - first:
+      213: -2172075707820948991
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_22
+  - first:
+      213: -4490630864894911001
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_23
+  - first:
+      213: -7343112091220058365
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_24
+  - first:
+      213: 7882937573117388620
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_25
+  - first:
+      213: -2564876114457246399
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_26
+  - first:
+      213: 1912587125197553358
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_27
+  - first:
+      213: -249213712162263705
+    second: pngtree-six-black-dice-sides-red-photo-png-image_14220828_28
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: pngtree-six-black-dice-sides-red-photo-png-image_14220828_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 810
+        width: 833
+        height: 810
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e007597f7a7860cb0800000000000000
+      internalID: -4898078389235781618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngtree-six-black-dice-sides-red-photo-png-image_14220828_1
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 810
+        width: 833
+        height: 810
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d147c1f1d699cb360800000000000000
+      internalID: 7186787799328912413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngtree-six-black-dice-sides-red-photo-png-image_14220828_2
+      rect:
+        serializedVersion: 2
+        x: 1666
+        y: 810
+        width: 833
+        height: 810
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c674d29fb27787e0800000000000000
+      internalID: -1763314561964542272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngtree-six-black-dice-sides-red-photo-png-image_14220828_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 833
+        height: 810
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97a0222b22ba69fa0800000000000000
+      internalID: -5794255705059751303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngtree-six-black-dice-sides-red-photo-png-image_14220828_4
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 0
+        width: 833
+        height: 810
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87dca64af80e26f50800000000000000
+      internalID: 6873302888864206200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngtree-six-black-dice-sides-red-photo-png-image_14220828_5
+      rect:
+        serializedVersion: 2
+        x: 1666
+        y: 0
+        width: 833
+        height: 810
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c20126380e0f63900800000000000000
+      internalID: 663982842151309356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5266113ef1b3e7a4882dd7cecf17663b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":3.0,"y":2.0},"gridSpriteSize":{"x":833.0,"y":810.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      pngtree-six-black-dice-sides-red-photo-png-image_14220828_0: -4898078389235781618
+      pngtree-six-black-dice-sides-red-photo-png-image_14220828_1: 7186787799328912413
+      pngtree-six-black-dice-sides-red-photo-png-image_14220828_2: -1763314561964542272
+      pngtree-six-black-dice-sides-red-photo-png-image_14220828_3: -5794255705059751303
+      pngtree-six-black-dice-sides-red-photo-png-image_14220828_4: 6873302888864206200
+      pngtree-six-black-dice-sides-red-photo-png-image_14220828_5: 663982842151309356
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.UI;
 using NUnit.Framework;
 
 public class BattleManager : MonoBehaviour
@@ -15,6 +16,18 @@ public class BattleManager : MonoBehaviour
     [SerializeField] int textScaleMod;
     [SerializeField] float timePerUnit;
 
+    [Header("rolling")]
+    [SerializeField] GameObject dice;
+    [SerializeField] Button diceButton;
+    [SerializeField] Image diceSprite;
+    bool rolled = false;
+    int diceValue = 0;
+    [SerializeField] Sprite[] diceFace = new Sprite[6];
+    [SerializeField] float diceIntervals;
+    [SerializeField] GameObject oppDice;
+    [SerializeField] Image oppDiceSprite;
+    bool oppRolled;
+
     int currentLine;
 
     public void ResetBattleVals()
@@ -22,6 +35,18 @@ public class BattleManager : MonoBehaviour
         currentLine = -1;
         playerPowerText.color = GameManager.instance.player.playerColor;
         opponentPowerText.color = GameManager.instance.opponent.playerColor;
+        ResetLineVals();
+    }
+
+    void ResetLineVals()
+    {
+        GameManager.instance.player.currentLinePower = 0;
+        GameManager.instance.opponent.currentLinePower = 0;
+        playerPowerText.text = "0";
+        opponentPowerText.text = "0";
+        dice.SetActive(false);
+        oppDice.SetActive(false);
+        diceButton.interactable = true;
     }
 
     /// <summary>
@@ -74,6 +99,9 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public IEnumerator InitBattleLine(List<Unit> units)
     {
+        // RESETTING VARIABLES
+        ResetLineVals();
+
         Player player = GameManager.instance.player;
         Player opponent = GameManager.instance.opponent;
         Field field = player.fields[currentLine];
@@ -103,30 +131,69 @@ public class BattleManager : MonoBehaviour
         
         foreach (Unit unit in units)
         {
-            if (unit.card.currentPower > 0) yield return StartCoroutine(AddUnitPower(unit));
+            if (unit.card.currentPower > 0) yield return StartCoroutine(AddPower(unit.card.player, unit.card.currentPower, unit));
         }
 
-        // ENABLING REROLL
+        // ENABLING ROLL
+
+        // Rolling for opponent if it's AI
+        if (opponent.isAI) StartCoroutine(RollOpponetDice());
+
+        GameManager.instance.readyButton.gameObject.SetActive(true);
+        dice.SetActive(true);
+
+        while (!rolled) // rolling dice until button is pressed 
+        {
+            diceValue = Random.Range(1, 7);
+            diceSprite.sprite = diceFace[diceValue - 1];
+            yield return new WaitForSeconds(diceIntervals);
+        }
+        rolled = false;
+
+        // Adding power that was on the dice when it stopped
+        yield return StartCoroutine(AddPower(player, diceValue));
+
+        // COMPARING POWER
     }   
 
-    IEnumerator AddUnitPower(Unit unit)
+    public void RollPower()
+    {
+        rolled = true;
+        diceButton.interactable = false;
+    }
+
+    IEnumerator RollOpponetDice(int diceValue = 0)
+    {
+        yield return new WaitForSeconds(1.5f);
+
+        int opponentDiceValue = (diceValue == 0) ? Random.Range(0, 7) : diceValue;
+        oppDice.SetActive(true);
+        oppDiceSprite.sprite = diceFace[opponentDiceValue - 1];
+
+        StartCoroutine(AddPower(GameManager.instance.opponent, opponentDiceValue));
+    }
+
+    IEnumerator AddPower(Player player, int power, Unit unit = null)
     {
         // Deciding whose unit is it
-        Player unitOwner = (unit.card.player == GameManager.instance.player) ? GameManager.instance.player : GameManager.instance.opponent;
-        TextMeshProUGUI powerText = (unit.card.player == GameManager.instance.player) ? playerPowerText : opponentPowerText;
+        TextMeshProUGUI powerText = (player == GameManager.instance.player) ? playerPowerText : opponentPowerText;
 
         // Setting Unit Scale
-        Vector3 defaultUnitScale = unit.transform.localScale;
-        Vector3 highlightedUnitScale = defaultUnitScale * unitScaleMod;
-        unit.transform.localScale = highlightedUnitScale;
+        Vector3 defaultUnitScale = new Vector3();
+        if (unit != null)
+        {
+            defaultUnitScale = unit.transform.localScale;
+            Vector3 highlightedUnitScale = defaultUnitScale * unitScaleMod;
+            unit.transform.localScale = highlightedUnitScale;
+        }
 
         // Setting text scale vars
         float startingTextSize = powerText.fontSize;
         float scaledTextSize = startingTextSize * textScaleMod;
 
         // Increasing power
-        unitOwner.currentLinePower += unit.card.currentPower;
-        powerText.text = unitOwner.currentLinePower.ToString();
+        player.currentLinePower += power;
+        powerText.text = player.currentLinePower.ToString();
 
         // Making power text bigger and have white color
         float t = 0;
@@ -142,7 +209,7 @@ public class BattleManager : MonoBehaviour
             powerText.fontSize = currentFontSize;
 
             // Changing text color (from player color to white)
-            Color currentTextColor = Color.Lerp(unitOwner.playerColor, Color.white, coolT);
+            Color currentTextColor = Color.Lerp(player.playerColor, Color.white, coolT);
 
             yield return null;
         }
@@ -161,15 +228,16 @@ public class BattleManager : MonoBehaviour
             powerText.fontSize = currentFontSize;
 
             // Changing text color (from player color to white)
-            Color currentTextColor = Color.Lerp(Color.white, unitOwner.playerColor, coolT);
+            Color currentTextColor = Color.Lerp(Color.white, player.playerColor, coolT);
 
             yield return null;
         }
 
-        // variables back to normal
-        unit.transform.localScale = defaultUnitScale;
         powerText.fontSize = startingTextSize;
-        powerText.color = unitOwner.playerColor;
+        powerText.color = player.playerColor;
+
+        // variables back to normal
+        if (unit != null) unit.transform.localScale = defaultUnitScale;
 
         // pause between units
         yield return new WaitForSeconds(0.5f);
