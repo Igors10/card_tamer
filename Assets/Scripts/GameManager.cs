@@ -94,6 +94,7 @@ public class GameManager : MonoBehaviour
 
                 break;
             case GameState.BATTLING:
+                managerUI.EnableUI(true);
                 battleManager.ResetBattleVals();
 
                 break;

@@ -13,7 +13,7 @@ public class BattleManager : MonoBehaviour
 
     [Header("Adding power")]
     [SerializeField] float unitScaleMod;
-    [SerializeField] int textScaleMod;
+    [SerializeField] float textScaleMod;
     [SerializeField] float timePerUnit;
 
     [Header("rolling")]
@@ -60,7 +60,7 @@ public class BattleManager : MonoBehaviour
         {
             // Getting all the units battling on currentLine and initialize battle
             List<Unit> units = GetAllLineUnits();
-            if (units.Count > 0) InitBattleLine(units);
+            if (units.Count > 0) StartCoroutine(InitBattleLine(units));
 
             // If line is empty go to next line instead
             else { NextLine(); return; }
@@ -88,7 +88,7 @@ public class BattleManager : MonoBehaviour
         }
         for (int i = 0; i < oppField.units.Length; i++)
         {
-            if (oppField.units[i] != null) unitsToReturn.Add(field.units[i]);
+            if (oppField.units[i] != null) unitsToReturn.Add(oppField.units[i]);
         }
 
         return unitsToReturn;
@@ -210,6 +210,7 @@ public class BattleManager : MonoBehaviour
 
             // Changing text color (from player color to white)
             Color currentTextColor = Color.Lerp(player.playerColor, Color.white, coolT);
+            powerText.color = currentTextColor;
 
             yield return null;
         }
