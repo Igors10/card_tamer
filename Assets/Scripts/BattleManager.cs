@@ -10,6 +10,9 @@ public class BattleManager : MonoBehaviour
     [Header("refs")]
     [SerializeField] TextMeshProUGUI playerPowerText;
     [SerializeField] TextMeshProUGUI opponentPowerText;
+    [SerializeField] Image playerPowerIcon;
+    [SerializeField] Image opponentPowerIcon;
+    [SerializeField] GameObject powerUI;
 
     [Header("Adding power")]
     [SerializeField] float unitScaleMod;
@@ -26,27 +29,36 @@ public class BattleManager : MonoBehaviour
     [SerializeField] float diceIntervals;
     [SerializeField] GameObject oppDice;
     [SerializeField] Image oppDiceSprite;
-    bool oppRolled;
+    [SerializeField] float opponentRollingTime;
 
     int currentLine;
 
     public void ResetBattleVals()
     {
         currentLine = -1;
-        playerPowerText.color = GameManager.instance.player.playerColor;
-        opponentPowerText.color = GameManager.instance.opponent.playerColor;
+        
         ResetLineVals();
     }
 
     void ResetLineVals()
     {
-        GameManager.instance.player.currentLinePower = 0;
-        GameManager.instance.opponent.currentLinePower = 0;
+        // resetting visuals
+        playerPowerText.color = GameManager.instance.player.playerColor;
+        opponentPowerText.color = GameManager.instance.opponent.playerColor;
+        playerPowerIcon.color = GameManager.instance.player.playerColor;
+        opponentPowerIcon.color = GameManager.instance.opponent.playerColor;
         playerPowerText.text = "0";
         opponentPowerText.text = "0";
+
+        // resetting power
+        GameManager.instance.player.currentLinePower = 0;
+        GameManager.instance.opponent.currentLinePower = 0;
+
+        // resetting states
         dice.SetActive(false);
         oppDice.SetActive(false);
         diceButton.interactable = true;
+        powerUI.SetActive(false);
     }
 
     /// <summary>
@@ -82,13 +94,19 @@ public class BattleManager : MonoBehaviour
         Field oppField = opponent.fields[currentLine];
         List<Unit> unitsToReturn = new List<Unit>();
 
+        unitsToReturn.AddRange(GetFieldUnits(field));
+        unitsToReturn.AddRange(GetFieldUnits(oppField));
+
+        return unitsToReturn;
+    }
+
+    List<Unit> GetFieldUnits(Field field)
+    {
+        List<Unit> unitsToReturn = new List<Unit>();
+
         for (int i = 0; i < field.units.Length; i++)
         {
             if (field.units[i] != null) unitsToReturn.Add(field.units[i]);
-        }
-        for (int i = 0; i < oppField.units.Length; i++)
-        {
-            if (oppField.units[i] != null) unitsToReturn.Add(oppField.units[i]);
         }
 
         return unitsToReturn;
@@ -114,6 +132,9 @@ public class BattleManager : MonoBehaviour
         Vector3 targetPos = new Vector3(posBetweenFields.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
         yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(targetPos, 0.6f));
 
+        // Enabling power UI
+        powerUI.SetActive(true);
+
         // Fading all lines, except current line fields
         for (int i = 0; i < player.fields.Length; i++)
         {
@@ -137,24 +158,37 @@ public class BattleManager : MonoBehaviour
         // ENABLING ROLL
 
         // Rolling for opponent if it's AI
-        if (opponent.isAI) StartCoroutine(RollOpponetDice());
+        if (opponent.isAI && GetFieldUnits(oppField).Count > 0) StartCoroutine(RollOpponetDice());
 
-        GameManager.instance.readyButton.gameObject.SetActive(true);
-        dice.SetActive(true);
-
-        while (!rolled) // rolling dice until button is pressed 
+        // If there are any units on your line player will roll the dice
+        if (GetFieldUnits(field).Count > 0)
         {
-            diceValue = Random.Range(1, 7);
-            diceSprite.sprite = diceFace[diceValue - 1];
-            yield return new WaitForSeconds(diceIntervals);
-        }
-        rolled = false;
+            GameManager.instance.readyButton.gameObject.SetActive(true);
+            dice.SetActive(true);
 
-        // Adding power that was on the dice when it stopped
-        yield return StartCoroutine(AddPower(player, diceValue));
+            while (!rolled) // rolling until button is pressed 
+            {
+                diceValue = Random.Range(1, 7);
+                diceSprite.sprite = diceFace[diceValue - 1];
+                yield return new WaitForSeconds(diceIntervals);
+            }
+            rolled = false;
+
+            // Adding power that was on the dice when it stopped
+            yield return StartCoroutine(AddPower(player, diceValue));
+        }
+
+        yield return new WaitForSeconds(1f);
 
         // COMPARING POWER
     }   
+
+    void ResolveLine(Player winner, Player loser)
+    {
+        TextMeshProUGUI winnerPowerText = (winner == GameManager.instance.player) ? playerPowerText : opponentPowerText;
+        Image winnerPowerIcon = (winner == GameManager.instance.player) ? playerPowerIcon : opponentPowerIcon;
+
+    }
 
     public void RollPower()
     {
@@ -164,10 +198,19 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator RollOpponetDice(int diceValue = 0)
     {
-        yield return new WaitForSeconds(1.5f);
-
-        int opponentDiceValue = (diceValue == 0) ? Random.Range(0, 7) : diceValue;
         oppDice.SetActive(true);
+
+        // Pretending to roll opponents dice
+        float t = 0;
+        while (t < opponentRollingTime)
+        {
+            t += Time.deltaTime;
+            oppDiceSprite.sprite = diceFace[Random.Range(0,6)];
+            yield return new WaitForSeconds(diceIntervals);
+        }
+        
+        // Actually rolling the dice 
+        int opponentDiceValue = (diceValue == 0) ? Random.Range(0, 7) : diceValue;
         oppDiceSprite.sprite = diceFace[opponentDiceValue - 1];
 
         StartCoroutine(AddPower(GameManager.instance.opponent, opponentDiceValue));
@@ -222,7 +265,7 @@ public class BattleManager : MonoBehaviour
         {
             t += Time.deltaTime * 2;
             float actualT = t / timePerUnit;
-            float coolT = actualT * actualT;
+            float coolT = 1 - (1 - actualT) * (1 - actualT);
 
             // Increasing text size
             float currentFontSize = Mathf.RoundToInt(Mathf.Lerp(scaledTextSize, startingTextSize, coolT));

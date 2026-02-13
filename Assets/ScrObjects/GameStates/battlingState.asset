@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 852c92fdaa1431d44a8024e8bef7a987, type: 3}
   m_Name: battlingState
   m_EditorClassIdentifier: Assembly-CSharp::GameStateData
-  defaultHintText: Creatures with higher combined power on each field win. Press
-    "roll" to determine power on current fieldl
+  defaultHintText: Creatures fight!
   stateName: Battle
   buttonText: Roll dice
   buttonColor: {r: 0.6745098, g: 0.9450981, b: 0.5764706, a: 1}
