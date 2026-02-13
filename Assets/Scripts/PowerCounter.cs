@@ -34,14 +34,16 @@ public class PowerCounter : MonoBehaviour
         powerText.text = "0";
         currentPower= 0;
         diceRolled = false;
+        EnableDice(false);
     }
 
     /// <summary>
     /// Enables dice to be clicked on
     /// </summary>
-    public void EnableDice()
+    public void EnableDice(bool enable)
     {
-        dice.gameObject.SetActive(true);
+        dice.gameObject.SetActive(enable);
+        dice.clickable = enable;
     }
 
     /// <summary>
@@ -50,7 +52,8 @@ public class PowerCounter : MonoBehaviour
     /// <returns></returns>
     public IEnumerator RollDicePower()
     {
-        EnableDice();
+        EnableDice(true);
+        dice.clickable = false;
         yield return StartCoroutine(dice.RollAnimation());
         yield return StartCoroutine(AddPower(dice.GetDiceValue()));
 

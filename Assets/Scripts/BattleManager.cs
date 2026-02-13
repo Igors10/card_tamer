@@ -133,33 +133,29 @@ public class BattleManager : MonoBehaviour
         // ADDING UNIT POWER
 
         // Opponent units first
-        if (opponentUnits.Count > 0)
-        { 
-            foreach (Unit unit in opponentUnits)
-            {
-                if (unit.card.currentPower > 0) yield return StartCoroutine(opponentPowerUI.AddPower(unit.card.currentPower, unit));
-            }
-            // Opponent rolls
-            StartCoroutine(opponentPowerUI.RollDicePower());
+        foreach (Unit unit in opponentUnits)
+        {
+            if (unit.card.currentPower > 0) yield return StartCoroutine(opponentPowerUI.AddPower(unit.card.currentPower, unit));
+        }
+        // Player units after
+        foreach (Unit unit in playerUnits)
+        {
+            if (unit.card.currentPower > 0) yield return StartCoroutine(playerPowerUI.AddPower(unit.card.currentPower, unit));
         }
 
-        // Player units after
-        if (playerUnits.Count > 0)
-        {
-            foreach (Unit unit in playerUnits)
-            {
-                if (unit.card.currentPower > 0) yield return StartCoroutine(playerPowerUI.AddPower(unit.card.currentPower, unit));
-            }
-            playerPowerUI.EnableDice();
-        }
+        // Rolling dice
+        if (opponentUnits.Count > 0) yield return StartCoroutine(opponentPowerUI.RollDicePower());
+        yield return new WaitForSeconds(0.4f);        
+        if (playerUnits.Count > 0) playerPowerUI.EnableDice(true);
+    
         // Wait for player(s) to roll dices
-        while (!playerPowerUI.diceRolled && !opponentPowerUI.diceRolled)
+        while ((!playerPowerUI.diceRolled && playerUnits.Count > 0) || (!opponentPowerUI.diceRolled && opponentUnits.Count > 0))
         {
             yield return null;
         }
 
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3f);
         // COMPARING POWER
         NextLine();//temp
     }   

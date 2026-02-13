@@ -1,3 +1,4 @@
+using GameKit.Dependencies.Utilities;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -18,6 +19,7 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
     [SerializeField] float diceIntervals;
     [SerializeField] float rollDistance;
     [SerializeField] float rotationSpeed;
+    [HideInInspector] public bool clickable;
 
     private void Start()
     {
@@ -29,6 +31,9 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
         Vector3 diceTargetPos = new Vector3(diceStartingPos.x, diceStartingPos.y + rollDistance, diceStartingPos.z);
         rolling = true;
 
+        // randomly picking dice values while it is rolling
+        StartCoroutine(RandomizeDiceValue());
+
         // Floating up
         float t = 0;
         while (t < rollingTime)
@@ -38,10 +43,7 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
             float coolT = actualT * actualT;
 
             transform.position = Vector3.Lerp(diceStartingPos, diceTargetPos, coolT);
-
-            diceValue = ChangeDiceValue();
             yield return null;
-            //yield return new WaitForSeconds(diceIntervals);
         }
         // Floating down
         t = 0;
@@ -52,26 +54,41 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
             float coolT = 1 - (1 - actualT) * (1 - actualT);
 
             transform.position = Vector3.Lerp(diceTargetPos, diceStartingPos, coolT);
-
-            diceValue = ChangeDiceValue();
             yield return null;
-            //yield return new WaitForSeconds(diceIntervals);
         }
 
         rolling = false;
+
+        // snapping to correct position and rotation
+        transform.position = diceStartingPos;
+        sprite.transform.localRotation = Quaternion.identity;
     }
 
     void RotateDice()
     {
+        if (!rolling) return;
         RectTransform rect = sprite.GetComponent<RectTransform>();
 
-        float rotationThisFrame = (rolling) ? rotationSpeed * Time.deltaTime : 0;
+        float rotationThisFrame =rotationSpeed * Time.deltaTime;
         rect.Rotate(0f, 0f, -rotationThisFrame); 
     }
 
     void FixedUpdate()
     {
         RotateDice();
+    }
+
+    /// <summary>
+    /// Changes dice value every now and then
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator RandomizeDiceValue()
+    {
+        while (rolling)
+        {
+            diceValue = ChangeDiceValue();
+            yield return new WaitForSeconds(diceIntervals);
+        }
     }
 
     int ChangeDiceValue()
@@ -89,7 +106,7 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
 
     void ManualRoll()
     {
-        if (rolling || powerCounter.diceRolled) return;
+        if (!clickable) return;
 
         glow.SetActive(false);
         StartCoroutine(powerCounter.RollDicePower());
@@ -97,7 +114,7 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
 
     void OnHover(bool mouseOver)
     {
-        if (rolling || powerCounter.diceRolled) return;
+        if (!clickable) return;
 
         glow.SetActive(mouseOver);
     }
