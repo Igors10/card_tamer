@@ -782,6 +782,9 @@ MonoBehaviour:
   faded: 0
   fadedAlpha: 0.75
   unitUI: {fileID: 1252183568118034703}
+  shakeTime: 0.9
+  shakeIntensity: 0.3
+  shakeFrequency: 40
 --- !u!1 &4769408951669579870
 GameObject:
   m_ObjectHideFlags: 0

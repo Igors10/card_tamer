@@ -3337,20 +3337,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
   playerPowerUI: {fileID: 239285717}
   opponentPowerUI: {fileID: 632663721}
-  dice: {fileID: 0}
-  diceButton: {fileID: 0}
-  diceSprite: {fileID: 0}
-  diceFace:
-  - {fileID: -4898078389235781618, guid: f7166e1ee79cca44d99dab79f5c32468, type: 3}
-  - {fileID: 7186787799328912413, guid: f7166e1ee79cca44d99dab79f5c32468, type: 3}
-  - {fileID: -1763314561964542272, guid: f7166e1ee79cca44d99dab79f5c32468, type: 3}
-  - {fileID: -5794255705059751303, guid: f7166e1ee79cca44d99dab79f5c32468, type: 3}
-  - {fileID: 6873302888864206200, guid: f7166e1ee79cca44d99dab79f5c32468, type: 3}
-  - {fileID: 663982842151309356, guid: f7166e1ee79cca44d99dab79f5c32468, type: 3}
-  diceIntervals: 0.2
-  oppDice: {fileID: 0}
-  oppDiceSprite: {fileID: 0}
-  opponentRollingTime: 0.2
 --- !u!1 &1864813448
 GameObject:
   m_ObjectHideFlags: 0

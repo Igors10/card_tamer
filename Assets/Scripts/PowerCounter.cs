@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PowerCounter : MonoBehaviour
 {
@@ -12,16 +13,36 @@ public class PowerCounter : MonoBehaviour
     [HideInInspector] public float currentPower;
     [SerializeField] D6 dice;
 
+    [Header("default vals")]
+    Vector3 defaultIconScale;
+    float defaultFontSize;
+
     [Header("Adding power")]
     [SerializeField] float unitScaleMod = 1.2f;
     [SerializeField] float textScaleMod = 1.5f;
     [SerializeField] float timePerUnit = 0.5f;
     [HideInInspector] public bool diceRolled;
 
+    [Header("Resolving")]
+    [SerializeField] float resolveSizeMod = 1.5f;
+    [SerializeField] Color lostColor;
+    [SerializeField] ParticleSystem winVFX;
+    [SerializeField] ParticleSystem damageVFX;
+    [SerializeField] float damageAnimTime;
+    [SerializeField] float powerDecreaseInterval;
+    [SerializeField] GameObject damageObj;
+    [HideInInspector] public bool resolved;
     private void Start()
     {
         // passing reference to this to player
         player.powerCounter = this;
+    }
+
+    private void OnEnable()
+    {
+        // saving default values
+        defaultFontSize = powerText.fontSize;
+        defaultIconScale = powerIcon.transform.localScale;
     }
 
     /// <summary>
@@ -29,11 +50,14 @@ public class PowerCounter : MonoBehaviour
     /// </summary>
     public void ResetCounter()
     {
+        if (defaultFontSize != 0) powerText.fontSize = defaultFontSize;
         powerText.color = player.playerColor;
         powerIcon.color = player.playerColor;
+        if (defaultIconScale != Vector3.zero) powerIcon.transform.localScale = defaultIconScale;
         powerText.text = "0";
         currentPower= 0;
         diceRolled = false;
+        resolved = false;
         EnableDice(false);
     }
 
@@ -128,4 +152,107 @@ public class PowerCounter : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
     }
 
+    public void ResolveCounter(bool won, Field field)
+    {
+        // When player loses (has less power on the current line
+        if (!won)
+        {
+            powerIcon.transform.localScale /= resolveSizeMod;
+            powerText.fontSize = powerText.fontSize / resolveSizeMod;
+            powerText.color = lostColor;
+            powerIcon.color = lostColor;
+            resolved = true;
+            return;
+        }
+
+        // When player wins (has more power)
+        powerIcon.transform.localScale *= resolveSizeMod;
+        powerText.fontSize = powerText.fontSize * resolveSizeMod;
+        if (winVFX != null) winVFX.Play();
+
+        // Dealing damage to opponent field
+        StartCoroutine(DealFieldDamage(field));
+    }
+
+    IEnumerator DealFieldDamage(Field field)
+    {
+        // Damage absorbed by block
+        if (field.currentBlock > 0)
+        {
+            Vector3 blockPosition = Camera.main.WorldToScreenPoint(field.blockObj.transform.position);
+            yield return StartCoroutine(Damage(blockPosition, field.currentBlock));
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        // Damage to units
+        List<Unit> unitsToDamage = field.GetFieldUnits();
+        for (int i = 0; i < unitsToDamage.Count; i++)
+        {
+            // checking if there is any power left
+            if (currentPower == 0) break;
+
+            int unitHP = unitsToDamage[i].card.GetCurrerntHealth();
+            int damage = (currentPower > unitHP) ? unitHP : (int)currentPower;
+            Vector3 unitPosition = Camera.main.WorldToScreenPoint(unitsToDamage[i].transform.position);
+            yield return StartCoroutine(Damage(unitPosition, damage));
+            yield return StartCoroutine(unitsToDamage[i].TakeDamage(damage));
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        // Damage to player HP
+
+        // Mark as resolved
+        resolved = true;
+    }
+
+    /// <summary>
+    /// Flying out a sword particle to indicate which object is getting damaged
+    /// </summary>
+    /// <param name="targetPosition"></param>
+    /// <returns></returns>
+    IEnumerator Damage(Vector3 targetPosition, int damageAmount)
+    {
+        StartCoroutine(DecreasePower(damageAmount));
+
+        float t = 0;
+        Vector3 startingPos = powerText.transform.position;
+        damageObj.SetActive(true);
+        damageObj.GetComponent<Image>().color = player.playerColor;
+        
+        while (t < damageAnimTime)
+        {
+            t += Time.deltaTime;
+            float actualT = t / damageAnimTime;
+            float coolT = actualT * actualT;
+
+            damageObj.transform.position = Vector3.Lerp(startingPos, targetPosition, coolT);
+            yield return null;
+        }
+
+        damageObj.SetActive(false);
+        // playing the damange VFX
+        if (damageVFX != null)
+        {
+            damageVFX.transform.position = targetPosition;
+            damageVFX.Play();
+        }
+    }
+
+    /// <summary>
+    /// Counting down power one by one when power is decreased;
+    /// </summary>
+    /// <param name="decrease"></param>
+    /// <returns></returns>
+    IEnumerator DecreasePower(int decrease)
+    {
+        float targetPower = currentPower - decrease;
+        if (targetPower < 0) targetPower = 0;
+
+        while (currentPower != targetPower)
+        {
+            currentPower--;
+            powerText.text = currentPower.ToString();
+            yield return new WaitForSeconds(powerDecreaseInterval);
+        }
+    }
 }

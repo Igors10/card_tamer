@@ -1,8 +1,10 @@
+﻿using System.Collections;
+using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 {   
@@ -35,6 +37,11 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [HideInInspector] public bool faded = false;
     [SerializeField] float fadedAlpha;
     [SerializeField] GameObject unitUI;
+
+    [Header("animation")]
+    [SerializeField] float shakeTime;
+    [SerializeField] float shakeIntensity;
+    [SerializeField] float shakeFrequency;
 
     void Start()
     {
@@ -104,6 +111,50 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         {
             GameManager.instance.managerUI.PreviewCard(isViewed, this);
         }
+    }
+
+    public IEnumerator TakeDamage(int damage)
+    {
+        damage = (card.GetCurrerntHealth() > damage) ? card.GetCurrerntHealth() : damage;
+        card.damageToHP += damage;
+        card.Refresh();
+        RefreshUnitVisuals();
+
+        // do damage VFX and SFX 
+        yield return ShakeAnim();
+
+        // do death check
+    }
+
+    void Death()
+    {
+        // destroy unit
+    }
+
+    /// <summary>
+    /// Making unit shake left and right when taking damage
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator ShakeAnim()
+    {
+        float t = 0;
+        Vector3 startingPos = transform.localPosition;
+
+        while (t < shakeTime)
+        {
+            t += Time.deltaTime;
+
+            float progress = t / shakeTime;          
+            float damper = 1f - progress;         
+            damper *= damper;                       
+
+            float offsetX = Mathf.Sin(t * shakeFrequency) * shakeIntensity * damper;
+            transform.localPosition = startingPos + new Vector3(offsetX, 0f, 0f);
+
+            yield return null;
+        }
+
+        transform.localPosition = startingPos;
     }
 
     // ===============

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using NUnit.Framework;
+using FishNet.Example.Authenticating;
 
 public class BattleManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] PowerCounter playerPowerUI;
     [SerializeField] PowerCounter opponentPowerUI;
 
+    /*
     [Header("rolling")]
     [SerializeField] GameObject dice;
     [SerializeField] Button diceButton;
@@ -22,7 +24,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] GameObject oppDice;
     [SerializeField] Image oppDiceSprite;
     [SerializeField] float opponentRollingTime;
-
+    */
     int currentLine;
 
     public void ResetBattleVals()
@@ -51,8 +53,8 @@ public class BattleManager : MonoBehaviour
         if (currentLine < GameManager.instance.player.fields.Length)
         {
             // Getting all the units battling on currentLine and initialize battle
-            List<Unit> playerUnits = GetFieldUnits(GameManager.instance.player.fields[currentLine]);
-            List<Unit> opponentUnits = GetFieldUnits(GameManager.instance.opponent.fields[currentLine]);
+            List<Unit> playerUnits = GameManager.instance.player.fields[currentLine].GetFieldUnits();
+            List<Unit> opponentUnits = GameManager.instance.opponent.fields[currentLine].GetFieldUnits();
             if (playerUnits.Count > 0 || opponentUnits.Count > 0) StartCoroutine(InitBattleLine(playerUnits, opponentUnits));
 
             // If line is empty go to next line instead
@@ -65,32 +67,6 @@ public class BattleManager : MonoBehaviour
             GameManager.instance.opponent.endStateReady = true;
             GameManager.instance.EndTurn();
         }
-    }
-
-    List<Unit> GetAllLineUnits()
-    {
-        Player player = GameManager.instance.player;
-        Player opponent = GameManager.instance.opponent;
-        Field field = player.fields[currentLine];
-        Field oppField = opponent.fields[currentLine];
-        List<Unit> unitsToReturn = new List<Unit>();
-
-        unitsToReturn.AddRange(GetFieldUnits(field));
-        unitsToReturn.AddRange(GetFieldUnits(oppField));
-
-        return unitsToReturn;
-    }
-
-    List<Unit> GetFieldUnits(Field field)
-    {
-        List<Unit> unitsToReturn = new List<Unit>();
-
-        for (int i = 0; i < field.units.Length; i++)
-        {
-            if (field.units[i] != null) unitsToReturn.Add(field.units[i]);
-        }
-
-        return unitsToReturn;
     }
 
     /// <summary>
@@ -148,20 +124,25 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(0.4f);        
         if (playerUnits.Count > 0) playerPowerUI.EnableDice(true);
     
-        // Wait for player(s) to roll dices
+        // Wait for player(s) to roll dice
         while ((!playerPowerUI.diceRolled && playerUnits.Count > 0) || (!opponentPowerUI.diceRolled && opponentUnits.Count > 0))
         {
             yield return null;
         }
 
 
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1f);
         // COMPARING POWER
-        NextLine();//temp
+        if (playerPowerUI.currentPower > opponentPowerUI.currentPower) Debug.Log("BattleManager: player has more power");
+        if (playerPowerUI.currentPower < opponentPowerUI.currentPower) Debug.Log("BattleManager: opponent has more power");
+        if (playerPowerUI.currentPower == opponentPowerUI.currentPower) Debug.Log("BattleManager: it is tied for the power");
+        playerPowerUI.ResolveCounter(playerPowerUI.currentPower >= opponentPowerUI.currentPower, oppField);
+        opponentPowerUI.ResolveCounter(opponentPowerUI.currentPower >= playerPowerUI.currentPower, field);
+
+        // Waiting for both power counters to get resolved
+        while (!playerPowerUI.resolved || !opponentPowerUI.resolved) yield return null;
+
+        // Switching to next line
+        NextLine();
     }   
-
-    void ResolveLine(Player winner, Player loser)
-    {
-
-    }
 }

@@ -1,6 +1,6 @@
-using UnityEditor;
-using UnityEngine;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 
 public class Field : MonoBehaviour
 {
@@ -13,7 +13,7 @@ public class Field : MonoBehaviour
     [SerializeField] GameObject fieldUI;
 
     [Header("Block")]
-    [SerializeField] GameObject blockObj;
+    [HideInInspector] public GameObject blockObj;
     [SerializeField] TextMeshProUGUI blockValue;
     [HideInInspector] public int currentBlock;
 
@@ -72,6 +72,17 @@ public class Field : MonoBehaviour
         }
     }
 
+    public List<Unit> GetFieldUnits()
+    {
+        List<Unit> unitsToReturn = new List<Unit>();
+
+        for (int i = 0; i < units.Length; i++)
+        {
+            if (units[i] != null) unitsToReturn.Add(units[i]);
+        }
+
+        return unitsToReturn;
+    }
     private void Update()
     {
         IsCardOver();

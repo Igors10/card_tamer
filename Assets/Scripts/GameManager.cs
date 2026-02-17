@@ -2,8 +2,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
-using TMPro.EditorUtilities;
 using UnityEngine.VFX;
 
 public enum GameState

@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using UnityEditor.ShaderGraph.Internal;
 using TMPro;
 
 public class Viewpoint : MonoBehaviour

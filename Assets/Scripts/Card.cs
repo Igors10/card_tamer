@@ -94,6 +94,11 @@ public class Card : MonoBehaviour
         player = owner;
     }
 
+    public int GetCurrerntHealth()
+    {
+        return cardData.health - damageToHP;
+    }
+
     /// <summary>
     ///  makes all the card data and visuals match the creature data and current state
     /// </summary>
