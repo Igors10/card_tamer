@@ -162,6 +162,11 @@ public class PowerCounter : MonoBehaviour
             powerText.color = lostColor;
             powerIcon.color = lostColor;
             resolved = true;
+
+            // Removing power from losing units
+            List<Unit> losingUnits = player.fields[GameManager.instance.battleManager.currentLine].GetFieldUnits();
+            foreach (Unit unit in losingUnits) { unit.card.currentPower = 0; unit.RefreshUnitVisuals(); }
+
             return;
         }
 
@@ -176,11 +181,24 @@ public class PowerCounter : MonoBehaviour
 
     IEnumerator DealFieldDamage(Field field)
     {
+        yield return new WaitForSeconds(0.5f);
+
         // Damage absorbed by block
         if (field.currentBlock > 0)
         {
+            // Finding block screen position
             Vector3 blockPosition = Camera.main.WorldToScreenPoint(field.blockObj.transform.position);
-            yield return StartCoroutine(Damage(blockPosition, field.currentBlock));
+
+            // Calculating damage
+            int damage = (currentPower > field.currentBlock) ? field.currentBlock : (int)currentPower;
+            field.currentBlock -= damage;
+
+            // "Attacking" the block
+            yield return StartCoroutine(Damage(blockPosition, damage));
+            
+            // Updating block visuals
+            field.RefreshFieldVisuals();
+
             yield return new WaitForSeconds(0.5f);
         }
 
@@ -191,15 +209,19 @@ public class PowerCounter : MonoBehaviour
             // checking if there is any power left
             if (currentPower == 0) break;
 
+            // calculating unit hp, damage dealt and units position
             int unitHP = unitsToDamage[i].card.GetCurrerntHealth();
             int damage = (currentPower > unitHP) ? unitHP : (int)currentPower;
             Vector3 unitPosition = Camera.main.WorldToScreenPoint(unitsToDamage[i].transform.position);
+
+            // "Attacking" the unit
             yield return StartCoroutine(Damage(unitPosition, damage));
             yield return StartCoroutine(unitsToDamage[i].TakeDamage(damage));
             yield return new WaitForSeconds(0.5f);
         }
 
         // Damage to player HP
+        
 
         // Mark as resolved
         resolved = true;
@@ -212,8 +234,6 @@ public class PowerCounter : MonoBehaviour
     /// <returns></returns>
     IEnumerator Damage(Vector3 targetPosition, int damageAmount)
     {
-        StartCoroutine(DecreasePower(damageAmount));
-
         float t = 0;
         Vector3 startingPos = powerText.transform.position;
         damageObj.SetActive(true);
@@ -236,6 +256,9 @@ public class PowerCounter : MonoBehaviour
             damageVFX.transform.position = targetPosition;
             damageVFX.Play();
         }
+
+        // Decrement the power number
+        StartCoroutine(DecreasePower(damageAmount));
     }
 
     /// <summary>

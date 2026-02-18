@@ -107,7 +107,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4669544073768496148
 RectTransform:
   m_ObjectHideFlags: 0
@@ -210,6 +210,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6923572496832994886}
+  - component: {fileID: 8264275166229001869}
   m_Layer: 0
   m_Name: BlockObj
   m_TagString: Untagged
@@ -225,20 +226,32 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4836697454238505976}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalScale: {x: 0.85, y: 0.85, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4669544073768496148}
-  - {fileID: 9212106783574290548}
   - {fileID: 8420324936044287670}
+  - {fileID: 9212106783574290548}
   m_Father: {fileID: 5099698635240784513}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 0.3, y: 0.447}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8264275166229001869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4836697454238505976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ea4b716da9e900418a264921df3fafa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardEffect
 --- !u!1 &5285435976434954848
 GameObject:
   m_ObjectHideFlags: 0
@@ -449,6 +462,7 @@ MonoBehaviour:
   blockObj: {fileID: 4836697454238505976}
   blockValue: {fileID: 9022608662803520452}
   currentBlock: 0
+  mirrorBlock: 0
   highlighColor: {r: 0.45805532, g: 0.9622642, b: 0.44845137, a: 1}
   dimHighlightColor: {r: 0.7631157, g: 0.85660374, b: 0.7612459, a: 1}
   highlightSpawnPointColor: {r: 1, g: 1, b: 1, a: 1}
@@ -598,7 +612,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.079, y: 0}
+  m_AnchoredPosition: {x: -0.018, y: 0.001}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8542787004003462821
@@ -631,15 +645,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: 1
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b007cca46cd8d164ba3f8487d9bad7d1, type: 2}
+  m_sharedMaterial: {fileID: 3258775908216779026, guid: b007cca46cd8d164ba3f8487d9bad7d1, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294110695
+  m_fontColor: {r: 0.90606624, g: 0.93094474, b: 0.94716984, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -836,8 +850,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.08, y: 0}
-  m_SizeDelta: {x: 0.1901, y: 0.1421}
+  m_AnchoredPosition: {x: -0.008, y: 0}
+  m_SizeDelta: {x: 0.45, y: 0.35}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4645399327949864543
 CanvasRenderer:

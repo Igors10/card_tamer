@@ -16,6 +16,7 @@ public class Field : MonoBehaviour
     [HideInInspector] public GameObject blockObj;
     [SerializeField] TextMeshProUGUI blockValue;
     [HideInInspector] public int currentBlock;
+    [SerializeField] bool mirrorBlock;
 
     [Header("Highlight")]
     Color defaultColor;
@@ -31,6 +32,9 @@ public class Field : MonoBehaviour
         // getting the default colors
         defaultColor = sprite.color;
         defaultSpawnPointColor = spawnPoint.color;
+
+        // Mirroring block if enabled
+        if (mirrorBlock) blockObj.transform.localPosition = new Vector2(-blockObj.transform.localPosition.x, blockObj.transform.localPosition.y);
     }
 
     /// <summary>

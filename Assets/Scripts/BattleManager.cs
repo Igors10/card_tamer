@@ -12,20 +12,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] PowerCounter playerPowerUI;
     [SerializeField] PowerCounter opponentPowerUI;
 
-    /*
-    [Header("rolling")]
-    [SerializeField] GameObject dice;
-    [SerializeField] Button diceButton;
-    [SerializeField] Image diceSprite;
-    bool rolled = false;
-    int diceValue = 0;
-    [SerializeField] Sprite[] diceFace = new Sprite[6];
-    [SerializeField] float diceIntervals;
-    [SerializeField] GameObject oppDice;
-    [SerializeField] Image oppDiceSprite;
-    [SerializeField] float opponentRollingTime;
-    */
-    int currentLine;
+    [HideInInspector] public int currentLine;
 
     public void ResetBattleVals()
     {
@@ -129,7 +116,6 @@ public class BattleManager : MonoBehaviour
         {
             yield return null;
         }
-
 
         yield return new WaitForSeconds(1f);
         // COMPARING POWER

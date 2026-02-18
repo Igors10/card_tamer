@@ -129,7 +129,20 @@ public class Card : MonoBehaviour
         }
     }
 
-   
+    /// <summary>
+    /// Removes card from game
+    /// </summary>
+    public void DestroyCard()
+    {
+        unit.RemoveFromBoard();
+
+        // Remove card from field cards (card cant really be destroyed when they are in hand)
+        player.cardsOnField.Remove(this);
+
+        Destroy(unit.gameObject);
+        Destroy(this.gameObject);
+    }
+
     // ====================
     // Hover Over
     // ====================

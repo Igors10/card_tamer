@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -27,8 +28,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     [Header("movement and input")]
     [HideInInspector] public bool readyToMove = false;
-    bool isDragged = false;
-    float dragFollowSpeed = 0.15f;
+    bool mouseOver;
     Vector3 hoveredScale;
     Vector3 defaultScale;
     Vector3 moveStartingPos;
@@ -115,30 +115,42 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public IEnumerator TakeDamage(int damage)
     {
-        damage = (card.GetCurrerntHealth() > damage) ? card.GetCurrerntHealth() : damage;
+        damage = (card.GetCurrerntHealth() > damage) ? damage : card.GetCurrerntHealth();
         card.damageToHP += damage;
         card.Refresh();
         RefreshUnitVisuals();
 
-        // do damage VFX and SFX 
-        yield return ShakeAnim();
-
         // do death check
+        bool isDead = card.GetCurrerntHealth() == 0;
+
+        // do damage VFX and SFX 
+        yield return ShakeAnim(isDead);
+
+        if (isDead) card.DestroyCard();
     }
 
-    void Death()
+    /// <summary>
+    /// Removes the unit off the board
+    /// </summary>
+    public void RemoveFromBoard()
     {
-        // destroy unit
+        // removes unit from field
+        int unitSlot = (currentField.units[0] == this) ? 0 : 1;
+        currentField.units[unitSlot] = null;
     }
 
     /// <summary>
     /// Making unit shake left and right when taking damage
     /// </summary>
     /// <returns></returns>
-    IEnumerator ShakeAnim()
+    IEnumerator ShakeAnim(bool isDead)
     {
         float t = 0;
         Vector3 startingPos = transform.localPosition;
+
+        // colors for fading out the unit if was killed
+        Color spriteColor = sprite.color;
+        Color fadedColor = new Color(spriteColor.r, spriteColor.g, spriteColor.b, 0f);
 
         while (t < shakeTime)
         {
@@ -150,6 +162,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
             float offsetX = Mathf.Sin(t * shakeFrequency) * shakeIntensity * damper;
             transform.localPosition = startingPos + new Vector3(offsetX, 0f, 0f);
+
+            // Fade out unit if the damage was deadly
+            if (isDead) sprite.color = Color.Lerp(spriteColor, fadedColor, progress);
 
             yield return null;
         }
@@ -165,7 +180,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         // nothing happens when unit is selected during execute state
         if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this
-            && GameManager.instance.executeManager.readyRevealCard == false) return;
+            && GameManager.instance.executeManager.readyRevealCard == false || faded) return;
 
 
         ViewCard(mouseOver);

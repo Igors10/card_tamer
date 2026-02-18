@@ -133,6 +133,9 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
 
         // Effect
         // find a way to have different effects here
+
+        // Disabling an order marker after an ability is used
+        card.unit.EnableOrderMarker(false);
     }
 
     // ====================
