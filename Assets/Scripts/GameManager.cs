@@ -167,6 +167,7 @@ public class GameManager : MonoBehaviour
 
             case GameState.BATTLING:
                 battleManager.NextLine();
+                readyButton.gameObject.SetActive(false);
                 break;
         }
     }
@@ -191,6 +192,17 @@ public class GameManager : MonoBehaviour
         Debug.Log("GameManager: gives away player object, it is player's turn: " + yourTurn);
         return playerToReturn;
     }
+
+    /// <summary>
+    /// Returns the opponent of given player
+    /// </summary>
+    /// <param name="p"></param>
+    /// <returns></returns>
+    public Player GetOpponentOfPlayer(Player p)
+    {
+       return (player == p) ? opponent : player;
+    }
+
     public GameStateData GetState()
     {
         return gameStates[(int)currentState];

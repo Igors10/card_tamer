@@ -4,14 +4,18 @@ using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
-    [Header("player attributes")]
-    public int health;
+    [Header("refs")]
+    public PlayerUI playerUI;
     public List<Card> cardsInHand = new List<Card>();
     public List<Card> cardsOnField = new List<Card>();
     public List<Card> plannedCardStack = new List<Card>();
     public Field[] fields = new Field[4];
-    public bool endStateReady = false;
     [HideInInspector] public PowerCounter powerCounter;
+
+    [Header("player attributes")]
+    public int health;
+    public bool endStateReady = false;
+    
 
     [Header("config")]
     AIOpponent AIplayer;
@@ -42,5 +46,13 @@ public class Player : MonoBehaviour
     public void StartTurn()
     {
         if (isAI) AIplayer.AIStartTurn();
+    }
+
+    public void TakeDamage(int damageAmount)
+    {
+        damageAmount = (damageAmount > health) ? health : damageAmount;
+
+        health -= damageAmount;
+        playerUI.RefreshHP(damageAmount);
     }
 }

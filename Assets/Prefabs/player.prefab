@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5787719754676156524}
   - component: {fileID: 4674054684845155786}
+  - component: {fileID: 4287692715053019839}
   m_Layer: 0
   m_Name: player
   m_TagString: Untagged
@@ -44,15 +45,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 862bf0e23248b0546b44c3756c846bd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  health: 0
+  playerUI: {fileID: 4287692715053019839}
   cardsInHand: []
   cardsOnField: []
+  plannedCardStack: []
   fields:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  powerCounter: {fileID: 0}
+  health: 0
+  endStateReady: 0
   isAI: 0
+  playerColor: {r: 0, g: 0, b: 0, a: 0}
   berries: 0
   meat: 0
   fish: 0
+--- !u!114 &4287692715053019839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8551844874858225478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dec559c5bc581546b2f422aa5abc545, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerUI
+  healthbar: {fileID: 0}
+  healthbarFill: {fileID: 0}
+  hpValue: {fileID: 0}
+  damageVFX: {fileID: 0}
+  shakeLenght: 1
+  shakeIntensity: 10
+  head: {fileID: 0}
+  face: {fileID: 0}
+  avatarColor: {r: 0, g: 0, b: 0, a: 0}

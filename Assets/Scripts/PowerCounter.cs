@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using FishNet.Demo.AdditiveScenes;
 
 public class PowerCounter : MonoBehaviour
 {
@@ -32,6 +34,7 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] float powerDecreaseInterval;
     [SerializeField] GameObject damageObj;
     [HideInInspector] public bool resolved;
+    [SerializeField] int damagePowerCost;
     private void Start()
     {
         // passing reference to this to player
@@ -221,7 +224,54 @@ public class PowerCounter : MonoBehaviour
         }
 
         // Damage to player HP
-        
+        // Dealing 1 damage for each X power
+        List<GameObject> damageParticles = new List<GameObject>();
+        int damageToPlayer = 0;
+        float damageParticleOffset = 40f;
+
+        while (currentPower > 0)
+        {
+            int nextDamagePowerCost = (currentPower > damagePowerCost) ? damagePowerCost : (int)currentPower;
+            damageToPlayer++;
+
+            
+            // Adding one damage (sword) particle for each X power is left to show how much damage will be dealt to opposing player
+            if (damageToPlayer == 1)
+            {
+                damageObj.SetActive(true);
+                damageObj.GetComponent<Image>().color = player.playerColor;
+                damageObj.transform.position = powerText.transform.position;
+
+                float particleOffsetY = 90f;
+                if (player == GameManager.instance.opponent) particleOffsetY *= -1;
+                damageObj.transform.localPosition += new Vector3(0f, particleOffsetY, 0f);
+            }
+            else
+            {
+                GameObject newDamageParticle = Instantiate(damageObj, damageObj.transform.position, Quaternion.identity, damageObj.transform);
+                newDamageParticle.GetComponent<Image>().color = player.playerColor;
+                newDamageParticle.transform.localPosition += new Vector3(damageParticleOffset, 0f, 0f);
+                damageParticles.Add(newDamageParticle);
+            }
+
+            yield return StartCoroutine(DecreasePower(nextDamagePowerCost));
+        }
+
+        // ending the coroutine if no damage to opponent can be dealt
+        if (damageToPlayer < 1) { resolved = true; yield break; }
+
+        yield return new WaitForSeconds(1f);
+
+        // Visuals for damage targeting opponents UI
+        Player playerToDamage = GameManager.instance.GetOpponentOfPlayer(player);
+        Vector3 healthbarPos = playerToDamage.playerUI.healthbar.transform.position;
+        yield return Damage(healthbarPos, 0);
+
+        // Refreshing opponents hp value and applying damage juice effects
+        playerToDamage.TakeDamage(damageToPlayer);
+
+        // destroying excess damage particles
+        foreach (GameObject damageParticle in damageParticles) { Destroy(damageParticle); }
 
         // Mark as resolved
         resolved = true;
@@ -235,7 +285,7 @@ public class PowerCounter : MonoBehaviour
     IEnumerator Damage(Vector3 targetPosition, int damageAmount)
     {
         float t = 0;
-        Vector3 startingPos = powerText.transform.position;
+        Vector3 startingPos = (damageObj.activeSelf) ? damageObj.transform.position : powerText.transform.position;
         damageObj.SetActive(true);
         damageObj.GetComponent<Image>().color = player.playerColor;
         
