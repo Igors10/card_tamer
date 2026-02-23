@@ -1,6 +1,8 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
+using UnityEditor.ShaderGraph.Internal;
 
 public class ManagerUI : MonoBehaviour
 {
@@ -14,6 +16,15 @@ public class ManagerUI : MonoBehaviour
     [Header("card preview")]
     [SerializeField] Card previewCard;
     [SerializeField] Vector3 cardPreviewOffset = new Vector3(0f, 400f, 0f);
+
+    [Header("game over")]
+    [SerializeField] GameObject gameOverScreen;
+    [SerializeField] float bgAlpha;
+    [SerializeField] float fadeInTime;
+    [SerializeField] Image gameOverBG;
+    [SerializeField] TextMeshProUGUI gameOverText;
+    [SerializeField] string wonText;
+    [SerializeField] string lostText;
 
     /// <summary>
     /// Makes a readOnly card version above specific unit
@@ -61,4 +72,39 @@ public class ManagerUI : MonoBehaviour
         turnMessage.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;
         turnMessage.text = (GameManager.instance.yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
     }
+
+    public void GameOverScreen(Player lostPlayer)
+    {
+        gameOverScreen.SetActive(true);
+        gameOverText.text = (lostPlayer == GameManager.instance.player) ? lostText : wonText;
+
+        StartCoroutine(GameOverFadeIn());
+    }
+
+    IEnumerator GameOverFadeIn()
+    {
+        float t = 0;
+
+        // background color
+        Color startingBGColor = new Color(gameOverBG.color.r, gameOverBG.color.g, gameOverBG.color.b, 0f);
+        Color targetBGColor = new Color(gameOverBG.color.r, gameOverBG.color.g, gameOverBG.color.b, bgAlpha);
+
+        // text color
+        Color startingTextColor = new Color(gameOverText.color.r, gameOverText.color.g, gameOverText.color.b, 0f);
+        Color targetTextColor = gameOverText.color;
+
+        while (t < fadeInTime)
+        {
+            t += Time.deltaTime;
+            float actualT = t / fadeInTime;
+            float coolT = actualT * actualT;
+
+            gameOverBG.color = Color.Lerp(startingBGColor, targetBGColor, coolT);
+            gameOverText.color = Color.Lerp(startingTextColor, targetTextColor, coolT);
+
+            yield return null;
+        }
+    }
+
+
 }

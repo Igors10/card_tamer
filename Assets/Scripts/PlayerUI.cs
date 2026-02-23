@@ -1,7 +1,7 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System.Collections;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -22,10 +22,17 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] Image face;
     [SerializeField] Color avatarColor;
 
+    [Header("Food tokens")]
+    [SerializeField] FoodToken[] foodCounters = new FoodToken[3];
+    [SerializeField] GameObject foodObj;
+    [SerializeField] float offsetY;
+    [SerializeField] float tokenStayTime;
+
 
     private void Start()
     {
         player = GetComponent<Player>();
+        RefreshHP();
     }
 
     /// <summary>
@@ -80,5 +87,49 @@ public class PlayerUI : MonoBehaviour
             // Reverting the offset
             healthbar.transform.localPosition = startingPosition;
         }
+    }
+
+    /// <summary>
+    /// Add (or reduce) food tokens on the player
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="amount"></param>
+    public void AddFoodToken(FoodType type, int amount)
+    {
+        player.food[(int)type] += amount;
+        StartCoroutine(TokenUpdateAnim(type));
+    }
+    IEnumerator ShowTokens(bool show)
+    {
+        Vector3 startingPosition = foodObj.transform.localPosition;
+
+        // adjusting target position
+        float currentOffsetY = offsetY;
+        if (!show ^ player.isOpponent) currentOffsetY *= -1;
+        Vector3 targetPosition = startingPosition + new Vector3(0, currentOffsetY, 0);
+        float t = 0;
+        float timeAppearing = 0.8f;
+
+        while (t < timeAppearing)
+        {
+            t += Time.deltaTime;
+            float clampedT = t / timeAppearing;
+            float coolT = (show) ? 1 - (1 - clampedT) * (1 - clampedT) : clampedT * clampedT; 
+
+            foodObj.transform.localPosition = Vector3.Lerp(startingPosition, targetPosition, coolT);
+
+            yield return null;
+        }
+
+        // snapping to correct position
+        foodObj.transform.localPosition = targetPosition;
+    }
+    IEnumerator TokenUpdateAnim(FoodType type)
+    {
+        yield return StartCoroutine(ShowTokens(true));
+        foodCounters[(int)type].RefreshToken(true);
+
+        yield return new WaitForSeconds(tokenStayTime);
+        yield return StartCoroutine(ShowTokens(false));
     }
 }

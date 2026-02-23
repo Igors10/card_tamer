@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FishNet.Demo.AdditiveScenes;
+using Newtonsoft.Json.Converters;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -123,6 +125,14 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // do death check
         bool isDead = card.GetCurrerntHealth() == 0;
 
+        // give random food token if dead
+        if (isDead)
+        {
+            int randomFoodType = UnityEngine.Random.Range(0, Enum.GetNames(typeof(FoodType)).Length);
+            card.player.playerUI.AddFoodToken((FoodType)randomFoodType, 1);
+            yield return new WaitForSeconds(1.5f);
+        }
+       
         // do damage VFX and SFX 
         yield return ShakeAnim(isDead);
 

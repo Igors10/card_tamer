@@ -22,10 +22,3 @@ public class CreatureObj : ScriptableObject
         return audio[randomSound];
     }
 }
-
-public enum FoodType
-{
-    MEAT,
-    FISH,
-    BERRIES
-}

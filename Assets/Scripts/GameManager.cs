@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
     public List<GameStateData> gameStates = new List<GameStateData>();
     public List<GameObject> gameStateUI = new List<GameObject>();
     [HideInInspector] public bool yourTurn;
+    [HideInInspector] public bool gameOver;
 
     [Header("Managers")]
     public HandManager handManager;
@@ -32,6 +33,7 @@ public class GameManager : MonoBehaviour
     public ManagerUI managerUI;
     public VFXManager VFXmanager;
     public BattleManager battleManager;
+    public Animations animations;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -41,6 +43,7 @@ public class GameManager : MonoBehaviour
     public Player player;
     public Player opponent;
     public int startingMaxHealth;
+    public int startingResourceAmount;
     public PlayerConfigObj playerConfig;
    
 
@@ -141,6 +144,7 @@ public class GameManager : MonoBehaviour
         CheckEndState();
     }
 
+   
     public void StartTurn()
     {
         Debug.Log("GameManager: Starting the turn");
@@ -177,9 +181,21 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void CheckEndState()
     {
+        // Do nothing if game over
+        if (gameOver) return;
+
         if (player.endStateReady && opponent.endStateReady) FinishCurrentState();
         else if (opponent.endStateReady) StartTurn();
         else opponent.StartTurn();
+    }
+
+    /// <summary>
+    /// Ends the game
+    /// </summary>
+    public void GameOver(Player lostPlayer)
+    {
+        gameOver = true;
+        managerUI.GameOverScreen(lostPlayer);
     }
 
     /// <summary>

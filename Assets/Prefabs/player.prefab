@@ -57,11 +57,11 @@ MonoBehaviour:
   powerCounter: {fileID: 0}
   health: 0
   endStateReady: 0
+  dead: 0
   isAI: 0
   playerColor: {r: 0, g: 0, b: 0, a: 0}
-  berries: 0
-  meat: 0
-  fish: 0
+  isOpponent: 0
+  food: 000000000000000000000000
 --- !u!114 &4287692715053019839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,3 +83,10 @@ MonoBehaviour:
   head: {fileID: 0}
   face: {fileID: 0}
   avatarColor: {r: 0, g: 0, b: 0, a: 0}
+  foodCounters:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  foodObj: {fileID: 0}
+  offsetY: 200
+  tokenStayTime: 1.3

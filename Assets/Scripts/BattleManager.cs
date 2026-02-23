@@ -37,7 +37,7 @@ public class BattleManager : MonoBehaviour
     {
         currentLine++;
  
-        if (currentLine < GameManager.instance.player.fields.Length)
+        if (currentLine < GameManager.instance.player.fields.Length && GameManager.instance.gameOver != true)
         {
             // Getting all the units battling on currentLine and initialize battle
             List<Unit> playerUnits = GameManager.instance.player.fields[currentLine].GetFieldUnits();

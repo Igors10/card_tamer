@@ -12,4 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 852c92fdaa1431d44a8024e8bef7a987, type: 3}
   m_Name: buyingState
   m_EditorClassIdentifier: Assembly-CSharp::GameStateData
-  defaultHintText: 
+  defaultHintText: Spend tokens to get new cards
+  stateName: Buying
+  buttonText: Finish buying
+  buttonColor: {r: 0.6745098, g: 0.9450981, b: 0.5764706, a: 1}
+  pressedButtonText: wait for opponent
+  pressedButtonColor: {r: 0.3056603, g: 0.3056603, b: 0.3056603, a: 1}
+  cameraPosition: {x: 0, y: 10, z: -2}
+  cameraRotation: {x: 60, y: 0, z: 0}
+  cameraSize: 84

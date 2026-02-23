@@ -220,7 +220,7 @@ public class PowerCounter : MonoBehaviour
             // "Attacking" the unit
             yield return StartCoroutine(Damage(unitPosition, damage));
             yield return StartCoroutine(unitsToDamage[i].TakeDamage(damage));
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(1f);
         }
 
         // Damage to player HP

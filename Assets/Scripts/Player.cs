@@ -15,17 +15,17 @@ public class Player : MonoBehaviour
     [Header("player attributes")]
     public int health;
     public bool endStateReady = false;
+    [HideInInspector] public bool dead;
     
 
     [Header("config")]
     AIOpponent AIplayer;
     public bool isAI;
     public Color playerColor;
+    [HideInInspector] public bool isOpponent;
 
     [Header("resources")]
-    [HideInInspector] public int berries = 1;
-    [HideInInspector] public int meat = 1;
-    [HideInInspector] public int fish = 1;
+    [HideInInspector] public int[] food = new int[3];
 
 
     private void Start()
@@ -38,9 +38,16 @@ public class Player : MonoBehaviour
         // checking if its AI
         AIplayer = GetComponent<AIOpponent>();
         if (AIplayer != null ) isAI = true;
+        if (GameManager.instance.opponent == this) isOpponent = true;
 
         // heatlh
         health = GameManager.instance.startingMaxHealth;
+
+        // food
+        for (int i = 0; i < food.Length; i++)
+        {
+            food[i] = GameManager.instance.startingResourceAmount;
+        }
     }
 
     public void StartTurn()
@@ -54,5 +61,12 @@ public class Player : MonoBehaviour
 
         health -= damageAmount;
         playerUI.RefreshHP(damageAmount);
+
+        if (health < 1) PlayerDeath();
+    }
+    void PlayerDeath()
+    {
+        dead = true;
+        GameManager.instance.GameOver(this);
     }
 }
