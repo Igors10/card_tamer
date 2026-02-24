@@ -23,7 +23,7 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         button.gameObject.SetActive(true);
         button.interactable = true;
         buttonText.text = (customButtonText == null) ? GameManager.instance.GetState().buttonText : customButtonText;
-        sprite.color = GameManager.instance.GetState().buttonColor;
+        //sprite.color = GameManager.instance.GetState().buttonColor;
     }
 
     public void ButtonClick()
@@ -37,7 +37,7 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 GameManager.instance.player.endStateReady = true;
                 button.interactable = false;
                 buttonText.text = GameManager.instance.GetState().pressedButtonText;
-                sprite.color = GameManager.instance.GetState().pressedButtonColor;
+                //sprite.color = GameManager.instance.GetState().pressedButtonColor;
                 break;
 
             case GameState.EXECUTING:

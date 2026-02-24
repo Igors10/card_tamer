@@ -108,7 +108,7 @@ public class PlayerUI : MonoBehaviour
         if (!show ^ player.isOpponent) currentOffsetY *= -1;
         Vector3 targetPosition = startingPosition + new Vector3(0, currentOffsetY, 0);
         float t = 0;
-        float timeAppearing = 0.8f;
+        float timeAppearing = 0.4f;
 
         while (t < timeAppearing)
         {

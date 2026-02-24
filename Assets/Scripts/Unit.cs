@@ -125,6 +125,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // do death check
         bool isDead = card.GetCurrerntHealth() == 0;
 
+        // do damage VFX and SFX 
+        yield return ShakeAnim(isDead);
+
         // give random food token if dead
         if (isDead)
         {
@@ -132,9 +135,6 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             card.player.playerUI.AddFoodToken((FoodType)randomFoodType, 1);
             yield return new WaitForSeconds(1.5f);
         }
-       
-        // do damage VFX and SFX 
-        yield return ShakeAnim(isDead);
 
         if (isDead) card.DestroyCard();
     }
