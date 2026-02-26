@@ -1317,7 +1317,7 @@ MonoBehaviour:
   player: {fileID: 1425032168}
   opponent: {fileID: 1541516079}
   startingMaxHealth: 12
-  startingResourceAmount: 0
+  startingResourceAmount: 3
   playerConfig: {fileID: 11400000, guid: 4830222a87a796a489eb0184e93624f0, type: 2}
 --- !u!1 &606257367
 GameObject:
@@ -2387,7 +2387,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardGenerator
   startingCardNumber: 3
   mainList: {fileID: 11400000, guid: 4b0c04d6042e501469062f54f0381a6d, type: 2}
-  shopList: {fileID: 0}
+  shopList: {fileID: 11400000, guid: 93afdd4af7537cc499f6583c5db841ba, type: 2}
   cardPrefab: {fileID: 6614981847699036136, guid: 630a4b73555eb5842b257b9f93693f0f, type: 3}
 --- !u!1 &933939374
 GameObject:
@@ -2843,7 +2843,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1111299627}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 647963240}
+        m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
+        m_MethodName: RandomizeSlots
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1111299627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4947,11 +4959,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1878616678}
   - {fileID: 1389799261}
   - {fileID: 1041707585}
   - {fileID: 243512485}
   - {fileID: 465639860}
+  - {fileID: 1878616678}
   - {fileID: 2043235229}
   - {fileID: 1205934171}
   - {fileID: 1992731206}

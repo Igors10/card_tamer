@@ -63,6 +63,7 @@ public class FoodToken : MonoBehaviour
     {
         float t = 0;
         float intervalT = 0;
+        Color startingColor = sprite.color;
 
         while (t <  blinkingTime)
         {
@@ -73,11 +74,11 @@ public class FoodToken : MonoBehaviour
             {
                 intervalT = 0;
 
-                sprite.color = (sprite.color == blinkingColor) ? Color.white : blinkingColor;
+                sprite.color = (sprite.color == blinkingColor) ? startingColor : blinkingColor;
             }
             yield return null;
         }
 
-        sprite.color = Color.white;
+        sprite.color = startingColor;
     }
 }

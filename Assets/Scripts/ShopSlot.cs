@@ -18,6 +18,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     FoodType[] priceTag;
     [SerializeField] float tokenHorSpacing;
     [SerializeField] float tokenVerSpacing;
+    [SerializeField] float tokenVerOffset = -200f;
     [SerializeField] float buyingSpeed;
     bool isBuying;
     float buyProgress = 0f;
@@ -31,6 +32,8 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private void Start()
     {
         highlightBgColor = Color.Lerp(highlightColor, Color.white, 0.6f);
+        highlightFill.color = highlightColor;
+        highlightBackground.color = highlightBgColor;
     }
 
     /// <summary>
@@ -50,20 +53,32 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         for (int i = 0; i < priceTokens.Length; i++)
         {
-            // activates tokens necessary and deactivates the rest
-            priceTokens[i].gameObject.SetActive(i < priceTag.Length);
+            // reset (deactivate) all tokens
+            priceTokens[i].gameObject.SetActive(false);
 
             if (i < priceTag.Length)
             {
+                // activates tokens necessary
+                priceTokens[i].gameObject.SetActive(true);
+
                 // makes the tokens render correct foods
                 priceTokens[i].sprite = foodSprites[(int)priceTag[i]];
 
-                // Makes the price tokens spaced correctly
-                float horizontalOffset = tokenHorSpacing * (i - (priceTag.Length - 1) / 2f);
+                // special case for when its only 1 token
+                if (priceTag.Length == 1)
+                {
+                    priceTokens[i].transform.localPosition = new Vector3(0, tokenVerOffset, 0f);
+                    priceTokens[i].transform.localRotation = Quaternion.identity;
+                }
+                else
+                {
+                    // Makes the price tokens spaced correctly
+                    float horizontalOffset = tokenHorSpacing * (i - (priceTag.Length - 1) / 2f);
 
-                float normalizedPosition = 2f * i / (priceTag.Length - 1) - 1f;
-                float verticalOffset = tokenVerSpacing * (1 - normalizedPosition * normalizedPosition);
-                priceTokens[i].transform.localPosition = new Vector3(horizontalOffset, verticalOffset, 0f);
+                    float normalizedPosition = 2f * i / (priceTag.Length - 1) - 1f;
+                    float verticalOffset = tokenVerSpacing * (1 - normalizedPosition * normalizedPosition) + tokenVerOffset;
+                    priceTokens[i].transform.localPosition = new Vector3(horizontalOffset, verticalOffset, 0f);
+                }
             }           
         }
 
@@ -123,6 +138,14 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
 
         // buying
+        // substract the resources
+        for (int i = 0; i < requiredFood.Length; i++)
+        {
+            buyer.food[i] -= requiredFood[i];
+            buyer.playerUI.foodCounters[(int)requiredFood[i]].RefreshToken(false);
+        }
+
+        // give card to the player
         GameManager.instance.cardGenerator.CreateCard(cardData, buyer);
 
         this.gameObject.SetActive(false);

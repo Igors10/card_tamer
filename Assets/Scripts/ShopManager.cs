@@ -14,12 +14,6 @@ public class ShopManager : MonoBehaviour
     FoodType rerollPrice;
     bool freeReroll = true;
 
-    private void OnEnable()
-    {
-        ResetReroll();
-        RandomizeSlots();
-    }
-
     void ResetReroll()
     {
         freeReroll = true;
@@ -34,7 +28,7 @@ public class ShopManager : MonoBehaviour
         freeReroll = false;
     }
 
-    void RandomizeSlots()
+    public void RandomizeSlots()
     {
         for (int i = 0; i < shopSlots.Length; i++)
         {
@@ -42,19 +36,21 @@ public class ShopManager : MonoBehaviour
 
             bool cardRepeated = false;
             CreatureObj cardForSale;
+            int loopSave = 0;
 
             do
             {
                 // picking random card for the shop
                 cardForSale = GameManager.instance.cardGenerator.PickRandomCard("shop");
                 cardRepeated = false;
+                loopSave++;
 
                 for (int a = 0; a < i; a++)
                 {
-                    if (shopSlots[i].cardData == shopSlots[a].cardData) cardRepeated = true;
+                    if (cardForSale == shopSlots[a].cardData) cardRepeated = true;
                 }
 
-            } while (cardRepeated);
+            } while (cardRepeated && loopSave < 10);
 
             shopSlots[i].InitSlot(cardForSale);
         }
