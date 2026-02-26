@@ -23,7 +23,7 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] Color avatarColor;
 
     [Header("Food tokens")]
-    [SerializeField] FoodToken[] foodCounters = new FoodToken[3];
+    public FoodToken[] foodCounters = new FoodToken[3];
     [SerializeField] GameObject foodObj;
     [SerializeField] float offsetY;
     [SerializeField] float tokenStayTime;

@@ -10,6 +10,7 @@ public class CardGenerator : MonoBehaviour
     [Header("refs")]
     HandManager handManager;
     [SerializeField] CardList mainList;
+    [SerializeField] CardList shopList;
 
     [Header("prefabs")]
     [SerializeField] GameObject cardPrefab;
@@ -24,10 +25,20 @@ public class CardGenerator : MonoBehaviour
     /// Picks random card scriptalbe object from an array of all available cards
     /// </summary>
     /// <returns></returns>
-    CreatureObj PickRandomCard()
+    public CreatureObj PickRandomCard(string listName = "")
     {
-        int randomCard_ID = Random.Range(0, mainList.cardList.Count);
-        return mainList.cardList[randomCard_ID];
+        CardList list = mainList;
+
+        // Picking from a specific list if asked in parameters
+        switch (listName)
+        {
+            case "shop":
+                list = shopList;
+                break;
+        }
+
+        int randomCard_ID = Random.Range(0, list.cardList.Count);
+        return list.cardList[randomCard_ID];
     }
 
     public void CreateStartingHand(List<CreatureObj> startingCardList, Player player)
@@ -43,7 +54,7 @@ public class CardGenerator : MonoBehaviour
     /// Creates card gameObject from chosen card data
     /// </summary>
     /// <param name="cardData"></param>
-    void CreateCard(CreatureObj cardData, Player player)
+    public void CreateCard(CreatureObj cardData, Player player)
     {
         Transform ParentTransform = (player == GameManager.instance.player) ? handManager.hand.transform : handManager.opponentHand.transform;
         GameObject newCardObject = Instantiate(cardPrefab, transform.position, Quaternion.identity, ParentTransform);

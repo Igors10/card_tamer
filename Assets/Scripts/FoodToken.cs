@@ -1,7 +1,8 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
+using System.Collections;
+using System.Runtime.InteropServices.WindowsRuntime;
 public enum FoodType
 {
     MEAT,
@@ -17,6 +18,11 @@ public class FoodToken : MonoBehaviour
     [SerializeField] TextMeshProUGUI textAmount;
     [SerializeField] ParticleSystem tokenVFX;
     [SerializeField] FoodType type;
+
+    [Header("blinking")]
+    [SerializeField] float blinkingTime;
+    [SerializeField] float blinkingInterval;
+    [SerializeField] Color blinkingColor;
 
     private void Start()
     {
@@ -46,5 +52,32 @@ public class FoodToken : MonoBehaviour
             // making the token pop
             GameManager.instance.animations.PopAnim(this.gameObject, 0.5f, 0.45f);
         }
+    }
+
+
+    /// <summary>
+    /// Blinking red when not enough of this for buying a card
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator NegativeBlink()
+    {
+        float t = 0;
+        float intervalT = 0;
+
+        while (t <  blinkingTime)
+        {
+            t += Time.deltaTime;
+            intervalT += Time.deltaTime;
+
+            if (intervalT > blinkingInterval)
+            {
+                intervalT = 0;
+
+                sprite.color = (sprite.color == blinkingColor) ? Color.white : blinkingColor;
+            }
+            yield return null;
+        }
+
+        sprite.color = Color.white;
     }
 }

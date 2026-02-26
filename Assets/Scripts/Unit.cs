@@ -1,13 +1,10 @@
-﻿using FishNet.Demo.AdditiveScenes;
-using Newtonsoft.Json.Converters;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
 {   
@@ -111,7 +108,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         }
         else
         {
-            GameManager.instance.managerUI.PreviewCard(isViewed, this);
+            GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);
         }
     }
 

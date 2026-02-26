@@ -131,6 +131,9 @@ MonoBehaviour:
   textAmount: {fileID: 8951017777908319185}
   tokenVFX: {fileID: 0}
   type: 0
+  blinkingTime: 1.5
+  blinkingInterval: 0.3
+  blinkingColor: {r: 0.96981126, g: 0.064044006, b: 0.064044006, a: 1}
 --- !u!1 &6951682981388196889
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,8 +8,7 @@ public class CreatureObj : ScriptableObject
     public int health;
     public Sprite cardSprite;
     public Sprite unitSprite;
-    public FoodType foodType;
-    public int cost;
+    public FoodType[] cost;
     public AbilityObj[] ability = new AbilityObj[2];
 
     // doodle varialbes

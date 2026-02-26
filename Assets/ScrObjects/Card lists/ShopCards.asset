@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24721130b39132b41ba2f5a9e82a04ae, type: 3}
+  m_Name: ShopCards
+  m_EditorClassIdentifier: Assembly-CSharp::CardList
+  cardList:
+  - {fileID: 11400000, guid: 1e7f1b919283e9245a56cbfcd95aad0c, type: 2}
+  - {fileID: 11400000, guid: 2178e2ce3c95a4640a68723240e3ead5, type: 2}
+  - {fileID: 11400000, guid: cf6467b59938c77408c9e64a4fd63ab2, type: 2}
+  - {fileID: 11400000, guid: bd957ca9279b6c044b2e8684667a06f6, type: 2}
+  - {fileID: 11400000, guid: 4b5818845656d0146a6e4397b4f61b9d, type: 2}
