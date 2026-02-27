@@ -11,7 +11,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [Header("refs")]
     [HideInInspector] public CreatureObj cardData;
     [SerializeField] Image[] priceTokens;
-    [SerializeField] Sprite[] foodSprites;
+    public Sprite[] foodSprites;
     [SerializeField] Image slotSprite;
 
     [Header("buying")]
@@ -107,7 +107,12 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     }
 
-    public void BuyCard(Player buyer)
+    /// <summary>
+    /// Calculates if player has enough resources to buy a card, buys it and returns true if so. Returns false if resources are not enough
+    /// </summary>
+    /// <param name="buyer"></param>
+    /// <returns></returns>
+    public bool BuyCard(Player buyer)
     {
         ResetBuyProgress();
 
@@ -134,21 +139,24 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (!enoughFood)
         {
             // also play negative sound effect
-            return;
+            return false;
         }
 
         // buying
         // substract the resources
         for (int i = 0; i < requiredFood.Length; i++)
         {
-            buyer.food[i] -= requiredFood[i];
-            buyer.playerUI.foodCounters[(int)requiredFood[i]].RefreshToken(false);
+            buyer.playerUI.foodCounters[i].AddFood(-requiredFood[i]);
         }
 
         // give card to the player
         GameManager.instance.cardGenerator.CreateCard(cardData, buyer);
 
         this.gameObject.SetActive(false);
+        return true;
+
+        // Ending the turn
+        GameManager.instance.EndTurn();
     }
 
     /// <summary>
@@ -175,16 +183,20 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void OnHover(bool mouseOver)
     {
+        if (!GameManager.instance.yourTurn) return;
+
         highlightBackground.gameObject.SetActive(mouseOver);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (!GameManager.instance.yourTurn) return;
         ResetBuyProgress();
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!GameManager.instance.yourTurn) return;
         isBuying = true;
     }
 

@@ -564,8 +564,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -67}
-  m_SizeDelta: {x: 80, y: 80}
+  m_AnchoredPosition: {x: 0, y: -2}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &126296828
 MonoBehaviour:
@@ -574,7 +574,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 126296826}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -587,7 +587,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 5ddb750404f5c1942bebf7519cc1558c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -963,7 +963,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &465639860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1300,7 +1300,7 @@ MonoBehaviour:
   - {fileID: 1389799260}
   - {fileID: 243512484}
   - {fileID: 1205934170}
-  - {fileID: 1389799260}
+  - {fileID: 465639859}
   yourTurn: 0
   gameOver: 0
   handManager: {fileID: 1715698343}
@@ -1312,6 +1312,7 @@ MonoBehaviour:
   VFXmanager: {fileID: 114547771}
   battleManager: {fileID: 1855517284}
   animations: {fileID: 913994104}
+  shopManager: {fileID: 647963240}
   hintMessage: {fileID: 1043674312}
   readyButton: {fileID: 1972340611}
   player: {fileID: 1425032168}
@@ -2772,6 +2773,7 @@ GameObject:
   - component: {fileID: 1111299628}
   - component: {fileID: 1111299627}
   - component: {fileID: 1111299626}
+  - component: {fileID: 1111299629}
   m_Layer: 5
   m_Name: rerollButton
   m_TagString: Untagged
@@ -2846,11 +2848,11 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 647963240}
         m_TargetAssemblyTypeName: ShopManager, Assembly-CSharp
-        m_MethodName: RandomizeSlots
-        m_Mode: 1
+        m_MethodName: RerollShop
+        m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgument: {fileID: 1425032168}
+          m_ObjectArgumentAssemblyTypeName: Player, Assembly-CSharp
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -2869,15 +2871,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.6270665, g: 0.89433956, b: 0.62603766, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 4801c33c99c43e84ea083b04bf2e5a28, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -2894,6 +2896,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1111299624}
   m_CullTransparentMesh: 1
+--- !u!114 &1111299629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111299624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df4e10c1d4250b148aae31dad7f3de00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverEffect
+  sizeMod: 1.1
 --- !u!1001 &1122556826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3055,8 +3070,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4242,8 +4257,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1541516079}
     - target: {fileID: 898516309747998680, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 259
+      objectReference: {fileID: 0}
+    - target: {fileID: 898516309747998680, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 250
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 2822458310605819303, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -4356,6 +4375,14 @@ PrefabInstance:
     - target: {fileID: 8770364012864283444, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_LocalScale.y
       value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8770364012864283444, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -267
+      objectReference: {fileID: 0}
+    - target: {fileID: 8770364012864283444, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -97
       objectReference: {fileID: 0}
     - target: {fileID: 8911800250486159518, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: player
@@ -5660,8 +5687,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1425032168}
     - target: {fileID: 898516309747998680, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -1801
+      objectReference: {fileID: 0}
+    - target: {fileID: 898516309747998680, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -179
+      value: 613
       objectReference: {fileID: 0}
     - target: {fileID: 4312236905799503499, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_Pivot.x

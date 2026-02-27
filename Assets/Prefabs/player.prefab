@@ -88,5 +88,5 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   foodObj: {fileID: 0}
-  offsetY: 200
+  offsetX: 250
   tokenStayTime: 0.7

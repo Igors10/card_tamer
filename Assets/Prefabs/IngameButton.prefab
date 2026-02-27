@@ -354,6 +354,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7423255778726383183}
   - component: {fileID: 2328139035623623976}
+  - component: {fileID: 6143723591719557301}
   m_Layer: 5
   m_Name: IngameButton
   m_TagString: Untagged
@@ -398,3 +399,16 @@ MonoBehaviour:
   button: {fileID: 4751332682031014835}
   sprite: {fileID: 4171177285205117780}
   buttonGlow: {fileID: 7838869148200768085}
+--- !u!114 &6143723591719557301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8639052861695258448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df4e10c1d4250b148aae31dad7f3de00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HoverEffect
+  sizeMod: 1.1

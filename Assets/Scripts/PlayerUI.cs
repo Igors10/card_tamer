@@ -25,7 +25,7 @@ public class PlayerUI : MonoBehaviour
     [Header("Food tokens")]
     public FoodToken[] foodCounters = new FoodToken[3];
     [SerializeField] GameObject foodObj;
-    [SerializeField] float offsetY;
+    [SerializeField] float offsetX;
     [SerializeField] float tokenStayTime;
 
 
@@ -99,14 +99,14 @@ public class PlayerUI : MonoBehaviour
         player.food[(int)type] += amount;
         StartCoroutine(TokenUpdateAnim(type));
     }
-    IEnumerator ShowTokens(bool show)
+    public IEnumerator ShowTokens(bool show)
     {
         Vector3 startingPosition = foodObj.transform.localPosition;
 
         // adjusting target position
-        float currentOffsetY = offsetY;
-        if (!show ^ player.isOpponent) currentOffsetY *= -1;
-        Vector3 targetPosition = startingPosition + new Vector3(0, currentOffsetY, 0);
+        float currentOffsetX = offsetX;
+        if (!show ^ player.isOpponent) currentOffsetX *= -1;
+        Vector3 targetPosition = startingPosition + new Vector3(currentOffsetX, 0, 0);
         float t = 0;
         float timeAppearing = 0.4f;
 

@@ -1,7 +1,8 @@
+using System;
+using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using TMPro;
-using System.Collections.Generic;
 using UnityEngine.VFX;
 
 public enum GameState
@@ -34,6 +35,7 @@ public class GameManager : MonoBehaviour
     public VFXManager VFXmanager;
     public BattleManager battleManager;
     public Animations animations;
+    public ShopManager shopManager;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -76,15 +78,19 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameState.PLACING:
+                // disabling resource UI after shop
+                StartCoroutine(player.playerUI.ShowTokens(false));
+                StartCoroutine(opponent.playerUI.ShowTokens(false));
                 break;
+
             case GameState.PLANNING:
                 // Making field cards appear correctly
                 planningManager.UpdateFieldHandVisuals(player);
 
                 // Making AI shuffle the cards
                 if (playerConfig.offlineMatch) opponent.StartTurn();
-
                 break;
+
             case GameState.EXECUTING:
                 // passing cards in the correct order to executing manager
                 executeManager.LoadCardStack(player.cardsOnField, player);
@@ -92,14 +98,24 @@ public class GameManager : MonoBehaviour
 
                 // button is only available after choosing an ability
                 readyButton.gameObject.SetActive(false);
-
                 break;
+
             case GameState.BATTLING:
                 managerUI.EnableUI(true);
                 battleManager.ResetBattleVals();
-
                 break;
+
             case GameState.BUYING:
+                // Enabling resource UI
+                StartCoroutine(player.playerUI.ShowTokens(true));
+                StartCoroutine(opponent.playerUI.ShowTokens(true));
+
+                // Enabling hand UI
+                gameStateUI[0].SetActive(true);
+
+                // resetting shop values
+                shopManager.RandomizeSlots();
+                shopManager.ResetReroll();
                 break;
         }
 
@@ -128,7 +144,10 @@ public class GameManager : MonoBehaviour
         {
             case GameState.EXECUTING:
                 executeManager.StopRevealCard();
+                break;
 
+            case GameState.BUYING:
+                shopManager.EnableRerollButton(false);
                 break;
         }
 
@@ -172,6 +191,10 @@ public class GameManager : MonoBehaviour
             case GameState.BATTLING:
                 battleManager.NextLine();
                 readyButton.gameObject.SetActive(false);
+                break;
+
+            case GameState.BUYING:
+                shopManager.EnableRerollButton(true);
                 break;
         }
     }
@@ -235,7 +258,8 @@ public class GameManager : MonoBehaviour
         managerUI.EnableUI(false);
 
         // Deciding which next state should be
-        GameState nextGameState = ((int)currentState + 1 < gameStates.Count) ? (GameState)(currentState + 1) : GameState.PLACING;
+        //GameState nextGameState = ((int)currentState + 1 < gameStates.Count) ? (GameState)(currentState + 1) : GameState.PLACING;
+        GameState nextGameState = (GameState)(((int)currentState + 1) % Enum.GetNames(typeof(GameState)).Length);
         TransitionGameState(nextGameState);
     }
 }

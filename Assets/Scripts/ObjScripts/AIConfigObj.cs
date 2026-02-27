@@ -13,4 +13,5 @@ public class AIConfigObj : ScriptableObject
     public float executingAbilityDelay;
     public float battlingDelay;
     public float buyingDelay;
+    public int shopRerollsPerTurn;
 }

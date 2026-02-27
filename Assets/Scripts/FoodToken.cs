@@ -54,6 +54,11 @@ public class FoodToken : MonoBehaviour
         }
     }
 
+    public void AddFood(int amount)
+    {
+        player.food[(int)type] += amount;
+        RefreshToken(false);
+    }
 
     /// <summary>
     /// Blinking red when not enough of this for buying a card
@@ -61,6 +66,9 @@ public class FoodToken : MonoBehaviour
     /// <returns></returns>
     public IEnumerator NegativeBlink()
     {
+        // Dont blink if its AI
+        if (player.isAI) yield break;
+
         float t = 0;
         float intervalT = 0;
         Color startingColor = sprite.color;

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AIOpponent : MonoBehaviour
@@ -55,6 +56,7 @@ public class AIOpponent : MonoBehaviour
             case GameState.BATTLING:
                 break;
             case GameState.BUYING:
+                StartCoroutine(BuyRandomCard());
                 break;
 
         }
@@ -191,6 +193,47 @@ public class AIOpponent : MonoBehaviour
         yield return new WaitForSeconds(config.executingAbilityDelay);
 
         // ENDS THE TURN
+        AIEndTurn();
+    }
+
+    // =========================================================
+    // =================== BATTLING ============================
+
+    // add battle AI control
+
+    // =========================================================
+    // ===================== BUYING ============================
+
+    IEnumerator BuyRandomCard()
+    {
+        yield return new WaitForSeconds(config.buyingDelay);
+
+        ShopSlot[] slots = GameManager.instance.shopManager.shopSlots;
+
+        for (int i = 0; i < config.shopRerollsPerTurn + 1; i++)
+        {
+            // Trying to buy a card from every slot in random order
+            int n = slots.Length;
+            while (n > 1)
+            {
+                n--;
+                int randomSlot = Random.Range(0, n + 1);
+                if (slots[randomSlot].BuyCard(playerObj)) { AIEndTurn(); yield break; }
+            }
+
+            // breaks for loop here since we dont need to reroll on last iteration
+            if (i == config.shopRerollsPerTurn) break;
+
+            // if couldnt buy anything it will try to reroll
+            if (!GameManager.instance.shopManager.RerollShop(playerObj)) 
+            {
+                // if couldnt reroll AI will stop buying this round
+                playerObj.endStateReady = true;
+                AIEndTurn(); 
+                yield break; 
+            } 
+        }
+
         AIEndTurn();
     }
 
