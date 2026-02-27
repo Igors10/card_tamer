@@ -206,12 +206,12 @@ public class AIOpponent : MonoBehaviour
 
     IEnumerator BuyRandomCard()
     {
-        yield return new WaitForSeconds(config.buyingDelay);
-
         ShopSlot[] slots = GameManager.instance.shopManager.shopSlots;
 
         for (int i = 0; i < config.shopRerollsPerTurn + 1; i++)
         {
+            yield return new WaitForSeconds(config.buyingDelay);
+
             // Trying to buy a card from every slot in random order
             int n = slots.Length;
             while (n > 1)

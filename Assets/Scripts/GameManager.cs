@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     public GameState currentState;
     public List<GameStateData> gameStates = new List<GameStateData>();
     public List<GameObject> gameStateUI = new List<GameObject>();
-    [HideInInspector] public bool yourTurn;
+    public bool yourTurn;
     [HideInInspector] public bool gameOver;
 
     [Header("Managers")]
@@ -106,10 +106,6 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameState.BUYING:
-                // Enabling resource UI
-                StartCoroutine(player.playerUI.ShowTokens(true));
-                StartCoroutine(opponent.playerUI.ShowTokens(true));
-
                 // Enabling hand UI
                 gameStateUI[0].SetActive(true);
 

@@ -154,7 +154,7 @@ public class Card : MonoBehaviour
     /// <param name="mouseOver"></param>
     public void OnHover(bool mouseOver)
     {
-        if (GameManager.instance.currentState == GameState.PLACING)
+        if (GameManager.instance.currentState == GameState.PLACING || GameManager.instance.currentState != GameState.BUYING)
         {
             // Putting the card in "reading mode" when hovering over it in hand
             // Scale

@@ -1,4 +1,6 @@
+using FishNet.Demo.AdditiveScenes;
 using System;
+using System.ComponentModel;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,12 +20,16 @@ public class ShopManager : MonoBehaviour
     public void EnableRerollButton(bool isEnable)
     {
         rerollButton.interactable = isEnable;
+
+        // temp also food ui is attached to this 
+        StartCoroutine(GameManager.instance.player.playerUI.ShowTokens(isEnable));
+        StartCoroutine(GameManager.instance.opponent.playerUI.ShowTokens(!isEnable));
     }
 
     public void ResetReroll()
     {
         freeReroll = true;
-        rerollText.text = "";
+        rerollText.text = "free";
         rerollPriceImage.GetComponent<Image>().enabled = false;
     }
 

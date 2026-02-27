@@ -153,10 +153,11 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         GameManager.instance.cardGenerator.CreateCard(cardData, buyer);
 
         this.gameObject.SetActive(false);
-        return true;
 
         // Ending the turn
         GameManager.instance.EndTurn();
+
+        return true;
     }
 
     /// <summary>

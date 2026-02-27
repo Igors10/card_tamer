@@ -23,4 +23,5 @@ MonoBehaviour:
   executingRevealDelay: 1
   executingAbilityDelay: 1
   battlingDelay: 0
-  buyingDelay: 0
+  buyingDelay: 1
+  shopRerollsPerTurn: 1
