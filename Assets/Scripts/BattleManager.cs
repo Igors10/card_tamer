@@ -50,9 +50,7 @@ public class BattleManager : MonoBehaviour
         // Ending the battle phase after finished with last line
         else
         {
-            GameManager.instance.player.endStateReady = true;
-            GameManager.instance.opponent.endStateReady = true;
-            GameManager.instance.EndTurn();
+            StartCoroutine(WrapUpBattle());
         }
     }
 
@@ -130,5 +128,20 @@ public class BattleManager : MonoBehaviour
 
         // Switching to next line
         NextLine();
-    }   
+    }
+
+    IEnumerator WrapUpBattle()
+    {
+        // Putting the camera where it was before battling phase
+        Vector3 stateCameraPosition = GameManager.instance.GetState().cameraPosition;
+        Vector3 centerCameraPosition = new Vector3(0, stateCameraPosition.y, stateCameraPosition.z);
+        yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(centerCameraPosition, 0.6f));
+
+        // add tokens at the end of battle phase
+
+        // Ending the phase
+        GameManager.instance.player.endStateReady = true;
+        GameManager.instance.opponent.endStateReady = true;
+        GameManager.instance.EndTurn();
+    }
 }

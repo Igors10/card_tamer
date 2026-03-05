@@ -1,4 +1,8 @@
+using FishNet.Component.Transforming.Beta;
+using FishNet.Utility.Extension;
+using System;
 using System.Collections;
+using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,12 +31,21 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] GameObject foodObj;
     [SerializeField] float offsetX;
     [SerializeField] float tokenStayTime;
+    Vector3 defaultTokenPos;
+    Vector3 shownTokenPos;
 
 
     private void Start()
     {
+        // getting reference for the player
         player = GetComponent<Player>();
+
+        // Updating the hp bar visuals
         RefreshHP();
+
+        // Getting positions for food tokens UI positions
+        defaultTokenPos = foodObj.transform.localPosition;
+        shownTokenPos = (player.isOpponent) ? defaultTokenPos - new Vector3(offsetX, 0, 0) : defaultTokenPos + new Vector3(offsetX, 0, 0);
     }
 
     /// <summary>
@@ -77,8 +90,8 @@ public class PlayerUI : MonoBehaviour
             float currentIntensity = Mathf.Lerp(maxIntensity, 0f, actualT);
 
             // Random position offset
-            float xOffset = Random.Range(-1, 1) * currentIntensity;
-            float yOffset = Random.Range(-1, 1) * currentIntensity;
+            float xOffset = UnityEngine.Random.Range(-1, 1) * currentIntensity;
+            float yOffset = UnityEngine.Random.Range(-1, 1) * currentIntensity;
 
             healthbar.transform.localPosition += new Vector3(xOffset, yOffset, 0);
 
@@ -94,21 +107,18 @@ public class PlayerUI : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <param name="amount"></param>
-    public void AddFoodToken(FoodType type, int amount)
+    public void AddRandomFoodToken(bool showing = false)
     {
-        player.food[(int)type] += amount;
-        StartCoroutine(TokenUpdateAnim(type));
+        FoodType type = (FoodType)UnityEngine.Random.Range(0, Enum.GetNames(typeof(FoodType)).Length);
+        player.food[(int)type]++;
+        StartCoroutine(TokenUpdateAnim(type, showing));
     }
     public IEnumerator ShowTokens(bool show)
     {
         Vector3 startingPosition = foodObj.transform.localPosition;
-
-        // adjusting target position
-        float currentOffsetX = offsetX;
-        if (!show ^ player.isOpponent) currentOffsetX *= -1;
-        Vector3 targetPosition = startingPosition + new Vector3(currentOffsetX, 0, 0);
+        Vector3 targetPosition = (show) ? shownTokenPos : defaultTokenPos;
         float t = 0;
-        float timeAppearing = 1f;
+        float timeAppearing = 0.6f;
 
         while (t < timeAppearing)
         {
@@ -124,12 +134,12 @@ public class PlayerUI : MonoBehaviour
         // snapping to correct position
         foodObj.transform.localPosition = targetPosition;
     }
-    IEnumerator TokenUpdateAnim(FoodType type)
+    IEnumerator TokenUpdateAnim(FoodType type, bool showing)
     {
-        yield return StartCoroutine(ShowTokens(true));
+        if (showing) yield return StartCoroutine(ShowTokens(true));
         foodCounters[(int)type].RefreshToken(true);
 
         yield return new WaitForSeconds(tokenStayTime);
-        yield return StartCoroutine(ShowTokens(false));
+        if (showing) yield return StartCoroutine(ShowTokens(false));
     }
 }

@@ -133,8 +133,6 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
-        Debug.Log("GameManager: Ending the turn");
-
         // state specific effects
         switch (currentState)
         {
@@ -162,7 +160,7 @@ public class GameManager : MonoBehaviour
    
     public void StartTurn()
     {
-        Debug.Log("GameManager: Starting the turn");
+        Debug.Log("GameManager: [" + player.playerName + "] starting the turn.");
 
         yourTurn = true;
 

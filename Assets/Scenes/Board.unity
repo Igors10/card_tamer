@@ -1725,6 +1725,7 @@ MonoBehaviour:
   - {fileID: 1324678741}
   - {fileID: 1339388517}
   - {fileID: 788858212}
+  shopTokenVFX: {fileID: 736432065343499861, guid: 601774e8f831ace47a9738f39738cd82, type: 3}
   rerollButton: {fileID: 1111299626}
   rerollText: {fileID: 1167336943}
   rerollPriceImage: {fileID: 126296828}
@@ -2908,6 +2909,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df4e10c1d4250b148aae31dad7f3de00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverEffect
+  inGame: 1
   sizeMod: 1.1
 --- !u!1001 &1122556826
 PrefabInstance:
@@ -3710,6 +3712,10 @@ PrefabInstance:
       propertyPath: playerUI
       value: 
       objectReference: {fileID: 1541516081}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: playerName
+      value: bot
+      objectReference: {fileID: 0}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: playerColor.a
       value: 1
@@ -5688,11 +5694,19 @@ PrefabInstance:
       objectReference: {fileID: 1425032168}
     - target: {fileID: 898516309747998680, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -1801
+      value: -1812
       objectReference: {fileID: 0}
     - target: {fileID: 898516309747998680, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 613
+      value: 675
+      objectReference: {fileID: 0}
+    - target: {fileID: 1290053804272605874, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 26
+      objectReference: {fileID: 0}
+    - target: {fileID: 1290053804272605874, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -13
       objectReference: {fileID: 0}
     - target: {fileID: 4312236905799503499, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_Pivot.x
@@ -5785,6 +5799,22 @@ PrefabInstance:
     - target: {fileID: 6773031840635954642, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: m_Name
       value: PlayerUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 6848997288500882883, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6848997288500882883, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -13
+      objectReference: {fileID: 0}
+    - target: {fileID: 7653350644516350303, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -210
+      objectReference: {fileID: 0}
+    - target: {fileID: 7653350644516350303, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -13
       objectReference: {fileID: 0}
     - target: {fileID: 8911800250486159518, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
       propertyPath: player
@@ -6084,6 +6114,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1425032169}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: playerName
+      value: player
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: playerColor.a
       value: 1
       objectReference: {fileID: 0}
@@ -6339,11 +6373,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7423255778726383183, guid: aae08212a53ab094793d05053c85ba4c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 777
+      value: 772
       objectReference: {fileID: 0}
     - target: {fileID: 7423255778726383183, guid: aae08212a53ab094793d05053c85ba4c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -349
+      value: -372
       objectReference: {fileID: 0}
     - target: {fileID: 7423255778726383183, guid: aae08212a53ab094793d05053c85ba4c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

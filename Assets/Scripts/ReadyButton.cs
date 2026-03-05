@@ -48,6 +48,11 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
             case GameState.BATTLING:
                 break;
+
+            case GameState.BUYING:
+                GameManager.instance.player.endStateReady = true;
+                if (GameManager.instance.opponent.isAI) GameManager.instance.opponent.endStateReady = true;
+                break;
         }
 
         // general buttom clicks effects

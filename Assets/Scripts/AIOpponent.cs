@@ -7,6 +7,7 @@ public class AIOpponent : MonoBehaviour
 {
     Player playerObj;
     [SerializeField] AIConfigObj config;
+    Coroutine currentAction;
     void Awake()
     {
         // Checking if match is offline
@@ -42,7 +43,7 @@ public class AIOpponent : MonoBehaviour
         switch (GameManager.instance.currentState)
         {
             case GameState.PLACING:
-                StartCoroutine(PlaceRandomCard());
+                currentAction = StartCoroutine(PlaceRandomCard());
                 break;
 
             case GameState.PLANNING:
@@ -50,20 +51,23 @@ public class AIOpponent : MonoBehaviour
                 break;
 
             case GameState.EXECUTING:
-                StartCoroutine(ResolvePlannedCard());
+                currentAction = StartCoroutine(ResolvePlannedCard());
                 break;
 
             case GameState.BATTLING:
                 break;
             case GameState.BUYING:
-                StartCoroutine(BuyRandomCard());
+                currentAction = StartCoroutine(BuyRandomCard());
                 break;
 
         }
     }
 
-    void AIEndTurn()
+    public void AIEndTurn()
     {
+        // stop any current action
+        StopCoroutine(currentAction);
+
         if (GameManager.instance.player.endStateReady) GameManager.instance.CheckEndState();
         else GameManager.instance.StartTurn();
     }
@@ -206,34 +210,45 @@ public class AIOpponent : MonoBehaviour
 
     IEnumerator BuyRandomCard()
     {
+        yield return new WaitForSeconds(1.5f);
+
         ShopSlot[] slots = GameManager.instance.shopManager.shopSlots;
+
+        Debug.Log("AIOpponent: Opponent is about to buy a card");
 
         for (int i = 0; i < config.shopRerollsPerTurn + 1; i++)
         {
             yield return new WaitForSeconds(config.buyingDelay);
 
-            // Trying to buy a card from every slot in random order
-            int n = slots.Length;
-            while (n > 1)
+            List<int> indices = new List<int>();
+            for (int a = 0; i < slots.Length; i++) indices.Add(i);
+
+            // shuffle
+            for (int a = indices.Count - 1; a > 0; a--)
             {
-                n--;
-                int randomSlot = Random.Range(0, n + 1);
-                if (slots[randomSlot].BuyCard(playerObj)) { AIEndTurn(); yield break; }
+                int j = Random.Range(0, a + 1);
+                (indices[a], indices[j]) = (indices[j], indices[a]);
+            }
+
+            // try buying
+            foreach (int index in indices)
+            {
+                Debug.Log("AIOpponent: Opponent tries to buy a slot");
+                if (slots[index].gameObject.activeSelf)
+                {
+                    yield return StartCoroutine(slots[index].BuyCard(playerObj));
+                    yield return null;
+                }
             }
 
             // breaks for loop here since we dont need to reroll on last iteration
             if (i == config.shopRerollsPerTurn) break;
 
             // if couldnt buy anything it will try to reroll
-            if (!GameManager.instance.shopManager.RerollShop(playerObj)) 
-            {
-                // if couldnt reroll AI will stop buying this round
-                playerObj.endStateReady = true;
-                AIEndTurn(); 
-                yield break; 
-            } 
+            GameManager.instance.shopManager.RerollShop(playerObj);
         }
 
+        Debug.Log("AIOpponent: opponent went through slots and didnt buy anythng");
         AIEndTurn();
     }
 

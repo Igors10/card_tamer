@@ -9,6 +9,7 @@ public class ShopManager : MonoBehaviour
 {
     [Header("refs")]
     public ShopSlot[] shopSlots;
+    public ParticleSystem shopTokenVFX;
 
     [Header("rerolling")]
     [SerializeField] Button rerollButton;
@@ -38,7 +39,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     /// <param name="roller"></param>
     /// <returns></returns>
-    public bool RerollShop(Player roller)
+    public void RerollShop(Player roller)
     {
         // do checks if player has enough food and change random food when used
         if (!freeReroll)
@@ -50,8 +51,7 @@ public class ShopManager : MonoBehaviour
                 StartCoroutine(roller.playerUI.foodCounters[(int)rerollPrice].NegativeBlink());
 
                 // play soundeffect
-
-                return false;
+                return;
             }
         }
 
@@ -71,8 +71,6 @@ public class ShopManager : MonoBehaviour
 
         // Disabling free reroll
         freeReroll = false;
-
-        return true;
     }
 
     public void RandomizeSlots()

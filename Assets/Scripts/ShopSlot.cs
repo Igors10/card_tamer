@@ -1,10 +1,9 @@
-using FishNet.Demo.AdditiveScenes;
-using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
 {
@@ -20,6 +19,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [SerializeField] float tokenVerSpacing;
     [SerializeField] float tokenVerOffset = -200f;
     [SerializeField] float buyingSpeed;
+    [SerializeField] float tokenAnimInterval = 0.3f;
     bool isBuying;
     float buyProgress = 0f;
 
@@ -84,6 +84,9 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         ResetBuyProgress();
         highlightBackground.gameObject.SetActive(false);
+
+        // starting token animation
+        StartCoroutine(ShopTokenAnim(true));
     }
 
     void Update()
@@ -102,9 +105,39 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
         else
         {
-            BuyCard(GameManager.instance.player);
+            StartCoroutine(BuyCard(GameManager.instance.player));
         }
 
+    }
+
+    /// <summary>
+    /// Makes tokens appear one after another (or disappear if parameter is set to false)
+    /// </summary>
+    /// <param name="appearing"></param>
+    /// <returns></returns>
+    IEnumerator ShopTokenAnim(bool appearing)
+    {
+        // gettting all the active tokens
+        List<GameObject> activeTokens = new List<GameObject>();
+        foreach (Image token in priceTokens)
+        {
+            if (token.gameObject.activeSelf) activeTokens.Add(token.gameObject);
+            if (appearing) token.gameObject.SetActive(false);
+        }
+
+        for (int i = 0; i < activeTokens.Count; i++)
+        {
+            // pause interval
+            float animInterval = (appearing) ? tokenAnimInterval / 2 : tokenAnimInterval;
+            yield return new WaitForSeconds(animInterval);
+
+            // Activating (or diactivating correct token)
+            int currentTokenID = (appearing) ? i : activeTokens.Count - 1 - i;
+            activeTokens[currentTokenID].SetActive(appearing);
+
+            // Playing VFX
+            ParticleSystem tokenVFX = Instantiate(GameManager.instance.shopManager.shopTokenVFX, activeTokens[currentTokenID].transform.position, Quaternion.identity);
+        }
     }
 
     /// <summary>
@@ -112,7 +145,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     /// </summary>
     /// <param name="buyer"></param>
     /// <returns></returns>
-    public bool BuyCard(Player buyer)
+    public IEnumerator BuyCard(Player buyer)
     {
         ResetBuyProgress();
 
@@ -138,8 +171,9 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         // if not enough food resources do not proceed with buying
         if (!enoughFood)
         {
+            Debug.Log("ShopSlot: player has not enough money to purchase the slot");
             // also play negative sound effect
-            return false;
+            yield break;
         }
 
         // buying
@@ -149,15 +183,18 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             buyer.playerUI.foodCounters[i].AddFood(-requiredFood[i]);
         }
 
+        // disappearing token animation
+        yield return StartCoroutine(ShopTokenAnim(false));
+
         // give card to the player
         GameManager.instance.cardGenerator.CreateCard(cardData, buyer);
 
         this.gameObject.SetActive(false);
 
         // Ending the turn
-        GameManager.instance.EndTurn();
+        buyer.EndTurn();
 
-        return true;
+        Debug.Log("ShopSlot: ["+ buyer.playerName +"] purchases " + cardData.name);
     }
 
     /// <summary>

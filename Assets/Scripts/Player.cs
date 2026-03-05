@@ -1,3 +1,4 @@
+using FishNet.Demo.AdditiveScenes;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -14,6 +15,7 @@ public class Player : MonoBehaviour
 
     [Header("player attributes")]
     public int health;
+    public string playerName;
     public bool endStateReady = false;
     [HideInInspector] public bool dead;
     
@@ -50,8 +52,15 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void EndTurn()
+    {
+        if (isAI) AIplayer.AIEndTurn();
+        else GameManager.instance.EndTurn();
+    }
+
     public void StartTurn()
     {
+        Debug.Log("GameManager: [" + playerName + "] starting the turn.");
         if (isAI) AIplayer.AIStartTurn();
     }
 

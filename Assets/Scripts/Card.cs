@@ -154,7 +154,7 @@ public class Card : MonoBehaviour
     /// <param name="mouseOver"></param>
     public void OnHover(bool mouseOver)
     {
-        if (GameManager.instance.currentState == GameState.PLACING || GameManager.instance.currentState != GameState.BUYING)
+        if (GameManager.instance.currentState == GameState.PLACING)
         {
             // Putting the card in "reading mode" when hovering over it in hand
             // Scale
@@ -181,11 +181,10 @@ public class Card : MonoBehaviour
             // resetting visuals when mouse leaves the card
             if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.player);
         }
-        else if (GameManager.instance.currentState == GameState.PLANNING)
+        
+        if (GameManager.instance.currentState == GameState.PLANNING)
         {
-            // ??? for whatever reason this part only works before changing order of cards ???
-            // highlights unit
-            //HighlightCard(mouseOver);
+            transform.localScale = (mouseOver) ? dragScale : defaultScale;
         }
     }
     
