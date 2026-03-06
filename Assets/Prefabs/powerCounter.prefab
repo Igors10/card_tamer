@@ -141,7 +141,7 @@ MonoBehaviour:
   lostColor: {r: 0.5018867, g: 0.5018867, b: 0.5018867, a: 1}
   winVFX: {fileID: 0}
   damageVFX: {fileID: 0}
-  damageAnimTime: 1
+  damageAnimTime: 0.7
   powerDecreaseInterval: 0.2
   damageObj: {fileID: 8081672363522261177}
   resolved: 0

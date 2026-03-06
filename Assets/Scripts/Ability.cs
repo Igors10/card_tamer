@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -32,17 +33,12 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     [SerializeField] float passiveEffectWidth;
 
     [Header("Input juice params")]
-    [SerializeField] Outline glowOutline;
-    [SerializeField] Color glowReadyColor;
-    [SerializeField] Color glowChosenColor;
-    Vector2 glowDefaultSize = new Vector2(3, -3);
-    Vector2 glowChosenSize = new Vector2(4, -4);
     Vector3 defaultScale;
     Vector3 highlightedScale;
     Vector3 pressedScale;
     [HideInInspector] public bool selected = false;
     // saved unit position
-    Field savedField;
+    [HideInInspector] public Field savedField;
     int savedSlot;
 
     void Start()
@@ -151,7 +147,6 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         if (passive) return; // cannot activate a passive ability
 
         ready = isActive;
-        glowOutline.enabled = isActive;
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -180,6 +175,14 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         SelectAbility(true);
     }
 
+    public void CancelAbility()
+    {
+        savedField = null;
+        ready = false;
+        selected = false;
+        transform.localScale = defaultScale;
+    }
+
     public void SelectAbility(bool isSelected)
     {
         // resetting units position
@@ -192,9 +195,6 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         selected = isSelected;
 
         // applying selected effects
-        glowOutline.enabled = isSelected;
-        glowOutline.effectColor = (isSelected) ? glowChosenColor : glowReadyColor;
-        glowOutline.effectDistance = (isSelected) ? glowChosenSize : glowDefaultSize;
         transform.localScale = (isSelected) ? highlightedScale : defaultScale;
 
         // Highlighting fields for movement

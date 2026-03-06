@@ -13,7 +13,7 @@ public class HandManager : MonoBehaviour
 
     [Header("Fan spread params")]
     [SerializeField] float fanSpread;
-    [SerializeField] float cardSpacing = 200f;
+    [SerializeField] float defaultCardSpacing = 200f;
     [SerializeField] float verticalSpacing = 10f;
 
     [Header("Hand hide params")]
@@ -66,6 +66,7 @@ public class HandManager : MonoBehaviour
             float rotationAngle = fanSpread * (a - (cardCount - 1) / 2f);
             player.cardsInHand[a].RotateCard(rotationAngle);
 
+            float cardSpacing = (cardsInHand.Count < 7) ? -defaultCardSpacing : -defaultCardSpacing / cardsInHand.Count * 6;
             float horizontalOffset = cardSpacing * (a - (cardCount - 1) / 2f);
 
             float normalizedPosition = 2f * a / (cardCount - 1) - 1f; 

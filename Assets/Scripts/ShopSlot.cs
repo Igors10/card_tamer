@@ -120,7 +120,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         // setting correct indicator values 
         indicatorObj.transform.localPosition = transform.localPosition + new Vector3(0, -tokenVerOffset, 0);
         indicatorText.color = player.playerColor;
-        string text = player.playerName + "is buying";
+        string text = player.playerName + " is buying";
         indicatorText.text = text;
 
         // activating the indicator
@@ -142,13 +142,9 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     /// <returns></returns>
     IEnumerator ShopTokenAnim(bool appearing, Player buyer = null)
     {
-        // Acitvating the indicator
-        if (buyer != null) IndicatePlayer(buyer);
-
-        if (buyer != null) yield return new WaitForSeconds(buyingDelay);
-
-        // gettting all the active tokens
+            // gettting all the active tokens
         List<GameObject> activeTokens = new List<GameObject>();
+
         foreach (Image token in priceTokens)
         {
             if (token.gameObject.activeSelf) activeTokens.Add(token.gameObject);
@@ -166,6 +162,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             activeTokens[currentTokenID].SetActive(appearing);
 
             // Playing VFX
+            GameManager.instance.animations.PopAnim(activeTokens[currentTokenID], 0.3f, 0.25f);
             ParticleSystem tokenVFX = Instantiate(GameManager.instance.shopManager.shopTokenVFX, activeTokens[currentTokenID].transform.position, Quaternion.identity);
             Debug.Log("ShopSlot: shop token VFX instantiated at " + tokenVFX.transform.position);
         }
@@ -217,8 +214,13 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             buyer.playerUI.foodCounters[i].AddFood(-requiredFood[i]);
         }
 
-        // disappearing token animation
-        yield return StartCoroutine(ShopTokenAnim(false, buyer));
+        // Acitvating the indicator
+        if (buyer == GameManager.instance.opponent)
+        {
+            IndicatePlayer(buyer);
+            yield return new WaitForSeconds(buyingDelay);
+            StopIndicatePlayer();
+        }
 
         // give card to the player
         GameManager.instance.cardGenerator.CreateCard(cardData, buyer);

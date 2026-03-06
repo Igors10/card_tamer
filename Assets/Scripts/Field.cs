@@ -149,6 +149,7 @@ public class Field : MonoBehaviour
 
     public void RefreshFieldVisuals()
     {
+        // block visuals
         if (currentBlock > 0)
         {
             blockObj.SetActive(true);
@@ -170,9 +171,19 @@ public class Field : MonoBehaviour
     /// <summary>
     /// Resets all temporary field attributes (like block) at the end of round
     /// </summary>
-    void FieldEndRound()
+    public void FieldEndRound()
     {
+        // remove any block left
         currentBlock = 0;
         RefreshFieldVisuals();
+
+        // fadeout cancel
+        FadeOut(false);
+
+        // reset field units
+        foreach (Unit unit in units)
+        {
+            if (unit != null) unit.card.CardEndRound();
+        }
     }
 }

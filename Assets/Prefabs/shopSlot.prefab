@@ -668,7 +668,7 @@ MonoBehaviour:
   tokenVerSpacing: -20
   tokenVerOffset: -160
   buyingSpeed: 2
-  buyingDelay: 1
+  buyingDelay: 1.3
   tokenAnimInterval: 0.6
   highlightBackground: {fileID: 7221876122391783156}
   highlightFill: {fileID: 2476414390226988405}

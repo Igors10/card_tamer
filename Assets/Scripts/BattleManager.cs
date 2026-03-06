@@ -134,6 +134,9 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator WrapUpBattle()
     {
+        // resetting battle visuals
+        ResetLineVals();
+
         // Putting the camera where it was before battling phase
         Vector3 stateCameraPosition = GameManager.instance.GetState().cameraPosition;
         Vector3 centerCameraPosition = new Vector3(0, stateCameraPosition.y, stateCameraPosition.z);

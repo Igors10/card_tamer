@@ -9,6 +9,7 @@ public class ShopManager : MonoBehaviour
     public ShopSlot[] shopSlots;
     public ParticleSystem shopTokenVFX;
     public TextMeshProUGUI shopPlayerIndicator;
+    [SerializeField] GameObject shopObj;
 
     [Header("rerolling")]
     [SerializeField] Button rerollButton;
@@ -31,6 +32,14 @@ public class ShopManager : MonoBehaviour
         freeReroll = true;
         rerollText.text = "free";
         rerollPriceImage.GetComponent<Image>().enabled = false;
+    }
+
+    /// <summary>
+    /// Hides (or shows back) whole shop window so that player can look at the board
+    /// </summary>
+    public void HideShop()
+    {
+        shopObj.SetActive(!shopObj.activeSelf);
     }
 
     /// <summary>

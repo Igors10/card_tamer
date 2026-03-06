@@ -85,6 +85,7 @@ public class GameManager : MonoBehaviour
 
             case GameState.PLANNING:
                 // Making field cards appear correctly
+                planningManager.InitPlanCards(player);
                 planningManager.UpdateFieldHandVisuals(player);
 
                 // Making AI shuffle the cards
@@ -109,9 +110,15 @@ public class GameManager : MonoBehaviour
                 // Enabling hand UI
                 gameStateUI[0].SetActive(true);
 
+                // Resets field state for next round
+                player.EndRoundReset();
+                opponent.EndRoundReset();
+
                 // resetting shop values
+                managerUI.EnableUI(true);
                 shopManager.RandomizeSlots();
                 shopManager.ResetReroll();
+                readyButton.gameObject.SetActive(true);
                 break;
         }
 
@@ -189,6 +196,8 @@ public class GameManager : MonoBehaviour
 
             case GameState.BUYING:
                 shopManager.EnableRerollButton(true);
+
+               
                 break;
         }
     }

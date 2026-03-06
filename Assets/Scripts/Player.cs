@@ -78,4 +78,13 @@ public class Player : MonoBehaviour
         dead = true;
         GameManager.instance.GameOver(this);
     }
+
+    // Refreshes the battlefield on players side
+    public void EndRoundReset()
+    {
+        foreach (Field field in fields)
+        {
+            field.FieldEndRound();
+        }
+    }
 }

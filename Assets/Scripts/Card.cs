@@ -298,10 +298,14 @@ public class Card : MonoBehaviour
     /// </summary>
     public void CardEndRound()
     {
+        // regenerating all health and resetting the power
         currentPower = 0;
         damageToHP = 0;
 
         unit.RefreshUnitVisuals();
+
+        // Resetting the abilities        
+        foreach (Ability ability in abilities) ability.CancelAbility();
     }
 
 }

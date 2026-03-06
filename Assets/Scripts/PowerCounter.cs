@@ -245,6 +245,9 @@ public class PowerCounter : MonoBehaviour
                 float particleOffsetY = 90f;
                 if (player == GameManager.instance.opponent) particleOffsetY *= -1;
                 damageObj.transform.localPosition += new Vector3(0f, particleOffsetY, 0f);
+
+                // pop animation
+                GameManager.instance.animations.PopAnim(damageObj, 0.3f, 0.45f);
             }
             else
             {
@@ -252,8 +255,12 @@ public class PowerCounter : MonoBehaviour
                 newDamageParticle.GetComponent<Image>().color = player.playerColor;
                 newDamageParticle.transform.localPosition += new Vector3(damageParticleOffset, 0f, 0f);
                 damageParticles.Add(newDamageParticle);
+
+                // pop animation
+                GameManager.instance.animations.PopAnim(newDamageParticle, 0.3f, 0.45f);
             }
 
+            
             yield return StartCoroutine(DecreasePower(nextDamagePowerCost));
         }
 
@@ -288,14 +295,25 @@ public class PowerCounter : MonoBehaviour
         Vector3 startingPos = (damageObj.activeSelf) ? damageObj.transform.position : powerText.transform.position;
         damageObj.SetActive(true);
         damageObj.GetComponent<Image>().color = player.playerColor;
-        
+
+        // Generate random curve variables
+        Vector3 midPoint = Vector3.Lerp(startingPos, targetPosition, 0.5f);
+        float curveIntensity = Random.Range(300f, 400f);
+        Vector3 randomOffset = Random.insideUnitSphere * curveIntensity;
+        Vector3 controlPoint = midPoint + randomOffset;
+
         while (t < damageAnimTime)
         {
             t += Time.deltaTime;
             float actualT = t / damageAnimTime;
             float coolT = actualT * actualT;
 
-            damageObj.transform.position = Vector3.Lerp(startingPos, targetPosition, coolT);
+            // Bezier Curve movement
+            Vector3 m1 = Vector3.Lerp(startingPos, controlPoint, coolT);
+            Vector3 m2 = Vector3.Lerp(controlPoint, targetPosition, coolT);
+            damageObj.transform.position = Vector3.Lerp(m1, m2, coolT);
+
+            //damageObj.transform.position = Vector3.Lerp(startingPos, targetPosition, coolT);
             yield return null;
         }
 

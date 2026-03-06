@@ -24,8 +24,9 @@ public class PlanningManager : MonoBehaviour
             card.gameObject.SetActive(true);
 
             // Positioning cards
+            float cardInterval = (player.cardsOnField.Count < 6) ? defaultCardInterval : defaultCardInterval / player.cardsOnField.Count * 5;
             card.transform.position = firstCardPosition.position;
-            card.transform.position += new Vector3(defaultCardInterval * i, 0f);
+            card.transform.position += new Vector3(cardInterval * i, 0f);
 
             // Making order markers have correct numbers
             card.orderMarker.gameObject.SetActive(true);
@@ -35,6 +36,9 @@ public class PlanningManager : MonoBehaviour
             // Applying slight random rotation to cards
             int randomAngle = Random.Range(-cardRotationIntensity, cardRotationIntensity);
             card.RotateCard(randomAngle);
+
+            // Sorting the card in the rendering layer
+            card.transform.SetAsLastSibling();
         }
     }
 
@@ -44,5 +48,14 @@ public class PlanningManager : MonoBehaviour
     public void SortCards(Player player)
     {
         player.cardsOnField.Sort((a, b) => a.transform.localPosition.x.CompareTo(b.transform.localPosition.x));
+    }
+
+    public void InitPlanCards(Player player)
+    {
+        foreach (Card card in player.cardsOnField)
+        {
+            card.transform.SetParent(GameManager.instance.planningManager.fieldHand.transform, false);
+            card.OnHover(false);
+        }
     }
 }
