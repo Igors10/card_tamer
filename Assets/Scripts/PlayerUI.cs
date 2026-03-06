@@ -30,7 +30,8 @@ public class PlayerUI : MonoBehaviour
     public FoodToken[] foodCounters = new FoodToken[3];
     [SerializeField] GameObject foodObj;
     [SerializeField] float offsetX;
-    [SerializeField] float tokenStayTime;
+    public float tokenStayTime;
+    public float tokenShowTime = 0.6f;
     Vector3 defaultTokenPos;
     Vector3 shownTokenPos;
 
@@ -118,7 +119,7 @@ public class PlayerUI : MonoBehaviour
         Vector3 startingPosition = foodObj.transform.localPosition;
         Vector3 targetPosition = (show) ? shownTokenPos : defaultTokenPos;
         float t = 0;
-        float timeAppearing = 0.6f;
+        float timeAppearing = tokenShowTime;
 
         while (t < timeAppearing)
         {

@@ -1,6 +1,4 @@
-using FishNet.Demo.AdditiveScenes;
 using System;
-using System.ComponentModel;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +8,7 @@ public class ShopManager : MonoBehaviour
     [Header("refs")]
     public ShopSlot[] shopSlots;
     public ParticleSystem shopTokenVFX;
+    public TextMeshProUGUI shopPlayerIndicator;
 
     [Header("rerolling")]
     [SerializeField] Button rerollButton;

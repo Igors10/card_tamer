@@ -666,8 +666,10 @@ MonoBehaviour:
   slotSprite: {fileID: 1999348528064575836}
   tokenHorSpacing: 100
   tokenVerSpacing: -20
-  tokenVerOffset: -200
+  tokenVerOffset: -160
   buyingSpeed: 2
+  buyingDelay: 1
+  tokenAnimInterval: 0.6
   highlightBackground: {fileID: 7221876122391783156}
   highlightFill: {fileID: 2476414390226988405}
   highlightColor: {r: 0.48235297, g: 0.59607846, b: 0.9960785, a: 1}
@@ -683,4 +685,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df4e10c1d4250b148aae31dad7f3de00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverEffect
+  inGame: 1
   sizeMod: 1.1

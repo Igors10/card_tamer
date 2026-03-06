@@ -3,14 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
-using NUnit.Framework;
-using FishNet.Example.Authenticating;
 
 public class BattleManager : MonoBehaviour
 {
     [Header("refs")]
     [SerializeField] PowerCounter playerPowerUI;
     [SerializeField] PowerCounter opponentPowerUI;
+    
+    [Header("round end")]
+    [SerializeField] TextMeshProUGUI roundEndsMessage;
+    [SerializeField] int roundEndResourceReward = 2;
 
     [HideInInspector] public int currentLine;
 
@@ -137,7 +139,19 @@ public class BattleManager : MonoBehaviour
         Vector3 centerCameraPosition = new Vector3(0, stateCameraPosition.y, stateCameraPosition.z);
         yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(centerCameraPosition, 0.6f));
 
-        // add tokens at the end of battle phase
+        // Message that round ends
+        roundEndsMessage.gameObject.SetActive(true);
+
+        // Giving 2 random resources to players
+        for (int i = 0; i < roundEndResourceReward; i++)
+        {
+            GameManager.instance.player.playerUI.AddRandomFoodToken(true);
+            GameManager.instance.opponent.playerUI.AddRandomFoodToken(true);
+        }
+
+        float pauseTime = GameManager.instance.player.playerUI.tokenShowTime * 2 + GameManager.instance.player.playerUI.tokenStayTime + 1.2f;
+        yield return new WaitForSeconds(pauseTime);
+        roundEndsMessage.gameObject.SetActive(false);
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;
