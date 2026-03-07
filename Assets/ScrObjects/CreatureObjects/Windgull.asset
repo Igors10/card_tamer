@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8545ef02531faa45ad6deda723251a0, type: 3}
+  m_Name: Windgull
+  m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
+  creatureName: Windgull
+  health: 3
+  cardSprite: {fileID: 21300000, guid: 177f153f0592d344693d705ac63316b8, type: 3}
+  unitSprite: {fileID: 21300000, guid: 01fbf93fa1a7c5b4c87ceabd1831e794, type: 3}
+  cost: 010000000200000001000000
+  ability:
+  - {fileID: 11400000, guid: e36b4e1df2d56bd4ebd461ca040fce37, type: 2}
+  - {fileID: 11400000, guid: 138a286500c48334688c947463e054bb, type: 2}
+  doodleSprite: {fileID: 21300000, guid: f38fca7a6042e604a80d66285b0db4f8, type: 3}
+  audio:
+  - {fileID: 8300000, guid: 1a8f706444d43dc4abd20b44e905a1a7, type: 3}
+  - {fileID: 8300000, guid: 309bb99abc1be984eab074f64fc79b12, type: 3}

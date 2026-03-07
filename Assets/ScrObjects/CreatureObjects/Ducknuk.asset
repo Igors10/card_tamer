@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8545ef02531faa45ad6deda723251a0, type: 3}
+  m_Name: Ducknuk
+  m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
+  creatureName: Ducknuk
+  health: 5
+  cardSprite: {fileID: 21300000, guid: 1188dd6fe69440c49b186d0b707232fe, type: 3}
+  unitSprite: {fileID: 21300000, guid: 1f100ae438c03eb45918fab7c0a20819, type: 3}
+  cost: 010000000200000002000000
+  ability:
+  - {fileID: 11400000, guid: a35493e6b5561c848a2f7f19b0db36bd, type: 2}
+  - {fileID: 11400000, guid: a0cbab4dd669f544b9bb58a54d346f6f, type: 2}
+  doodleSprite: {fileID: 21300000, guid: 32239a99460aeff48a8aa0d04608e4e9, type: 3}
+  audio:
+  - {fileID: 8300000, guid: 432b6570d3dcd3b4fad1c049a2bd649c, type: 3}
+  - {fileID: 8300000, guid: 82d67e9da9c04bb4aa46e87c2132e75c, type: 3}

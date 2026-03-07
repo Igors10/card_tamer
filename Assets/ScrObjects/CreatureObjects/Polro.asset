@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8545ef02531faa45ad6deda723251a0, type: 3}
+  m_Name: Polro
+  m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
+  creatureName: Polro
+  health: 6
+  cardSprite: {fileID: 21300000, guid: 71b5dd00a40428e44944413d43c11436, type: 3}
+  unitSprite: {fileID: 21300000, guid: cc1111e88e704a74f9ea233565d90980, type: 3}
+  cost: 010000000100000001000000
+  ability:
+  - {fileID: 11400000, guid: c35e2c253128d614a9cb42d491153a9f, type: 2}
+  doodleSprite: {fileID: 21300000, guid: 4b9b9113b49b89b4a8c65a074d547809, type: 3}
+  audio:
+  - {fileID: 8300000, guid: a85fda03d0bc39e4e938cc882c2561db, type: 3}
+  - {fileID: 8300000, guid: b0ceee2a028987944b81b60593f89fcb, type: 3}
