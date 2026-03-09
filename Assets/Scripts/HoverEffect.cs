@@ -28,7 +28,7 @@ public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
     void OnHover(bool mouseOver)
     {
         // Only do the effect if it is your turn
-        if (inGame && !GameManager.instance.yourTurn) return;
+        if (inGame && GameManager.instance != null && !GameManager.instance.yourTurn) return;
 
         transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
     }

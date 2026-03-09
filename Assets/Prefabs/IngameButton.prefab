@@ -411,4 +411,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df4e10c1d4250b148aae31dad7f3de00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverEffect
-  sizeMod: 1.1
+  inGame: 1
+  sizeMod: 1.3
