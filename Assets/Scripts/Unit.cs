@@ -182,7 +182,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     // INPUT
     // ===============
 
-    public void OnHover(bool mouseOver)
+    public void PreviewCard(bool mouseOver)
     {
         // nothing happens when unit is selected during execute state
         if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this
@@ -195,12 +195,12 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        OnHover(true);
+        PreviewCard(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        OnHover(false);
+        PreviewCard(false);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -233,7 +233,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
                 transform.position = moveStartingPos;
          }
 
-         OnHover(false);
+         PreviewCard(false);
         
     }
 }

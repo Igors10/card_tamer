@@ -20,7 +20,7 @@ MonoBehaviour:
   ability:
   - {fileID: 11400000, guid: ff8b4eeadebbb9142a52a3853be1ec5b, type: 2}
   - {fileID: 11400000, guid: 674004cdc60b1c442ae91007bc1f012d, type: 2}
-  doodleSprite: {fileID: 0}
+  doodleSprite: {fileID: 21300000, guid: 38bb7ed304e8bd541bc9f70803e11d96, type: 3}
   audio:
   - {fileID: 8300000, guid: a66e46b8574d2f84daa5939033b981cf, type: 3}
   - {fileID: 8300000, guid: 0d22941058d4960499e758c93b0a1ba2, type: 3}

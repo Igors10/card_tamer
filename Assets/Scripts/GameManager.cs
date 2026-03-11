@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviour
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
     public ReadyButton readyButton;
+    public LoadingFog loadingFog;
+    [SerializeField] float loadingTime;
 
     [Header("players")]
     public Player player;
@@ -58,6 +60,10 @@ public class GameManager : MonoBehaviour
     {
         // in offline matches player always goes first
         if (playerConfig.offlineMatch) StartTurn();
+
+        // Loading fog fading away effect
+        loadingFog.gameObject.SetActive(true);
+        StartCoroutine(loadingFog.LoadingAnimation(loadingTime));
     }
 
     public void TransitionGameState(GameState newState)

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class TitleScreen : MonoBehaviour
 {
@@ -13,11 +14,26 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] MenuChoice startingSpecialChoice;
     [SerializeField] PlayerConfigObj playerConfigObj;
 
+    [Header("menu transition")]
+    [SerializeField] LoadingFog loadingFog;
+    Coroutine currentTransition = null;
+    
+
     private void Awake()
     {
         instance = this;
         titleAudioSource = GetComponent<AudioSource>();
     }
+
+    private void Start()
+    {
+        // loading fog fade away effect at the beginning
+
+        loadingFog.gameObject.SetActive(true);
+        StartCoroutine(loadingFog.ApplyLoadingFog(false));
+    }
+   
+    
 
     /// <summary>
     /// Plays a soundeffect from title screen's audioSource
@@ -40,7 +56,23 @@ public class TitleScreen : MonoBehaviour
     /// <param name="menuID"></param>
     public void OpenMenu(int menuID)
     {
+        if (currentTransition == null)
+        {
+            // beginning to switch menus
+            currentTransition = StartCoroutine(TransitionToMenu(menuID));
+
+            // playing soundeffect
+            AudioManager.instance.PlaySFX("ButtonSound");
+        }
+    }
+
+    IEnumerator TransitionToMenu(int menuID)
+    {
+        yield return StartCoroutine(loadingFog.ApplyLoadingFog(true));
         for (int i = 0; i < menus.Length; i++) menus[i].SetActive(i == menuID);
+        yield return StartCoroutine(loadingFog.ApplyLoadingFog(false));
+
+        currentTransition = null;
     }
 
     /// <summary>
@@ -59,8 +91,18 @@ public class TitleScreen : MonoBehaviour
     /// <summary>
     /// Starts transition to "Board" scene
     /// </summary>
-    public void StartOfflineMatch()
+    public void StartOfflineMatchButton()
     {
+        StartCoroutine(StartOfflineMatch());
+    }
+
+    IEnumerator StartOfflineMatch()
+    {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("ButtonSound");
+
+        yield return StartCoroutine(loadingFog.ApplyLoadingFog(true));
+
         // resetting player card config
         playerConfigObj.ResetCardConfig();
 

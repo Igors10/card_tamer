@@ -154,8 +154,13 @@ public class Card : MonoBehaviour
     /// <param name="mouseOver"></param>
     public void OnHover(bool mouseOver)
     {
+        // playing soundeffect
+        if (mouseOver) AudioManager.instance.PlaySFX("CardHoverSound2");
+
         if (GameManager.instance.currentState == GameState.PLACING)
         {
+            //if (GameManager.instance.handManager.activeCard != null) return;
+
             // Putting the card in "reading mode" when hovering over it in hand
             // Scale
             cardVisual.transform.localScale = (mouseOver) ? highlightedScale : defaultScale;

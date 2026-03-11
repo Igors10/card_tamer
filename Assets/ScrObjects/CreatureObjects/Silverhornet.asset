@@ -19,6 +19,7 @@ MonoBehaviour:
   cost: 0200000000000000
   ability:
   - {fileID: 11400000, guid: 402027ffe8a7b7a498d018c0ea046d6b, type: 2}
+  - {fileID: 11400000, guid: 87564fb9c6aedca4b9a3f1d40e9a9598, type: 2}
   doodleSprite: {fileID: 21300000, guid: 4e92064c2a208034490b6217d20731ed, type: 3}
   audio:
   - {fileID: 8300000, guid: 22e28e7dc41f08341a231c57e48176f8, type: 3}

@@ -52,8 +52,8 @@ public class MenuChoice : MonoBehaviour
         // sets the description
         description.text = descTexts[currentOption];
 
-        // plays an audio effect if there is any
-        if (audioClips.Count > 0) TitleScreen.instance.PlaySound(audioClips[currentOption]);
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("ButtonSound");
     }
 
     public GameObject GetCurrentChoice()

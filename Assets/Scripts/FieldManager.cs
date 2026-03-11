@@ -118,6 +118,8 @@ public class FieldManager : MonoBehaviour
             }
         }
         
+        // disable visuals if card wasn't spawned
+        DisableAllSlots();
     }
 
     public void SpawnUnit(Card cardToSpawn, Field fieldToSpawnOn)
@@ -133,6 +135,9 @@ public class FieldManager : MonoBehaviour
 
         // Plays spawning "poof" VFX
         GameManager.instance.VFXmanager.PlayVFX(newUnitObj.transform.position, spawnVFX);
+
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("CardPlay");
     }
 
     public int GetUnitSlot(Unit unit)

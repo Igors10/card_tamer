@@ -11,13 +11,11 @@ public class CardInput : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (GameManager.instance.handManager.activeCard != null) return; // shouldnt trigger if a card is being selected
         thisCard.OnHover(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (GameManager.instance.handManager.activeCard != null) return; // shouldnt trigger if a card is being selected
         thisCard.OnHover(false);
     }
 
