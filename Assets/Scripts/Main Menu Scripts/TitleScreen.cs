@@ -123,4 +123,5 @@ public class TitleScreen : MonoBehaviour
         // Starting the match
         SceneManager.LoadScene("Board");
     }
+
 }

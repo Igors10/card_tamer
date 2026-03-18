@@ -91,4 +91,8 @@ MonoBehaviour:
   angle: 10
   duration: 0.15
   swings: 2
+  idleRotateInterval: 1.5
+  idleRotationIntensity: 3
+  isIdleAnim: 0
+  doodleRotateLeft: 0
   doodleData: {fileID: 0}

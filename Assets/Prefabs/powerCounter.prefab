@@ -135,7 +135,7 @@ MonoBehaviour:
   dice: {fileID: 4469668243677781190}
   unitScaleMod: 1.2
   textScaleMod: 1.5
-  timePerUnit: 0.5
+  timePerUnit: 0.3
   diceRolled: 0
   resolveSizeMod: 1.35
   lostColor: {r: 0.5018867, g: 0.5018867, b: 0.5018867, a: 1}

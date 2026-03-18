@@ -5,10 +5,13 @@ using UnityEngine.UI;
 
 public class MenuDoodle : MonoBehaviour, IPointerClickHandler
 {
+    [Header("shake anim")]
     public float angle = 10f;       // How far it tilts left/right
     public float duration = 0.15f;  // How fast each swing is
     public int swings = 2;          // How many back-and-forths
+    bool shaking = false;
 
+    [Header("refs")]
     Image sprite;
     RectTransform rect;
     Coroutine currentAnim;
@@ -21,7 +24,6 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
         sprite = GetComponent<Image>();
         rect = GetComponent<RectTransform>();
         AssignDoodleData();
-        
     }
 
     void AssignDoodleData()
@@ -60,6 +62,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
     IEnumerator ShakeAnim()
     {
         Quaternion original = rect.localRotation;
+        shaking = true;
 
         for (int i = 0; i < swings; i++)
         {
@@ -68,6 +71,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
         }
 
         rect.localRotation = original;
+        shaking = false;
     }
 
     IEnumerator RotateTo(float targetAngle, float time)
