@@ -137,7 +137,7 @@ public class FieldManager : MonoBehaviour
         GameManager.instance.VFXmanager.PlayVFX(newUnitObj.transform.position, spawnVFX);
 
         // playing soundeffect
-        AudioManager.instance.PlaySFX("CardPlay");
+        AudioManager.instance.PlaySFX("CardPlaySFX");
     }
 
     public int GetUnitSlot(Unit unit)

@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
@@ -12,10 +12,14 @@ public class AudioManager : MonoBehaviour
     [Header("sounds")]
     [SerializeField] AudioClip[] audioClips;
     [SerializeField] AudioClip[] musicClips;
+    float savedSoundVolume = 0;
+    bool isSoundMuted = false;
 
     [Header("music")]
     [SerializeField] float musicDelay = 0;
     [SerializeField] bool playMusic = true;
+    float savedMusicVolume = 0;
+    bool isMusicMuted = false;
 
 
     private void Awake()
@@ -52,7 +56,59 @@ public class AudioManager : MonoBehaviour
         if (soundtrack == null) Debug.Log("Sound Not Found");
         else
         {
-            audioSource.PlayOneShot(soundtrack);
+            musicSource.PlayOneShot(soundtrack);
         }
+    }
+
+    /// <summary>
+    /// Mutes every sound effect in the scene
+    /// </summary>
+    /// <param name="mute"></param>
+    public bool MuteSound(bool mute)
+    {
+        isSoundMuted = mute;
+
+        if (mute)
+        {
+            // saving the volume value
+            savedSoundVolume = audioSource.volume;
+
+            // setting volume to 0
+            audioSource.volume = 0;
+        }
+        else
+        {
+            // setting the volume back to pre-muted saved value
+            audioSource.volume = savedSoundVolume;
+        }
+
+        // returns true if sound was muted
+        return isSoundMuted;
+    }
+
+    /// <summary>
+    /// Mutes music in the scene
+    /// </summary>
+    /// <param name="mute"></param>
+    public bool MuteMusic(bool mute)
+    {
+        isMusicMuted = mute;
+
+        if (mute)
+        {
+            // saving the volume value
+            savedMusicVolume = musicSource.volume;
+
+            // setting volume to 0
+            musicSource.volume = 0;
+        }
+        else
+        {
+            // setting the volume back to pre-muted saved value
+            musicSource.volume = savedMusicVolume;
+        }
+
+        // returns true if music was muted
+        return isMusicMuted;
     }
 }

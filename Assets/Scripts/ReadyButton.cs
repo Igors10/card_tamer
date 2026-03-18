@@ -28,6 +28,9 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     public void ButtonClick()
     {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("ButtonSFX");
+
         // game state specific button click effects
         switch (GameManager.instance.currentState)
         {

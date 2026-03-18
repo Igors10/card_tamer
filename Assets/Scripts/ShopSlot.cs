@@ -203,9 +203,15 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (!enoughFood)
         {
             Debug.Log("ShopSlot: player has not enough money to purchase the slot");
-            // also play negative sound effect
+  
+            // playing soundeffect
+            AudioManager.instance.PlaySFX("NegativeSFX");
+
             yield break;
         }
+
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("BuySFX");
 
         // buying
         // substract the resources
@@ -271,6 +277,10 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!GameManager.instance.yourTurn) return;
+
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("ClickUnitSFX");
+
         isBuying = true;
     }
 

@@ -114,6 +114,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public IEnumerator TakeDamage(int damage)
     {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("HitSFX");
+
         damage = (card.GetCurrerntHealth() > damage) ? damage : card.GetCurrerntHealth();
         card.damageToHP += damage;
         card.Refresh();

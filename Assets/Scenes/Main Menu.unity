@@ -2017,14 +2017,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.4566037, g: 0.36413428, b: 0.3575293, a: 1}
+  m_Color: {r: 0.4716981, g: 0.40850836, b: 0.40850836, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1e3ab228f41a91f45b22cb8d833e0849, type: 3}
+  m_Sprite: {fileID: -4589707214123847400, guid: c25b89321ff289a4db76d10f104bad10, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2099,16 +2099,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7201675583939907049, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: m_Volume
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 7201675583939907049, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: m_Resource
       value: 
-      objectReference: {fileID: 8300000, guid: cc8fd0346fd08446d9a0b5cde9e1d2a1, type: 3}
+      objectReference: {fileID: 8300000, guid: 0ad591428b0c18c4da51fe3bf98dbc63, type: 3}
     - target: {fileID: 7201675583939907049, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: m_PlayOnAwake
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: audioClips.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: musicClips.Array.size
@@ -2117,7 +2121,11 @@ PrefabInstance:
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: 'audioClips.Array.data[0]'
       value: 
-      objectReference: {fileID: 8300000, guid: 80721227073f0cf4497b42ead9687c56, type: 3}
+      objectReference: {fileID: 8300000, guid: 3d444555e9aef884ab6e840f33aec7dd, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: b83bf8726a7fac349a54389f0c57cda6, type: 3}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: 'musicClips.Array.data[0]'
       value: 
@@ -2969,6 +2977,7 @@ GameObject:
   - component: {fileID: 1253801476}
   - component: {fileID: 1253801475}
   - component: {fileID: 1253801474}
+  - component: {fileID: 1253801477}
   m_Layer: 0
   m_Name: TitleScreenManager
   m_TagString: Untagged
@@ -3109,6 +3118,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1253801477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1253801473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcf68add3e62d9f4f850cf40e379dc36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Animations
 --- !u!1001 &1322297772
 PrefabInstance:
   m_ObjectHideFlags: 0

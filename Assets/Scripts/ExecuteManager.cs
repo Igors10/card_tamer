@@ -27,6 +27,9 @@ public class ExecuteManager : MonoBehaviour
 
     public void RevealCard()
     {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("NextCardSFX");
+
         readyRevealCard = false;
 
         // positioning the card

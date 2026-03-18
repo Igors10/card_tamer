@@ -62,7 +62,7 @@ public class TitleScreen : MonoBehaviour
             currentTransition = StartCoroutine(TransitionToMenu(menuID));
 
             // playing soundeffect
-            AudioManager.instance.PlaySFX("ButtonSound");
+            AudioManager.instance.PlaySFX("ButtonSFX");
         }
     }
 
@@ -99,7 +99,8 @@ public class TitleScreen : MonoBehaviour
     IEnumerator StartOfflineMatch()
     {
         // playing soundeffect
-        AudioManager.instance.PlaySFX("ButtonSound");
+        AudioManager.instance.PlaySFX("ButtonSFX");
+        AudioManager.instance.PlaySFX("StartGameSFX");
 
         yield return StartCoroutine(loadingFog.ApplyLoadingFog(true));
 

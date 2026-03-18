@@ -1,8 +1,16 @@
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class Animations : MonoBehaviour
 {
+    public static Animations instance;
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
     public void PopAnim(GameObject obj, float time, float intensity)
     {
         StartCoroutine(Pop(obj, time, intensity));

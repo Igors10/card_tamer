@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     // Makes the element scale up a little when a mouse is over it
 
@@ -25,11 +25,29 @@ public class HoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         OnHover(false);
     }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        ClickJuiceEffect();
+    }
+
     void OnHover(bool mouseOver)
     {
         // Only do the effect if it is your turn
         if (inGame && GameManager.instance != null && !GameManager.instance.yourTurn) return;
 
         transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
+    }
+
+    /// <summary>
+    /// Makes the button pop when player clicks it
+    /// </summary>
+    public void ClickJuiceEffect()
+    {
+        transform.localScale = defaultScale;
+
+        if (Animations.instance != null)
+        {
+            Animations.instance.PopAnim(this.gameObject, 0.3f, -0.25f);
+        }
     }
 }

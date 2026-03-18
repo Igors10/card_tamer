@@ -53,7 +53,7 @@ public class MenuChoice : MonoBehaviour
         description.text = descTexts[currentOption];
 
         // playing soundeffect
-        AudioManager.instance.PlaySFX("ButtonSound");
+        AudioManager.instance.PlaySFX("ButtonSFX");
     }
 
     public GameObject GetCurrentChoice()

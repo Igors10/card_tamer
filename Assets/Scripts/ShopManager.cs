@@ -58,7 +58,9 @@ public class ShopManager : MonoBehaviour
                 // starting red blinking animation for resources
                 StartCoroutine(roller.playerUI.foodCounters[(int)rerollPrice].NegativeBlink());
 
-                // play soundeffect
+                // playing soundeffect
+                AudioManager.instance.PlaySFX("NegativeSFX");
+
                 return;
             }
         }
@@ -83,6 +85,9 @@ public class ShopManager : MonoBehaviour
 
     public void RandomizeSlots()
     {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("RerollSFX");
+
         for (int i = 0; i < shopSlots.Length; i++)
         {
             shopSlots[i].gameObject.SetActive(true);

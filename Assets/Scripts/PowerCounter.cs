@@ -79,6 +79,9 @@ public class PowerCounter : MonoBehaviour
     /// <returns></returns>
     public IEnumerator RollDicePower()
     {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("DiceRollSFX");
+
         EnableDice(true);
         dice.clickable = false;
         yield return StartCoroutine(dice.RollAnimation());
@@ -89,6 +92,9 @@ public class PowerCounter : MonoBehaviour
 
     public IEnumerator AddPower(int power, Unit unit = null)
     {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("GainPowerSFX");
+
         // Setting Unit Scale
         Vector3 defaultUnitScale = new Vector3();
         if (unit != null)
@@ -198,7 +204,10 @@ public class PowerCounter : MonoBehaviour
 
             // "Attacking" the block
             yield return StartCoroutine(Damage(blockPosition, damage));
-            
+
+            // playing soundeffect
+            AudioManager.instance.PlaySFX("HitSFX");
+
             // Updating block visuals
             field.RefreshFieldVisuals();
 
@@ -234,7 +243,9 @@ public class PowerCounter : MonoBehaviour
             int nextDamagePowerCost = (currentPower > damagePowerCost) ? damagePowerCost : (int)currentPower;
             damageToPlayer++;
 
-            
+            // playing soundeffect
+            AudioManager.instance.PlaySFX("MoreDamageSFX");
+
             // Adding one damage (sword) particle for each X power is left to show how much damage will be dealt to opposing player
             if (damageToPlayer == 1)
             {

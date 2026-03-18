@@ -119,6 +119,9 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     {
         Debug.Log("Ability: " + card.name + " uses " + abilityData.name);
 
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("UseAbilitySFX");
+
         // Gaining power if any
         if (abilityData.power > 0)
             card.GainPower(abilityData.power);

@@ -66,6 +66,9 @@ public class Player : MonoBehaviour
 
     public void TakeDamage(int damageAmount)
     {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("HitSFX");
+
         damageAmount = (damageAmount > health) ? health : damageAmount;
 
         health -= damageAmount;
