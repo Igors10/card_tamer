@@ -47,6 +47,10 @@ public class Card : MonoBehaviour
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
 
+    [Header("Ability play")]
+    [SerializeField] float zoomIntensity;
+    [SerializeField] float zoomTime;
+
     private void Start()
     {
         SetScales();
@@ -306,14 +310,23 @@ public class Card : MonoBehaviour
         RotateCard(0);
         transform.localScale = defaultScale;
 
+        // disable ready button before an ability is chosen
+        GameManager.instance.readyButton.gameObject.SetActive(false);
+
         // make abilities available for selecting 
         GameManager.instance.executeManager.RevealCard(this);
+
+        // zooming in on the unit
+        GameManager.instance.mainCamera.ZoomIn(unit.gameObject, zoomIntensity, zoomTime);
     }
 
     public void CardUseAbility(Ability ability)
     {
         // Deactivating the card
         GameManager.instance.executeManager.StopRevealCard();
+
+        // zooming out from the unit
+        GameManager.instance.mainCamera.ZoomOut();
     }
 
     /// <summary>

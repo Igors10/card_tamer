@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using FishNet.Demo.AdditiveScenes;
+using GameKit.Dependencies.Utilities.Types;
 
 public class PowerCounter : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] Image powerIcon;
     [HideInInspector] public float currentPower;
     [SerializeField] D6 dice;
+    [SerializeField] GameObject damageObj;
+    [SerializeField] GameObject dmgParticlePrefab;
 
     [Header("default vals")]
     Vector3 defaultIconScale;
@@ -32,9 +35,8 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] ParticleSystem damageVFX;
     [SerializeField] float damageAnimTime;
     [SerializeField] float powerDecreaseInterval;
-    [SerializeField] GameObject damageObj;
     [HideInInspector] public bool resolved;
-    [SerializeField] int damagePowerCost;
+    [SerializeField] int damagePowerCost; 
     List<GameObject> damageParticles = new List<GameObject>();
     private void Start()
     {
@@ -197,12 +199,13 @@ public class PowerCounter : MonoBehaviour
         // Dealing 1 damage for each X power
         int damageToPlayer = 0;
         float damageParticleOffset = 40f;
+        int unitToDamageID = 0;
+        float powerDecreaseSpeedMod = 1f;
 
         while (currentPower > 0)
         {
             int nextDamagePowerCost = (currentPower > damagePowerCost) ? damagePowerCost : (int)currentPower;
             damageToPlayer++;
-            int unitToDamageID = 0;
 
             // playing soundeffect
             AudioManager.instance.PlaySFX("MoreDamageSFX");
@@ -224,7 +227,7 @@ public class PowerCounter : MonoBehaviour
             }
             else
             {
-                GameObject newDamageParticle = Instantiate(damageObj, damageObj.transform.position, Quaternion.identity, damageObj.transform);
+                GameObject newDamageParticle = Instantiate(dmgParticlePrefab, damageObj.transform.position, Quaternion.identity, damageObj.transform);
                 newDamageParticle.GetComponent<Image>().color = player.playerColor;
                 newDamageParticle.transform.localPosition += new Vector3(damageParticleOffset, 0f, 0f);
                 damageParticles.Add(newDamageParticle);
@@ -233,8 +236,10 @@ public class PowerCounter : MonoBehaviour
                 GameManager.instance.animations.PopAnim(newDamageParticle, 0.3f, 0.45f);
             }
 
-            
-            yield return StartCoroutine(DecreasePower(nextDamagePowerCost));
+            // Decrease power from power counter
+            powerDecreaseSpeedMod *= 1.3f; // every 5 power the decrease speeds up
+            yield return StartCoroutine(DecreasePower(nextDamagePowerCost, powerDecreaseSpeedMod));
+            yield return new WaitForSeconds(0.3f);
         }
 
         // Damage distribution
@@ -265,9 +270,10 @@ public class PowerCounter : MonoBehaviour
             }
 
             // Damage to enemy units
-            if (field.GetFieldUnits(true).Count > 1)
+            if (field.GetFieldUnits(true).Count > unitToDamageID)
             {
-                Unit unitToDamage = field.GetFieldUnits()[0];
+                Unit unitToDamage = field.GetFieldUnits()[unitToDamageID];
+                unitToDamageID++;
                 
                 Vector3 unitPosition = Camera.main.WorldToScreenPoint(unitToDamage.transform.position);
 
@@ -286,7 +292,7 @@ public class PowerCounter : MonoBehaviour
             yield return Damage(healthbarPos, damageParticles[currentDmgParticle]);
 
             // Refreshing opponents hp value and applying damage juice effects
-            playerToDamage.TakeDamage(damageToPlayer);
+            playerToDamage.TakeDamage(1);
             yield return new WaitForSeconds(0.2f);
         }
 
@@ -354,7 +360,7 @@ public class PowerCounter : MonoBehaviour
     /// </summary>
     /// <param name="decrease"></param>
     /// <returns></returns>
-    IEnumerator DecreasePower(int decrease)
+    IEnumerator DecreasePower(int decrease, float decreaseSpeed = 1f)
     {
         float targetPower = currentPower - decrease;
         if (targetPower < 0) targetPower = 0;
@@ -363,7 +369,7 @@ public class PowerCounter : MonoBehaviour
         {
             currentPower--;
             powerText.text = currentPower.ToString();
-            yield return new WaitForSeconds(powerDecreaseInterval);
+            yield return new WaitForSeconds(powerDecreaseInterval / decreaseSpeed);
         }
     }
 }

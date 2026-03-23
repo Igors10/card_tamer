@@ -674,9 +674,12 @@ MonoBehaviour:
   unit: {fileID: 0}
   player: {fileID: 0}
   glowEffect: {fileID: 7700092449853056093}
+  defaultScale: {x: 0, y: 0, z: 0}
   highlightedScale: {x: 0, y: 0, z: 0}
   isDragged: 0
   currentPower: 0
+  zoomIntensity: 0.3
+  zoomTime: 3
 --- !u!114 &5701744519133028315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -731,6 +734,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df4e10c1d4250b148aae31dad7f3de00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HoverEffect
+  inGame: 1
   sizeMod: 1.1
 --- !u!1 &7700092449853056093
 GameObject:

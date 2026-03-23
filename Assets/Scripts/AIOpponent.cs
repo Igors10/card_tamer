@@ -87,7 +87,7 @@ public class AIOpponent : MonoBehaviour
     /// <returns></returns>
     IEnumerator PlaceRandomCard()
     {
-        yield return new WaitForSeconds(config.placingDelay);
+        yield return new WaitForSeconds(2.5f);
 
         // Getting all empty fields
         List<Field> availableFields = GameManager.instance.fieldManager.FindEmptyFields(playerObj.fields);
@@ -108,7 +108,7 @@ public class AIOpponent : MonoBehaviour
         //GameManager.instance.fieldManager.SpawnUnit(cardToPlay, fieldToSpawnOn);
         //GameManager.instance.handManager.AddCardToField(cardToPlay, playerObj);
 
-        yield return null;
+        yield return new WaitForSeconds(1f);
         yield return ChooseRandomAbility();
 
         // Ending the turn

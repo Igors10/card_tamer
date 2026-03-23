@@ -6,12 +6,17 @@ public class CartoonShakeEffect : MonoBehaviour
     [Header("shake anim")]
     [SerializeField] float idleRotateInterval = 1.5f;
     [SerializeField] float idleRotationIntensity = 3f;
+    Coroutine anim;
 
     private void OnEnable()
     {
-        StartCoroutine(IdleAnim(transform.localEulerAngles));
+        anim = StartCoroutine(IdleAnim(transform.localEulerAngles));
     }
 
+    private void OnDisable()
+    {
+        StopCoroutine(anim);
+    }
     IEnumerator IdleAnim(Vector3 startingRotation)
     {
         // determine first rotation randomly

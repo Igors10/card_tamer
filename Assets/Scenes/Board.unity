@@ -10026,6 +10026,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: HideShopButton
       objectReference: {fileID: 0}
+    - target: {fileID: 1013361038154256346, guid: 1ef2592676fa2e148b8ff80ac08439c2, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7167891799507022455, guid: 1ef2592676fa2e148b8ff80ac08439c2, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

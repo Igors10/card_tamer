@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
 
 public class Viewpoint : MonoBehaviour
 {
@@ -15,6 +16,9 @@ public class Viewpoint : MonoBehaviour
     Vector3 prevPosition;
     Vector3 prevRotation;
     float prevSize; // field of view
+
+    [Header("zoom")]
+    bool zoomedIn;
     
     [SerializeField] float viewChangeSpeed;
 
@@ -86,6 +90,78 @@ public class Viewpoint : MonoBehaviour
         GameManager.instance.managerUI.EnableUI(true);
 
         Debug.Log("Viewpoint: viewpoint transition complete");
+    }
+
+    public void ZoomIn(GameObject objToZoomIn, float zoomIntensity, float zoomTime)
+    {
+        StartCoroutine(ZoomInOn(objToZoomIn, zoomIntensity, zoomTime));
+    }
+
+    public IEnumerator ZoomInOn(GameObject zoomObj, float zoomIntensity, float zoomTime)
+    {
+        Debug.Log($"Viewport [{gameObject.GetInstanceID()}]: Started zoom in");
+
+        // starting values
+        Vector3 startingPosition = transform.position;
+        Vector3 startingRotation = transform.localEulerAngles;
+
+        // target values
+        Vector3 targetPosition = Vector3.Lerp(startingPosition, zoomObj.transform.position, zoomIntensity);
+        targetPosition = new Vector3(zoomObj.transform.position.x, targetPosition.y, targetPosition.z);
+        Vector3 targetRotation = Vector3.Lerp(startingRotation, new Vector3(startingRotation.x * 0.3f, startingRotation.y, startingRotation.z), zoomIntensity);
+
+        float t = 0;
+        zoomedIn = true;
+
+        // zooming in
+        while (t < zoomTime * 2/3)
+        {
+            t += Time.deltaTime;
+            float clampedT = t / (zoomTime * 2/3);
+            float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
+
+            transform.position = Vector3.Lerp(startingPosition, targetPosition, coolT);
+            Vector3 rotation = Vector3.Lerp(startingRotation, targetRotation, coolT);
+            transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+
+            yield return null;
+        }
+
+        // waiting for command to stop zooming in
+        while (zoomedIn)
+        {
+            yield return null;
+        }
+
+        Debug.Log("Viewport: in zoomout phase");
+
+        t = 0;
+
+        // zooming out
+        while (t < zoomTime * 1/3)
+        {
+            t += Time.deltaTime;
+            float clampedT = t / (zoomTime * 1/3);
+            float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
+
+            transform.position = Vector3.Lerp(targetPosition, startingPosition, coolT);
+            Vector3 rotation = Vector3.Lerp(targetRotation, startingRotation, coolT);
+            transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+
+            yield return null;
+        }
+
+        // snapping to correct values
+        transform.position = startingPosition;
+        transform.localRotation = Quaternion.Euler(startingRotation);
+
+        Debug.Log("Viewport: zoom in finished");
+    }
+
+    public void ZoomOut()
+    {
+        Debug.Log($"Viewport [{gameObject.GetInstanceID()}]: Called for a zoom out");
+        zoomedIn = false;
     }
 
     public IEnumerator MoveCamera(Vector3 targetPosition, float moveSpeed)

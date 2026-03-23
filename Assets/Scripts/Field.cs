@@ -82,7 +82,7 @@ public class Field : MonoBehaviour
 
         for (int i = 0; i < units.Length; i++)
         {
-            if (units[i] != null && (!onlyNotStunned || !units[i].stunned)) unitsToReturn.Add(units[i]);
+            if (units[i] != null) unitsToReturn.Add(units[i]);
         }
 
         return unitsToReturn;

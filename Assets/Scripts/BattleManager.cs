@@ -107,8 +107,8 @@ public class BattleManager : MonoBehaviour
         }
 
         // Rolling dice
-        if (opponentUnits.Count > 0) yield return StartCoroutine(opponentPowerUI.RollDicePower());
-        yield return new WaitForSeconds(0.4f);        
+        if (opponentUnits.Count > 0) StartCoroutine(opponentPowerUI.RollDicePower());
+        yield return new WaitForSeconds(0.6f);        
         if (playerUnits.Count > 0) playerPowerUI.EnableDice(true);
     
         // Wait for player(s) to roll dice

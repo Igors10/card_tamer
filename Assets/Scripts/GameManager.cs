@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
     public BattleManager battleManager;
     public Animations animations;
     public ShopManager shopManager;
+    public Viewpoint mainCamera;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -53,6 +54,8 @@ public class GameManager : MonoBehaviour
     {
         // Making GameManager accessible from anywhere
         instance = this;
+
+        mainCamera = Camera.main.GetComponent<Viewpoint>();
     }
     void Start()
     {
@@ -76,7 +79,7 @@ public class GameManager : MonoBehaviour
 
         // Moving the camera
         if (currentState != GameState.BATTLING)
-        Camera.main.GetComponent<Viewpoint>().ChangeViewpoint(GetState());
+        mainCamera.ChangeViewpoint(GetState());
 
         // Applying new state to the game
         switch (currentState)

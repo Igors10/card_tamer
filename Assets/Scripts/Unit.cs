@@ -87,7 +87,15 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         // FADE
         unitUI.SetActive(!faded);
-        sprite.color = (faded) ? new Color(sprite.color.r, sprite.color.g, sprite.color.b, fadedAlpha) : new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
+        Color spriteColor = (faded) ? new Color(sprite.color.r, sprite.color.g, sprite.color.b, fadedAlpha) : new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
+        sprite.color = spriteColor;
+        stunIndicator.GetComponent<Image>().color = spriteColor;
+        // cancelling card preview if it was on right before fading
+        if (faded) 
+        {
+            ViewCard(false);
+            HighlightUnit(false);
+        }
 
         // STUN
         if (stunIndicator != null) stunIndicator.SetActive(stunned);
