@@ -41,7 +41,7 @@ public class Field : MonoBehaviour
     /// Makes the field being available for playing cards on it
     /// </summary>
     /// <param name="enable"></param>
-    public void EnableSpawnSlot(int spawnSlot = 0) 
+    public void EnableSpawnSlot(int spawnSlot = 0)
     {
         // for moving units it first checks the front slot
         if (spawnSlot == 0 && units[spawnSlot] != null)
@@ -72,7 +72,7 @@ public class Field : MonoBehaviour
         // fading units
         foreach (Unit unit in units)
         {
-             if (unit != null) { unit.faded = isFadeOut; unit.RefreshUnitVisuals(); }
+            if (unit != null) { unit.faded = isFadeOut; unit.RefreshUnitVisuals(); }
         }
     }
 
@@ -97,7 +97,8 @@ public class Field : MonoBehaviour
     /// </summary>
     void IsCardOver()
     {
-        if (!unitSlots[1].gameObject.activeSelf || GameManager.instance.currentState != GameState.PLACING) return; // only matters when a card is being dragged during placing state
+        if (GameManager.instance.handManager.activeCard == null || GameManager.instance.currentState != GameState.PLACING
+            || (units[0] != null && units[1] != null || GameManager.instance.executeManager.currentCard != null)) return;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -132,13 +133,13 @@ public class Field : MonoBehaviour
     /// <param name="cardPlayed"></param>
     public bool PlayCard(Card cardPlayed, Player player)
     {
-        if (cardIsOver == false || units[1] != null) return false;
+        if ((player == GameManager.instance.player) && (cardIsOver == false || units[1] != null)) return false;
 
         // spawn a creature
         GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);
 
-        // moving card to field cards
-        GameManager.instance.handManager.AddCardToField(cardPlayed, player);
+        // activating cards ability
+        cardPlayed.PlayCard();
 
         Debug.Log("Field: a " + cardPlayed.cardData.name + " has been spawned");
         HighlightField(false);

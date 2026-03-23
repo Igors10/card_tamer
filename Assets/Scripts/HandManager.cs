@@ -1,13 +1,15 @@
+using NUnit.Framework.Constraints;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-using System.Collections;
-using NUnit.Framework.Constraints;
+using static UnityEngine.UI.CanvasScaler;
 public class HandManager : MonoBehaviour
 {
     [Header("refs")]
     public List<Card> cardsInHand = new List<Card>();
     public GameObject hand;
+    public GameObject fieldHand;
     public GameObject opponentHand;
     public Card activeCard; // card currently being dragged
 
@@ -40,9 +42,21 @@ public class HandManager : MonoBehaviour
     {
         player.cardsInHand.Remove(card);
         player.cardsOnField.Add(card);
-        card.transform.SetParent(GameManager.instance.planningManager.fieldHand.transform, false);
-        card.gameObject.SetActive(false);
+        card.transform.SetParent(fieldHand.transform, false);
+        //card.gameObject.SetActive(false);
         UpdateHandVisuals(player);
+    }
+
+    public void ReturnCardsToHand(Player player)
+    {
+        foreach (Card card in player.cardsOnField)
+        {
+            card.gameObject.SetActive(true);
+            card.unit.RemoveFromBoard();
+            card.transform.SetParent(hand.transform, false);
+            card.CardEndRound();
+            AddCardToHand(card, player);
+        }
     }
 
     /// <summary>
@@ -80,13 +94,14 @@ public class HandManager : MonoBehaviour
     /// </summary>
     void HandHidingCheck()
     {
-        if (GameManager.instance.currentState != GameState.PLACING) return;
+        // Hide the hand if following
+        bool forceHide = (GameManager.instance.currentState != GameState.PLACING || activeCard != null);
         RectTransform handRT = hand.GetComponent<RectTransform>();
         float hideSpeed = 0;
 
         // Deciding if hand should go up, down or not move
         // Hand goes down (hides)
-        if (Input.mousePosition.y >= handHideDistance && handRT.transform.position.y > handHiddenPos.transform.position.y)
+        if (Input.mousePosition.y >= handHideDistance && handRT.transform.position.y > handHiddenPos.transform.position.y || forceHide)
         {
             hideSpeed = -handHideSpeed;
             // Making the hand movement speed increase exponentially

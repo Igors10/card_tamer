@@ -16,7 +16,7 @@ public class Card : MonoBehaviour
 
     [Header("Healthbar")]
     [HideInInspector] public int damageToHP; // how much hp is currently missing
-    [SerializeField]Image[] hearts = new Image[10];
+    [SerializeField] Image[] hearts = new Image[10];
     [SerializeField] TextMeshProUGUI healthText;
 
     [Header("refs")]
@@ -31,7 +31,7 @@ public class Card : MonoBehaviour
 
     [Header("highlight")]
     [SerializeField] GameObject glowEffect;
-    Vector3 defaultScale = new Vector3();
+    [HideInInspector] public Vector3 defaultScale = new Vector3();
     [HideInInspector] public Vector3 highlightedScale = new Vector3();
     Vector3 dragScale = new Vector3();
     float highlightOffsetY = 220f;
@@ -140,7 +140,6 @@ public class Card : MonoBehaviour
         // Remove card from field cards (card cant really be destroyed when they are in hand)
         player.cardsOnField.Remove(this);
 
-        Destroy(unit.gameObject);
         Destroy(this.gameObject);
     }
 
@@ -156,7 +155,7 @@ public class Card : MonoBehaviour
     {
         if (GameManager.instance.currentState == GameState.PLACING)
         {
-            //if (GameManager.instance.handManager.activeCard != null) return;
+            if (GameManager.instance.executeManager.currentCard == this) return;
 
             // Putting the card in "reading mode" when hovering over it in hand
             // Scale
@@ -184,10 +183,11 @@ public class Card : MonoBehaviour
             if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.player);
         }
         
+        /*
         if (GameManager.instance.currentState == GameState.PLANNING)
         {
             transform.localScale = (mouseOver) ? dragScale : defaultScale;
-        }
+        }*/
     }
     
     public void HighlightCard(bool isHightlighted)
@@ -201,20 +201,21 @@ public class Card : MonoBehaviour
 
     public void StartDrag()
     {
-        if (player != GameManager.instance.player) return;
+        if (GameManager.instance.executeManager.currentCard != null ) return;
 
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;
 
         if (GameManager.instance.currentState == GameState.PLACING && GameManager.instance.yourTurn) 
-            GameManager.instance.fieldManager.EnableSpawnSlots();
+            GameManager.instance.fieldManager.EnableSpawnSlots(0);
 
+        /*
         if (GameManager.instance.currentState == GameState.PLANNING)
         {
             // making the card appear above other cards and be bigger while dragged
             transform.localScale = dragScale;
             transform.SetAsLastSibling();
-        }
+        }*/
     }
 
     public void EndDrag()
@@ -227,6 +228,7 @@ public class Card : MonoBehaviour
             GameManager.instance.fieldManager.PlayCard(this, GameManager.instance.player);
             GameManager.instance.handManager.activeCard = null;
         }
+        /*
         else if (GameManager.instance.currentState == GameState.PLANNING)
         {
             // card size back to default
@@ -235,7 +237,7 @@ public class Card : MonoBehaviour
             // sorting cards based on their position
             GameManager.instance.planningManager.SortCards(player);
             GameManager.instance.planningManager.UpdateFieldHandVisuals(player);
-        }
+        }*/
     }
 
     /// <summary>
@@ -293,6 +295,25 @@ public class Card : MonoBehaviour
     public void UseSelectedAbility()
     {
         foreach (Ability ability in abilities) if (ability.selected) ability.UseAbility();
+    }
+
+    public void PlayCard()
+    {
+        // moving card to field cards
+        GameManager.instance.handManager.AddCardToField(this, player);
+
+        // resetting visual params
+        RotateCard(0);
+        transform.localScale = defaultScale;
+
+        // make abilities available for selecting 
+        GameManager.instance.executeManager.RevealCard(this);
+    }
+
+    public void CardUseAbility(Ability ability)
+    {
+        // Deactivating the card
+        GameManager.instance.executeManager.StopRevealCard();
     }
 
     /// <summary>

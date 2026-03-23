@@ -64,6 +64,15 @@ public class Player : MonoBehaviour
         if (isAI) AIplayer.AIStartTurn();
     }
 
+    public void FinishStatePlayer()
+    {
+        // resetting endStateReady
+        endStateReady = false;
+
+        // returning all cards back to hand
+        if (GameManager.instance.currentState == GameState.BATTLING) GameManager.instance.handManager.ReturnCardsToHand(this);
+    }
+
     public void TakeDamage(int damageAmount)
     {
         // playing soundeffect

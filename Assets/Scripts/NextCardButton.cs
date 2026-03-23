@@ -58,6 +58,6 @@ public class NextCardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         if (!GameManager.instance.executeManager.readyRevealCard) return;
         glow.transform.localScale = defaultGlowScale;
         glow.SetActive(false);
-        GameManager.instance.executeManager.RevealCard();
+       //GameManager.instance.executeManager.RevealCard();
     }
 }

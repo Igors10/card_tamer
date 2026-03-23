@@ -133,8 +133,7 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         // Effect
         // find a way to have different effects here
 
-        // Disabling an order marker after an ability is used
-        card.unit.EnableOrderMarker(false);
+        card.CardUseAbility(this);
     }
 
     // ====================
@@ -189,7 +188,7 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
     public void SelectAbility(bool isSelected)
     {
         // resetting units position
-        if (savedField != null) GameManager.instance.fieldManager.MoveUnit(card.unit, savedField, savedSlot, false);
+        //if (savedField != null) GameManager.instance.fieldManager.MoveUnit(card.unit, savedField, savedSlot, false);
 
         // resets the abilities in case another ability was selected
         if (isSelected) card.ResetAbilities();
@@ -201,16 +200,16 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         transform.localScale = (isSelected) ? highlightedScale : defaultScale;
 
         // Highlighting fields for movement
-        if (isSelected) GameManager.instance.fieldManager.EnableMoveSlots(card.unit.currentField, abilityData.speed);
+        //if (isSelected) GameManager.instance.fieldManager.EnableMoveSlots(card.unit.currentField, abilityData.speed);
 
         // Making the unit ready to move
-        card.unit.readyToMove = isSelected; // Instance not set to an instance of an object
+        //card.unit.readyToMove = isSelected; // Instance not set to an instance of an object
 
         // Saving units starting position
-        savedField = card.unit.currentField;
-        savedSlot = GameManager.instance.fieldManager.GetUnitSlot(card.unit);
+        //savedField = card.unit.currentField;
+        //savedSlot = GameManager.instance.fieldManager.GetUnitSlot(card.unit);
 
-        if (GameManager.instance.yourTurn)
+        if (GameManager.instance.yourTurn && isSelected)
         {
             // Enables 'use' button
             string buttonText = "Use " + name.text;

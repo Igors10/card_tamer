@@ -17,23 +17,17 @@ public class ExecuteManager : MonoBehaviour
     [Header("revealed card params")]
     [HideInInspector] public bool readyRevealCard = false;
     float readyCardScale = 0.6f;
-    Vector3 revealedCardScale = new Vector3(2f, 2f, 1f);
+    Vector3 revealedCardScale = new Vector3(1.8f, 1.8f, 1f);
 
-    public void LoadCardStack(List<Card> newCardStack, Player player)
+    public void RevealCard(Card cardToReveal)
     {
-        player.plannedCardStack.Clear();
-        player.plannedCardStack.AddRange(newCardStack);
-    }
+        currentCard = cardToReveal;
 
-    public void RevealCard()
-    {
         // playing soundeffect
         AudioManager.instance.PlaySFX("NextCardSFX");
 
-        readyRevealCard = false;
-
         // positioning the card
-        currentCard.transform.localPosition = revealedCardPos.localPosition;
+        currentCard.transform.position = revealedCardPos.position;
         currentCard.transform.localScale = revealedCardScale;
 
         // making card's abilities be ready to be clicked on
@@ -46,6 +40,21 @@ public class ExecuteManager : MonoBehaviour
 
         // Telling player to choose an ability
         GameManager.instance.managerUI.NewHint("Pick one of card's abilities");
+    }
+
+    public void StopRevealCard()
+    {
+        currentCard.unit.HighlightUnit(false);
+        currentCard.gameObject.SetActive(false);
+        currentCard.transform.localScale = currentCard.defaultScale;
+
+        currentCard = null;
+    }
+
+    public void LoadCardStack(List<Card> newCardStack, Player player)
+    {
+        player.plannedCardStack.Clear();
+        player.plannedCardStack.AddRange(newCardStack);
     }
 
     public void NextCardReady()
@@ -64,20 +73,5 @@ public class ExecuteManager : MonoBehaviour
 
         readyRevealCard = true;
         if (GameManager.instance.yourTurn) nextCardButton.glow.SetActive(true);
-    }
-
-    public void StopRevealCard()
-    {
-        Player currentPlayer = GameManager.instance.GetCurrentPlayer();
-
-        currentCard.unit.HighlightUnit(false);
-        currentCard.gameObject.SetActive(false);
-
-        Debug.Log("ExecuteManager: cards left in a stack:" + currentPlayer.plannedCardStack.Count);
-        currentPlayer.plannedCardStack.Remove(currentPlayer.plannedCardStack[0]);
-        currentCard = null;
-
-        // Checking if there are any cards left to resolve
-        if (currentPlayer.plannedCardStack.Count == 0) currentPlayer.endStateReady = true;
     }
 }

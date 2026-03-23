@@ -15,15 +15,17 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
     private void Start()
     {
-        UpdateButtonState();
+        //UpdateButtonState();
     }
 
     public void UpdateButtonState(string customButtonText = null)
     {
+        Debug.Log("Ready button text was updated to " + customButtonText);
+
         button.gameObject.SetActive(true);
         button.interactable = true;
         buttonText.text = (customButtonText == null) ? GameManager.instance.GetState().buttonText : customButtonText;
-        //sprite.color = GameManager.instance.GetState().buttonColor;
+        sprite.color = GameManager.instance.GetState().buttonColor;
     }
 
     public void ButtonClick()
@@ -37,16 +39,16 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
             // PLACING AND PLANNING
             default:
 
-                GameManager.instance.player.endStateReady = true;
-                button.interactable = false;
-                buttonText.text = GameManager.instance.GetState().pressedButtonText;
-                //sprite.color = GameManager.instance.GetState().pressedButtonColor;
-                break;
-
-            case GameState.EXECUTING:
-
-                GameManager.instance.fieldManager.DisableAllSlots();
-                GameManager.instance.executeManager.currentCard.UseSelectedAbility();
+                if (GameManager.instance.executeManager.currentCard != null)
+                {
+                    GameManager.instance.executeManager.currentCard.UseSelectedAbility();
+                }
+                else
+                {
+                    GameManager.instance.player.endStateReady = true;
+                    button.interactable = false;
+                    buttonText.text = GameManager.instance.GetState().pressedButtonText;
+                }
                 break;
 
             case GameState.BATTLING:

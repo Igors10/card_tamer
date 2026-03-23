@@ -9,7 +9,7 @@ public class CartoonShakeEffect : MonoBehaviour
 
     private void OnEnable()
     {
-        StartCoroutine(IdleAnim(transform.eulerAngles));
+        StartCoroutine(IdleAnim(transform.localEulerAngles));
     }
 
     IEnumerator IdleAnim(Vector3 startingRotation)

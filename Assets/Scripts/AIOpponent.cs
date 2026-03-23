@@ -46,13 +46,14 @@ public class AIOpponent : MonoBehaviour
                 currentAction = StartCoroutine(PlaceRandomCard());
                 break;
 
+                /*
             case GameState.PLANNING:
                 PlanCards();
                 break;
 
             case GameState.EXECUTING:
-                currentAction = StartCoroutine(ResolvePlannedCard());
-                break;
+                //currentAction = StartCoroutine(ResolvePlannedCard());
+                break;*/
 
             case GameState.BATTLING:
                 break;
@@ -103,12 +104,45 @@ public class AIOpponent : MonoBehaviour
         Field fieldToSpawnOn = availableFields[randomField];
 
         // Spawning a unit
-        GameManager.instance.fieldManager.SpawnUnit(cardToPlay, fieldToSpawnOn);
-        GameManager.instance.handManager.AddCardToField(cardToPlay, playerObj);
+        fieldToSpawnOn.PlayCard(cardToPlay, playerObj);
+        //GameManager.instance.fieldManager.SpawnUnit(cardToPlay, fieldToSpawnOn);
+        //GameManager.instance.handManager.AddCardToField(cardToPlay, playerObj);
+
+        yield return null;
+        yield return ChooseRandomAbility();
 
         // Ending the turn
-        yield return new WaitForSeconds(config.placingDelay);
         AIEndTurn();
+    }
+
+    IEnumerator ChooseRandomAbility()
+    {
+        // REVEALS THE CARD
+        // Prepares the card and reveals it immideately
+        //GameManager.instance.executeManager.NextCardReady();
+        //GameManager.instance.executeManager.RevealCard();
+
+        yield return new WaitForSeconds(config.executingAbilityDelay);
+
+        // SELECTS AN ABILITY
+        Card cardResolving = GameManager.instance.executeManager.currentCard;
+
+        // Getting all cards active abilities
+        List<Ability> cardAbilities = new List<Ability>();
+        for (int i = 0; i < cardResolving.abilities.Length; i++)
+        {
+            if (cardResolving.abilities[i].abilityData.isPassive == false) cardAbilities.Add(cardResolving.abilities[i]);
+        }
+
+        // Picking one random card's active ability
+        int randomAbility = Random.Range(0, cardAbilities.Count);
+        Ability abilityToUse = cardAbilities[randomAbility];
+        abilityToUse.SelectAbility(true);
+
+        // USES AN ABILITY
+        abilityToUse.UseAbility();
+      
+        yield return new WaitForSeconds(config.executingAbilityDelay);
     }
 
     // =========================================================
@@ -136,69 +170,7 @@ public class AIOpponent : MonoBehaviour
     // =========================================================
     // =================== EXECUTING============================
 
-    IEnumerator ResolvePlannedCard()
-    {
-        yield return new WaitForSeconds(config.executingRevealDelay);
-
-        // REVEALS THE CARD
-        // Prepares the card and reveals it immideately
-        GameManager.instance.executeManager.NextCardReady();
-        GameManager.instance.executeManager.RevealCard();
-
-        yield return new WaitForSeconds(config.executingAbilityDelay);
-
-        // SELECTS AN ABILITY
-        Card cardResolving = GameManager.instance.executeManager.currentCard;
-
-        // Getting all cards active abilities
-        List<Ability> cardAbilities = new List<Ability>();
-        for (int i = 0; i < cardResolving.abilities.Length; i++)
-        {
-            if (cardResolving.abilities[i].abilityData.isPassive == false) cardAbilities.Add(cardResolving.abilities[i]);
-        }
-
-        // Picking one random card's active ability
-        int randomAbility = Random.Range(0, cardAbilities.Count);
-        Ability abilityToUse = cardAbilities[randomAbility];
-        abilityToUse.SelectAbility(true);
-
-        yield return new WaitForSeconds(config.executingAbilityDelay);
-
-        // MOVES THE UNIT
-        // Get all available fields
-        List<Field> availableFields = new List<Field>();
-
-        for (int i = 0; i < 4; i++)
-        {
-            if (playerObj.fields[i].unitSlots[0].gameObject.activeSelf 
-                || playerObj.fields[i].unitSlots[1].gameObject.activeSelf 
-                || playerObj.fields[i] == cardResolving.unit.currentField)
-            {
-                availableFields.Add(playerObj.fields[i]);
-            }
-        }
-
-        // Picking random field
-        int randomField = Random.Range(0, availableFields.Count);
-
-        // if field picked is different from one unit already occupying move unit there
-        if (availableFields[randomField] != cardResolving.unit.currentField)
-        {
-            int enabledSlotID = (availableFields[randomField].unitSlots[0].gameObject.activeSelf) ? 0 : 1;
-            GameManager.instance.fieldManager.MoveUnit(cardResolving.unit, availableFields[randomField], enabledSlotID, false);
-            yield return new WaitForSeconds(config.executingAbilityDelay);
-        }
-
-        // USES AN ABILITY
-        abilityToUse.UseAbility();
-        GameManager.instance.executeManager.StopRevealCard();
-        GameManager.instance.fieldManager.DisableAllSlots();
-
-        yield return new WaitForSeconds(config.executingAbilityDelay);
-
-        // ENDS THE TURN
-        AIEndTurn();
-    }
+   
 
     // =========================================================
     // =================== BATTLING ============================

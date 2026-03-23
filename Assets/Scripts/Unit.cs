@@ -102,14 +102,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// </summary>
     void ViewCard(bool isViewed)
     {
-        if (GameManager.instance.currentState == GameState.PLANNING && card.player == GameManager.instance.player)
-        {
-            card.HighlightCard(isViewed);
-        }
-        else
-        {
-            GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);
-        }
+        GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);        
     }
 
     public IEnumerator TakeDamage(int damage)
@@ -143,9 +136,13 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// </summary>
     public void RemoveFromBoard()
     {
-        // removes unit from field
+        // removes unit reference from field
         int unitSlot = (currentField.units[0] == this) ? 0 : 1;
         currentField.units[unitSlot] = null;
+
+        // removes unit gameObject
+        Destroy(this.gameObject);
+
     }
 
     /// <summary>

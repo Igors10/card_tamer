@@ -2590,14 +2590,10 @@ MonoBehaviour:
   currentState: 0
   gameStates:
   - {fileID: 11400000, guid: 400f9069f76a97c4ebc85623c9e6e694, type: 2}
-  - {fileID: 11400000, guid: 95cc30679fe9d024ca23fbdf86aa887e, type: 2}
-  - {fileID: 11400000, guid: 385a6b5994f7bfa419a6c89a87fe4a2f, type: 2}
   - {fileID: 11400000, guid: 94119400c2af2594dba49145b2713ad1, type: 2}
   - {fileID: 11400000, guid: 21d0423fe7f6efb4593be6ebf6b06512, type: 2}
   gameStateUI:
   - {fileID: 1878616677}
-  - {fileID: 1389799260}
-  - {fileID: 243512484}
   - {fileID: 1205934170}
   - {fileID: 465639859}
   yourTurn: 0
@@ -4529,7 +4525,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 550}
+  m_AnchoredPosition: {x: 94, y: 550}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &1013467353
@@ -7631,6 +7627,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HandManager
   cardsInHand: []
   hand: {fileID: 1649722222}
+  fieldHand: {fileID: 1887581407}
   opponentHand: {fileID: 1820820545}
   activeCard: {fileID: 0}
   fanSpread: 8
@@ -8479,7 +8476,43 @@ RectTransform:
   - {fileID: 1391243420}
   - {fileID: 2124064077}
   - {fileID: 1820820546}
+  - {fileID: 1887581408}
   m_Father: {fileID: 1955103754}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1887581407
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1887581408}
+  m_Layer: 5
+  m_Name: FieldHand
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1887581408
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1887581407}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1878616678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

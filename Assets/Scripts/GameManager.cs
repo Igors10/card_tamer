@@ -8,8 +8,6 @@ using UnityEngine.VFX;
 public enum GameState
 {
     PLACING,
-    PLANNING,
-    EXECUTING,
     BATTLING,
     BUYING
 }
@@ -89,6 +87,7 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(opponent.playerUI.ShowTokens(false));
                 break;
 
+                /*
             case GameState.PLANNING:
                 // Making field cards appear correctly
                 planningManager.InitPlanCards(player);
@@ -106,6 +105,7 @@ public class GameManager : MonoBehaviour
                 // button is only available after choosing an ability
                 readyButton.gameObject.SetActive(false);
                 break;
+                */
 
             case GameState.BATTLING:
                 managerUI.EnableUI(true);
@@ -149,10 +149,6 @@ public class GameManager : MonoBehaviour
         // state specific effects
         switch (currentState)
         {
-            case GameState.EXECUTING:
-                executeManager.StopRevealCard();
-                break;
-
             case GameState.BUYING:
                 shopManager.EnableRerollButton(false);
                 break;
@@ -186,13 +182,12 @@ public class GameManager : MonoBehaviour
         switch (GameManager.instance.currentState)
         {
             case GameState.PLACING:
+
                 // disables "finish placing" button if there are no units on player's side
                 if (player.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
-                break;
-
-            case GameState.EXECUTING:
-                executeManager.NextCardReady();
-                readyButton.gameObject.SetActive(false);
+                // otherwise resetting its visuals
+                else readyButton.UpdateButtonState();
+                
                 break;
 
             case GameState.BATTLING:
@@ -202,7 +197,6 @@ public class GameManager : MonoBehaviour
 
             case GameState.BUYING:
                 shopManager.EnableRerollButton(true);
-
                
                 break;
         }
@@ -260,8 +254,8 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameManager: wrapping up state: " + currentState.ToString());
         // resetting turn logic values
-        opponent.endStateReady = false;
-        player.endStateReady = false;
+        opponent.FinishStatePlayer();
+        player.FinishStatePlayer();
 
         // disabling current state UI 
         managerUI.EnableUI(false);

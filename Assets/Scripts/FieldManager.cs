@@ -111,14 +111,10 @@ public class FieldManager : MonoBehaviour
         {
             if (fields[i].PlayCard(cardToPlay, player))
             {
-                // End the turn if a card was spawned
-                DisableAllSlots();
-                GameManager.instance.EndTurn();
-                return;
+                break;
             }
         }
         
-        // disable visuals if card wasn't spawned
         DisableAllSlots();
     }
 
@@ -127,8 +123,8 @@ public class FieldManager : MonoBehaviour
         // checking if field is full already
         if (fieldToSpawnOn.units[1] != null) { Debug.Log("Field: cannot spawn unit, field is already full"); return; }
 
-        int nextEmptySlot = 1; // always spawns units at the back slot
-        GameObject newUnitObj = Instantiate(unitPrefab, fieldToSpawnOn.unitSlots[nextEmptySlot].transform.position, Quaternion.identity, this.gameObject.transform);
+        int nextEmptySlot = (fieldToSpawnOn.units[0] == null) ? 0 : 1; // chooses next availavble slot to spawn unit on
+        GameObject newUnitObj = Instantiate(unitPrefab, fieldToSpawnOn.unitSlots[nextEmptySlot].transform.position, Quaternion.Euler(60f, 0f, 0f), this.gameObject.transform);
         Unit newUnit = newUnitObj.GetComponent<Unit>();
         fieldToSpawnOn.units[nextEmptySlot] = newUnit;
         newUnit.InitUnit(cardToSpawn, fieldToSpawnOn);

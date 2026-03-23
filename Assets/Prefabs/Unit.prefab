@@ -220,6 +220,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6301522003194282320}
+  - component: {fileID: 1114223188110332672}
   m_Layer: 0
   m_Name: unitUI
   m_TagString: Untagged
@@ -243,8 +244,22 @@ Transform:
   - {fileID: 4664609873625991877}
   - {fileID: 4159098066444410952}
   - {fileID: 9148819430455530113}
+  - {fileID: 7104147675448540656}
   m_Father: {fileID: 4513581992025929299}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1114223188110332672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252183568118034703}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ea4b716da9e900418a264921df3fafa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardEffect
+  onStartOnly: 0
 --- !u!1 &1756766998245664043
 GameObject:
   m_ObjectHideFlags: 0
@@ -347,11 +362,11 @@ RectTransform:
   m_GameObject: {fileID: 2745936368968254601}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.06, y: 0.02, z: 1}
+  m_LocalScale: {x: 0.06, y: 0.020000001, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5846015154568916885}
-  m_Father: {fileID: 4513581992025929299}
+  m_Father: {fileID: 6301522003194282320}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -427,7 +442,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7104147675448540656}
   - {fileID: 7636158932771844217}
   - {fileID: 6301522003194282320}
   m_Father: {fileID: 6563220294542665295}
@@ -662,7 +676,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6563220294542665295}
   - component: {fileID: 3327599165064251939}
-  - component: {fileID: 2206187887213793907}
   - component: {fileID: 9008516459039196607}
   m_Layer: 0
   m_Name: Unit
@@ -745,18 +758,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2206187887213793907
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4710258510420537553}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ea4b716da9e900418a264921df3fafa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BillboardEffect
 --- !u!114 &9008516459039196607
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -979,6 +980,7 @@ GameObject:
   - component: {fileID: 7636158932771844217}
   - component: {fileID: 225352427123266494}
   - component: {fileID: 7459371196094019566}
+  - component: {fileID: 217078657629280581}
   m_Layer: 0
   m_Name: UnitVisuals
   m_TagString: Untagged
@@ -993,7 +995,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6850638614268251036}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1043,6 +1045,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &217078657629280581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6850638614268251036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ab1780e9436f94ba67d86b4bf2a98f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CartoonShakeEffect
+  idleRotateInterval: 1.5
+  idleRotationIntensity: 4
 --- !u!1 &6913014311538785610
 GameObject:
   m_ObjectHideFlags: 0
