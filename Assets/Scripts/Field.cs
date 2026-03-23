@@ -76,13 +76,13 @@ public class Field : MonoBehaviour
         }
     }
 
-    public List<Unit> GetFieldUnits()
+    public List<Unit> GetFieldUnits(bool onlyNotStunned = false)
     {
         List<Unit> unitsToReturn = new List<Unit>();
 
         for (int i = 0; i < units.Length; i++)
         {
-            if (units[i] != null) unitsToReturn.Add(units[i]);
+            if (units[i] != null && (!onlyNotStunned || !units[i].stunned)) unitsToReturn.Add(units[i]);
         }
 
         return unitsToReturn;

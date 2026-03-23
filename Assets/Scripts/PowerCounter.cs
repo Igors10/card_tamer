@@ -35,6 +35,7 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] GameObject damageObj;
     [HideInInspector] public bool resolved;
     [SerializeField] int damagePowerCost;
+    List<GameObject> damageParticles = new List<GameObject>();
     private void Start()
     {
         // passing reference to this to player
@@ -192,49 +193,8 @@ public class PowerCounter : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        // Damage absorbed by block
-        if (field.currentBlock > 0)
-        {
-            // Finding block screen position
-            Vector3 blockPosition = Camera.main.WorldToScreenPoint(field.blockObj.transform.position);
-
-            // Calculating damage
-            int damage = (currentPower > field.currentBlock) ? field.currentBlock : (int)currentPower;
-            field.currentBlock -= damage;
-
-            // "Attacking" the block
-            yield return StartCoroutine(Damage(blockPosition, damage));
-
-            // playing soundeffect
-            AudioManager.instance.PlaySFX("HitSFX");
-
-            // Updating block visuals
-            field.RefreshFieldVisuals();
-
-            yield return new WaitForSeconds(0.5f);
-        }
-
-        // Damage to units
-        List<Unit> unitsToDamage = field.GetFieldUnits();
-        for (int i = 0; i < unitsToDamage.Count; i++)
-        {
-            // checking if there is any power left
-            if (currentPower == 0) break;
-
-            // calculating unit hp, damage dealt and units position
-            int unitHP = unitsToDamage[i].card.GetCurrerntHealth();
-            int damage = (currentPower > unitHP) ? unitHP : (int)currentPower;
-            Vector3 unitPosition = Camera.main.WorldToScreenPoint(unitsToDamage[i].transform.position);
-
-            // "Attacking" the unit
-            yield return StartCoroutine(Damage(unitPosition, damage));
-            yield return StartCoroutine(unitsToDamage[i].TakeDamage(damage));
-            yield return new WaitForSeconds(1f);
-        }
-
-        // Damage to player HP
+        // Damage to opponent
         // Dealing 1 damage for each X power
-        List<GameObject> damageParticles = new List<GameObject>();
         int damageToPlayer = 0;
         float damageParticleOffset = 40f;
 
@@ -242,6 +202,7 @@ public class PowerCounter : MonoBehaviour
         {
             int nextDamagePowerCost = (currentPower > damagePowerCost) ? damagePowerCost : (int)currentPower;
             damageToPlayer++;
+            int unitToDamageID = 0;
 
             // playing soundeffect
             AudioManager.instance.PlaySFX("MoreDamageSFX");
@@ -250,6 +211,7 @@ public class PowerCounter : MonoBehaviour
             if (damageToPlayer == 1)
             {
                 damageObj.SetActive(true);
+                damageParticles.Add(damageObj);
                 damageObj.GetComponent<Image>().color = player.playerColor;
                 damageObj.transform.position = powerText.transform.position;
 
@@ -275,21 +237,71 @@ public class PowerCounter : MonoBehaviour
             yield return StartCoroutine(DecreasePower(nextDamagePowerCost));
         }
 
-        // ending the coroutine if no damage to opponent can be dealt
-        if (damageToPlayer < 1) { resolved = true; yield break; }
+        // Damage distribution
+        for (int i = damageToPlayer; i > 0; i--)
+        {
+            int currentDmgParticle = i - 1;
+
+            // Damage to block
+            if (field.currentBlock > 0)
+            {
+                // Finding block screen position
+                Vector3 blockPosition = Camera.main.WorldToScreenPoint(field.blockObj.transform.position);
+
+                // Calculating damage
+                field.currentBlock--;
+
+                // "Attacking" the block
+                yield return StartCoroutine(Damage(blockPosition, damageParticles[currentDmgParticle]));
+
+                // playing soundeffect
+                AudioManager.instance.PlaySFX("HitSFX");
+
+                // Updating block visuals
+                field.RefreshFieldVisuals();
+
+                yield return new WaitForSeconds(0.2f);
+                continue;
+            }
+
+            // Damage to enemy units
+            if (field.GetFieldUnits(true).Count > 1)
+            {
+                Unit unitToDamage = field.GetFieldUnits()[0];
+                
+                Vector3 unitPosition = Camera.main.WorldToScreenPoint(unitToDamage.transform.position);
+
+                // "Attacking" the unit
+                yield return StartCoroutine(Damage(unitPosition, damageParticles[currentDmgParticle]));
+                StartCoroutine(unitToDamage.TakeDamage(1));
+
+                yield return new WaitForSeconds(0.2f);
+                continue;
+            }
+ 
+            // Damage to enemy player
+            // Visuals for damage targeting opponents UI
+            Player playerToDamage = GameManager.instance.GetOpponentOfPlayer(player);
+            Vector3 healthbarPos = playerToDamage.playerUI.healthbar.transform.position;
+            yield return Damage(healthbarPos, damageParticles[currentDmgParticle]);
+
+            // Refreshing opponents hp value and applying damage juice effects
+            playerToDamage.TakeDamage(damageToPlayer);
+            yield return new WaitForSeconds(0.2f);
+        }
+
+       
 
         yield return new WaitForSeconds(1f);
 
-        // Visuals for damage targeting opponents UI
-        Player playerToDamage = GameManager.instance.GetOpponentOfPlayer(player);
-        Vector3 healthbarPos = playerToDamage.playerUI.healthbar.transform.position;
-        yield return Damage(healthbarPos, 0);
+       
 
-        // Refreshing opponents hp value and applying damage juice effects
-        playerToDamage.TakeDamage(damageToPlayer);
 
         // destroying excess damage particles
-        foreach (GameObject damageParticle in damageParticles) { Destroy(damageParticle); }
+        foreach (GameObject damageParticle in damageParticles) { if (damageParticle != damageParticles[0]) Destroy(damageParticle); }
+
+        // clearing particle list
+        damageParticles.Clear();
 
         // Mark as resolved
         resolved = true;
@@ -300,12 +312,12 @@ public class PowerCounter : MonoBehaviour
     /// </summary>
     /// <param name="targetPosition"></param>
     /// <returns></returns>
-    IEnumerator Damage(Vector3 targetPosition, int damageAmount)
+    IEnumerator Damage(Vector3 targetPosition, GameObject damagePart)
     {
         float t = 0;
-        Vector3 startingPos = (damageObj.activeSelf) ? damageObj.transform.position : powerText.transform.position;
-        damageObj.SetActive(true);
-        damageObj.GetComponent<Image>().color = player.playerColor;
+        Vector3 startingPos = (damagePart.activeSelf) ? damagePart.transform.position : powerText.transform.position;
+        damagePart.SetActive(true);
+        damagePart.GetComponent<Image>().color = player.playerColor;
 
         // Generate random curve variables
         Vector3 midPoint = Vector3.Lerp(startingPos, targetPosition, 0.5f);
@@ -322,22 +334,19 @@ public class PowerCounter : MonoBehaviour
             // Bezier Curve movement
             Vector3 m1 = Vector3.Lerp(startingPos, controlPoint, coolT);
             Vector3 m2 = Vector3.Lerp(controlPoint, targetPosition, coolT);
-            damageObj.transform.position = Vector3.Lerp(m1, m2, coolT);
+            damagePart.transform.position = Vector3.Lerp(m1, m2, coolT);
 
             //damageObj.transform.position = Vector3.Lerp(startingPos, targetPosition, coolT);
             yield return null;
         }
 
-        damageObj.SetActive(false);
+        damagePart.SetActive(false);
         // playing the damange VFX
         if (damageVFX != null)
         {
             damageVFX.transform.position = targetPosition;
             damageVFX.Play();
         }
-
-        // Decrement the power number
-        StartCoroutine(DecreasePower(damageAmount));
     }
 
     /// <summary>

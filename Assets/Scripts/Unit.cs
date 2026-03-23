@@ -24,6 +24,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     [Header("health")]
     [SerializeField] Color healthValueColor = new Color(0.86f, 0.63f, 0.83f, 1f);
+    [HideInInspector] public bool stunned = false;
+    [SerializeField] GameObject stunIndicator;
 
     [Header("movement and input")]
     [HideInInspector] public bool readyToMove = false;
@@ -86,6 +88,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // FADE
         unitUI.SetActive(!faded);
         sprite.color = (faded) ? new Color(sprite.color.r, sprite.color.g, sprite.color.b, fadedAlpha) : new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
+
+        // STUN
+        if (stunIndicator != null) stunIndicator.SetActive(stunned);
+        sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = !stunned;
     }
 
     /// <summary>
@@ -113,6 +119,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         damage = (card.GetCurrerntHealth() > damage) ? damage : card.GetCurrerntHealth();
         card.damageToHP += damage;
         card.Refresh();
+        stunned = true;
         RefreshUnitVisuals();
 
         // do death check
