@@ -89,16 +89,10 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         float effectX = defaultEffectX;
         float effectWidth = defaultEffectWidth;
         // * (passive ability)
-        if (abilityData.isPassive)
+        if (abilityData.isPassive || abilityData.power <= 0)
         {
             effectX = passiveEffectX;
             effectWidth = passiveEffectWidth;
-        }
-        // * (no power ability)
-        else if (abilityData.power <= 0)
-        {
-            effectX = noPowerEffectX;
-            effectWidth = noPowerEffectWidth;
         }
   
         // applying formating (making it take as much space as possible if some other elements are disabled)

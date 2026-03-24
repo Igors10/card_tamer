@@ -43,7 +43,7 @@ public class ManagerUI : MonoBehaviour
         // If preview is away from the screen, move it down
         RectTransform cardRT = previewCard.GetComponent<RectTransform>();
         float cardTopY = cardRT.position.y + (1f - cardRT.pivot.y) * cardRT.rect.height;
-        if (cardTopY > Screen.height) previewCard.transform.position -= cardPreviewOffset * 2f;
+        if (cardTopY - 50f > Screen.height) previewCard.transform.position -= cardPreviewOffset * 2f;
     }
 
 

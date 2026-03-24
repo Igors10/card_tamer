@@ -5,6 +5,7 @@ using UnityEngine;
 public class Field : MonoBehaviour
 {
     public Unit[] units = new Unit[2];
+    [SerializeField] bool spawnable;
 
     [Header("refs")]
     [SerializeField] SpriteRenderer spawnPoint;
@@ -98,7 +99,7 @@ public class Field : MonoBehaviour
     void IsCardOver()
     {
         if (GameManager.instance.handManager.activeCard == null || GameManager.instance.currentState != GameState.PLACING
-            || (units[0] != null && units[1] != null || GameManager.instance.executeManager.currentCard != null)) return;
+            || (units[0] != null && units[1] != null || GameManager.instance.executeManager.currentCard != null) || !spawnable) return;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
