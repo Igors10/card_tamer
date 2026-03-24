@@ -133,7 +133,7 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         // Effect
         // find a way to have different effects here
 
-        card.CardUseAbility(this);
+        GameManager.instance.executeManager.CardUseAbility(card, this);
     }
 
     // ====================

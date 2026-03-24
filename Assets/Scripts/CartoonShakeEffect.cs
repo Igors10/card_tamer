@@ -7,6 +7,7 @@ public class CartoonShakeEffect : MonoBehaviour
     [SerializeField] float idleRotateInterval = 1.5f;
     [SerializeField] float idleRotationIntensity = 3f;
     Coroutine anim;
+    bool stop;
 
     private void OnEnable()
     {
@@ -38,8 +39,14 @@ public class CartoonShakeEffect : MonoBehaviour
                 transform.localRotation = Quaternion.Euler(startingRotation.x, startingRotation.y, startingRotation.z + doodleRotationAngle);
             }
 
-            yield return null;
+            do
+            {
+                yield return null;
+            } while (stop);
+            
         }
     }
+
+    public void StopAnim(bool isStop) => stop = isStop;
 
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -39,10 +40,15 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float fadedAlpha;
     [SerializeField] GameObject unitUI;
 
-    [Header("animation")]
+    [Header("idle animation")]
     [SerializeField] float shakeTime;
     [SerializeField] float shakeIntensity;
     [SerializeField] float shakeFrequency;
+
+    [Header("ability animation")]
+    [SerializeField] float jumpHeight;
+    [SerializeField] float jumpTime;
+    [SerializeField] TextMeshProUGUI skillText;
 
     void Start()
     {
@@ -191,6 +197,56 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         }
 
         transform.localPosition = startingPos;
+    }
+
+    public IEnumerator AbilityAnimation(Ability ability)
+    {
+        // disabling idle animation
+        sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = false;
+
+        // setting starting anim variables
+        // position variables
+        float t = 0;
+        Vector3 startingPosition = sprite.transform.localPosition;
+        Vector3 targetPosition = startingPosition + new Vector3(0, jumpHeight, 0);
+
+        // ability text variables variables
+        skillText.gameObject.SetActive(true);
+        skillText.text = ability.abilityData.name;
+        skillText.color = new Color(skillText.color.r, skillText.color.g, skillText.color.b, 1f);
+        Color skillTextColor = skillText.color;
+        Color skillTextTargetColor = new Color(skillTextColor.r, skillTextColor.g, skillTextColor.b, 0f);
+
+        // jumping up
+        while (t < jumpTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = t / jumpTime;
+            float coolT = clampedT * clampedT;
+
+            sprite.transform.localPosition = Vector3.Lerp(startingPosition, targetPosition, coolT);
+            yield return null;
+        }
+
+        t = 0f;
+        // landing and fading text away
+        while (t < jumpTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = t / jumpTime;
+            float coolT = 1 - (1 -clampedT) * (1 - clampedT);
+
+            sprite.transform.localPosition = Vector3.Lerp(targetPosition, startingPosition, coolT);
+            //skillText.color = Color.Lerp(skillTextColor, skillTextTargetColor, coolT);
+            yield return null;
+        }
+
+        // snapping values to correct ones
+        sprite.transform.localPosition = startingPosition;
+        skillText.gameObject.SetActive(false);
+
+        // enabling idle animation
+        sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = true;
     }
 
     // ===============

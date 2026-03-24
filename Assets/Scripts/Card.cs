@@ -1,9 +1,7 @@
-using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
+using System.Collections;
 
 public class Card : MonoBehaviour
 {
@@ -49,7 +47,7 @@ public class Card : MonoBehaviour
 
     [Header("Ability play")]
     [SerializeField] float zoomIntensity;
-    [SerializeField] float zoomTime;
+    public float zoomTime;
 
     private void Start()
     {
@@ -318,15 +316,6 @@ public class Card : MonoBehaviour
 
         // zooming in on the unit
         GameManager.instance.mainCamera.ZoomIn(unit.gameObject, zoomIntensity, zoomTime);
-    }
-
-    public void CardUseAbility(Ability ability)
-    {
-        // Deactivating the card
-        GameManager.instance.executeManager.StopRevealCard();
-
-        // zooming out from the unit
-        GameManager.instance.mainCamera.ZoomOut();
     }
 
     /// <summary>

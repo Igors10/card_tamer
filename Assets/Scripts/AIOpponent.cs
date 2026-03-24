@@ -108,7 +108,7 @@ public class AIOpponent : MonoBehaviour
         //GameManager.instance.fieldManager.SpawnUnit(cardToPlay, fieldToSpawnOn);
         //GameManager.instance.handManager.AddCardToField(cardToPlay, playerObj);
 
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(1f);
         yield return ChooseRandomAbility();
 
         // Ending the turn

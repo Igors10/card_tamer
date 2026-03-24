@@ -1,6 +1,7 @@
 using NUnit.Framework;
-using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ExecuteManager : MonoBehaviour
 {
@@ -35,22 +36,47 @@ public class ExecuteManager : MonoBehaviour
         // if its not player's turn mirror the card to appear on the opponents side of the screen
         else currentCard.transform.localPosition = new Vector2(Screen.width - currentCard.transform.localPosition.x, currentCard.transform.localPosition.y);
 
-        // highlighting the unit
-        currentCard.unit.HighlightUnit(true);
-
         // Telling player to choose an ability
         GameManager.instance.managerUI.NewHint("Pick one of card's abilities");
     }
 
     public void StopRevealCard()
     {
-        currentCard.unit.HighlightUnit(false);
         currentCard.gameObject.SetActive(false);
         currentCard.transform.localScale = currentCard.defaultScale;
 
         currentCard = null;
     }
 
+    public void CardUseAbility(Card card, Ability ability)
+    {
+        StartCoroutine(CardUseAbl(card, ability));
+    }
+
+    /// <summary>
+    /// Triggers all necessary animations and switches after an ability is used
+    /// </summary>
+    /// <param name="card"></param>
+    /// <param name="ability"></param>
+    /// <returns></returns>
+    public IEnumerator CardUseAbl(Card card, Ability ability)
+    {
+        // Deactivating the card
+        GameManager.instance.executeManager.StopRevealCard();
+
+        // Playing unit animation
+        yield return StartCoroutine(card.unit.AbilityAnimation(ability));
+
+        // zooming out from the unit
+        GameManager.instance.mainCamera.ZoomOut();
+        yield return new WaitForSeconds(card.zoomTime * 1 / 3);
+
+        // ending the turn 
+        if (card.player == GameManager.instance.player) GameManager.instance.EndTurn();
+    }
+
+
+    /*
     public void LoadCardStack(List<Card> newCardStack, Player player)
     {
         player.plannedCardStack.Clear();
@@ -73,5 +99,5 @@ public class ExecuteManager : MonoBehaviour
 
         readyRevealCard = true;
         if (GameManager.instance.yourTurn) nextCardButton.glow.SetActive(true);
-    }
+    }*/
 }

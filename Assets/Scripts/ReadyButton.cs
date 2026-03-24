@@ -42,6 +42,7 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
                 if (GameManager.instance.executeManager.currentCard != null)
                 {
                     GameManager.instance.executeManager.currentCard.UseSelectedAbility();
+                    return;
                 }
                 else
                 {

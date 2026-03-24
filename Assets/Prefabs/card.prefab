@@ -679,7 +679,7 @@ MonoBehaviour:
   isDragged: 0
   currentPower: 0
   zoomIntensity: 0.3
-  zoomTime: 3
+  zoomTime: 1.5
 --- !u!114 &5701744519133028315
 MonoBehaviour:
   m_ObjectHideFlags: 0
