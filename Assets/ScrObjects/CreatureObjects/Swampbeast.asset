@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Swampbeast
   m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
   creatureName: Swampbeast
-  health: 8
+  health: 4
   cardSprite: {fileID: 21300000, guid: c382e4ff0fb512548af12b6c83cd9549, type: 3}
   unitSprite: {fileID: 21300000, guid: 5657a84028d66cd45b8cfd2e4f18de90, type: 3}
   cost: 01000000010000000000000000000000

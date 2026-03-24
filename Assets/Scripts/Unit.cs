@@ -27,6 +27,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] Color healthValueColor = new Color(0.86f, 0.63f, 0.83f, 1f);
     [HideInInspector] public bool stunned = false;
     [SerializeField] GameObject stunIndicator;
+    [SerializeField] GameObject healthBar;
 
     [Header("movement and input")]
     [HideInInspector] public bool readyToMove = false;
@@ -81,7 +82,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // HEALTH
         int currentHP = card.cardData.health - card.damageToHP;
         healthValue.color = (card.damageToHP > 0) ? Color.red : healthValueColor; // number gets red if damaged
-        healthValue.text = currentHP.ToString();
+        healthValue.text = currentHP.ToString() + "/" + card.cardData.health.ToString();
 
         // POWER
         if (card.currentPower > 0)
@@ -106,6 +107,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // STUN
         if (stunIndicator != null) stunIndicator.SetActive(stunned);
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = !stunned;
+        healthBar.SetActive(stunned);
     }
 
     /// <summary>
@@ -138,6 +140,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         // do death check
         bool isDead = card.GetCurrerntHealth() == 0;
+        Debug.Log("Unit: " + card.cardData.name + " is dead (" + isDead + ")");
 
         // do damage VFX and SFX 
         yield return ShakeAnim(isDead);
@@ -148,8 +151,6 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             card.player.playerUI.AddRandomFoodToken(true);
             yield return new WaitForSeconds(1.5f);
         }
-
-        if (isDead) card.DestroyCard();
     }
 
     /// <summary>
@@ -160,10 +161,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // removes unit reference from field
         int unitSlot = (currentField.units[0] == this) ? 0 : 1;
         currentField.units[unitSlot] = null;
-
-        // removes unit gameObject
-        Destroy(this.gameObject);
-
+        Debug.Log("Removed unit gameObject from board");
     }
 
     /// <summary>
@@ -243,6 +241,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         // snapping values to correct ones
         sprite.transform.localPosition = startingPosition;
+
+        yield return new WaitForSeconds(jumpTime * 2);
+        // deactivating ability text
         skillText.gameObject.SetActive(false);
 
         // enabling idle animation

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   speed: 1
   power: 0
-  block: 3
-  abilityDescription: +3 defense on every line
+  block: 1
+  abilityDescription: +1 defense on every line
   abilityName: Exoskeleton
   isPassive: 0

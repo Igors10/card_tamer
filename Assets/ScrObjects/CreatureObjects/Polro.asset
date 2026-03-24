@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Polro
   m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
   creatureName: Polro
-  health: 6
+  health: 3
   cardSprite: {fileID: 21300000, guid: 71b5dd00a40428e44944413d43c11436, type: 3}
   unitSprite: {fileID: 21300000, guid: cc1111e88e704a74f9ea233565d90980, type: 3}
   cost: 010000000100000001000000

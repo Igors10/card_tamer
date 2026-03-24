@@ -128,6 +128,16 @@ public class BattleManager : MonoBehaviour
         // Waiting for both power counters to get resolved
         while (!playerPowerUI.resolved || !opponentPowerUI.resolved) yield return null;
 
+        // REMOVING DEAD UNITS
+        foreach (Unit unit in opponentUnits)
+        {
+            unit.card.DeathCheck();
+        }
+        foreach (Unit unit in playerUnits)
+        {
+            unit.card.DeathCheck();
+        }
+
         // Switching to next line
         NextLine();
     }

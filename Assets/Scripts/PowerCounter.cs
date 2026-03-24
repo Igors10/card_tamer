@@ -238,10 +238,10 @@ public class PowerCounter : MonoBehaviour
 
             // Decrease power from power counter
             powerDecreaseSpeedMod *= 1.3f; // every 5 power the decrease speeds up
-            yield return StartCoroutine(DecreasePower(nextDamagePowerCost, powerDecreaseSpeedMod));
-            yield return new WaitForSeconds(0.3f);
+            yield return StartCoroutine(DecreasePower(nextDamagePowerCost, powerDecreaseSpeedMod));    
         }
 
+        yield return new WaitForSeconds(0.3f);
         // Damage distribution
         for (int i = damageToPlayer; i > 0; i--)
         {

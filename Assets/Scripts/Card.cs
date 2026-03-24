@@ -16,6 +16,8 @@ public class Card : MonoBehaviour
     [HideInInspector] public int damageToHP; // how much hp is currently missing
     [SerializeField] Image[] hearts = new Image[10];
     [SerializeField] TextMeshProUGUI healthText;
+    [SerializeField] float heartSpacing;
+    [SerializeField] float heartSize;
 
     [Header("refs")]
     public Ability[] abilities = new Ability[2];
@@ -125,6 +127,13 @@ public class Card : MonoBehaviour
             // Showing amount of hearts corresponding to max hp value
             hearts[a].gameObject.SetActive(a < cardData.health);
 
+            // Spreading out hearts correctly
+            float horizontalOffset = heartSpacing * (a - (cardData.health - 1) / 2f);
+            hearts[a].transform.localPosition = new Vector3(horizontalOffset, hearts[a].transform.localPosition.y, 0f);
+
+            // Setting heart size
+            hearts[a].transform.localScale = new Vector3(heartSize, heartSize, 0f);
+
             // Coloring hearts black according to damage taken
             Color fullHeartColor = new Color(1f, 1f, 1f, 1f);
             Color emptyHeartColor = new Color(0f, 0f, 0f, 1f);
@@ -132,15 +141,25 @@ public class Card : MonoBehaviour
         }
     }
 
+    public void DeathCheck()
+    {
+        if (GetCurrerntHealth() < 1) DestroyCard();
+    }
+
     /// <summary>
     /// Removes card from game
     /// </summary>
     public void DestroyCard()
     {
+        Debug.Log("Card: Card is getting destroyed.");
+
         unit.RemoveFromBoard();
 
         // Remove card from field cards (card cant really be destroyed when they are in hand)
         player.cardsOnField.Remove(this);
+        // removes unit gameObject
+        Destroy(unit.gameObject);
+
 
         Destroy(this.gameObject);
     }

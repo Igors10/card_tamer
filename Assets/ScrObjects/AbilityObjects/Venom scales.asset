@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   speed: 1
   power: 0
-  block: 3
-  abilityDescription: <color=blue>+3 defense</color>, <color=purple>2 poison</color>
+  block: 1
+  abilityDescription: <color=blue>+1 defense</color>, <color=purple>2 poison</color>
     to next enemy
   abilityName: 
   isPassive: 0
