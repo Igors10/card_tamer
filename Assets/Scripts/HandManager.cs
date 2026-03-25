@@ -12,6 +12,7 @@ public class HandManager : MonoBehaviour
     public GameObject fieldHand;
     public GameObject opponentHand;
     public Card activeCard; // card currently being dragged
+    public GameObject activeCardObj;
 
     [Header("Fan spread params")]
     [SerializeField] float fanSpread;

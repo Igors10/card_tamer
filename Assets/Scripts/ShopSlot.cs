@@ -211,7 +211,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
 
         // playing soundeffect
-        AudioManager.instance.PlaySFX("BuySFX");
+        //AudioManager.instance.PlaySFX("BuySFX");
 
         // buying
         // substract the resources

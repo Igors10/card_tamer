@@ -664,7 +664,7 @@ MonoBehaviour:
   - {fileID: 8713851892223630852}
   healthText: {fileID: 1974405119241728709}
   heartSpacing: 40
-  heartSize: 1
+  heartSize: 1.4
   abilities:
   - {fileID: 1664464962511736816}
   - {fileID: 7949598111694404865}

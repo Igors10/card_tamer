@@ -176,7 +176,7 @@ public class Card : MonoBehaviour
     {
         if (GameManager.instance.currentState == GameState.PLACING)
         {
-            if (GameManager.instance.executeManager.currentCard == this) return;
+            if (GameManager.instance.executeManager.currentCard == this || isDragged) return;
 
             // Putting the card in "reading mode" when hovering over it in hand
             // Scale
@@ -222,43 +222,27 @@ public class Card : MonoBehaviour
 
     public void StartDrag()
     {
-        if (GameManager.instance.executeManager.currentCard != null ) return;
+        if (GameManager.instance.executeManager.currentCard != null) return;
 
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;
+        //transform.SetParent(GameManager.instance.handManager.activeCard.transform, false);
 
-        if (GameManager.instance.currentState == GameState.PLACING && GameManager.instance.yourTurn) 
+        if (GameManager.instance.currentState == GameState.PLACING && GameManager.instance.yourTurn)
             GameManager.instance.fieldManager.EnableSpawnSlots(0);
-
-        /*
-        if (GameManager.instance.currentState == GameState.PLANNING)
-        {
-            // making the card appear above other cards and be bigger while dragged
-            transform.localScale = dragScale;
-            transform.SetAsLastSibling();
-        }*/
     }
 
     public void EndDrag()
     {
         isDragged = false;
         OnHover(false);
+        //transform.SetParent(GameManager.instance.handManager.hand.transform, false);
 
         if (GameManager.instance.currentState == GameState.PLACING)
         {
             GameManager.instance.fieldManager.PlayCard(this, GameManager.instance.player);
             GameManager.instance.handManager.activeCard = null;
         }
-        /*
-        else if (GameManager.instance.currentState == GameState.PLANNING)
-        {
-            // card size back to default
-            transform.localScale = defaultScale;
-
-            // sorting cards based on their position
-            GameManager.instance.planningManager.SortCards(player);
-            GameManager.instance.planningManager.UpdateFieldHandVisuals(player);
-        }*/
     }
 
     /// <summary>

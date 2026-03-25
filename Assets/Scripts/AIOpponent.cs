@@ -87,7 +87,7 @@ public class AIOpponent : MonoBehaviour
     /// <returns></returns>
     IEnumerator PlaceRandomCard()
     {
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(0.5f);
 
         // Getting all empty fields
         List<Field> availableFields = GameManager.instance.fieldManager.FindEmptyFields(playerObj.fields);

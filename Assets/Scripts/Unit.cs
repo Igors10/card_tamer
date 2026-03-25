@@ -162,6 +162,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         int unitSlot = (currentField.units[0] == this) ? 0 : 1;
         currentField.units[unitSlot] = null;
         Debug.Log("Removed unit gameObject from board");
+
+        // remove the gameObject
+        if (this.gameObject != null) Destroy(this.gameObject);
     }
 
     /// <summary>

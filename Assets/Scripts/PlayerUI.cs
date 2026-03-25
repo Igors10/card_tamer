@@ -42,7 +42,7 @@ public class PlayerUI : MonoBehaviour
         player = GetComponent<Player>();
 
         // Updating the hp bar visuals
-        RefreshHP();
+        //RefreshHP();
 
         // Getting positions for food tokens UI positions
         defaultTokenPos = foodObj.transform.localPosition;
