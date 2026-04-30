@@ -87,7 +87,7 @@ public class AIOpponent : MonoBehaviour
     /// <returns></returns>
     IEnumerator PlaceRandomCard()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.5f);
 
         // Getting all empty fields
         List<Field> availableFields = GameManager.instance.fieldManager.FindEmptyFields(playerObj.fields);
@@ -105,77 +105,7 @@ public class AIOpponent : MonoBehaviour
 
         // Spawning a unit
         fieldToSpawnOn.PlayCard(cardToPlay, playerObj);
-        //GameManager.instance.fieldManager.SpawnUnit(cardToPlay, fieldToSpawnOn);
-        //GameManager.instance.handManager.AddCardToField(cardToPlay, playerObj);
-
-        //yield return new WaitForSeconds(1f);
-        yield return ChooseRandomAbility();
-
-        // Ending the turn
-        AIEndTurn();
     }
-
-    IEnumerator ChooseRandomAbility()
-    {
-        // REVEALS THE CARD
-        // Prepares the card and reveals it immideately
-        //GameManager.instance.executeManager.NextCardReady();
-        //GameManager.instance.executeManager.RevealCard();
-
-        yield return new WaitForSeconds(config.executingAbilityDelay);
-
-        // SELECTS AN ABILITY
-        Card cardResolving = GameManager.instance.executeManager.currentCard;
-
-        // Getting all cards active abilities
-        List<Ability> cardAbilities = new List<Ability>();
-        for (int i = 0; i < cardResolving.abilities.Length; i++)
-        {
-            if (cardResolving.abilities[i].abilityData.isPassive == false) cardAbilities.Add(cardResolving.abilities[i]);
-        }
-
-        // Picking one random card's active ability
-        int randomAbility = Random.Range(0, cardAbilities.Count);
-        Ability abilityToUse = cardAbilities[randomAbility];
-        abilityToUse.SelectAbility(true);
-
-        // USES AN ABILITY
-        abilityToUse.UseAbility();
-      
-        yield return new WaitForSeconds(config.executingAbilityDelay);
-    }
-
-    // =========================================================
-    // =================== PLANNING ============================
-
-    /// <summary>
-    /// Randomly shuffles AI cards to simulate planning
-    /// </summary>
-    void PlanCards()
-    {
-        // Shuffling cards that are on field
-        int n = playerObj.cardsOnField.Count;
-
-        while (n > 1)
-        {
-            n--;
-            int randomCard = Random.Range(0, n + 1);
-            (playerObj.cardsOnField[randomCard], playerObj.cardsOnField[n]) = (playerObj.cardsOnField[n], playerObj.cardsOnField[randomCard]);
-        }
-
-        // after cards are shuffled opponent is ready to move to next game phase
-        GameManager.instance.opponent.endStateReady = true;
-    }
-
-    // =========================================================
-    // =================== EXECUTING============================
-
-   
-
-    // =========================================================
-    // =================== BATTLING ============================
-
-    // add battle AI control
 
     // =========================================================
     // ===================== BUYING ============================

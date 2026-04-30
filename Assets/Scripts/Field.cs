@@ -135,7 +135,8 @@ public class Field : MonoBehaviour
     /// <param name="cardPlayed"></param>
     public bool PlayCard(Card cardPlayed, Player player)
     {
-        if ((player == GameManager.instance.player) && (cardIsOver == false || units[1] != null)) return false;
+        if ((player == GameManager.instance.player) && (cardIsOver == false || units[1] != null)
+            || GameManager.instance.executeManager.currentCard != null) return false;
 
         // spawn a creature
         GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);

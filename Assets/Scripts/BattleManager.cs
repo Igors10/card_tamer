@@ -129,14 +129,7 @@ public class BattleManager : MonoBehaviour
         while (!playerPowerUI.resolved || !opponentPowerUI.resolved) yield return null;
 
         // REMOVING DEAD UNITS
-        foreach (Unit unit in opponentUnits)
-        {
-            unit.card.DeathCheck();
-        }
-        foreach (Unit unit in playerUnits)
-        {
-            unit.card.DeathCheck();
-        }
+       
 
         // Switching to next line
         NextLine();

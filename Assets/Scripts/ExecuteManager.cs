@@ -20,9 +20,14 @@ public class ExecuteManager : MonoBehaviour
     float readyCardScale = 0.6f;
     Vector3 revealedCardScale = new Vector3(1.8f, 1.8f, 1f);
 
+    [Header("card play params")]
+    [SerializeField] float zoomIntensity;
+    public float zoomTime;
+
     public void RevealCard(Card cardToReveal)
     {
         currentCard = cardToReveal;
+        currentCard.gameObject.SetActive(true);
 
         // playing soundeffect
         AudioManager.instance.PlaySFX("NextCardSFX");
@@ -34,7 +39,13 @@ public class ExecuteManager : MonoBehaviour
         // making card's abilities be ready to be clicked on
         if (GameManager.instance.yourTurn) currentCard.ActivateAbilities();
         // if its not player's turn mirror the card to appear on the opponents side of the screen
-        else currentCard.transform.localPosition = new Vector2(Screen.width - currentCard.transform.localPosition.x, currentCard.transform.localPosition.y);
+        else 
+        {
+            Camera camera = Camera.main;
+            float rightSideX = camera.ViewportToWorldPoint(new Vector3(1, 1, camera.nearClipPlane)).x;
+            currentCard.transform.localPosition = new Vector2(rightSideX - currentCard.transform.localPosition.x, currentCard.transform.localPosition.y);
+            
+        }
 
         // Telling player to choose an ability
         GameManager.instance.managerUI.NewHint("Pick one of card's abilities");
@@ -42,37 +53,48 @@ public class ExecuteManager : MonoBehaviour
 
     public void StopRevealCard()
     {
+        // hide die from unit UI
+        currentCard.unit.die.DisableDie();
+
+        // deactivate card
         currentCard.gameObject.SetActive(false);
         currentCard.transform.localScale = currentCard.defaultScale;
 
+        // reset current card var
         currentCard = null;
     }
 
-    public void CardUseAbility(Card card, Ability ability)
+    public void CardUseAbl(Card card, Ability ability)
     {
-        StartCoroutine(CardUseAbl(card, ability));
+        StartCoroutine(CardUseAbility(card, ability));
     }
-
     /// <summary>
     /// Triggers all necessary animations and switches after an ability is used
     /// </summary>
     /// <param name="card"></param>
     /// <param name="ability"></param>
     /// <returns></returns>
-    public IEnumerator CardUseAbl(Card card, Ability ability)
+    public IEnumerator CardUseAbility(Card card, Ability ability)
     {
-        // Deactivating the card
-        GameManager.instance.executeManager.StopRevealCard();
+        // zooming in on the unit
+        GameManager.instance.mainCamera.ZoomIn(card.unit.gameObject, zoomIntensity, zoomTime);
+        yield return new WaitForSeconds(zoomTime * 2 / 3);
 
         // Playing unit animation
         yield return StartCoroutine(card.unit.AbilityAnimation(ability));
 
+        // Card effect + power
+        yield return StartCoroutine(card.unit.RollPower());
+
+        // Deactivating the card
+        GameManager.instance.executeManager.StopRevealCard();
+
         // zooming out from the unit
         GameManager.instance.mainCamera.ZoomOut();
-        yield return new WaitForSeconds(card.zoomTime * 1 / 3);
+        yield return new WaitForSeconds(zoomTime * 1 / 3);
 
         // ending the turn 
-        if (card.player == GameManager.instance.player) GameManager.instance.EndTurn();
+        card.player.EndTurn();
     }
 
 

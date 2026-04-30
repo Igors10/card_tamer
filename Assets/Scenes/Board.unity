@@ -8454,6 +8454,8 @@ MonoBehaviour:
   plannedCardStack: []
   currentCard: {fileID: 0}
   readyRevealCard: 0
+  zoomIntensity: 0.3
+  zoomTime: 1.5
 --- !u!1 &1878616677
 GameObject:
   m_ObjectHideFlags: 0

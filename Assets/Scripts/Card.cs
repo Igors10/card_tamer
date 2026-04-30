@@ -7,17 +7,11 @@ public class Card : MonoBehaviour
 {
     [Header("CreatureData")]
     public CreatureObj cardData;
+    [HideInInspector] public string cardName;
     
     [Header("Prefabs")]
     public GameObject activeAbility;
     [SerializeField] GameObject heart;
-
-    [Header("Healthbar")]
-    [HideInInspector] public int damageToHP; // how much hp is currently missing
-    [SerializeField] Image[] hearts = new Image[10];
-    [SerializeField] TextMeshProUGUI healthText;
-    [SerializeField] float heartSpacing;
-    [SerializeField] float heartSize;
 
     [Header("refs")]
     public Ability[] abilities = new Ability[2];
@@ -46,10 +40,7 @@ public class Card : MonoBehaviour
 
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
-
-    [Header("Ability play")]
-    [SerializeField] float zoomIntensity;
-    public float zoomTime;
+   
 
     private void Start()
     {
@@ -97,11 +88,7 @@ public class Card : MonoBehaviour
         Refresh();
 
         player = owner;
-    }
-
-    public int GetCurrerntHealth()
-    {
-        return cardData.health - damageToHP;
+        cardName = newCardData.name;
     }
 
     /// <summary>
@@ -113,37 +100,7 @@ public class Card : MonoBehaviour
         nameText.text = cardData.name;
 
         // SPRITE
-        cardSprite.sprite = cardData.cardSprite;
-
-        // HEALTH (number)
-        int currentHP = cardData.health - damageToHP;
-        if (currentHP < 0) currentHP = 0;
-
-        healthText.text = currentHP.ToString();
-
-        // HEALTH (heart visuals)
-        for (int a = hearts.Length - 1; a >= 0; a--)
-        {
-            // Showing amount of hearts corresponding to max hp value
-            hearts[a].gameObject.SetActive(a < cardData.health);
-
-            // Spreading out hearts correctly
-            float horizontalOffset = heartSpacing * (a - (cardData.health - 1) / 2f);
-            hearts[a].transform.localPosition = new Vector3(horizontalOffset, hearts[a].transform.localPosition.y, 0f);
-
-            // Setting heart size
-            hearts[a].transform.localScale = new Vector3(heartSize, heartSize, 0f);
-
-            // Coloring hearts black according to damage taken
-            Color fullHeartColor = new Color(1f, 1f, 1f, 1f);
-            Color emptyHeartColor = new Color(0f, 0f, 0f, 1f);
-            Color heartColor = (cardData.health - damageToHP < a) ? fullHeartColor : emptyHeartColor;
-        }
-    }
-
-    public void DeathCheck()
-    {
-        if (GetCurrerntHealth() < 1) DestroyCard();
+        cardSprite.sprite = cardData.unitSprite;
     }
 
     /// <summary>
@@ -265,7 +222,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void ActivateAbilities()
     {
-        foreach (Ability ability in abilities) { ability.Activate(true); }
+        
     }
 
     /// <summary>
@@ -273,8 +230,6 @@ public class Card : MonoBehaviour
     /// </summary>
     public void ResetAbilities()
     {
-        foreach (Ability ability in abilities) { ability.SelectAbility(false); }
-
         GameManager.instance.fieldManager.DisableAllSlots();
     }
 
@@ -289,6 +244,9 @@ public class Card : MonoBehaviour
     public void GainPower(int power)
     {
         Debug.Log("Card: " + cardData.name + "gains " + power + " power.");
+
+        // showing added power as bonus
+        if (currentPower != 0 && power != 0) unit.powerBonus.StartShowingBonus(power); 
 
         currentPower += power;
         unit.RefreshUnitVisuals();
@@ -317,8 +275,8 @@ public class Card : MonoBehaviour
         // make abilities available for selecting 
         GameManager.instance.executeManager.RevealCard(this);
 
-        // zooming in on the unit
-        GameManager.instance.mainCamera.ZoomIn(unit.gameObject, zoomIntensity, zoomTime);
+        // using the ability
+        abilities[0].UseAbility();
     }
 
     /// <summary>
@@ -328,12 +286,8 @@ public class Card : MonoBehaviour
     {
         // regenerating all health and resetting the power
         currentPower = 0;
-        damageToHP = 0;
 
         unit.RefreshUnitVisuals();
-
-        // Resetting the abilities        
-        foreach (Ability ability in abilities) ability.CancelAbility();
     }
 
 }

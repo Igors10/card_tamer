@@ -18,12 +18,19 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [HideInInspector] public Field currentField;
     public OrderMarker orderMarker;
     [SerializeField] Image unitHighlight;
+    public PowerBonus powerBonus;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
     [SerializeField] TextMeshProUGUI powerValue;
 
-    [Header("health")]
+    [Header("die")]
+    public D6 die;
+    [SerializeField] float dieRadius;
+    [SerializeField] float dieOffset;
+    [SerializeField] float afterDiePause;
+
+    [Header("state")]
     [SerializeField] Color healthValueColor = new Color(0.86f, 0.63f, 0.83f, 1f);
     [HideInInspector] public bool stunned = false;
     [SerializeField] GameObject stunIndicator;
@@ -79,15 +86,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public void RefreshUnitVisuals()
     {
-        // HEALTH
-        int currentHP = card.cardData.health - card.damageToHP;
-        healthValue.color = (card.damageToHP > 0) ? Color.red : healthValueColor; // number gets red if damaged
-        healthValue.text = currentHP.ToString() + "/" + card.cardData.health.ToString();
-
         // POWER
         if (card.currentPower > 0)
         {
-            powerUI.SetActive(true);
             powerValue.text = card.currentPower.ToString();
         }
         else powerUI.SetActive(false);
@@ -107,7 +108,6 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // STUN
         if (stunIndicator != null) stunIndicator.SetActive(stunned);
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = !stunned;
-        healthBar.SetActive(stunned);
     }
 
     /// <summary>
@@ -132,25 +132,11 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // playing soundeffect
         AudioManager.instance.PlaySFX("HitSFX");
 
-        damage = (card.GetCurrerntHealth() > damage) ? damage : card.GetCurrerntHealth();
-        card.damageToHP += damage;
-        card.Refresh();
         stunned = true;
         RefreshUnitVisuals();
 
-        // do death check
-        bool isDead = card.GetCurrerntHealth() == 0;
-        Debug.Log("Unit: " + card.cardData.name + " is dead (" + isDead + ")");
-
         // do damage VFX and SFX 
-        yield return ShakeAnim(isDead);
-
-        // give random food token if dead
-        if (isDead)
-        {
-            card.player.playerUI.AddRandomFoodToken(true);
-            yield return new WaitForSeconds(1.5f);
-        }
+        yield return ShakeAnim(false);
     }
 
     /// <summary>
@@ -200,6 +186,51 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         transform.localPosition = startingPos;
     }
 
+    public IEnumerator RollPower()
+    {
+        // enabling die
+        die.gameObject.SetActive(true);
+
+        int loopSave = 0;
+        // setting random die position
+        do
+        {
+            Vector2 dieStartingPos = new Vector2(sprite.transform.localPosition.x, sprite.transform.localPosition.y);
+            die.transform.localPosition = dieStartingPos + UnityEngine.Random.insideUnitCircle * dieRadius;
+
+            loopSave++;
+        } while (DieTooClose() && loopSave < 5);
+
+        // rolling the die
+        yield return StartCoroutine(die.RollAnimation());
+
+        // adding rolled power
+        card.GainPower(die.GetDiceValue());
+
+        // showing the result
+        die.Glow(true);
+        powerUI.SetActive(true);
+
+        // adding bonus power
+        yield return new WaitForSeconds(1f);
+        card.GainPower(card.abilities[0].abilityData.power);
+
+        // wait a bit after rolling is finished
+        yield return new WaitForSeconds(afterDiePause);
+    }
+
+    /// <summary>
+    /// checks if the die got spawned too close to powerUI or the creature itself
+    /// </summary>
+    /// <returns></returns>
+    bool DieTooClose()
+    {
+        bool tooClose = false;
+        if (Vector2.Distance(die.transform.position, powerUI.transform.position) < dieOffset ||
+            Vector2.Distance(die.transform.position, sprite.transform.position) < dieOffset) tooClose = true;
+        return tooClose;
+    }
+
     public IEnumerator AbilityAnimation(Ability ability)
     {
         // disabling idle animation
@@ -213,7 +244,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         // ability text variables variables
         skillText.gameObject.SetActive(true);
-        skillText.text = ability.abilityData.name;
+        skillText.text = card.cardName;
         skillText.color = new Color(skillText.color.r, skillText.color.g, skillText.color.b, 1f);
         Color skillTextColor = skillText.color;
         Color skillTextTargetColor = new Color(skillTextColor.r, skillTextColor.g, skillTextColor.b, 0f);

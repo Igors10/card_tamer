@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class D6 : MonoBehaviour
 {
     [Header("refs")]
-    [SerializeField] PowerCounter powerCounter;
+    [SerializeField] Unit unit;
     [SerializeField] Image sprite;
     [SerializeField] Sprite[] diceFaces;
     [SerializeField] GameObject glow;
@@ -23,7 +23,7 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
 
     private void Start()
     {
-        sprite.color = powerCounter.player.playerColor;
+        sprite.color = unit.card.player.playerColor;
     }
     public IEnumerator RollAnimation()
     {
@@ -104,6 +104,27 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
         return diceValue;
     }
 
+    /// <summary>
+    /// Deactivating die's object
+    /// </summary>
+    public void DisableDie()
+    {
+        Glow(false);
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Enables and disables glow around die
+    /// </summary>
+    /// <param name="glowOn"></param>
+    public void Glow(bool glowOn)
+    {
+        glow.SetActive(glowOn);
+    }
+
+    /*
+     * // ================== MOUSE INPUT =====================
+     * 
     void ManualRoll()
     {
         if (!clickable) return;
@@ -119,7 +140,7 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
         glow.SetActive(mouseOver);
     }
 
-    // ================== MOUSE INPUT =====================
+    
     public void OnPointerEnter(PointerEventData eventData)
     {
         OnHover(true);
@@ -133,5 +154,5 @@ public class D6 : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPoi
     public void OnPointerClick(PointerEventData eventData)
     {
         ManualRoll();
-    }
+    }*/
 }

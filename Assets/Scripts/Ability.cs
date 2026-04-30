@@ -1,11 +1,8 @@
 using TMPro;
-using Unity.IO.LowLevel.Unsafe;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
+public class Ability : MonoBehaviour
 {
     [Header("AbilityData")]
     public AbilityObj abilityData;
@@ -63,48 +60,40 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         // Getting reference to the card
         card = cardAssignTo;
 
-        // NAME
-        name.text = abilityData.name;
-
-        // PASSIVE OR ACTIVE
-        background.enabled = !abilityData.isPassive; // passive abilities can be identified by not having a colored background
-        passive = abilityData.isPassive;
-
-        // SPEED
-        speedIcon.SetActive(abilityData.isPassive == false);
-        speedValue.text = abilityData.speed.ToString();
-
         // POWER
-        powerIcon.SetActive(abilityData.power > 0 && abilityData.isPassive == false);
-        powerValue.text = abilityData.power.ToString();
+        powerIcon.SetActive(abilityData.power != 0);
+        powerValue.text = "+" + abilityData.power.ToString();
 
         // EFFECT DESCRIPTION
         effectDesc.text = abilityData.abilityDescription;
 
         // EFFECT FORMATING
         // text alignment
-        effectDesc.alignment = (abilityData.isPassive) ? TextAlignmentOptions.Center : TextAlignmentOptions.Left;
+        effectDesc.alignment = (abilityData.power != 0) ? TextAlignmentOptions.Center : TextAlignmentOptions.Left;
 
         // textbox size and position
         float effectX = defaultEffectX;
         float effectWidth = defaultEffectWidth;
-        // * (passive ability)
-        if (abilityData.isPassive || abilityData.power <= 0)
+        // if no power move effect to the center
+        if (abilityData.power == 0)
         {
             effectX = passiveEffectX;
             effectWidth = passiveEffectWidth;
         }
-  
-        // applying formating (making it take as much space as possible if some other elements are disabled)
-        effectDesc.transform.localPosition = new Vector3(effectX, effectDesc.transform.localPosition.y, 0f);
-        effectDesc.rectTransform.sizeDelta = new Vector2(effectWidth, effectDesc.rectTransform.sizeDelta.y);
+        // if no effect, move power to the center
+        else if (abilityData.abilityDescription == "")
+        {
+            powerIcon.transform.localPosition = new Vector3(passiveEffectX, powerIcon.transform.localPosition.y, 0f);
+        }
 
+            // applying formating (making it take as much space as possible if some other elements are disabled)
+            effectDesc.transform.localPosition = new Vector3(effectX, effectDesc.transform.localPosition.y, 0f);
+        effectDesc.rectTransform.sizeDelta = new Vector2(effectWidth, effectDesc.rectTransform.sizeDelta.y);
     }
 
     // =====================
     // Effect
     // =====================
-
 
     /// <summary>
     /// Applies the effect of the ability to the unit(s)
@@ -116,102 +105,8 @@ public class Ability : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
         // playing soundeffect
         AudioManager.instance.PlaySFX("UseAbilitySFX");
 
-        // Gaining power if any
-        if (abilityData.power > 0)
-            card.GainPower(abilityData.power);
-
-        // Gaining block if any
-        if (abilityData.block > 0) 
-            card.unit.currentField.GainBlock(abilityData.block);
-
         // Effect
         // find a way to have different effects here
-
-        GameManager.instance.executeManager.CardUseAbility(card, this);
-    }
-
-    // ====================
-    // Input
-    // ====================
-
-    /// <summary>
-    /// Makes ability be ready to be clicked on and used
-    /// </summary>
-    /// <param name="isActive"></param>
-    public void Activate(bool isActive)
-    {
-        if (passive) return; // cannot activate a passive ability
-
-        ready = isActive;
-    }
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        OnHover(true);
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        OnHover(false);
-    }
-
-    void OnHover(bool mouseOver)
-    {
-        if (!ready || selected || !GameManager.instance.yourTurn) return;
-        transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
-    }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (!ready || selected || !GameManager.instance.yourTurn) return;
-        transform.localScale = pressedScale;
-    }
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        if (!ready || selected || !GameManager.instance.yourTurn) return; 
-        SelectAbility(true);
-    }
-
-    public void CancelAbility()
-    {
-        savedField = null;
-        ready = false;
-        selected = false;
-        transform.localScale = defaultScale;
-    }
-
-    public void SelectAbility(bool isSelected)
-    {
-        // resetting units position
-        //if (savedField != null) GameManager.instance.fieldManager.MoveUnit(card.unit, savedField, savedSlot, false);
-
-        // resets the abilities in case another ability was selected
-        if (isSelected) card.ResetAbilities();
-
-        // marking as selected
-        selected = isSelected;
-
-        // applying selected effects
-        transform.localScale = (isSelected) ? highlightedScale : defaultScale;
-
-        // Highlighting fields for movement
-        //if (isSelected) GameManager.instance.fieldManager.EnableMoveSlots(card.unit.currentField, abilityData.speed);
-
-        // Making the unit ready to move
-        //card.unit.readyToMove = isSelected; // Instance not set to an instance of an object
-
-        // Saving units starting position
-        //savedField = card.unit.currentField;
-        //savedSlot = GameManager.instance.fieldManager.GetUnitSlot(card.unit);
-
-        if (GameManager.instance.yourTurn && isSelected)
-        {
-            // Enables 'use' button
-            string buttonText = "Use " + name.text;
-            GameManager.instance.readyButton.gameObject.SetActive(isSelected);
-            GameManager.instance.readyButton.UpdateButtonState(buttonText);
-
-            // Telling the player to click "use ability"
-            GameManager.instance.managerUI.NewHint("Move the creature (or keep the position as it is) and click 'use' when ready");
-        }
+        GameManager.instance.executeManager.CardUseAbl(card, this);
     }
 }
