@@ -93,6 +93,9 @@ public class ExecuteManager : MonoBehaviour
         GameManager.instance.mainCamera.ZoomOut();
         yield return new WaitForSeconds(zoomTime * 1 / 3);
 
+        // coloring the line
+
+
         // ending the turn 
         card.player.EndTurn();
     }

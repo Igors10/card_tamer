@@ -58,7 +58,7 @@ MonoBehaviour:
   powerIcon: {fileID: 3405830062024774628}
   currentPower: 0
   dice: {fileID: 4469668243677781190}
-  damageObj: {fileID: 8081672363522261177}
+  damageObj: {fileID: 1305667350972253971}
   dmgParticlePrefab: {fileID: 8590069785806615365, guid: 0d6b9694322ad0d4c8fe2ecad5251f3b, type: 3}
   unitScaleMod: 1.2
   textScaleMod: 1.5
@@ -462,11 +462,6 @@ PrefabInstance:
 --- !u!224 &7923832224468116936 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7703068145668363828, guid: 0d6b9694322ad0d4c8fe2ecad5251f3b, type: 3}
-  m_PrefabInstance: {fileID: 509417787866199036}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8081672363522261177 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8590069785806615365, guid: 0d6b9694322ad0d4c8fe2ecad5251f3b, type: 3}
   m_PrefabInstance: {fileID: 509417787866199036}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3837104183588100668

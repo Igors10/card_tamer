@@ -111,10 +111,6 @@ public class PowerCounter : MonoBehaviour
         float startingTextSize = powerText.fontSize;
         float scaledTextSize = startingTextSize * textScaleMod;
 
-        // Increasing power
-        currentPower += power;
-        powerText.text = currentPower.ToString();
-
         // Making power text bigger and have white color
         float t = 0;
 
@@ -134,6 +130,15 @@ public class PowerCounter : MonoBehaviour
 
             yield return null;
         }
+
+        // Increasing power
+        for (int i = 0; i < power; i++)
+        {
+            currentPower++;
+            powerText.text = currentPower.ToString();
+            yield return new WaitForSeconds(0.13f);
+        }
+        
 
         // Quickly making text back to normal
         t = 0;
@@ -164,7 +169,7 @@ public class PowerCounter : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
     }
 
-    public void ResolveCounter(bool won, Field field)
+    public void ResolveCounter(bool won, Field[] field)
     {
         // When player loses (has less power on the current line
         if (!won)
@@ -191,120 +196,61 @@ public class PowerCounter : MonoBehaviour
         StartCoroutine(DealFieldDamage(field));
     }
 
-    IEnumerator DealFieldDamage(Field field)
+    IEnumerator DealFieldDamage(Field[] field)
     {
         yield return new WaitForSeconds(0.5f);
 
-        // Damage to opponent
-        // Dealing 1 damage for each X power
-        int damageToPlayer = 0;
-        float damageParticleOffset = 40f;
-        int unitToDamageID = 0;
-        float powerDecreaseSpeedMod = 1f;
+        // KNOCK OUT ENEMY UNITS
+        // =====================
+        List <Unit> enemyUnits = field[1].GetFieldUnits();
 
-        while (currentPower > 0)
+        for (int i = 0; i < enemyUnits.Count; i++)
         {
-            int nextDamagePowerCost = (currentPower > damagePowerCost) ? damagePowerCost : (int)currentPower;
-            damageToPlayer++;
+            enemyUnits[i].KnockOut();
+            yield return new WaitForSeconds(0.2f);
+        }
+        yield return new WaitForSeconds(0.3f);
+
+        // DAMAGE TO ENEMY PLAYER 
+        // ======================
+        int friendlyUnitCount = field[0].GetFieldUnits().Count;
+        float damageParticleOffset = 40f;
+
+        // preparing damage particles
+        for (int i = 0; i < friendlyUnitCount; i++)
+        {
+            // spawning damage particle
+            Vector3 unitPos = Camera.main.WorldToScreenPoint(field[0].GetFieldUnits()[i].transform.position);
+            GameObject newDamageParticle = Instantiate(dmgParticlePrefab, unitPos, Quaternion.identity, damageObj.transform);
+            newDamageParticle.GetComponent<Image>().color = player.playerColor;
+            newDamageParticle.transform.localPosition += new Vector3(damageParticleOffset, 0f, 0f);
+            damageParticles.Add(newDamageParticle);
 
             // playing soundeffect
             AudioManager.instance.PlaySFX("MoreDamageSFX");
 
-            // Adding one damage (sword) particle for each X power is left to show how much damage will be dealt to opposing player
-            if (damageToPlayer == 1)
-            {
-                damageObj.SetActive(true);
-                damageParticles.Add(damageObj);
-                damageObj.GetComponent<Image>().color = player.playerColor;
-                damageObj.transform.position = powerText.transform.position;
-
-                float particleOffsetY = 90f;
-                if (player == GameManager.instance.opponent) particleOffsetY *= -1;
-                damageObj.transform.localPosition += new Vector3(0f, particleOffsetY, 0f);
-
-                // pop animation
-                GameManager.instance.animations.PopAnim(damageObj, 0.3f, 0.45f);
-            }
-            else
-            {
-                GameObject newDamageParticle = Instantiate(dmgParticlePrefab, damageObj.transform.position, Quaternion.identity, damageObj.transform);
-                newDamageParticle.GetComponent<Image>().color = player.playerColor;
-                newDamageParticle.transform.localPosition += new Vector3(damageParticleOffset, 0f, 0f);
-                damageParticles.Add(newDamageParticle);
-
-                // pop animation
-                GameManager.instance.animations.PopAnim(newDamageParticle, 0.3f, 0.45f);
-            }
-
-            // Decrease power from power counter
-            powerDecreaseSpeedMod *= 1.3f; // every 5 power the decrease speeds up
-            yield return StartCoroutine(DecreasePower(nextDamagePowerCost, powerDecreaseSpeedMod));    
+            // pop animation
+            GameManager.instance.animations.PopAnim(newDamageParticle, 0.3f, 0.45f);
+            yield return new WaitForSeconds(0.2f);
         }
 
-        yield return new WaitForSeconds(0.3f);
-        // Damage distribution
-        for (int i = damageToPlayer; i > 0; i--)
+        // dealing damage to opponent 
+        for (int i = 0; i < friendlyUnitCount; i++)
         {
-            int currentDmgParticle = i - 1;
-
-            // Damage to block
-            if (field.currentBlock > 0)
-            {
-                // Finding block screen position
-                Vector3 blockPosition = Camera.main.WorldToScreenPoint(field.blockObj.transform.position);
-
-                // Calculating damage
-                field.currentBlock--;
-
-                // "Attacking" the block
-                yield return StartCoroutine(Damage(blockPosition, damageParticles[currentDmgParticle]));
-
-                // playing soundeffect
-                AudioManager.instance.PlaySFX("HitSFX");
-
-                // Updating block visuals
-                field.RefreshFieldVisuals();
-
-                yield return new WaitForSeconds(0.2f);
-                continue;
-            }
-
-            // Damage to enemy units
-            if (field.GetFieldUnits(true).Count > unitToDamageID)
-            {
-                Unit unitToDamage = field.GetFieldUnits()[unitToDamageID];
-                unitToDamageID++;
-                
-                Vector3 unitPosition = Camera.main.WorldToScreenPoint(unitToDamage.transform.position);
-
-                // "Attacking" the unit
-                yield return StartCoroutine(Damage(unitPosition, damageParticles[currentDmgParticle]));
-                StartCoroutine(unitToDamage.TakeDamage(1));
-
-                yield return new WaitForSeconds(0.2f);
-                continue;
-            }
- 
-            // Damage to enemy player
             // Visuals for damage targeting opponents UI
             Player playerToDamage = GameManager.instance.GetOpponentOfPlayer(player);
             Vector3 healthbarPos = playerToDamage.playerUI.healthbar.transform.position;
-            yield return Damage(healthbarPos, damageParticles[currentDmgParticle]);
+            yield return Damage(healthbarPos, damageParticles[i]);
 
             // Refreshing opponents hp value and applying damage juice effects
             playerToDamage.TakeDamage(1);
             yield return new WaitForSeconds(0.2f);
         }
 
-       
-
         yield return new WaitForSeconds(1f);
-
-       
-
-
+  
         // destroying excess damage particles
-        foreach (GameObject damageParticle in damageParticles) { if (damageParticle != damageParticles[0]) Destroy(damageParticle); }
+        foreach (GameObject damageParticle in damageParticles) { Destroy(damageParticle); }
 
         // clearing particle list
         damageParticles.Clear();

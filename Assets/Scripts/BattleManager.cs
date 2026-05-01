@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
+using FishNet.Demo.AdditiveScenes;
 
 public class BattleManager : MonoBehaviour
 {
@@ -95,41 +96,51 @@ public class BattleManager : MonoBehaviour
 
         // ADDING UNIT POWER
 
-        // Opponent units first
+        int playerPower = 0;
+        int opponentPower = 0;
+        // Opponent's power
         foreach (Unit unit in opponentUnits)
         {
-            if (unit.card.currentPower > 0) yield return StartCoroutine(opponentPowerUI.AddPower(unit.card.currentPower, unit));
+            if (unit.card.currentPower > 0 && !unit.stunned)
+            {
+                StartCoroutine(opponentPowerUI.AddPower(unit.card.currentPower, unit));
+                opponentPower += unit.card.currentPower;
+            }
         }
-        // Player units after
-        foreach (Unit unit in playerUnits)
-        {
-            if (unit.card.currentPower > 0) yield return StartCoroutine(playerPowerUI.AddPower(unit.card.currentPower, unit));
-        }
-
-        // Rolling dice
-        if (opponentUnits.Count > 0) StartCoroutine(opponentPowerUI.RollDicePower());
-        yield return new WaitForSeconds(0.6f);        
-        if (playerUnits.Count > 0) playerPowerUI.EnableDice(true);
-    
-        // Wait for player(s) to roll dice
-        while ((!playerPowerUI.diceRolled && playerUnits.Count > 0) || (!opponentPowerUI.diceRolled && opponentUnits.Count > 0))
+        // Wait for power to get calculated
+        while (opponentPowerUI.currentPower < opponentPower)
         {
             yield return null;
         }
+        yield return new WaitForSeconds(0.5f);
+
+
+        // Player's power
+        foreach (Unit unit in playerUnits)
+        {
+            if (unit.card.currentPower > 0 && !unit.stunned)
+            {
+                StartCoroutine(playerPowerUI.AddPower(unit.card.currentPower, unit));
+                playerPower += unit.card.currentPower;
+            }
+        }
+        // Wait for power to get calculated
+        while (playerPowerUI.currentPower < playerPower)
+        {
+            yield return null;
+        }
+        yield return new WaitForSeconds(0.5f);
 
         yield return new WaitForSeconds(1f);
         // COMPARING POWER
         if (playerPowerUI.currentPower > opponentPowerUI.currentPower) Debug.Log("BattleManager: player has more power");
         if (playerPowerUI.currentPower < opponentPowerUI.currentPower) Debug.Log("BattleManager: opponent has more power");
         if (playerPowerUI.currentPower == opponentPowerUI.currentPower) Debug.Log("BattleManager: it is tied for the power");
-        playerPowerUI.ResolveCounter(playerPowerUI.currentPower >= opponentPowerUI.currentPower, oppField);
-        opponentPowerUI.ResolveCounter(opponentPowerUI.currentPower >= playerPowerUI.currentPower, field);
+        playerPowerUI.ResolveCounter(playerPowerUI.currentPower >= opponentPowerUI.currentPower, new Field[] { field, oppField });
+        opponentPowerUI.ResolveCounter(opponentPowerUI.currentPower >= playerPowerUI.currentPower, new Field[] { oppField, field });
 
         // Waiting for both power counters to get resolved
         while (!playerPowerUI.resolved || !opponentPowerUI.resolved) yield return null;
-
-        // REMOVING DEAD UNITS
-       
 
         // Switching to next line
         NextLine();

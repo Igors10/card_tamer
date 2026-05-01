@@ -169,7 +169,6 @@ public class GameManager : MonoBehaviour
         // debug solution for transitioning states
         CheckEndState();
     }
-
    
     public void StartTurn()
     {

@@ -101,12 +101,16 @@ public class Viewpoint : MonoBehaviour
 
         // starting values
         Vector3 startingPosition = transform.position;
-        Vector3 startingRotation = transform.localEulerAngles;
+        Quaternion startingRotation = transform.rotation;
 
         // target values
+        // POSITION
         Vector3 targetPosition = Vector3.Lerp(startingPosition, zoomObj.transform.position, zoomIntensity);
         targetPosition = new Vector3(zoomObj.transform.position.x, targetPosition.y, targetPosition.z);
-        Vector3 targetRotation = Vector3.Lerp(startingRotation, new Vector3(startingRotation.x * 0.3f, startingRotation.y, startingRotation.z), zoomIntensity);
+
+        // ROTATION
+        Vector3 direction = zoomObj.transform.position - targetPosition;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
 
         float t = 0;
         zoomedIn = true;
@@ -119,8 +123,7 @@ public class Viewpoint : MonoBehaviour
             float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
 
             transform.position = Vector3.Lerp(startingPosition, targetPosition, coolT);
-            Vector3 rotation = Vector3.Lerp(startingRotation, targetRotation, coolT);
-            transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+            transform.rotation = Quaternion.Slerp(startingRotation, targetRotation, coolT);
 
             yield return null;
         }
@@ -143,15 +146,14 @@ public class Viewpoint : MonoBehaviour
             float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
 
             transform.position = Vector3.Lerp(targetPosition, startingPosition, coolT);
-            Vector3 rotation = Vector3.Lerp(targetRotation, startingRotation, coolT);
-            transform.localRotation = Quaternion.Euler(rotation.x, rotation.y, rotation.z);
+            transform.rotation = Quaternion.Slerp(targetRotation, startingRotation, coolT);
 
             yield return null;
         }
 
         // snapping to correct values
         transform.position = startingPosition;
-        transform.localRotation = Quaternion.Euler(startingRotation);
+        //transform.rotation = targetRotation;
 
         Debug.Log("Viewport: zoom in finished");
     }

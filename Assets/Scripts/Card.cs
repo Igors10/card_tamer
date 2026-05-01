@@ -117,7 +117,6 @@ public class Card : MonoBehaviour
         // removes unit gameObject
         Destroy(unit.gameObject);
 
-
         Destroy(this.gameObject);
     }
 

@@ -6,7 +6,6 @@ using UnityEngine;
 public class FieldManager : MonoBehaviour
 {
     [Header("refs")]
-    //public Field[] fields = new Field[4];
     [SerializeField] ParticleSystem spawnVFX;
 
     [Header("prefabs")]
@@ -78,6 +77,17 @@ public class FieldManager : MonoBehaviour
         {
             fields[i].DisableAllSlots();
         }
+    }
+
+    // ================
+    // VISUALS
+    // ================
+
+    public void Refresh()
+    {
+        // so basically color the line to color of the winner
+        //List <Field> 
+        //for (int i = 0; i)
     }
 
     // ================

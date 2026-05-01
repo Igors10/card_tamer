@@ -87,7 +87,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public void RefreshUnitVisuals()
     {
         // POWER
-        if (card.currentPower > 0)
+        if (card.currentPower > 0 && stunned == false)
         {
             powerValue.text = card.currentPower.ToString();
         }
@@ -127,7 +127,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);        
     }
 
-    public IEnumerator TakeDamage(int damage)
+    public void KnockOut()
     {
         // playing soundeffect
         AudioManager.instance.PlaySFX("HitSFX");
@@ -136,7 +136,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         RefreshUnitVisuals();
 
         // do damage VFX and SFX 
-        yield return ShakeAnim(false);
+        StartCoroutine(ShakeAnim(false));
     }
 
     /// <summary>
