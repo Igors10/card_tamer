@@ -16,6 +16,10 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] Image healthbarFill;
     [SerializeField] TextMeshProUGUI hpValue;
 
+    [Header("Stars")]
+    [SerializeField] GameObject starsObj;
+    [SerializeField] TextMeshProUGUI starsText;
+
     [Header("Damage effects")]
     [SerializeField] ParticleSystem damageVFX;
     [SerializeField] float shakeLenght;
@@ -53,8 +57,11 @@ public class PlayerUI : MonoBehaviour
     /// Updates hp value on the healthbar (and plays damage animation if needed)
     /// </summary>
     /// <param name="isDamage"></param>
-    public void RefreshHP(int damage = 0)
+    public void Refresh(int damage = 0)
     {
+        // REFRESHING HP
+        // ==============
+
         // Updating the text
         hpValue.text = player.health.ToString();
 
@@ -66,6 +73,15 @@ public class PlayerUI : MonoBehaviour
         }
 
         if (damage > 0) StartCoroutine(DamageEffect(damage));
+
+        // REFRESHING STARS
+        // ================
+
+        starsObj.SetActive(player.currentStars > 0);
+
+        // playing the animation if star value has changed
+        if (Convert.ToInt32(starsText.text) != player.currentStars) Animations.instance.PopAnim(starsObj, 0.3f, 0.45f);
+        starsText.text = player.currentStars.ToString();
     } 
 
     /// <summary>

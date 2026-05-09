@@ -44,7 +44,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1252183568118034703}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ea4b716da9e900418a264921df3fafa, type: 3}
   m_Name: 
@@ -724,7 +724,7 @@ MonoBehaviour:
   powerUI: {fileID: 3795751108397365226}
   powerValue: {fileID: 532405815697476448}
   die: {fileID: 4517016545063126273}
-  dieRadius: 5.5
+  dieRadius: 4
   dieOffset: 0.8
   afterDiePause: 2
   healthValueColor: {r: 0.86, g: 0.63, b: 0.83, a: 1}
@@ -1317,10 +1317,6 @@ PrefabInstance:
       propertyPath: unit
       value: 
       objectReference: {fileID: 9008516459039196607}
-    - target: {fileID: 812708945137043194, guid: 2c0ad62241e7dc047a59ac1a6174ac7f, type: 3}
-      propertyPath: rollDistance
-      value: 2.5
-      objectReference: {fileID: 0}
     - target: {fileID: 5031903783797572478, guid: 2c0ad62241e7dc047a59ac1a6174ac7f, type: 3}
       propertyPath: m_IsActive
       value: 0

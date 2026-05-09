@@ -89,6 +89,9 @@ public class GameManager : MonoBehaviour
                 // disabling resource UI after shop
                 StartCoroutine(player.playerUI.ShowTokens(false));
                 StartCoroutine(opponent.playerUI.ShowTokens(false));
+
+                // starting new round
+                RoundStart();
                 break;
 
                 /*
@@ -136,6 +139,14 @@ public class GameManager : MonoBehaviour
         StartTurn();
     }
 
+    /// <summary>
+    /// Triggers at the beginning of each round
+    /// </summary>
+    void RoundStart()
+    {
+        player.StartRound();
+        opponent.StartRound();
+    }
     private void Update()
     {
         DebugStateInput();

@@ -20,6 +20,7 @@ public class Card : MonoBehaviour
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] GameObject cardVisual;
     public OrderMarker orderMarker;
+    [SerializeField] GameObject specialIcon;
     [HideInInspector] public Unit unit;
     public Player player;
 
@@ -101,6 +102,9 @@ public class Card : MonoBehaviour
 
         // SPRITE
         cardSprite.sprite = cardData.unitSprite;
+
+        // SPECIAL OR NOT
+        specialIcon.SetActive(cardData.isSpecial);
     }
 
     /// <summary>
@@ -261,6 +265,9 @@ public class Card : MonoBehaviour
 
     public void PlayCard()
     {
+        // checking for stars if special
+        if (!SpecialCost()) return;
+
         // moving card to field cards
         GameManager.instance.handManager.AddCardToField(this, player);
 
@@ -276,6 +283,24 @@ public class Card : MonoBehaviour
 
         // using the ability
         abilities[0].UseAbility();
+    }
+
+    /// <summary>
+    /// Returns true if player can afford to play the card
+    /// </summary>
+    /// <returns></returns>
+    bool SpecialCost()
+    {
+        // checking if card requires a star to be played
+        if (cardData.isSpecial == false) return true;
+
+        // checking if player has a star
+        if (player.currentStars < 1) return false;
+
+        // taking the star
+        player.currentStars--;
+        player.playerUI.Refresh();
+        return true;
     }
 
     /// <summary>

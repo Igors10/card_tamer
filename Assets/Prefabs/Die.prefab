@@ -127,13 +127,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5031903783797572478}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.2928087, g: 0.5002852, b: 0.8867924, a: 0.83137256}
+  m_Color: {r: 0.29411763, g: 0.8862745, b: 0.3106724, a: 0.83137256}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -196,7 +196,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aeacf0dd3ea3c94cb1f4f3f252f2a8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::D6
-  powerCounter: {fileID: 0}
+  unit: {fileID: 0}
   sprite: {fileID: 2427986645305080471}
   diceFaces:
   - {fileID: 4796394016262144139, guid: 5696114d8c1a28b439eb51b14e226049, type: 3}
@@ -208,6 +208,6 @@ MonoBehaviour:
   glow: {fileID: 5031903783797572478}
   rollingTime: 0.7
   diceIntervals: 0.2
-  rollDistance: 200
+  rollDistance: 0
   rotationSpeed: 800
   clickable: 0

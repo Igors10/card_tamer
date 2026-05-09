@@ -62,6 +62,9 @@ public class D6 : MonoBehaviour
         // snapping to correct position and rotation
         transform.position = diceStartingPos;
         sprite.transform.localRotation = Quaternion.identity;
+
+        // pop animation at the end
+        Animations.instance.PopAnim(this.gameObject, 0.3f, 0.004f);
     }
 
     void RotateDice()
