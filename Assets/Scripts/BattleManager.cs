@@ -155,7 +155,7 @@ public class BattleManager : MonoBehaviour
 
         // Putting the camera where it was before battling phase
         Vector3 stateCameraPosition = GameManager.instance.GetState().cameraPosition;
-        Vector3 centerCameraPosition = new Vector3(0, Camera.main.transform.position.y, stateCameraPosition.z);
+        Vector3 centerCameraPosition = new Vector3(0, Camera.main.transform.position.y, Camera.main.transform.position.z);
         yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(centerCameraPosition, 0.6f));
 
         // Message that round ends
@@ -174,7 +174,7 @@ public class BattleManager : MonoBehaviour
         yield return StartCoroutine(StunnedUnitsDiscard(playerStunnedUnits));
         yield return StartCoroutine(StunnedUnitsDiscard(opponentStunnedUnits));
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(2f);
         roundEndsMessage.gameObject.SetActive(false);
 
         // Ending the phase
@@ -190,19 +190,21 @@ public class BattleManager : MonoBehaviour
     /// <returns></returns>
     IEnumerator StunnedUnitsDiscard(List<Unit> units)
     {
+        if (units.Count < 1) yield break;
+
         Player player = units[0].card.player;
-        int discardUnitsAmount = units.Count + 1 / 2; // returns half of the unit amount rounded up
+        int discardUnitsAmount = (units.Count + 1) / 2; // returns half of the unit amount rounded up
         List<int> idsChosen = new List<int>();
 
         for (int i = 0; i < discardUnitsAmount; i++)
         {
             // chosing random unit that hasn't been chosen before
             int randomUnitID = 0;
-            do { randomUnitID = Random.Range(0, units.Count); } while(!idsChosen.Contains(randomUnitID));
+            do { randomUnitID = Random.Range(0, units.Count); } while(idsChosen.Contains(randomUnitID));
             idsChosen.Add(randomUnitID);
 
             units[randomUnitID].card.DestroyCard();
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.7f);
         }
     }
 
