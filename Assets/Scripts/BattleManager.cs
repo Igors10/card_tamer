@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using FishNet.Demo.AdditiveScenes;
+using System.ComponentModel.Design;
 
 public class BattleManager : MonoBehaviour
 {
@@ -13,7 +14,8 @@ public class BattleManager : MonoBehaviour
     
     [Header("round end")]
     [SerializeField] TextMeshProUGUI roundEndsMessage;
-    [SerializeField] int roundEndResourceReward = 2;
+    [SerializeField] float stunnedOffsetY;
+    [SerializeField] float stunnedOffsetX;
 
     [HideInInspector] public int currentLine;
 
@@ -153,26 +155,70 @@ public class BattleManager : MonoBehaviour
 
         // Putting the camera where it was before battling phase
         Vector3 stateCameraPosition = GameManager.instance.GetState().cameraPosition;
-        Vector3 centerCameraPosition = new Vector3(0, stateCameraPosition.y, stateCameraPosition.z);
+        Vector3 centerCameraPosition = new Vector3(0, Camera.main.transform.position.y, stateCameraPosition.z);
         yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(centerCameraPosition, 0.6f));
 
         // Message that round ends
         roundEndsMessage.gameObject.SetActive(true);
 
-        // Giving 2 random resources to players
-        for (int i = 0; i < roundEndResourceReward; i++)
-        {
-            GameManager.instance.player.playerUI.AddRandomFoodToken(true);
-            GameManager.instance.opponent.playerUI.AddRandomFoodToken(true);
-        }
+        // DISCARDING STUNNED UNITS
+        // ========================
 
-        float pauseTime = GameManager.instance.player.playerUI.tokenShowTime * 2 + GameManager.instance.player.playerUI.tokenStayTime + 1.2f;
-        yield return new WaitForSeconds(pauseTime);
+        // getting all stunned units
+        List<Unit> playerStunnedUnits = GameManager.instance.fieldManager.GetStunnedUnits(GameManager.instance.player);
+        List<Unit> opponentStunnedUnits = GameManager.instance.fieldManager.GetStunnedUnits(GameManager.instance.opponent);
+
+        //ShowStunnedUnits(playerStunnedUnits);
+        //ShowStunnedUnits(opponentStunnedUnits);
+
+        yield return StartCoroutine(StunnedUnitsDiscard(playerStunnedUnits));
+        yield return StartCoroutine(StunnedUnitsDiscard(opponentStunnedUnits));
+
+        yield return new WaitForSeconds(0.5f);
         roundEndsMessage.gameObject.SetActive(false);
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;
         GameManager.instance.opponent.endStateReady = true;
         GameManager.instance.EndTurn();
+    }
+
+    /// <summary>
+    /// Randomly chooses half of the stunned units and removes them from the game
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    IEnumerator StunnedUnitsDiscard(List<Unit> units)
+    {
+        Player player = units[0].card.player;
+        int discardUnitsAmount = units.Count + 1 / 2; // returns half of the unit amount rounded up
+        List<int> idsChosen = new List<int>();
+
+        for (int i = 0; i < discardUnitsAmount; i++)
+        {
+            // chosing random unit that hasn't been chosen before
+            int randomUnitID = 0;
+            do { randomUnitID = Random.Range(0, units.Count); } while(!idsChosen.Contains(randomUnitID));
+            idsChosen.Add(randomUnitID);
+
+            units[randomUnitID].card.DestroyCard();
+            yield return new WaitForSeconds(0.3f);
+        }
+    }
+
+    void ShowStunnedUnits(List<Unit> units)
+    {
+        Player player = units[0].card.player;
+
+        for (int i = 0; i < units.Count; i++)
+        {
+            float unitY = roundEndsMessage.transform.localPosition.y + stunnedOffsetY;
+            float unitX = stunnedOffsetX * (i - (units.Count - 1) / 2f);
+            Vector2 unitPos = new Vector2(unitX, unitY);
+
+            player.playerUI.stunnedPlaceholders[i].gameObject.SetActive(true);
+            player.playerUI.stunnedPlaceholders[i].transform.localPosition = unitPos;
+            player.playerUI.stunnedPlaceholders[i].sprite = units[i].card.cardData.unitSprite;
+        }
     }
 }

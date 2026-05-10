@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
     [Header("player attributes")]
     public int health;
     public int maxStars;
-    [HideInInspector] public int currentStars;
+    public int currentStars;
     public string playerName;
     public bool endStateReady = false;
     [HideInInspector] public bool dead;
@@ -46,6 +46,8 @@ public class Player : MonoBehaviour
 
         // heatlh
         health = GameManager.instance.startingMaxHealth;
+        maxStars = GameManager.instance.startingStars;
+        currentStars = maxStars;
 
         // food
         for (int i = 0; i < food.Length; i++)
@@ -92,7 +94,7 @@ public class Player : MonoBehaviour
         damageAmount = (damageAmount > health) ? health : damageAmount;
 
         health -= damageAmount;
-        playerUI.Refresh(damageAmount);
+        playerUI.Refresh();
 
         if (health < 1) PlayerDeath();
     }

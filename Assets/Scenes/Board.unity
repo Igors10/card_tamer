@@ -1396,6 +1396,17 @@ Transform:
   - {fileID: 814713060}
   m_Father: {fileID: 687881592}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &264118174 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8116503036527888339, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+  m_PrefabInstance: {fileID: 1758015966}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &269845871
 GameObject:
   m_ObjectHideFlags: 0
@@ -2616,6 +2627,7 @@ MonoBehaviour:
   player: {fileID: 1425032168}
   opponent: {fileID: 1541516079}
   startingMaxHealth: 12
+  startingStars: 2
   startingResourceAmount: 3
   playerConfig: {fileID: 11400000, guid: 4830222a87a796a489eb0184e93624f0, type: 2}
 --- !u!1 &606257367
@@ -6682,9 +6694,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1758015967}
     - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: starsObj
+      value: 
+      objectReference: {fileID: 1992214180}
+    - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: healthbar
       value: 
       objectReference: {fileID: 1758015969}
+    - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: starsText
+      value: 
+      objectReference: {fileID: 264118174}
     - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: healthbarFill
       value: 
@@ -6707,6 +6727,10 @@ PrefabInstance:
       objectReference: {fileID: 1758015971}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: isAI
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: health
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
@@ -8618,6 +8642,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 907750e53f32b134482e6313800a7df5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Field
+--- !u!114 &1915433421 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8116503036527888339, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+  m_PrefabInstance: {fileID: 259275793114704191}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!1 &1920023549 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4456329943502181235, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+  m_PrefabInstance: {fileID: 259275793114704191}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1927497416
 GameObject:
   m_ObjectHideFlags: 0
@@ -8994,6 +9034,11 @@ MonoBehaviour:
   gameOverText: {fileID: 514733097}
   wonText: You won!
   lostText: You lost :(
+--- !u!1 &1992214180 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4456329943502181235, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+  m_PrefabInstance: {fileID: 1758015966}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1992731205
 GameObject:
   m_ObjectHideFlags: 0
@@ -10383,9 +10428,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 259275793114704192}
     - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: starsObj
+      value: 
+      objectReference: {fileID: 1920023549}
+    - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: healthbar
       value: 
       objectReference: {fileID: 259275793114704194}
+    - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: starsText
+      value: 
+      objectReference: {fileID: 1915433421}
     - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: healthbarFill
       value: 
@@ -10406,6 +10459,10 @@ PrefabInstance:
       propertyPath: 'foodCounters.Array.data[2]'
       value: 
       objectReference: {fileID: 259275793114704196}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: health
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: playerUI
       value: 

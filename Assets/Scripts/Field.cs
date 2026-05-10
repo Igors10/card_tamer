@@ -20,7 +20,7 @@ public class Field : MonoBehaviour
     [SerializeField] bool mirrorBlock;
 
     [Header("Highlight")]
-    Color defaultColor;
+    [HideInInspector] public Color defaultColor;
     Color defaultSpawnPointColor;
     [SerializeField] Color highlighColor; // used for highlighting tiles that are available for spawning
     [SerializeField] Color dimHighlightColor; // used for highlighting tiles that are available for moving
@@ -88,6 +88,24 @@ public class Field : MonoBehaviour
 
         return unitsToReturn;
     }
+
+    /// <summary>
+    /// Returns combined power of all units on this field
+    /// </summary>
+    /// <returns></returns>
+    public int GetFieldPower()
+    {
+        int combinedPower = 0;
+
+        for (int i = 0; i < units.Length;i++)
+        {
+            if (units[i] == null) continue;
+            combinedPower += units[i].card.currentPower;
+        }
+
+        return combinedPower;
+    }
+
     private void Update()
     {
         IsCardOver();
@@ -138,6 +156,8 @@ public class Field : MonoBehaviour
         if ((player == GameManager.instance.player) && (cardIsOver == false || units[1] != null)
             || GameManager.instance.executeManager.currentCard != null) return false;
 
+        if (!cardPlayed.SpecialCost()) return false;
+
         // spawn a creature
         GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);
 
@@ -153,13 +173,7 @@ public class Field : MonoBehaviour
 
     public void RefreshFieldVisuals()
     {
-        // block visuals
-        if (currentBlock > 0)
-        {
-            blockObj.SetActive(true);
-            blockValue.text = currentBlock.ToString();
-        }
-        else blockObj.SetActive(false);
+        sprite.color = defaultColor;
     }
 
     /// <summary>

@@ -34,6 +34,8 @@ public class D6 : MonoBehaviour
         // randomly picking dice values while it is rolling
         StartCoroutine(RandomizeDiceValue());
 
+        yield return new WaitForSeconds(rollingTime);
+        /*
         // Floating up
         float t = 0;
         while (t < rollingTime)
@@ -55,7 +57,7 @@ public class D6 : MonoBehaviour
 
             transform.position = Vector3.Lerp(diceTargetPos, diceStartingPos, coolT);
             yield return null;
-        }
+        }*/
 
         rolling = false;
 
@@ -65,6 +67,9 @@ public class D6 : MonoBehaviour
 
         // pop animation at the end
         Animations.instance.PopAnim(this.gameObject, 0.3f, 0.004f);
+
+        // adding rolled power
+        unit.card.GainPower(GetDiceValue());
     }
 
     void RotateDice()

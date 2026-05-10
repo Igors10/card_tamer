@@ -1,6 +1,4 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class FieldManager : MonoBehaviour
@@ -17,6 +15,19 @@ public class FieldManager : MonoBehaviour
     Field[] GetCurrentPlayerFields()
     {
         return GameManager.instance.yourTurn ? GameManager.instance.player.fields : GameManager.instance.opponent.fields;
+    }
+
+    public List<Unit> GetStunnedUnits(Player player)
+    {
+        List<Unit> unitsToReturn = new List<Unit>();
+
+        for (int i = 0; i < player.fields.Length; i++)
+        {
+            List<Unit> fieldUnits = player.fields[i].GetFieldUnits();
+            foreach (Unit unit in fieldUnits) if (unit.stunned) unitsToReturn.Add(unit);
+        }
+
+        return unitsToReturn;
     }
 
     /// <summary>
@@ -85,9 +96,49 @@ public class FieldManager : MonoBehaviour
 
     public void Refresh()
     {
-        // so basically color the line to color of the winner
-        //List <Field> 
-        //for (int i = 0; i)
+        // FIELD COLOR
+        // ==================
+        Player player = GameManager.instance.player;
+        Player opponent = GameManager.instance.opponent;
+
+        // Highlighting the winning player field in each line
+        for (int i = 0; i < player.fields.Length; i++)
+        {
+            Field playerField = player.fields[i];
+            Field opponentField = opponent.fields[i];
+
+            // comparing power
+            bool lineTie = playerField.GetFieldPower() == opponentField.GetFieldPower();
+            bool playerWins = playerField.GetFieldPower() > opponentField.GetFieldPower() && !lineTie;
+
+            // player field color
+            Color playerFieldColor = (playerField.GetFieldPower() != 0) ? player.playerColor : Color.white;
+            if (!playerWins && !lineTie) playerFieldColor = DesaturateColor(playerFieldColor, 0.5f);
+            playerField.defaultColor = playerFieldColor;
+
+            // opponent field color
+            Color opponentFieldColor = (opponentField.GetFieldPower() != 0) ? opponent.playerColor : Color.white;
+            if (playerWins && !lineTie) opponentFieldColor = DesaturateColor(opponentFieldColor, 0.5f);
+            opponentField.defaultColor = opponentFieldColor;
+
+            // applying colors
+            playerField.RefreshFieldVisuals();
+            opponentField.RefreshFieldVisuals();
+        }
+    }
+
+    Color DesaturateColor(Color ogColor, float desatCoef)
+    {
+        float h, s, v;
+
+        // Convert the RGB color to HSV
+        Color.RGBToHSV(ogColor, out h, out s, out v);
+        // Reduce the saturation
+        s *= desatCoef;
+        // Convert it back to a standard RGB color
+        Color desatColor = Color.HSVToRGB(h, s, v);
+
+        return desatColor;
     }
 
     // ================

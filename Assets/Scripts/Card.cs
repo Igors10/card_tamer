@@ -249,7 +249,7 @@ public class Card : MonoBehaviour
         Debug.Log("Card: " + cardData.name + "gains " + power + " power.");
 
         // showing added power as bonus
-        if (currentPower != 0 && power != 0) unit.powerBonus.StartShowingBonus(power); 
+        if (power != 0) unit.powerBonus.StartShowingBonus(power); 
 
         currentPower += power;
         unit.RefreshUnitVisuals();
@@ -289,7 +289,7 @@ public class Card : MonoBehaviour
     /// Returns true if player can afford to play the card
     /// </summary>
     /// <returns></returns>
-    bool SpecialCost()
+    public bool SpecialCost()
     {
         // checking if card requires a star to be played
         if (cardData.isSpecial == false) return true;

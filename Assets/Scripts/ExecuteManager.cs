@@ -53,8 +53,7 @@ public class ExecuteManager : MonoBehaviour
 
     public void StopRevealCard()
     {
-        // hide die from unit UI
-        currentCard.unit.die.DisableDie();
+        currentCard.unit.DisableRollingUI();
 
         // deactivate card
         currentCard.gameObject.SetActive(false);
@@ -62,6 +61,9 @@ public class ExecuteManager : MonoBehaviour
 
         // reset current card var
         currentCard = null;
+
+        // refresh fields
+        GameManager.instance.fieldManager.Refresh();
     }
 
     public void CardUseAbl(Card card, Ability ability)

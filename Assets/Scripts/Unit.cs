@@ -24,11 +24,13 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] GameObject powerUI;
     [SerializeField] TextMeshProUGUI powerValue;
 
-    [Header("die")]
-    public D6 die;
-    [SerializeField] float dieRadius;
-    [SerializeField] float dieOffset;
+    [Header("power rolling")]
+    public D6[] dice;
+    [SerializeField] float diceDistance;
+    [SerializeField] float dieOffsetY;
     [SerializeField] float afterDiePause;
+    [SerializeField] GameObject bonusPowerObj;
+    [SerializeField] TextMeshProUGUI bonusPowerValue;
 
     [Header("state")]
     [SerializeField] Color healthValueColor = new Color(0.86f, 0.63f, 0.83f, 1f);
@@ -188,47 +190,55 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public IEnumerator RollPower()
     {
-        // enabling die
-        die.gameObject.SetActive(true);
+        int numberOfDice = (card.cardData.isSpecial) ? 2 : 1;
 
-        int loopSave = 0;
-        // setting random die position
-        do
-        {
-            Vector2 dieStartingPos = new Vector2(sprite.transform.localPosition.x, sprite.transform.localPosition.y);
-            die.transform.localPosition = dieStartingPos + UnityEngine.Random.insideUnitCircle * dieRadius;
-
-            loopSave++;
-        } while (DieTooClose() && loopSave < 5);
-
-        // rolling the die
-        yield return StartCoroutine(die.RollAnimation());
-
-        // adding rolled power
-        card.GainPower(die.GetDiceValue());
-
-        // showing the result
-        die.Glow(true);
         powerUI.SetActive(true);
 
-        // adding bonus power
-        yield return new WaitForSeconds(1f);
-        card.GainPower(card.abilities[0].abilityData.power);
+        // rolling dice
+        for (int i = 0; i < numberOfDice; i++)
+        {
+            D6 die = dice[i];
 
+            // enabling die
+            die.gameObject.SetActive(true);
+
+            float dieOffsetX = 3 * (i - (numberOfDice - 1) / 2f);
+            Vector2 diePos = new Vector2(sprite.transform.localPosition.x + dieOffsetX, sprite.transform.localPosition.y + dieOffsetY);
+            die.transform.localPosition = diePos;
+
+            // rolling the die
+            if (i + 1 == numberOfDice) yield return StartCoroutine(die.RollAnimation());
+            else StartCoroutine(die.RollAnimation()); yield return new WaitForSeconds(0.5f);
+
+            // showing the result
+            die.Glow(true);
+        }
+
+        // adding bonus power
+        if (card.abilities[0].abilityData.power > 0)
+        {
+            //bonusPowerObj.SetActive(true);
+            //bonusPowerValue.text = "+ " + card.abilities[0].abilityData.power;
+
+            yield return new WaitForSeconds(1f);
+            Animations.instance.PopAnim(card.abilities[0].powerIcon, 0.3f, 0.4f);
+            card.GainPower(card.abilities[0].abilityData.power);
+        }
+        
         // wait a bit after rolling is finished
         yield return new WaitForSeconds(afterDiePause);
     }
 
-    /// <summary>
-    /// checks if the die got spawned too close to powerUI or the creature itself
-    /// </summary>
-    /// <returns></returns>
-    bool DieTooClose()
+    public void DisableRollingUI()
     {
-        bool tooClose = false;
-        if (Vector2.Distance(die.transform.position, powerUI.transform.position) < dieOffset ||
-            Vector2.Distance(die.transform.position, sprite.transform.position) < dieOffset) tooClose = true;
-        return tooClose;
+        // hide dice
+        foreach (D6 die in dice)
+        {
+            die.DisableDie();
+        }
+
+        // hide power message
+        bonusPowerObj.SetActive(false);
     }
 
     public IEnumerator AbilityAnimation(Ability ability)

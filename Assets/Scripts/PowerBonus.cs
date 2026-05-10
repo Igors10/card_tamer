@@ -7,6 +7,7 @@ public class PowerBonus : MonoBehaviour
 {
     [Header("refs")]
     [SerializeField] TextMeshProUGUI text;
+    Coroutine currentBonus;
 
     [Header("anim params")]
     [SerializeField] float fadeTime;
@@ -14,7 +15,8 @@ public class PowerBonus : MonoBehaviour
 
     public void StartShowingBonus(int bonus)
     {
-        StartCoroutine(ShowBonus(bonus));
+        if (currentBonus != null) StopCoroutine(currentBonus);
+        currentBonus = StartCoroutine(ShowBonus(bonus));
     }
 
     /// <summary>
@@ -49,5 +51,8 @@ public class PowerBonus : MonoBehaviour
 
         // deactivating text
         text.gameObject.SetActive(false);
+
+        // removing reference to coroutine
+        currentBonus = null;
     }
 }

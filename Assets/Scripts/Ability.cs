@@ -13,7 +13,7 @@ public class Ability : MonoBehaviour
     bool passive;
     [SerializeField] TextMeshProUGUI name;
     [SerializeField] GameObject speedIcon;
-    [SerializeField] GameObject powerIcon;
+    public GameObject powerIcon;
     [SerializeField] TextMeshProUGUI speedValue;
     [SerializeField] TextMeshProUGUI powerValue;
     [SerializeField] TextMeshProUGUI effectDesc;

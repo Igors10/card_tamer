@@ -1,8 +1,9 @@
 using FishNet.Component.Transforming.Beta;
 using FishNet.Utility.Extension;
+using NUnit.Framework;
 using System;
 using System.Collections;
-using System.Security.Cryptography;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,9 @@ using UnityEngine.UI;
 public class PlayerUI : MonoBehaviour
 {
     Player player;
+
+    [Header("refs")]
+    public List<SpriteRenderer> stunnedPlaceholders;
 
     [Header("HP")]
     public GameObject healthbar;
@@ -45,9 +49,6 @@ public class PlayerUI : MonoBehaviour
         // getting reference for the player
         player = GetComponent<Player>();
 
-        // Updating the hp bar visuals
-        //RefreshHP();
-
         // Getting positions for food tokens UI positions
         defaultTokenPos = foodObj.transform.localPosition;
         shownTokenPos = (player.isOpponent) ? defaultTokenPos - new Vector3(offsetX, 0, 0) : defaultTokenPos + new Vector3(offsetX, 0, 0);
@@ -57,7 +58,7 @@ public class PlayerUI : MonoBehaviour
     /// Updates hp value on the healthbar (and plays damage animation if needed)
     /// </summary>
     /// <param name="isDamage"></param>
-    public void Refresh(int damage = 0)
+    public void Refresh()
     {
         // REFRESHING HP
         // ==============
@@ -72,7 +73,12 @@ public class PlayerUI : MonoBehaviour
             healthbarFill.fillAmount = newHealthbarFill;
         }
 
-        if (damage > 0) StartCoroutine(DamageEffect(damage));
+        // checking if there was damage and applying shake effect if there was
+        if (Convert.ToInt32(hpValue.text) > player.health)
+        {
+            int damage = Convert.ToInt32(hpValue.text) - player.health;
+            StartCoroutine(DamageEffect(damage));
+        }
 
         // REFRESHING STARS
         // ================
