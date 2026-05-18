@@ -738,6 +738,7 @@ MonoBehaviour:
   specialIcon: {fileID: 1451739142048650770}
   unit: {fileID: 0}
   player: {fileID: 0}
+  deathParticle: {fileID: 3195165135500661048, guid: 96bf9cb144eaafb4caa6a3dc98846554, type: 3}
   glowEffect: {fileID: 7700092449853056093}
   defaultScale: {x: 0, y: 0, z: 0}
   highlightedScale: {x: 0, y: 0, z: 0}

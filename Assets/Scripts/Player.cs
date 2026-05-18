@@ -30,6 +30,8 @@ public class Player : MonoBehaviour
 
     [Header("resources")]
     [HideInInspector] public int[] food = new int[3];
+    [HideInInspector] public int deadUnitsThisRound = 0;
+    [HideInInspector] public int shopStars = 0;
 
 
     private void Start()
@@ -74,6 +76,9 @@ public class Player : MonoBehaviour
         currentStars = maxStars;
 
         playerUI.Refresh();
+
+        // resetting temp values
+        deadUnitsThisRound = 0;
     }
 
 

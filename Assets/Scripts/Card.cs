@@ -22,7 +22,8 @@ public class Card : MonoBehaviour
     public OrderMarker orderMarker;
     [SerializeField] GameObject specialIcon;
     [HideInInspector] public Unit unit;
-    public Player player;
+    [HideInInspector] public Player player;
+    [SerializeField] DeathParticle deathParticle;
 
     [Header("highlight")]
     [SerializeField] GameObject glowEffect;
@@ -114,6 +115,12 @@ public class Card : MonoBehaviour
     {
         Debug.Log("Card: Card is getting destroyed.");
 
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("UnitDeathSFX");
+
+        // removing the unit
+        DeathParticle newParticle = Instantiate(deathParticle, unit.transform.position, unit.transform.rotation).GetComponent<DeathParticle>();
+        newParticle.Init(unit.sprite.sprite, player);
         unit.RemoveFromBoard();
 
         // Remove card from field cards (card cant really be destroyed when they are in hand)

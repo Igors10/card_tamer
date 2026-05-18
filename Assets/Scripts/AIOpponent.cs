@@ -58,7 +58,7 @@ public class AIOpponent : MonoBehaviour
             case GameState.BATTLING:
                 break;
             case GameState.BUYING:
-                currentAction = StartCoroutine(BuyRandomCard());
+                //currentAction = StartCoroutine(BuyRandomCard());
                 break;
 
         }
@@ -109,7 +109,7 @@ public class AIOpponent : MonoBehaviour
 
     // =========================================================
     // ===================== BUYING ============================
-
+    /*
     IEnumerator BuyRandomCard()
     {
         yield return new WaitForSeconds(1.5f);
@@ -153,7 +153,7 @@ public class AIOpponent : MonoBehaviour
         Debug.Log("AIOpponent: opponent went through slots and didnt buy anythng");
         AIEndTurn();
     }
-
+    */
     // =========================================================
 }
 

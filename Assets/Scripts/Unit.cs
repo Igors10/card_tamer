@@ -13,7 +13,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [HideInInspector] public Card card;
 
     [Header("refs")]
-    [SerializeField] Image sprite;
+    public Image sprite;
     [SerializeField] TextMeshProUGUI healthValue;
     [HideInInspector] public Field currentField;
     public OrderMarker orderMarker;

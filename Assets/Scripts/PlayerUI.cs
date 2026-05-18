@@ -62,6 +62,12 @@ public class PlayerUI : MonoBehaviour
     {
         // REFRESHING HP
         // ==============
+        // checking if there was damage and applying shake effect if there was
+        if (Convert.ToInt32(hpValue.text) > player.health)
+        {
+            int damage = Convert.ToInt32(hpValue.text) - player.health;
+            DamageEffect(damage);
+        }
 
         // Updating the text
         hpValue.text = player.health.ToString();
@@ -73,16 +79,9 @@ public class PlayerUI : MonoBehaviour
             healthbarFill.fillAmount = newHealthbarFill;
         }
 
-        // checking if there was damage and applying shake effect if there was
-        if (Convert.ToInt32(hpValue.text) > player.health)
-        {
-            int damage = Convert.ToInt32(hpValue.text) - player.health;
-            StartCoroutine(DamageEffect(damage));
-        }
-
+       
         // REFRESHING STARS
         // ================
-
         starsObj.SetActive(player.currentStars > 0);
 
         // playing the animation if star value has changed
@@ -95,34 +94,13 @@ public class PlayerUI : MonoBehaviour
     /// </summary>
     /// <param name="intensity"></param>
     /// <returns></returns>
-    IEnumerator DamageEffect(float damage)
+    void DamageEffect(float damage)
     {
         // playing the particle effect
         if (damageVFX != null) damageVFX.Play();
 
-        // shaking the healthbar for extra juice
-        float t = 0;
-        float maxIntensity = shakeIntensity * damage;
-        Vector3 startingPosition = healthbar.transform.localPosition;
-
-        while (t < shakeLenght)
-        {
-            // Gradually decreasing the intensity
-            t += Time.deltaTime;
-            float actualT = t / shakeLenght;
-            float currentIntensity = Mathf.Lerp(maxIntensity, 0f, actualT);
-
-            // Random position offset
-            float xOffset = UnityEngine.Random.Range(-1, 1) * currentIntensity;
-            float yOffset = UnityEngine.Random.Range(-1, 1) * currentIntensity;
-
-            healthbar.transform.localPosition += new Vector3(xOffset, yOffset, 0);
-
-            yield return null;
-
-            // Reverting the offset
-            healthbar.transform.localPosition = startingPosition;
-        }
+        // playing the shaking effect
+        Animations.instance.ShakeAnim(healthbar, shakeLenght, shakeIntensity);
     }
 
     /// <summary>

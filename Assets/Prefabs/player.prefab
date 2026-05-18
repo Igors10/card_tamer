@@ -56,12 +56,16 @@ MonoBehaviour:
   - {fileID: 0}
   powerCounter: {fileID: 0}
   health: 0
+  maxStars: 0
+  currentStars: 0
+  playerName: 
   endStateReady: 0
   dead: 0
   isAI: 0
   playerColor: {r: 0, g: 0, b: 0, a: 0}
   isOpponent: 0
   food: 000000000000000000000000
+  deadUnitsThisRound: 0
 --- !u!114 &4287692715053019839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,12 +78,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dec559c5bc581546b2f422aa5abc545, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerUI
+  stunnedPlaceholders: []
   healthbar: {fileID: 0}
   healthbarFill: {fileID: 0}
   hpValue: {fileID: 0}
+  starsObj: {fileID: 0}
+  starsText: {fileID: 0}
   damageVFX: {fileID: 0}
-  shakeLenght: 1
-  shakeIntensity: 10
+  shakeLenght: 10
+  shakeIntensity: 1
   head: {fileID: 0}
   face: {fileID: 0}
   avatarColor: {r: 0, g: 0, b: 0, a: 0}
@@ -90,3 +97,4 @@ MonoBehaviour:
   foodObj: {fileID: 0}
   offsetX: 250
   tokenStayTime: 0.7
+  tokenShowTime: 0.6

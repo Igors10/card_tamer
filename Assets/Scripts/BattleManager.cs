@@ -174,7 +174,7 @@ public class BattleManager : MonoBehaviour
         yield return StartCoroutine(StunnedUnitsDiscard(playerStunnedUnits));
         yield return StartCoroutine(StunnedUnitsDiscard(opponentStunnedUnits));
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(5f);
         roundEndsMessage.gameObject.SetActive(false);
 
         // Ending the phase
@@ -204,7 +204,7 @@ public class BattleManager : MonoBehaviour
             idsChosen.Add(randomUnitID);
 
             units[randomUnitID].card.DestroyCard();
-            yield return new WaitForSeconds(0.7f);
+            yield return new WaitForSeconds(1.5f);
         }
     }
 

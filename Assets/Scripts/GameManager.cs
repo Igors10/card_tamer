@@ -50,6 +50,9 @@ public class GameManager : MonoBehaviour
     public int startingStars;
     public int startingResourceAmount;
     public PlayerConfigObj playerConfig;
+    
+    //[Header("events")]
+    public static event Action OnStateTransition;
    
 
     private void Awake()
@@ -130,11 +133,12 @@ public class GameManager : MonoBehaviour
 
                 // resetting shop values
                 managerUI.EnableUI(true);
-                shopManager.RandomizeSlots();
-                shopManager.ResetReroll();
                 readyButton.gameObject.SetActive(true);
                 break;
         }
+
+        // trigger the event
+        OnStateTransition?.Invoke();
 
         // temp
         StartTurn();
@@ -162,14 +166,6 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
-        // state specific effects
-        switch (currentState)
-        {
-            case GameState.BUYING:
-                shopManager.EnableRerollButton(false);
-                break;
-        }
-
         yourTurn = false;
 
         // updating UI
@@ -211,8 +207,7 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameState.BUYING:
-                shopManager.EnableRerollButton(true);
-               
+             
                 break;
         }
     }

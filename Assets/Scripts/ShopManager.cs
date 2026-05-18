@@ -2,115 +2,163 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Collections;
+using System.Data;
+using Unity.VisualScripting;
 
 public class ShopManager : MonoBehaviour
 {
     [Header("refs")]
-    public ShopSlot[] shopSlots;
-    public ParticleSystem shopTokenVFX;
-    public TextMeshProUGUI shopPlayerIndicator;
-    [SerializeField] GameObject shopObj;
+    [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- draw special
+    TextMeshProUGUI[] prices;
+    [SerializeField] TextMeshProUGUI nextStarAmountText;
+    [SerializeField] Player player;
 
-    [Header("rerolling")]
-    [SerializeField] Button rerollButton;
-    [SerializeField] TextMeshProUGUI rerollText;
-    [SerializeField] Image rerollPriceImage;
-    FoodType rerollPrice = FoodType.BERRIES;
-    bool freeReroll = true;
+    [Header("prices")]
+    [SerializeField] int drawCardPrice;
+    [SerializeField] int drawSpecialPrice;
+    // upgrade price is current max star amount + 1
 
-    public void EnableRerollButton(bool isEnable)
+    [Header("shop stars")]
+    [SerializeField] int shopStarsAfterBattle;
+    [SerializeField] GameObject shopStarPrefab;
+    [SerializeField] Color starColor;
+    [SerializeField] Color deadUnitsStarColor;
+    [SerializeField] GameObject starsObj;
+    [SerializeField] float starSpacing;
+    [SerializeField] float starAppearIntervals;
+    List<Image> shopStars = new List<Image>();
+    bool skipStarAppearance = false;
+    // you stopped here - make stars appear
+
+    bool starsAlreadyUpgraded;
+
+    private void Start()
     {
-        rerollButton.interactable = isEnable;
-
-        // temp also food ui is attached to this 
-        StartCoroutine(GameManager.instance.player.playerUI.ShowTokens(isEnable));
-        StartCoroutine(GameManager.instance.opponent.playerUI.ShowTokens(!isEnable));
+        // adding functionality to buttons
+        buttons[0].onClick.AddListener(() => UpgradeStars(player));
+        buttons[1].onClick.AddListener(() => DrawCard(player));
+        buttons[2].onClick.AddListener(() => DrawSpecial(player));
     }
 
-    public void ResetReroll()
+    private void OnEnable()
     {
-        freeReroll = true;
-        rerollText.text = "free";
-        rerollPriceImage.GetComponent<Image>().enabled = false;
+        // player can't upgrade stars if there are more than 4
+        starsAlreadyUpgraded = player.maxStars < 4;
+        StartCoroutine(CreateShopStars());
+
+        Refresh();
     }
 
-    /// <summary>
-    /// Hides (or shows back) whole shop window so that player can look at the board
-    /// </summary>
-    public void HideShop()
+    void Refresh()
     {
-        shopObj.SetActive(!shopObj.activeSelf);
-    }
+        // refreshing up star button
+        int nextStarAmount = player.maxStars + 1;
+        prices[0].text = nextStarAmount.ToString();
+        nextStarAmountText.text = "Up Star (" + nextStarAmount.ToString() +")";
+        CheckButtonAvailability(0, nextStarAmount);
+        if (starsAlreadyUpgraded) buttons[0].interactable = false;
 
-    /// <summary>
-    /// Checks if player has all the needed resources and randomizes shop content if they do (returns true if they do)
-    /// </summary>
-    /// <param name="roller"></param>
-    /// <returns></returns>
-    public void RerollShop(Player roller)
-    {
-        // do checks if player has enough food and change random food when used
-        if (!freeReroll)
+        // refreshing draw card button
+        prices[1].text = drawCardPrice.ToString();
+        CheckButtonAvailability(1, drawCardPrice);
+
+        // refreshing draw special button
+        prices[2].text = drawCardPrice.ToString();
+        CheckButtonAvailability(2, drawSpecialPrice);
+
+        // refreshing shopStars
+        for (int i = 0; i < shopStars.Count; i++)
         {
-            if (roller.food[(int)rerollPrice] > 0) roller.playerUI.foodCounters[(int)rerollPrice].AddFood(-1);
-            else
+            // star position
+            float starX = starSpacing * (i - (shopStars.Count - 1) / 2f);
+            shopStars[i].transform.localPosition = new Vector2(starX, starsObj.transform.position.y);
+
+            // star transparency (used stars are half transparent
+            if (player.shopStars < i)
             {
-                // starting red blinking animation for resources
-                StartCoroutine(roller.playerUI.foodCounters[(int)rerollPrice].NegativeBlink());
-
-                // playing soundeffect
-                AudioManager.instance.PlaySFX("NegativeSFX");
-
-                return;
+                shopStars[i].color = new Color(shopStars[i].color.r, shopStars[i].color.g, shopStars[i].color.b, 0.5f);
             }
         }
-
-        // Deciding on new price resource
-        int randomFoodType = 0;
-        do
-        {
-            randomFoodType = UnityEngine.Random.Range(0, Enum.GetNames(typeof(FoodType)).Length);
-        } while (randomFoodType == (int)rerollPrice);
-        rerollPriceImage.GetComponent<Image>().enabled = true;
-        rerollPriceImage.sprite = shopSlots[0].foodSprites[randomFoodType];
-        rerollText.text = "";
-        rerollPrice = (FoodType)randomFoodType;
-
-        // Making slots actually reroll the cards stored
-        RandomizeSlots();
-
-        // Disabling free reroll
-        freeReroll = false;
     }
 
-    public void RandomizeSlots()
+    // SHOP BUTTONS
+    // ===============
+    void CheckButtonAvailability(int buttonID, int price)
     {
-        // playing soundeffect
-        AudioManager.instance.PlaySFX("RerollSFX");
+        // checking if player has enough stars
+        bool available = price > player.shopStars;
 
-        for (int i = 0; i < shopSlots.Length; i++)
+        // disabling the button if player doesnt have enough
+        buttons[buttonID].interactable = available;
+        prices[buttonID].color = (available) ? Color.black : Color.red;
+    }
+
+    void Pay(Player playerToPay, int price)
+    {
+        playerToPay.shopStars -= price;
+        if (playerToPay.shopStars < 0) playerToPay.shopStars = 0;
+    }
+
+    void UpgradeStars(Player playerToUpgrade)
+    {
+        // Upgrading stars
+        playerToUpgrade.maxStars += 1;
+        
+        Refresh();
+        playerToUpgrade.playerUI.Refresh();
+
+        // Paying
+        int starPrice = Convert.ToInt32(prices[0].text);
+        Pay(playerToUpgrade, starPrice);
+    }
+
+    void DrawCard(Player playerToGetCard)
+    {
+        // Generating the card (temporary just random card)
+        CardGenerator generator = GameManager.instance.cardGenerator;
+        generator.CreateCard(generator.PickRandomCard(), playerToGetCard);
+
+        // Paying
+        int cardPrice = Convert.ToInt32(prices[1].text);
+        Pay(playerToGetCard, cardPrice);
+    }
+
+    void DrawSpecial(Player playerToGetSpecial)
+    {
+        // Generating Special (temporary just random card)
+        CardGenerator generator = GameManager.instance.cardGenerator;
+        generator.CreateCard(generator.PickRandomCard(), playerToGetSpecial);
+
+        // Paying 
+        int specialPrice = Convert.ToInt32(prices[2].text);
+        Pay(playerToGetSpecial, specialPrice);
+    }
+
+    // SHOP STARS (MONEY)
+    // ==================
+
+    private void Update()
+    {
+        if (Input.GetButtonDown("Fire")) skipStarAppearance = true;
+    }
+
+    IEnumerator CreateShopStars()
+    {
+        yield return null;
+
+        player.shopStars = player.shopStars + player.deadUnitsThisRound + shopStarsAfterBattle;
+        
+        for (int i = 0; i < player.shopStars; i++)
         {
-            shopSlots[i].gameObject.SetActive(true);
+            Image newShopStar = Instantiate(shopStarPrefab, starsObj.transform.position, Quaternion.identity, starsObj.transform).GetComponent<Image>();
+            shopStars.Add(newShopStar);
+            newShopStar.color = (i < shopStarsAfterBattle) ? starColor : deadUnitsStarColor;
+            Animations.instance.PopAnim(newShopStar.gameObject, 0.4f, 0.2f);
 
-            bool cardRepeated = false;
-            CreatureObj cardForSale;
-            int loopSave = 0;
-
-            do
-            {
-                // picking random card for the shop
-                cardForSale = GameManager.instance.cardGenerator.PickRandomCard("shop");
-                cardRepeated = false;
-                loopSave++;
-
-                for (int a = 0; a < i; a++)
-                {
-                    if (cardForSale == shopSlots[a].cardData) cardRepeated = true;
-                }
-
-            } while (cardRepeated && loopSave < 10);
-
-            shopSlots[i].InitSlot(cardForSale);
+            Refresh();
+            if (!skipStarAppearance) yield return new WaitForSeconds(starAppearIntervals);
         }
     }
 }
