@@ -26,6 +26,8 @@ public class Field : MonoBehaviour
     [SerializeField] Color dimHighlightColor; // used for highlighting tiles that are available for moving
     [SerializeField] Color highlightSpawnPointColor;
     [SerializeField] Color fadedColor;
+    Material defaultMaterial;
+    [SerializeField] Material selectMaterial;
     bool cardIsOver;
 
     private void Start()
@@ -33,6 +35,8 @@ public class Field : MonoBehaviour
         // getting the default colors
         defaultColor = sprite.color;
         defaultSpawnPointColor = spawnPoint.color;
+        // getting default material
+        defaultMaterial = sprite.material;
 
         // Mirroring block if enabled
         if (mirrorBlock) blockObj.transform.localPosition = new Vector2(-blockObj.transform.localPosition.x, blockObj.transform.localPosition.y);
@@ -138,8 +142,9 @@ public class Field : MonoBehaviour
 
     void HighlightField(bool highlight) // highlights the field when spawning cards from hand
     {
-        sprite.color = (highlight) ? highlighColor : defaultColor;
-        spawnPoint.color = (highlight) ? highlightSpawnPointColor : defaultSpawnPointColor;
+        sprite.material = (highlight) ? selectMaterial : defaultMaterial;
+        //sprite.color = (highlight) ? highlighColor : defaultColor;
+        //spawnPoint.color = (highlight) ? highlightSpawnPointColor : defaultSpawnPointColor;
     }
 
     public void MoveHighlightField(bool highlight) // highlights the field when moving units 

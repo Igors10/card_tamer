@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 1e3ab228f41a91f45b22cb8d833e0849
+guid: fc547f846f0c58f4f971cdf99c4b56c1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5331184889492402627
-    second: cardboard texture_0
+      213: 8073493045502916411
+    second: white-pencil-lying-on-a-smooth-surface-with-a-sharp-point-and-clean-design-beside-other-drawing-tools-png_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,7 +48,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cardboard texture_0
+      name: white-pencil-lying-on-a-smooth-surface-with-a-sharp-point-and-clean-design-beside-other-drawing-tools-png_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 2448
-        height: 3264
+        x: 35
+        y: 92
+        width: 470
+        height: 190
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d3e00edb693d306b0800000000000000
-      internalID: -5331184889492402627
+      spriteID: b37b9c1562fca0070800000000000000
+      internalID: 8073493045502916411
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cardboard texture_0: -5331184889492402627
+      white-pencil-lying-on-a-smooth-surface-with-a-sharp-point-and-clean-design-beside-other-drawing-tools-png_0: 8073493045502916411
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

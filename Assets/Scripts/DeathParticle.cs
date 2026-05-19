@@ -34,9 +34,6 @@ public class DeathParticle : MonoBehaviour
 
     void SelfDestruct()
     {
-        // reporting to player another dead unit
-        player.deadUnitsThisRound++;
-
         // destroying the particle
         Destroy(this.gameObject);
     }

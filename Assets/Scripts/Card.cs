@@ -42,6 +42,7 @@ public class Card : MonoBehaviour
 
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
+    bool specialCostPaid = false;
    
 
     private void Start()
@@ -123,6 +124,10 @@ public class Card : MonoBehaviour
         newParticle.Init(unit.sprite.sprite, player);
         unit.RemoveFromBoard();
 
+        // reporting to player a unit died
+        player.deadUnitsThisRound++;
+
+
         // Remove card from field cards (card cant really be destroyed when they are in hand)
         player.cardsOnField.Remove(this);
         // removes unit gameObject
@@ -141,7 +146,7 @@ public class Card : MonoBehaviour
     /// <param name="mouseOver"></param>
     public void OnHover(bool mouseOver)
     {
-        if (GameManager.instance.currentState == GameState.PLACING)
+        if (GameManager.instance.player.cardsInHand.Contains(this))
         {
             if (GameManager.instance.executeManager.currentCard == this || isDragged) return;
 
@@ -299,13 +304,14 @@ public class Card : MonoBehaviour
     public bool SpecialCost()
     {
         // checking if card requires a star to be played
-        if (cardData.isSpecial == false) return true;
+        if (cardData.isSpecial == false || specialCostPaid) return true;
 
         // checking if player has a star
         if (player.currentStars < 1) return false;
 
         // taking the star
         player.currentStars--;
+        specialCostPaid = true;
         player.playerUI.Refresh();
         return true;
     }
@@ -317,6 +323,7 @@ public class Card : MonoBehaviour
     {
         // regenerating all health and resetting the power
         currentPower = 0;
+        specialCostPaid = false;
 
         unit.RefreshUnitVisuals();
     }

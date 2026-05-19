@@ -12,7 +12,7 @@ public class TitleScreen : MonoBehaviour
     public GameObject[] menus = new GameObject[0];
     [SerializeField] MenuChoice startingCardChoice;
     [SerializeField] MenuChoice startingSpecialChoice;
-    [SerializeField] PlayerConfigObj playerConfigObj;
+    public PlayerConfigObj playerConfigObj;
 
     [Header("menu transition")]
     [SerializeField] LoadingFog loadingFog;

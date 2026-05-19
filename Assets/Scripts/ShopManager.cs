@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 using System.Data;
 using Unity.VisualScripting;
 
@@ -11,7 +12,7 @@ public class ShopManager : MonoBehaviour
 {
     [Header("refs")]
     [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- draw special
-    TextMeshProUGUI[] prices;
+    [SerializeField] TextMeshProUGUI[] prices;
     [SerializeField] TextMeshProUGUI nextStarAmountText;
     [SerializeField] Player player;
 
@@ -44,15 +45,38 @@ public class ShopManager : MonoBehaviour
 
     private void OnEnable()
     {
+        Debug.Log("ShopManager: OnEnable triggers");
+
         // player can't upgrade stars if there are more than 4
-        starsAlreadyUpgraded = player.maxStars < 4;
+        starsAlreadyUpgraded = player.maxStars >= 4;
         StartCoroutine(CreateShopStars());
 
         Refresh();
     }
 
-    void Refresh()
+    private void OnDisable()
     {
+        DiscardSpendStars();
+    }
+
+    void Refresh(bool onlyRefreshStars = false)
+    {
+        // refreshing shopStars
+        for (int i = 0; i < shopStars.Count; i++)
+        {
+            // star position
+            float starX = starSpacing * (i - (shopStars.Count - 1) / 2f);
+            shopStars[i].transform.localPosition = new Vector2(starX, 0f);
+
+            // star transparency (used stars are half transparent
+            if (player.shopStars <= i)
+            {
+                shopStars[i].color = new Color(shopStars[i].color.r, shopStars[i].color.g, shopStars[i].color.b, 0.5f);
+            }
+        }
+
+        if (onlyRefreshStars) return;
+
         // refreshing up star button
         int nextStarAmount = player.maxStars + 1;
         prices[0].text = nextStarAmount.ToString();
@@ -65,22 +89,8 @@ public class ShopManager : MonoBehaviour
         CheckButtonAvailability(1, drawCardPrice);
 
         // refreshing draw special button
-        prices[2].text = drawCardPrice.ToString();
+        prices[2].text = drawSpecialPrice.ToString();
         CheckButtonAvailability(2, drawSpecialPrice);
-
-        // refreshing shopStars
-        for (int i = 0; i < shopStars.Count; i++)
-        {
-            // star position
-            float starX = starSpacing * (i - (shopStars.Count - 1) / 2f);
-            shopStars[i].transform.localPosition = new Vector2(starX, starsObj.transform.position.y);
-
-            // star transparency (used stars are half transparent
-            if (player.shopStars < i)
-            {
-                shopStars[i].color = new Color(shopStars[i].color.r, shopStars[i].color.g, shopStars[i].color.b, 0.5f);
-            }
-        }
     }
 
     // SHOP BUTTONS
@@ -88,7 +98,7 @@ public class ShopManager : MonoBehaviour
     void CheckButtonAvailability(int buttonID, int price)
     {
         // checking if player has enough stars
-        bool available = price > player.shopStars;
+        bool available = price <= player.shopStars;
 
         // disabling the button if player doesnt have enough
         buttons[buttonID].interactable = available;
@@ -99,14 +109,15 @@ public class ShopManager : MonoBehaviour
     {
         playerToPay.shopStars -= price;
         if (playerToPay.shopStars < 0) playerToPay.shopStars = 0;
+        Debug.Log("ShopManager: player pays " + price + " stars; player has " + playerToPay.shopStars + " stars left");
+
+        Refresh();
     }
 
     void UpgradeStars(Player playerToUpgrade)
     {
         // Upgrading stars
         playerToUpgrade.maxStars += 1;
-        
-        Refresh();
         playerToUpgrade.playerUI.Refresh();
 
         // Paying
@@ -141,24 +152,48 @@ public class ShopManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetButtonDown("Fire")) skipStarAppearance = true;
+        if (Input.GetButtonDown("Fire1")) { skipStarAppearance = true; Debug.Log("ShopManager: star appearance anim skipped"); }
     }
 
     IEnumerator CreateShopStars()
     {
-        yield return null;
+        // calculating player's shop stars
+        int newStars = player.deadUnitsThisRound + shopStarsAfterBattle;
+        player.shopStars += newStars;
+        player.deadUnitsThisRound = 0;
 
-        player.shopStars = player.shopStars + player.deadUnitsThisRound + shopStarsAfterBattle;
+        Debug.Log("ShopManager: Player has " + player.shopStars + " shop stars");
         
-        for (int i = 0; i < player.shopStars; i++)
+        for (int i = 0; i < newStars; i++)
         {
             Image newShopStar = Instantiate(shopStarPrefab, starsObj.transform.position, Quaternion.identity, starsObj.transform).GetComponent<Image>();
             shopStars.Add(newShopStar);
             newShopStar.color = (i < shopStarsAfterBattle) ? starColor : deadUnitsStarColor;
             Animations.instance.PopAnim(newShopStar.gameObject, 0.4f, 0.2f);
+            Debug.Log("ShopManager: new shop star created");
 
-            Refresh();
-            if (!skipStarAppearance) yield return new WaitForSeconds(starAppearIntervals);
+            Refresh(true);
+            if (skipStarAppearance) starAppearIntervals = 0.05f; 
+            yield return new WaitForSeconds(starAppearIntervals);
+        }
+        Refresh();
+    }
+
+    /// <summary>
+    ///  Removes all stars that were spend
+    /// </summary>
+    void DiscardSpendStars()
+    {
+        List<Image> shopStarsToRemove = new List<Image>();
+        foreach (Image shopStar in shopStars.Where(r => r.color.a < 1))
+        {
+            shopStarsToRemove.Add(shopStar);
+        }
+
+        for (int i = 0; i < shopStarsToRemove.Count; i++)
+        {
+            shopStars.Remove(shopStarsToRemove[i]);
+            Destroy(shopStarsToRemove[i]);
         }
     }
 }

@@ -52,6 +52,8 @@ public class PlayerUI : MonoBehaviour
         // Getting positions for food tokens UI positions
         defaultTokenPos = foodObj.transform.localPosition;
         shownTokenPos = (player.isOpponent) ? defaultTokenPos - new Vector3(offsetX, 0, 0) : defaultTokenPos + new Vector3(offsetX, 0, 0);
+
+        Refresh();
     }
 
     /// <summary>
@@ -85,7 +87,7 @@ public class PlayerUI : MonoBehaviour
         starsObj.SetActive(player.currentStars > 0);
 
         // playing the animation if star value has changed
-        if (Convert.ToInt32(starsText.text) != player.currentStars) Animations.instance.PopAnim(starsObj, 0.3f, 0.45f);
+        //if (Convert.ToInt32(starsText.text) != player.currentStars) Animations.instance.PopAnim(starsObj, 0.3f, 0.45f);
         starsText.text = player.currentStars.ToString();
     } 
 

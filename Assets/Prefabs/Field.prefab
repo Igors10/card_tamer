@@ -342,6 +342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ea4b716da9e900418a264921df3fafa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BillboardEffect
+  onStartOnly: 0
 --- !u!1 &5285435976434954848
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,6 +546,7 @@ MonoBehaviour:
   units:
   - {fileID: 0}
   - {fileID: 0}
+  spawnable: 0
   spawnPoint: {fileID: 859159213340426607}
   sprite: {fileID: 1769313033866807946}
   unitSlots:
@@ -555,10 +557,12 @@ MonoBehaviour:
   blockValue: {fileID: 9022608662803520452}
   currentBlock: 0
   mirrorBlock: 0
+  defaultColor: {r: 0, g: 0, b: 0, a: 0}
   highlighColor: {r: 0.45805532, g: 0.9622642, b: 0.44845137, a: 1}
   dimHighlightColor: {r: 0.7631157, g: 0.85660374, b: 0.7612459, a: 1}
   highlightSpawnPointColor: {r: 1, g: 1, b: 1, a: 1}
   fadedColor: {r: 0.5773585, g: 0.5773585, b: 0.5773585, a: 1}
+  selectMaterial: {fileID: 2100000, guid: 67360fcb16e4f364280d728131c7cdc5, type: 2}
 --- !u!65 &6785720502724929698
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -637,7 +641,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

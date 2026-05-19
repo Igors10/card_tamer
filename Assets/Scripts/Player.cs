@@ -20,9 +20,10 @@ public class Player : MonoBehaviour
     public string playerName;
     public bool endStateReady = false;
     [HideInInspector] public bool dead;
-    
+
 
     [Header("config")]
+    [HideInInspector] public PlayerConfigObj config;
     AIOpponent AIplayer;
     public bool isAI;
     public Color playerColor;
@@ -41,6 +42,9 @@ public class Player : MonoBehaviour
 
     void InitPlayer()
     {
+        // getting config
+        config = GameManager.instance.playerConfig;
+
         // checking if its AI
         AIplayer = GetComponent<AIOpponent>();
         if (AIplayer != null ) isAI = true;
@@ -56,6 +60,9 @@ public class Player : MonoBehaviour
         {
             food[i] = GameManager.instance.startingResourceAmount;
         }
+
+        // player color
+        if (!isAI) playerColor = config.playerColor;
     }
 
     public void EndTurn()
@@ -76,9 +83,6 @@ public class Player : MonoBehaviour
         currentStars = maxStars;
 
         playerUI.Refresh();
-
-        // resetting temp values
-        deadUnitsThisRound = 0;
     }
 
 

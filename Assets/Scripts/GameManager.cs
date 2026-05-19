@@ -151,6 +151,8 @@ public class GameManager : MonoBehaviour
     {
         player.StartRound();
         opponent.StartRound();
+
+        fieldManager.Refresh();
     }
     private void Update()
     {

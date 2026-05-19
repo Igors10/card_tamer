@@ -54,7 +54,9 @@ public class HandManager : MonoBehaviour
         {
             card.gameObject.SetActive(true);
             card.unit.RemoveFromBoard();
-            card.transform.SetParent(hand.transform, false);
+
+            Transform playerHand = (player == GameManager.instance.player) ? hand.transform : opponentHand.transform;
+            card.transform.SetParent(playerHand, false);
             card.CardEndRound();
             AddCardToHand(card, player);
         }
@@ -96,7 +98,7 @@ public class HandManager : MonoBehaviour
     void HandHidingCheck()
     {
         // Hide the hand if following
-        bool forceHide = (activeCard != null);
+        bool forceHide = (activeCard != null || GameManager.instance.currentState != GameState.PLACING);
         RectTransform handRT = hand.GetComponent<RectTransform>();
         float hideSpeed = 0;
 
