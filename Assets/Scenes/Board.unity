@@ -3981,8 +3981,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardGenerator
   startingCardNumber: 3
   mainList: {fileID: 11400000, guid: 4b0c04d6042e501469062f54f0381a6d, type: 2}
-  shopList: {fileID: 11400000, guid: 93afdd4af7537cc499f6583c5db841ba, type: 2}
+  basicList: {fileID: 11400000, guid: 86b356d1303c2704682f7b727aa23bd3, type: 2}
+  specialList: {fileID: 11400000, guid: aee5e180f032e584ebee7cc75952e1e3, type: 2}
   cardPrefab: {fileID: 6614981847699036136, guid: 630a4b73555eb5842b257b9f93693f0f, type: 3}
+  searchEnabled: 0
+  cardsName: 
 --- !u!1 &933939374
 GameObject:
   m_ObjectHideFlags: 0
@@ -4972,7 +4975,7 @@ MonoBehaviour:
   player: {fileID: 1425032168}
   drawCardPrice: 2
   drawSpecialPrice: 3
-  shopStarsAfterBattle: 2
+  shopStarsAfterBattle: 10
   shopStarPrefab: {fileID: 8485228647327631986, guid: c2a1de9d1668cc14094ab9d5ef2d133b, type: 3}
   starColor: {r: 0.182079, g: 0.3218743, b: 0.90188676, a: 1}
   deadUnitsStarColor: {r: 0.4720078, g: 0.42745098, b: 0.8627451, a: 1}

@@ -12,9 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Fangs
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  speed: 2
-  power: 4
-  block: 0
-  abilityDescription: 
-  abilityName: 
-  isPassive: 0
+  power: 0
+  abilityDescription: '<color=red>-2</color> power to whoever rolled [4]'

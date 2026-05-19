@@ -13,13 +13,10 @@ MonoBehaviour:
   m_Name: Ducknuk
   m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
   creatureName: Ducknuk
-  health: 2
-  cardSprite: {fileID: 21300000, guid: 1188dd6fe69440c49b186d0b707232fe, type: 3}
   unitSprite: {fileID: 21300000, guid: 1f100ae438c03eb45918fab7c0a20819, type: 3}
-  cost: 010000000200000002000000
+  isSpecial: 0
   ability:
   - {fileID: 11400000, guid: a35493e6b5561c848a2f7f19b0db36bd, type: 2}
-  - {fileID: 11400000, guid: a0cbab4dd669f544b9bb58a54d346f6f, type: 2}
   doodleSprite: {fileID: 21300000, guid: 32239a99460aeff48a8aa0d04608e4e9, type: 3}
   audio:
   - {fileID: 8300000, guid: 432b6570d3dcd3b4fad1c049a2bd649c, type: 3}

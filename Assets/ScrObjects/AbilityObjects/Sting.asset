@@ -12,9 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Sting
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  speed: 2
-  power: 6
-  block: 0
-  abilityDescription: 
-  abilityName: Sting
-  isPassive: 0
+  power: 3
+  abilityDescription: Knocks out itself at the end of battle

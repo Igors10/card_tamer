@@ -129,7 +129,7 @@ public class ShopManager : MonoBehaviour
     {
         // Generating the card (temporary just random card)
         CardGenerator generator = GameManager.instance.cardGenerator;
-        generator.CreateCard(generator.PickRandomCard(), playerToGetCard);
+        generator.CreateCard(generator.PickRandomCard("basic"), playerToGetCard);
 
         // Paying
         int cardPrice = Convert.ToInt32(prices[1].text);
@@ -140,7 +140,7 @@ public class ShopManager : MonoBehaviour
     {
         // Generating Special (temporary just random card)
         CardGenerator generator = GameManager.instance.cardGenerator;
-        generator.CreateCard(generator.PickRandomCard(), playerToGetSpecial);
+        generator.CreateCard(generator.PickRandomCard("special"), playerToGetSpecial);
 
         // Paying 
         int specialPrice = Convert.ToInt32(prices[2].text);

@@ -10,10 +10,15 @@ public class CardGenerator : MonoBehaviour
     [Header("refs")]
     HandManager handManager;
     [SerializeField] CardList mainList;
-    [SerializeField] CardList shopList;
+    [SerializeField] CardList basicList;
+    [SerializeField] CardList specialList;
 
     [Header("prefabs")]
     [SerializeField] GameObject cardPrefab;
+
+    [Header("Card search")]
+    [SerializeField] bool searchEnabled;
+    [SerializeField] string cardsName;
 
     private void Start()
     {
@@ -32,13 +37,33 @@ public class CardGenerator : MonoBehaviour
         // Picking from a specific list if asked in parameters
         switch (listName)
         {
-            case "shop":
-                list = shopList;
+            case "basic":
+                list = basicList;
+                break;
+
+            case "special":
+                list = specialList;
                 break;
         }
 
         int randomCard_ID = Random.Range(0, list.cardList.Count);
         return list.cardList[randomCard_ID];
+    }
+
+
+    /// <summary>
+    /// Looks up a specific card from the pool
+    /// </summary>
+    /// <param name="cardName"></param>
+    /// <returns></returns>
+    CreatureObj GetSpecificCard(string cardName)
+    {
+        foreach (CreatureObj card in mainList.cardList)
+        {
+            if (card.name == cardName) return card;
+        }
+
+        return null;
     }
 
     public void CreateStartingHand(List<CreatureObj> startingCardList, Player player)
@@ -68,6 +93,12 @@ public class CardGenerator : MonoBehaviour
     private void Update()
     {
         // temp solution for adding cards to hand
-        if (Input.GetKeyDown(KeyCode.A)) CreateCard(PickRandomCard(), GameManager.instance.player);
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            if (cardsName != null || searchEnabled == false) CreateCard(PickRandomCard(), GameManager.instance.player);
+
+            // getting a specific card if field with name is not empty
+            else CreateCard(GetSpecificCard(cardsName), GameManager.instance.player);
+        }
     }
 }

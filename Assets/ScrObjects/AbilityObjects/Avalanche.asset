@@ -12,9 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Avalanche
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  speed: 1
-  power: 6
-  block: 0
-  abilityDescription: Immobilize opposing enemies
-  abilityName: Avalanche
-  isPassive: 0
+  power: 0
+  abilityDescription: Pushes one random opposing enemy to an adjacent field

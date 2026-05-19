@@ -15,10 +15,8 @@ MonoBehaviour:
   creatureName: Aspiceros
   unitSprite: {fileID: 21300000, guid: 11a2fda1d9d988a4e88a8ed05d026663, type: 3}
   isSpecial: 1
-  cost: 02000000020000000200000001000000
   ability:
   - {fileID: 11400000, guid: 2f1efa05d61dc4349a0659a061f650be, type: 2}
-  - {fileID: 11400000, guid: 87564fb9c6aedca4b9a3f1d40e9a9598, type: 2}
   doodleSprite: {fileID: 21300000, guid: 82443e8593d4b9243bda4d722aa6ea83, type: 3}
   audio:
   - {fileID: 8300000, guid: df4f78f49dae89647aec8ef0b231b27e, type: 3}

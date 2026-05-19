@@ -14,7 +14,7 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject heart;
 
     [Header("refs")]
-    public Ability[] abilities = new Ability[2];
+    public Ability[] abilities = new Ability[1];
     [SerializeField] RectTransform rt;
     [SerializeField] Image cardSprite;
     [SerializeField] TextMeshProUGUI nameText;
@@ -81,7 +81,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void AssignAbilies()
     {
-        for (int i = 0; i < abilities.Length; i++) { abilities[i].InitAbility(cardData.ability[i], this); }
+        abilities[0].InitAbility(cardData.ability[0], this); 
     }
 
     public void AssignCardData(CreatureObj newCardData, Player owner)

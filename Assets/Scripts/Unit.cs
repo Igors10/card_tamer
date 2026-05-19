@@ -82,11 +82,6 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         currentField = field;
     }
 
-    void Update()
-    {
-        CheckForClosingPreview();
-    }
-
     public void EnableOrderMarker(bool enable, int orderNumber = 0)
     {
         orderMarker.gameObject.SetActive(enable);
@@ -312,18 +307,16 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this
             && GameManager.instance.executeManager.readyRevealCard == false || faded) return;
 
-
+        // call for preview card
         ViewCard(mouseOver);
+
+        // click 'juice'
+        if (mouseOver) Animations.instance.PopAnim(sprite.gameObject, 0.15f, -0.15f);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         PreviewCard(true);
-    }
-
-    void CheckForClosingPreview()
-    {
-        //if (Input.GetButton("Fire1")) PreviewCard(false);
     }
     
     public void OnPointerEnter(PointerEventData eventData)

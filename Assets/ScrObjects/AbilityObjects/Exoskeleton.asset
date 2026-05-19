@@ -12,9 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Exoskeleton
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  speed: 1
   power: 0
-  block: 1
-  abilityDescription: +1 defense on every line
-  abilityName: Exoskeleton
-  isPassive: 0
+  abilityDescription: Can't be knocked out

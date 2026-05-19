@@ -13,13 +13,10 @@ MonoBehaviour:
   m_Name: Bellrat
   m_EditorClassIdentifier: Assembly-CSharp::CreatureObj
   creatureName: 
-  health: 1
-  cardSprite: {fileID: 3626663542620517944, guid: d81de541ef346134caf2518d01a30a6f, type: 3}
   unitSprite: {fileID: 21300000, guid: d78ff855563c067489e2f5525f514992, type: 3}
-  cost: 01000000
+  isSpecial: 0
   ability:
-  - {fileID: 11400000, guid: 87564fb9c6aedca4b9a3f1d40e9a9598, type: 2}
-  - {fileID: 11400000, guid: d9a5add929f62964387f82dd439a3b03, type: 2}
+  - {fileID: 11400000, guid: 2727b98ed1e8a6e40957e96f44e38c6f, type: 2}
   doodleSprite: {fileID: 21300000, guid: 5fcc6657cb3d6ef49be7e92d04458af9, type: 3}
   audio:
   - {fileID: 8300000, guid: 5830145f4b23e4a44adb061950a2acef, type: 3}

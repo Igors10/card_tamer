@@ -12,9 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Pestilence
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  speed: 0
   power: 0
-  block: 0
-  abilityDescription: All enemies get poison <color=purple>2</color>
-  abilityName: Pestilence
-  isPassive: 0
+  abilityDescription: '[6] knocks down random opposing enemy'

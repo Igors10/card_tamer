@@ -12,9 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Flow
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  speed: 0
   power: 0
-  block: 0
-  abilityDescription: Next ally gets <color=green>+1</color> speed
-  abilityName: Flow
-  isPassive: 1
+  abilityDescription: Ally from same field moves 1 field to the left
