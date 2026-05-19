@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
+public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerClickHandler
 {   
     // Card this unit is represents on the board
     [HideInInspector] public Card card;
@@ -49,6 +49,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [HideInInspector] public bool faded = false;
     [SerializeField] float fadedAlpha;
     [SerializeField] GameObject unitUI;
+    [SerializeField] Material selectMaterial;
+    Material defaultMaterial;
 
     [Header("idle animation")]
     [SerializeField] float shakeTime;
@@ -74,9 +76,15 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         cardToInitialize.unit = this;
         sprite.sprite = card.cardData.unitSprite;
         RefreshUnitVisuals();
+        defaultMaterial = sprite.material;
 
         // Setting field position
         currentField = field;
+    }
+
+    void Update()
+    {
+        CheckForClosingPreview();
     }
 
     public void EnableOrderMarker(bool enable, int orderNumber = 0)
@@ -118,7 +126,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// <param name="isHighlighted"></param>
     public void HighlightUnit(bool isHighlighted)
     {
-        unitHighlight.gameObject.SetActive(isHighlighted);
+        sprite.material = (isHighlighted) ? selectMaterial : defaultMaterial;
     }
 
     /// <summary>
@@ -306,18 +314,30 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
 
         ViewCard(mouseOver);
-        HighlightUnit(mouseOver);
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public void OnPointerClick(PointerEventData eventData)
     {
         PreviewCard(true);
     }
 
+    void CheckForClosingPreview()
+    {
+        //if (Input.GetButton("Fire1")) PreviewCard(false);
+    }
+    
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        HighlightUnit(true);
+    }
+
     public void OnPointerExit(PointerEventData eventData)
     {
+        HighlightUnit(false);
         PreviewCard(false);
     }
+
+
 
     public void OnBeginDrag(PointerEventData eventData)
     {

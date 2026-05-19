@@ -877,6 +877,7 @@ MonoBehaviour:
   faded: 0
   fadedAlpha: 0.75
   unitUI: {fileID: 1252183568118034703}
+  selectMaterial: {fileID: 2100000, guid: ff32b4bb699f9f949aefca08366a2927, type: 2}
   shakeTime: 0.9
   shakeIntensity: 0.3
   shakeFrequency: 40
