@@ -81,6 +81,9 @@ public class CardGenerator : MonoBehaviour
     /// <param name="cardData"></param>
     public void CreateCard(CreatureObj cardData, Player player)
     {
+        // checking if player has reached their card limit
+        if (player.cardsInHand.Count >= GameManager.instance.maxHandSize) return;
+
         Transform ParentTransform = (player == GameManager.instance.player) ? handManager.hand.transform : handManager.opponentHand.transform;
         GameObject newCardObject = Instantiate(cardPrefab, transform.position, Quaternion.identity, ParentTransform);
         Card newCard = newCardObject.GetComponent<Card>();

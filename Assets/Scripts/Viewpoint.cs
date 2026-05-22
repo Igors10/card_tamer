@@ -116,10 +116,10 @@ public class Viewpoint : MonoBehaviour
         zoomedIn = true;
 
         // zooming in
-        while (t < zoomTime * 2/3)
+        while (t < zoomTime)
         {
             t += Time.deltaTime;
-            float clampedT = t / (zoomTime * 2/3);
+            float clampedT = t / (zoomTime);
             float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
 
             transform.position = Vector3.Lerp(startingPosition, targetPosition, coolT);
@@ -139,10 +139,10 @@ public class Viewpoint : MonoBehaviour
         t = 0;
 
         // zooming out
-        while (t < zoomTime * 1/3)
+        while (t < zoomTime)
         {
             t += Time.deltaTime;
-            float clampedT = t / (zoomTime * 1/3);
+            float clampedT = t / (zoomTime);
             float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
 
             transform.position = Vector3.Lerp(targetPosition, startingPosition, coolT);

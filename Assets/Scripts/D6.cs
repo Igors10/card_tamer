@@ -70,6 +70,9 @@ public class D6 : MonoBehaviour
 
         // adding rolled power
         unit.card.GainPower(GetDiceValue());
+
+        // triggering event
+        GameManager.instance.BroadcastOnDiceRolled(unit.card, GetDiceValue());
     }
 
     void RotateDice()

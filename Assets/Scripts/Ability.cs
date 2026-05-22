@@ -8,17 +8,11 @@ public class Ability : MonoBehaviour
     public AbilityObj abilityData;
     [HideInInspector] public Card card;
 
-    [Header("Attributes")]
-    bool ready;
-    bool passive;
+    [Header("refs")]
     [SerializeField] TextMeshProUGUI name;
-    [SerializeField] GameObject speedIcon;
     public GameObject powerIcon;
-    [SerializeField] TextMeshProUGUI speedValue;
     [SerializeField] TextMeshProUGUI powerValue;
     [SerializeField] TextMeshProUGUI effectDesc;
-
-    [Header("refs")]
     [SerializeField] Image background;
 
     [Header("Effect text params")]
@@ -28,23 +22,6 @@ public class Ability : MonoBehaviour
     [SerializeField] float noPowerEffectWidth;
     [SerializeField] float passiveEffectX;
     [SerializeField] float passiveEffectWidth;
-
-    [Header("Input juice params")]
-    Vector3 defaultScale;
-    Vector3 highlightedScale;
-    Vector3 pressedScale;
-    [HideInInspector] public bool selected = false;
-    // saved unit position
-    [HideInInspector] public Field savedField;
-    int savedSlot;
-
-    void Start()
-    {
-        // setting scales 
-        defaultScale = transform.localScale;
-        highlightedScale = defaultScale * 1.2f;
-        pressedScale = defaultScale * 0.8f;
-    }
 
     // ====================
     // Initialization
@@ -62,7 +39,7 @@ public class Ability : MonoBehaviour
 
         // POWER
         powerIcon.SetActive(abilityData.power != 0);
-        powerValue.text = "+" + abilityData.power.ToString();
+        powerValue.text = (abilityData.power > 0) ? "+" + abilityData.power.ToString() : abilityData.power.ToString();
 
         // EFFECT DESCRIPTION
         effectDesc.text = abilityData.abilityDescription;
@@ -106,7 +83,8 @@ public class Ability : MonoBehaviour
         AudioManager.instance.PlaySFX("UseAbilitySFX");
 
         // Effect
-        // find a way to have different effects here
         GameManager.instance.executeManager.CardUseAbl(card, this);
+        // effect prefab
+        if (abilityData.effect != null) Instantiate(abilityData.effect, card.unit.transform);
     }
 }

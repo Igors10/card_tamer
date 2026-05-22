@@ -12,17 +12,20 @@ public class ExecuteManager : MonoBehaviour
     public GameObject cardStackObj;
 
     // cards
-    [HideInInspector] public List<Card> plannedCardStack = new List<Card>();
+    [HideInInspector] public List<string> playedCardNames = new List<string>();
     [HideInInspector] public Card currentCard;
+
 
     [Header("revealed card params")]
     [HideInInspector] public bool readyRevealCard = false;
-    float readyCardScale = 0.6f;
     Vector3 revealedCardScale = new Vector3(1.8f, 1.8f, 1f);
 
     [Header("card play params")]
     [SerializeField] float zoomIntensity;
     public float zoomTime;
+
+    [Header("Effects")]
+    public List<IEnumerator> effectStack = new List<IEnumerator>();
 
     public void RevealCard(Card cardToReveal)
     {
@@ -78,53 +81,52 @@ public class ExecuteManager : MonoBehaviour
     /// <returns></returns>
     public IEnumerator CardUseAbility(Card card, Ability ability)
     {
-        // zooming in on the unit
-        GameManager.instance.mainCamera.ZoomIn(card.unit.gameObject, zoomIntensity, zoomTime);
-        yield return new WaitForSeconds(zoomTime * 2 / 3);
+        // checking if the card being played first time this game
+        bool playedFirstTime = !playedCardNames.Contains(card.cardData.name);
 
+        // add to the played card list
+        if (playedFirstTime) playedCardNames.Add(card.cardData.name);
+
+        // zooming in on the unit
+        if (playedFirstTime)
+        {
+            GameManager.instance.mainCamera.ZoomIn(card.unit.gameObject, zoomIntensity, zoomTime);
+            yield return new WaitForSeconds(zoomTime);
+        }
+        
         // Playing unit animation
         yield return StartCoroutine(card.unit.AbilityAnimation(ability));
 
+        // zooming out from the unit
+        if (playedFirstTime)
+        {
+            GameManager.instance.mainCamera.ZoomOut();
+            yield return new WaitForSeconds(zoomTime);
+        }
+
         // Card effect + power
-        yield return StartCoroutine(card.unit.RollPower());
+        yield return StartCoroutine(card.unit.RollPower());        
+
+        // Triggering on play card effects
+        GameManager.instance.BroadcastOnCardPlayed(card);
 
         // Deactivating the card
         GameManager.instance.executeManager.StopRevealCard();
 
-        // zooming out from the unit
-        GameManager.instance.mainCamera.ZoomOut();
-        yield return new WaitForSeconds(zoomTime * 1 / 3);
-
-        // coloring the line
-
+        // waiting until all effects are resolved
+        yield return StartCoroutine(TriggerEffects());
 
         // ending the turn 
         card.player.EndTurn();
     }
 
-
-    /*
-    public void LoadCardStack(List<Card> newCardStack, Player player)
+    public IEnumerator TriggerEffects()
     {
-        player.plannedCardStack.Clear();
-        player.plannedCardStack.AddRange(newCardStack);
+        foreach (IEnumerator effect in effectStack)
+        {
+            yield return StartCoroutine(effect);
+        }
+
+        effectStack.Clear();
     }
-
-    public void NextCardReady()
-    {
-        // Getting next prepared card of current player
-        Player currentPlayer = GameManager.instance.GetCurrentPlayer();
-        currentCard = currentPlayer.plannedCardStack[0];
-
-        // putting card under execute state UI and activating it
-        currentCard.transform.SetParent(nextCardButton.transform, false);
-        currentCard.gameObject.SetActive(true);
-
-        // making scale and position match the button
-        currentCard.transform.localScale = new Vector3(readyCardScale, readyCardScale, currentCard.transform.localScale.z);
-        currentCard.transform.localPosition = nextCardPos.localPosition;
-
-        readyRevealCard = true;
-        if (GameManager.instance.yourTurn) nextCardButton.glow.SetActive(true);
-    }*/
 }

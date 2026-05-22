@@ -2343,6 +2343,7 @@ MonoBehaviour:
   startingMaxHealth: 12
   startingStars: 2
   startingResourceAmount: 3
+  maxHandSize: 8
   playerConfig: {fileID: 11400000, guid: 4830222a87a796a489eb0184e93624f0, type: 2}
 --- !u!1 &606257367
 GameObject:
@@ -7659,11 +7660,11 @@ MonoBehaviour:
   nextCardPos: {fileID: 1342840477}
   revealedCardPos: {fileID: 963092919}
   cardStackObj: {fileID: 0}
-  plannedCardStack: []
+  playedCardNames: []
   currentCard: {fileID: 0}
   readyRevealCard: 0
-  zoomIntensity: 0.3
-  zoomTime: 1.5
+  zoomIntensity: 0.45
+  zoomTime: 1.75
 --- !u!1 &1878616677
 GameObject:
   m_ObjectHideFlags: 0
@@ -7892,7 +7893,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6aa066bb49ca04b4aa6a734f599a18b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NextCardButton
-  glow: {fileID: 606257367}
 --- !u!1001 &1930441621
 PrefabInstance:
   m_ObjectHideFlags: 0

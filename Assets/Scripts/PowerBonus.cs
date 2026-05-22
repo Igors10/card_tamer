@@ -27,7 +27,7 @@ public class PowerBonus : MonoBehaviour
     public IEnumerator ShowBonus(int bonus)
     {
         // enabling text
-        text.text = "+ " + bonus.ToString();
+        text.text = (bonus > 0) ? "+" + bonus.ToString() : bonus.ToString();
         text.gameObject.SetActive(true);
         text.color = new Color(text.color.r, text.color.g, text.color.b, 1f);
 

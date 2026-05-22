@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Deadly bite
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: +2 damage
+  abilityDescription: Deal 1 damage to opponent player
+  effect: {fileID: 0}

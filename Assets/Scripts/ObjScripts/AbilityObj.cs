@@ -5,4 +5,6 @@ public class AbilityObj : ScriptableObject
 {
     public int power;
     public string abilityDescription;
+
+    public GameObject effect;
 }

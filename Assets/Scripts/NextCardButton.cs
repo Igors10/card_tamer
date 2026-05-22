@@ -2,8 +2,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class NextCardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class NextCardButton : MonoBehaviour
 {
+    /*
     [Header("refs")]
     public GameObject glow;
     Vector3 defaultGlowScale;
@@ -59,5 +60,5 @@ public class NextCardButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         glow.transform.localScale = defaultGlowScale;
         glow.SetActive(false);
        //GameManager.instance.executeManager.RevealCard();
-    }
+    }*/
 }

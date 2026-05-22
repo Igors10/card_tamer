@@ -49,11 +49,14 @@ public class GameManager : MonoBehaviour
     public int startingMaxHealth;
     public int startingStars;
     public int startingResourceAmount;
+    public int maxHandSize;
     public PlayerConfigObj playerConfig;
     
     //[Header("events")]
     public static event Action OnStateTransition;
-   
+    public static event Action OnRoundEnd;
+    public static event Action<Card, int> OnDiceRolled;
+    public static event Action<Card> OnCardPlayed;
 
     private void Awake()
     {
@@ -124,12 +127,11 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameState.BUYING:
+                // Ending round
+                RoundEnd();
+
                 // Enabling hand UI
                 gameStateUI[0].SetActive(true);
-
-                // Resets field state for next round
-                player.EndRoundReset();
-                opponent.EndRoundReset();
 
                 // resetting shop values
                 managerUI.EnableUI(true);
@@ -142,6 +144,15 @@ public class GameManager : MonoBehaviour
 
         // temp
         StartTurn();
+    }
+
+    void RoundEnd()
+    {
+        // Resets field state for next round
+        player.EndRoundReset();
+        opponent.EndRoundReset();
+
+        OnRoundEnd?.Invoke();
     }
 
     /// <summary>
@@ -276,5 +287,17 @@ public class GameManager : MonoBehaviour
         //GameState nextGameState = ((int)currentState + 1 < gameStates.Count) ? (GameState)(currentState + 1) : GameState.PLACING;
         GameState nextGameState = (GameState)(((int)currentState + 1) % Enum.GetNames(typeof(GameState)).Length);
         TransitionGameState(nextGameState);
+    }
+
+    // EVENTS
+    // ========
+    public void BroadcastOnCardPlayed(Card card)
+    {
+        //OnCardPlayed.Invoke(card);
+    }
+
+    public void BroadcastOnDiceRolled(Card card, int diceResult)
+    {
+        //OnDiceRolled.Invoke(card, diceResult);
     }
 }

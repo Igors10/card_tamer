@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: -1
   abilityDescription: Heals for 1
+  effect: {fileID: 3327814835574798436, guid: 808024e11e4bbe04fafbf15353abb673, type: 3}

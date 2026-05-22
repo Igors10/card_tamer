@@ -127,5 +127,22 @@ public class HandManager : MonoBehaviour
     private void Update()
     {
         HandHidingCheck();
+
+        // temp clearing hand solution
+        if (Input.GetKey(KeyCode.Backspace)) ClearHand();
+    }
+
+    void ClearHand()
+    {
+        Player player = GameManager.instance.player;
+        
+        foreach (Card card in player.cardsInHand)
+        {
+            Destroy(card.gameObject);
+        }
+
+        player.cardsInHand.Clear();
+
+        Debug.Log("Hand Manager: hand cleared");
     }
 }

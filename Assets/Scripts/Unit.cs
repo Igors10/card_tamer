@@ -19,6 +19,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public OrderMarker orderMarker;
     [SerializeField] Image unitHighlight;
     public PowerBonus powerBonus;
+    public ParticleSystem cardEffectVFX;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
@@ -60,7 +61,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [Header("ability animation")]
     [SerializeField] float jumpHeight;
     [SerializeField] float jumpTime;
-    [SerializeField] TextMeshProUGUI skillText;
+    public TextMeshProUGUI skillText;
 
     void Start()
     {
@@ -218,7 +219,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         }
 
         // adding bonus power
-        if (card.abilities[0].abilityData.power > 0)
+        if (card.abilities[0].abilityData.power != 0)
         {
             //bonusPowerObj.SetActive(true);
             //bonusPowerValue.text = "+ " + card.abilities[0].abilityData.power;

@@ -36,23 +36,8 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         // game state specific button click effects
         switch (GameManager.instance.currentState)
         {
-            // PLACING AND PLANNING
-            default:
-
-                if (GameManager.instance.executeManager.currentCard != null)
-                {
-                    GameManager.instance.executeManager.currentCard.UseSelectedAbility();
-                    return;
-                }
-                else
-                {
-                    GameManager.instance.player.endStateReady = true;
-                    button.interactable = false;
-                    buttonText.text = GameManager.instance.GetState().pressedButtonText;
-                }
-                break;
-
-            case GameState.BATTLING:
+            case GameState.PLACING:
+                GameManager.instance.player.endStateReady = true;
                 break;
 
             case GameState.BUYING:

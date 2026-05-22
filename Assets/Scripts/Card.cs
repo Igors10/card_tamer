@@ -267,14 +267,6 @@ public class Card : MonoBehaviour
         unit.RefreshUnitVisuals();
     }
 
-    /// <summary>
-    /// Goes through list of this cards abilities and triggers one flagged as selected
-    /// </summary>
-    public void UseSelectedAbility()
-    {
-        foreach (Ability ability in abilities) if (ability.selected) ability.UseAbility();
-    }
-
     public void PlayCard()
     {
         // checking for stars if special

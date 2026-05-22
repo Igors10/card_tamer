@@ -77,7 +77,7 @@ public class PlayerUI : MonoBehaviour
         // Updating the healthbar fill
         if (healthbarFill != null)
         {
-            float newHealthbarFill = (float)player.health / (float)GameManager.instance.startingMaxHealth;
+            float newHealthbarFill = (player.health <= GameManager.instance.startingMaxHealth) ? (float)player.health / (float)GameManager.instance.startingMaxHealth : 1f;
             healthbarFill.fillAmount = newHealthbarFill;
         }
 
