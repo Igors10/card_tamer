@@ -3,10 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using FishNet.Demo.AdditiveScenes;
-using GameKit.Dependencies.Utilities.Types;
-
 public class PowerCounter : MonoBehaviour
 {
     [Header("refs")]
@@ -15,8 +11,7 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] Image powerIcon;
     [HideInInspector] public float currentPower;
     [SerializeField] D6 dice;
-    [SerializeField] GameObject damageObj;
-    [SerializeField] GameObject dmgParticlePrefab;
+    public GameObject playerCounterVisuals;
 
     [Header("default vals")]
     Vector3 defaultIconScale;
@@ -38,6 +33,7 @@ public class PowerCounter : MonoBehaviour
     [HideInInspector] public bool resolved;
     [SerializeField] int damagePowerCost; 
     List<GameObject> damageParticles = new List<GameObject>();
+    [HideInInspector] public float damageParticleOffset = 40f;
     private void Start()
     {
         // passing reference to this to player
@@ -214,14 +210,13 @@ public class PowerCounter : MonoBehaviour
         // DAMAGE TO ENEMY PLAYER 
         // ======================
         int friendlyUnitCount = field[0].GetFieldUnits().Count;
-        float damageParticleOffset = 40f;
 
         // preparing damage particles
         for (int i = 0; i < friendlyUnitCount; i++)
         {
             // spawning damage particle
             Vector3 unitPos = Camera.main.WorldToScreenPoint(field[0].GetFieldUnits()[i].transform.position);
-            GameObject newDamageParticle = Instantiate(dmgParticlePrefab, unitPos, Quaternion.identity, damageObj.transform);
+            GameObject newDamageParticle = Instantiate(GameManager.instance.battleManager.dmgParticlePrefab, unitPos, Quaternion.identity, GameManager.instance.battleManager.damageObj.transform);
             newDamageParticle.GetComponent<Image>().color = player.playerColor;
             newDamageParticle.transform.localPosition += new Vector3(damageParticleOffset, 0f, 0f);
             damageParticles.Add(newDamageParticle);
@@ -264,7 +259,7 @@ public class PowerCounter : MonoBehaviour
     /// </summary>
     /// <param name="targetPosition"></param>
     /// <returns></returns>
-    IEnumerator Damage(Vector3 targetPosition, GameObject damagePart)
+    public IEnumerator Damage(Vector3 targetPosition, GameObject damagePart)
     {
         float t = 0;
         Vector3 startingPos = (damagePart.activeSelf) ? damagePart.transform.position : powerText.transform.position;

@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
   abilityDescription: Deal 1 damage to opponent player
-  effect: {fileID: 0}
+  effect: {fileID: 8294793939277185065, guid: fcb29faef6e11ff4faf3c73aeba90bfe, type: 3}

@@ -1,16 +1,20 @@
 using UnityEngine;
-
+using System.Collections;
 public class BuffOnEmpty : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        
+        // adding this to effect stack on play
+        GameManager.instance.executeManager.effectStack.Add(UseEffect());
     }
-
-    // Update is called once per frame
-    void Update()
+    IEnumerator UseEffect()
     {
-        
+        Effect effect = GetComponent<Effect>();
+        yield return StartCoroutine(effect.ShowEffect());
+
+        // buffing if no other units on line
+
+
+        yield return StartCoroutine(effect.StopShowEffect());
     }
 }

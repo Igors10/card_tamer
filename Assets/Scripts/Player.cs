@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
     public List<Card> cardsOnField = new List<Card>();
     public List<Card> plannedCardStack = new List<Card>();
     public Field[] fields = new Field[4];
-    [HideInInspector] public PowerCounter powerCounter;
+    public PowerCounter powerCounter;
 
     [Header("player attributes")]
     public int health;

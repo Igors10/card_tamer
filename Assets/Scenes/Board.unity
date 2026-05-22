@@ -2597,6 +2597,10 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1541516079}
+    - target: {fileID: 1652126644776500223, guid: 0aee0106651a08f449a697eefdbf488b, type: 3}
+      propertyPath: damageObj
+      value: 
+      objectReference: {fileID: 933939374}
     - target: {fileID: 6989190585475059618, guid: 0aee0106651a08f449a697eefdbf488b, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -5782,6 +5786,10 @@ PrefabInstance:
       value: bot
       objectReference: {fileID: 0}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: powerCounter
+      value: 
+      objectReference: {fileID: 632663721}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: playerColor.a
       value: 1
       objectReference: {fileID: 0}
@@ -7608,6 +7616,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
   playerPowerUI: {fileID: 239285717}
   opponentPowerUI: {fileID: 632663721}
+  damageObj: {fileID: 933939374}
+  dmgParticlePrefab: {fileID: 8590069785806615365, guid: 0d6b9694322ad0d4c8fe2ecad5251f3b, type: 3}
   roundEndsMessage: {fileID: 666224143}
   stunnedOffsetY: 0
   stunnedOffsetX: 0
@@ -9584,6 +9594,10 @@ PrefabInstance:
       value: player
       objectReference: {fileID: 0}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: powerCounter
+      value: 
+      objectReference: {fileID: 239285717}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: playerColor.a
       value: 1
       objectReference: {fileID: 0}
@@ -9684,6 +9698,10 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1425032168}
+    - target: {fileID: 1652126644776500223, guid: 0aee0106651a08f449a697eefdbf488b, type: 3}
+      propertyPath: damageObj
+      value: 
+      objectReference: {fileID: 933939374}
     - target: {fileID: 8384090853808284989, guid: 0aee0106651a08f449a697eefdbf488b, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

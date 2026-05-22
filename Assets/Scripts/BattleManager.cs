@@ -11,6 +11,10 @@ public class BattleManager : MonoBehaviour
     [Header("refs")]
     [SerializeField] PowerCounter playerPowerUI;
     [SerializeField] PowerCounter opponentPowerUI;
+    public GameObject damageObj;
+
+    [Header("prefabs")]
+    public GameObject dmgParticlePrefab;
     
     [Header("round end")]
     [SerializeField] TextMeshProUGUI roundEndsMessage;
