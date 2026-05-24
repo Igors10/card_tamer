@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: -1
   abilityDescription: Blocks opposing field for 2 turns
+  effect: {fileID: 1827805099279404661, guid: c58753c752c60e74f828c26bb370978d, type: 3}

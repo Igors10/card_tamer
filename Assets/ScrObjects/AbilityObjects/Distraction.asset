@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Distraction
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  speed: 0
   power: 0
-  block: 0
   abilityDescription: Next enemy gets <color=red>-2</color> power
-  abilityName: Distraction
-  isPassive: 1
+  effect: {fileID: 5762393739908666132, guid: e6cf2166871f8844aa04c2fd63e25187, type: 3}

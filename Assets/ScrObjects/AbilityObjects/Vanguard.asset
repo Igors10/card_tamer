@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
   abilityDescription: <color=red>+2 </color> power if spawned on an empty line
+  effect: {fileID: 5888166341847222899, guid: e59435871228028418cee22e546c0cca, type: 3}

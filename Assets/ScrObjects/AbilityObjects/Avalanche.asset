@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
   abilityDescription: Pushes one random opposing enemy to an adjacent field
+  effect: {fileID: 588685956693649962, guid: 451b96a181ad1b0408056e274ef50936, type: 3}

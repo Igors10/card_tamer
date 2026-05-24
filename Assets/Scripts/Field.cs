@@ -13,15 +13,12 @@ public class Field : MonoBehaviour
     public Transform[] unitSlots = new Transform[2];
     [SerializeField] GameObject fieldUI;
 
-    [Header("Block")]
-    [HideInInspector] public GameObject blockObj;
-    [SerializeField] TextMeshProUGUI blockValue;
-    [HideInInspector] public int currentBlock;
-    [SerializeField] bool mirrorBlock;
+    [Header("blocked")]
+    [HideInInspector] public int roundsBlocked;
+    [SerializeField] TextMeshProUGUI[] blockedNumber;
 
     [Header("Highlight")]
     [HideInInspector] public Color defaultColor;
-    Color defaultSpawnPointColor;
     [SerializeField] Color highlighColor; // used for highlighting tiles that are available for spawning
     [SerializeField] Color dimHighlightColor; // used for highlighting tiles that are available for moving
     [SerializeField] Color highlightSpawnPointColor;
@@ -34,12 +31,9 @@ public class Field : MonoBehaviour
     {
         // getting the default colors
         defaultColor = sprite.color;
-        defaultSpawnPointColor = spawnPoint.color;
+        
         // getting default material
         defaultMaterial = sprite.material;
-
-        // Mirroring block if enabled
-        if (mirrorBlock) blockObj.transform.localPosition = new Vector2(-blockObj.transform.localPosition.x, blockObj.transform.localPosition.y);
     }
 
     /// <summary>
@@ -122,7 +116,7 @@ public class Field : MonoBehaviour
     {
         if (GameManager.instance.handManager.activeCard == null || GameManager.instance.currentState != GameState.PLACING
             || (units[0] != null && units[1] != null || GameManager.instance.executeManager.currentCard != null) || !spawnable 
-            || !GameManager.instance.yourTurn) return;
+            || !GameManager.instance.yourTurn && roundsBlocked == 0) return;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -159,7 +153,7 @@ public class Field : MonoBehaviour
     public bool PlayCard(Card cardPlayed, Player player)
     {
         if ((player == GameManager.instance.player) && (cardIsOver == false || units[1] != null)
-            || GameManager.instance.executeManager.currentCard != null) return false;
+            || GameManager.instance.executeManager.currentCard != null && roundsBlocked == 0) return false;
 
         if (!cardPlayed.SpecialCost()) return false;
 
@@ -178,26 +172,23 @@ public class Field : MonoBehaviour
 
     public void RefreshFieldVisuals()
     {
+        // applying color
         sprite.color = defaultColor;
+
+        // blocked visuals
+        for (int i = 0; i < units.Length; i++)
+        {
+            blockedNumber[i].gameObject.SetActive(units[i] == null && roundsBlocked > 0);
+            if (blockedNumber[i].gameObject.activeSelf) blockedNumber[i].text = roundsBlocked.ToString();
+        }
     }
 
-    /// <summary>
-    /// Adds block to this field
-    /// </summary>
-    /// <param name="block"></param>
-    public void GainBlock(int block)
-    {
-        currentBlock += block;
-        RefreshFieldVisuals();
-    }
-
+   
     /// <summary>
     /// Resets all temporary field attributes (like block) at the end of round
     /// </summary>
     public void FieldEndRound()
     {
-        // remove any block left
-        currentBlock = 0;
         RefreshFieldVisuals();
 
         // fadeout cancel
@@ -208,5 +199,13 @@ public class Field : MonoBehaviour
         {
             if (unit != null) unit.card.CardEndRound();
         }
+    }
+
+    public void FieldEndTurn()
+    {
+        // decrease field block
+        if (roundsBlocked > 0) roundsBlocked--;
+
+        RefreshFieldVisuals();
     }
 }

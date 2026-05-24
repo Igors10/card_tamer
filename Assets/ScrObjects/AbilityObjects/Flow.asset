@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
   abilityDescription: Ally from same field moves 1 field to the left
+  effect: {fileID: 5807869535008068974, guid: b01c135012b4bb44e8bae7f026a92609, type: 3}

@@ -67,6 +67,11 @@ public class Player : MonoBehaviour
 
     public void EndTurn()
     {
+        foreach (Field field in fields)
+        {
+            field.FieldEndTurn();
+        }
+
         if (isAI) AIplayer.AIEndTurn();
         else GameManager.instance.EndTurn();
     }

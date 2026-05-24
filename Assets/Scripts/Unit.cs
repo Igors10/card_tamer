@@ -20,6 +20,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] Image unitHighlight;
     public PowerBonus powerBonus;
     public ParticleSystem cardEffectVFX;
+    [HideInInspector] public int unitSlot;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;

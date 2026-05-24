@@ -1,3 +1,5 @@
+using FishNet.Editing;
+using NUnit.Framework.Internal;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -155,7 +157,7 @@ public class FieldManager : MonoBehaviour
         List<Field> fieldsToReturn = new List<Field>();
         for (int i = 0; i < potentialFields.Length; i++)
         {
-            if (potentialFields[i].units[1] == null) fieldsToReturn.Add(potentialFields[i]);
+            if (potentialFields[i].units[1] == null && potentialFields[i].roundsBlocked == 0) fieldsToReturn.Add(potentialFields[i]);
         }
 
         return fieldsToReturn;
@@ -202,6 +204,46 @@ public class FieldManager : MonoBehaviour
         return (unit.currentField.units[0] == unit) ? 0 : 1;
     }
 
+    public int GetFieldID(Field field)
+    {
+        Player player = GameManager.instance.player;
+        Player opponent = GameManager.instance.opponent;
+
+        for (int i = 0; i < player.fields.Length; i++)
+        {
+            if (player.fields[i] == field || opponent.fields[i] == field) { Debug.Log("FieldManager: Requested field ID is " + i); return i; }
+        }
+
+        Debug.Log("FieldManager: field ID was not found");
+        return 0;
+    }
+
+    public bool IsFieldEmpty(Field field, Unit unitExeption = null)
+    {
+        for (int i = 0; i < field.units.Length; i++)
+        {
+            // checking player's field
+            if (field.units[i] != null && field.units[i] != unitExeption) return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Returns another unit from the same field as passed unit
+    /// </summary>
+    /// <param name="unit"></param>
+    /// <returns></returns>
+    public Unit GetAnotherUnit(Unit unit)
+    {
+        for (int i = 0; i < unit.currentField.units.Length; i++)
+        {
+            if (unit.currentField.units[i] != unit) return unit.currentField.units[i];
+        }
+
+        return null;
+    }
+
     // ================
     // MOVIING UNITS
     // ================
@@ -212,7 +254,7 @@ public class FieldManager : MonoBehaviour
     /// <param name="unit"></param>
     /// <param name="targetField"></param>
     /// <param name="targetSlot"></param>
-    public void MoveUnit(Unit unit, Field targetField, int targetSlot, bool activatePrevSlot = true)
+    public void MoveUnit(Unit unit, Field targetField, int targetSlot, bool activatePrevSlot = false)
     {
         // making prev unit slot empty
         unit.currentField.unitSlots[GetUnitSlot(unit)].gameObject.SetActive(activatePrevSlot);
@@ -223,6 +265,9 @@ public class FieldManager : MonoBehaviour
         unit.currentField = targetField;
         targetField.units[targetSlot] = unit;
         targetField.unitSlots[targetSlot].gameObject.SetActive(false);
+
+        // refreshing visuals
+        Refresh();
     }
 
     /// <summary>

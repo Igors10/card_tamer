@@ -293,11 +293,11 @@ public class GameManager : MonoBehaviour
     // ========
     public void BroadcastOnCardPlayed(Card card)
     {
-        //OnCardPlayed.Invoke(card);
+        OnCardPlayed?.Invoke(card);
     }
 
     public void BroadcastOnDiceRolled(Card card, int diceResult)
     {
-        //OnDiceRolled.Invoke(card, diceResult);
+        OnDiceRolled?.Invoke(card, diceResult);
     }
 }
