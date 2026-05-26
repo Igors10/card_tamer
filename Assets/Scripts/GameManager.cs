@@ -57,6 +57,7 @@ public class GameManager : MonoBehaviour
     public static event Action OnRoundEnd;
     public static event Action<Card, int> OnDiceRolled;
     public static event Action<Card> OnCardPlayed;
+    public static event Action OnLineResolved;
 
     private void Awake()
     {
@@ -299,5 +300,10 @@ public class GameManager : MonoBehaviour
     public void BroadcastOnDiceRolled(Card card, int diceResult)
     {
         OnDiceRolled?.Invoke(card, diceResult);
+    }
+
+    public void BroadcastOnLineResolved()
+    {
+        OnLineResolved?.Invoke();
     }
 }

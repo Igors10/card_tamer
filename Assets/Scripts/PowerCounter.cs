@@ -202,7 +202,7 @@ public class PowerCounter : MonoBehaviour
 
         for (int i = 0; i < enemyUnits.Count; i++)
         {
-            enemyUnits[i].KnockOut();
+            yield return StartCoroutine(enemyUnits[i].KnockOut());
             yield return new WaitForSeconds(0.2f);
         }
         yield return new WaitForSeconds(0.3f);

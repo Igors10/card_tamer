@@ -148,6 +148,10 @@ public class BattleManager : MonoBehaviour
         // Waiting for both power counters to get resolved
         while (!playerPowerUI.resolved || !opponentPowerUI.resolved) yield return null;
 
+        // trigger any end of line effects
+        GameManager.instance.BroadcastOnLineResolved();
+        yield return GameManager.instance.executeManager.TriggerEffects("onBattleEnd");
+
         // Switching to next line
         NextLine();
     }

@@ -26,6 +26,8 @@ public class ExecuteManager : MonoBehaviour
 
     [Header("Effects")]
     public List<IEnumerator> effectStack = new List<IEnumerator>();
+    public List<IEnumerator> rollEffectStack = new List<IEnumerator>();
+    public List<IEnumerator> battleOverEffectStack = new List<IEnumerator>();
 
     public void RevealCard(Card cardToReveal)
     {
@@ -120,13 +122,26 @@ public class ExecuteManager : MonoBehaviour
         card.player.EndTurn();
     }
 
-    public IEnumerator TriggerEffects()
+    public IEnumerator TriggerEffects(string effectType = "onPlay")
     {
-        foreach (IEnumerator effect in effectStack)
+        List<IEnumerator> stack = effectStack;
+
+        // choosing the correct effect stack
+        switch (effectType)
+        {
+            case "onRoll":
+                stack = rollEffectStack;
+                break;
+            case "onBattleEnd":
+                stack = battleOverEffectStack;
+                break;
+        }
+
+        foreach (IEnumerator effect in stack)
         {
             yield return StartCoroutine(effect);
         }
 
-        effectStack.Clear();
+        stack.Clear();
     }
 }

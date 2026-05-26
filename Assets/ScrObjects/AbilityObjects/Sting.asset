@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Sting
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 3
-  abilityDescription: Knocks out itself at the end of battle
+  power: 0
+  abilityDescription: <color=red>+3</color> power,  Knocks out itself at the end
+    of battle
+  effect: {fileID: 2123092775877491577, guid: 7b8200184dc9ec04aae0f70916828e0f, type: 3}

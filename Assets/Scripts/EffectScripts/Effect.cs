@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-
+using System.Collections.Generic;
 
 public enum TriggerTime
 {
@@ -15,17 +15,20 @@ public class Effect : MonoBehaviour
     [SerializeField] MonoBehaviour effectObj;
     [HideInInspector] public Unit unit;
 
+    [Header("ability text")]
+    [SerializeField] List<string> abilityText = new List<string>();
     private void Awake()
     {
         // getting reference to unit host
         unit = GetComponentInParent<Unit>();
     }
 
-    public IEnumerator ShowEffect()
+    public IEnumerator ShowEffect(int abilityTextNr = 0)
     {
         // showing text
         unit.skillText.gameObject.SetActive(true);
-        unit.skillText.text = unit.card.abilities[0].abilityData.abilityDescription;
+        string textToDisplay = (abilityText.Count < 1) ? unit.card.abilities[0].abilityData.abilityDescription : abilityText[abilityTextNr];
+        unit.skillText.text = textToDisplay;
 
         // playing particle effect
         Animations.instance.PopAnim(unit.sprite.gameObject, 0.35f, 0.15f);

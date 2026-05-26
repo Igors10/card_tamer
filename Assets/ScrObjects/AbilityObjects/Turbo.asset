@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
   abilityDescription: '[2] <color=red>+1</color> power'
+  effect: {fileID: 8146565597263968891, guid: fb6a1920fe9dd1d48be3facd1382277d, type: 3}

@@ -43,7 +43,7 @@ public class Card : MonoBehaviour
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
     bool specialCostPaid = false;
-   
+    [HideInInspector] public bool shielded = false;
 
     private void Start()
     {
@@ -316,6 +316,7 @@ public class Card : MonoBehaviour
         // regenerating all health and resetting the power
         currentPower = 0;
         specialCostPaid = false;
+        shielded = false;
 
         unit.RefreshUnitVisuals();
     }

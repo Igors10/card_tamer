@@ -21,6 +21,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public PowerBonus powerBonus;
     public ParticleSystem cardEffectVFX;
     [HideInInspector] public int unitSlot;
+    [SerializeField] GameObject shieldVFX;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
@@ -134,8 +135,11 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);        
     }
 
-    public void KnockOut()
+    public IEnumerator KnockOut()
     {
+        // checking if shielded
+        if (card.shielded) { ShieldedEffect(); yield break; }
+
         // playing soundeffect
         AudioManager.instance.PlaySFX("HitSFX");
 
@@ -143,7 +147,16 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         RefreshUnitVisuals();
 
         // do damage VFX and SFX 
-        StartCoroutine(ShakeAnim(false));
+        yield return StartCoroutine(ShakeAnim(false));
+    }
+
+    void ShieldedEffect()
+    {
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("HitSFX"); // put different soundeffect
+
+        // activate shield sprite
+
     }
 
     /// <summary>
@@ -218,6 +231,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             // showing the result
             die.Glow(true);
         }
+
+        // waiting until all roll effects are resolved
+        yield return StartCoroutine(GameManager.instance.executeManager.TriggerEffects("onRoll"));
 
         // adding bonus power
         if (card.abilities[0].abilityData.power != 0)
