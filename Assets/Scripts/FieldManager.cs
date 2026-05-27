@@ -256,6 +256,9 @@ public class FieldManager : MonoBehaviour
     /// <param name="targetSlot"></param>
     public void MoveUnit(Unit unit, Field targetField, int targetSlot, bool activatePrevSlot = false)
     {
+        // play soundeffect
+        AudioManager.instance.PlaySFX("UnitMoveSFX");
+
         // making prev unit slot empty
         unit.currentField.unitSlots[GetUnitSlot(unit)].gameObject.SetActive(activatePrevSlot);
         unit.currentField.units[GetUnitSlot(unit)] = null;

@@ -194,7 +194,7 @@ public class PowerCounter : MonoBehaviour
 
     IEnumerator DealFieldDamage(Field[] field)
     {
-        yield return new WaitForSeconds(0.5f);
+        //yield return new WaitForSeconds(0.5f);
 
         // KNOCK OUT ENEMY UNITS
         // =====================
@@ -203,9 +203,9 @@ public class PowerCounter : MonoBehaviour
         for (int i = 0; i < enemyUnits.Count; i++)
         {
             yield return StartCoroutine(enemyUnits[i].KnockOut());
-            yield return new WaitForSeconds(0.2f);
+            //yield return new WaitForSeconds(0.2f);
         }
-        yield return new WaitForSeconds(0.3f);
+        //yield return new WaitForSeconds(0.3f);
 
         // DAMAGE TO ENEMY PLAYER 
         // ======================
@@ -242,7 +242,7 @@ public class PowerCounter : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
         }
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
   
         // destroying excess damage particles
         foreach (GameObject damageParticle in damageParticles) { Destroy(damageParticle); }

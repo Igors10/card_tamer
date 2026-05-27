@@ -25,6 +25,9 @@ public class Effect : MonoBehaviour
 
     public IEnumerator ShowEffect(int abilityTextNr = 0)
     {
+        // play soundeffect
+        AudioManager.instance.PlaySFX("EffectSFX");
+
         // showing text
         unit.skillTextObj.gameObject.SetActive(true);
         string textToDisplay = (abilityText.Count < 1) ? unit.card.abilities[0].abilityData.abilityDescription : abilityText[abilityTextNr];

@@ -67,7 +67,15 @@ public class D6 : MonoBehaviour
         sprite.transform.localRotation = Quaternion.identity;
 
         // pop animation at the end
-        Animations.instance.PopAnim(this.gameObject, 0.3f, 0.004f);
+        float popAnimIntensity = (GetDiceValue() == 6) ? 0.007f : 0.004f;
+        Animations.instance.PopAnim(this.gameObject, 0.3f, popAnimIntensity);
+
+        // playing sound effect
+        string sfxName = "DiceRollSFX";
+
+        if (GetDiceValue() == 1) sfxName = "NegativeSFX";
+        //else if (GetDiceValue() == 6) sfxName = "sixRollSFX";
+        AudioManager.instance.PlaySFX(sfxName);
 
         // adding rolled power
         unit.card.GainPower(GetDiceValue(), false);

@@ -70,6 +70,9 @@ public class ManagerUI : MonoBehaviour
 
     public void UpdateTurnMessage()
     {
+        // play soundeffect
+        AudioManager.instance.PlaySFX("RerollSFX");
+
         // updating turn hint (top of the screen text)
         turnHint.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;
         turnHint.text = (GameManager.instance.yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";

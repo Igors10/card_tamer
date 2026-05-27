@@ -172,6 +172,9 @@ public class ShopManager : MonoBehaviour
             Animations.instance.PopAnim(newShopStar.gameObject, 0.4f, 0.2f);
             Debug.Log("ShopManager: new shop star created");
 
+            // playing sound effect
+            AudioManager.instance.PlaySFX("ShopStarSFX");
+
             Refresh(true);
             if (skipStarAppearance) starAppearIntervals = 0.05f; 
             yield return new WaitForSeconds(starAppearIntervals);

@@ -189,6 +189,7 @@ public class Field : MonoBehaviour
     /// </summary>
     public void FieldEndRound()
     {
+        roundsBlocked = 0;
         RefreshFieldVisuals();
 
         // fadeout cancel
