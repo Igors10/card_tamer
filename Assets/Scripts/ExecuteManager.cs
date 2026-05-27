@@ -19,6 +19,8 @@ public class ExecuteManager : MonoBehaviour
     [Header("revealed card params")]
     [HideInInspector] public bool readyRevealCard = false;
     Vector3 revealedCardScale = new Vector3(1.8f, 1.8f, 1f);
+    //[SerializeField] float revealFadeInTime;
+    //[SerializeField] float revealFadeOutTime;
 
     [Header("card play params")]
     [SerializeField] float zoomIntensity;
@@ -33,6 +35,7 @@ public class ExecuteManager : MonoBehaviour
     {
         currentCard = cardToReveal;
         currentCard.gameObject.SetActive(true);
+        //StartCoroutine(currentCard.GetComponent<AutoFade>().FadeEffect(revealFadeInTime, 0f));
 
         // playing soundeffect
         AudioManager.instance.PlaySFX("NextCardSFX");
@@ -58,10 +61,9 @@ public class ExecuteManager : MonoBehaviour
 
     public void StopRevealCard()
     {
-        currentCard.unit.DisableRollingUI();
-
         // deactivate card
         currentCard.gameObject.SetActive(false);
+        //StartCoroutine(currentCard.GetComponent<AutoFade>().FadeEffect(0f, revealFadeOutTime));
         currentCard.transform.localScale = currentCard.defaultScale;
 
         // reset current card var
@@ -97,7 +99,10 @@ public class ExecuteManager : MonoBehaviour
         }
         
         // Playing unit animation
-        yield return StartCoroutine(card.unit.AbilityAnimation(ability));
+        yield return StartCoroutine(card.unit.EntranceAnimation(ability));
+
+        // Deactivating the card
+        GameManager.instance.executeManager.StopRevealCard();
 
         // zooming out from the unit
         if (playedFirstTime)
@@ -107,16 +112,16 @@ public class ExecuteManager : MonoBehaviour
         }
 
         // Card effect + power
-        yield return StartCoroutine(card.unit.RollPower());        
+        yield return StartCoroutine(card.unit.RollPower());
 
         // Triggering on play card effects
         GameManager.instance.BroadcastOnCardPlayed(card);
 
-        // Deactivating the card
-        GameManager.instance.executeManager.StopRevealCard();
-
         // waiting until all effects are resolved
         yield return StartCoroutine(TriggerEffects());
+
+        // refreshing field colors
+        GameManager.instance.fieldManager.Refresh();
 
         // ending the turn 
         card.player.EndTurn();

@@ -129,7 +129,7 @@ public class FieldManager : MonoBehaviour
         }
     }
 
-    Color DesaturateColor(Color ogColor, float desatCoef)
+    public Color DesaturateColor(Color ogColor, float desatCoef)
     {
         float h, s, v;
 

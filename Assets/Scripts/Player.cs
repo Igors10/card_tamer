@@ -63,6 +63,21 @@ public class Player : MonoBehaviour
 
         // player color
         if (!isAI) playerColor = config.playerColor;
+
+        RefreshCardVisuals();
+    }
+
+    void RefreshCardVisuals()
+    {
+        foreach (Card card in cardsInHand)
+        {
+            card.Refresh();
+        }
+
+        foreach (Card card in cardsOnField)
+        {
+            card.Refresh();
+        }
     }
 
     public void EndTurn()

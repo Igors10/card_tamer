@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Block
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: -1
+  power: 0
   abilityDescription: Heals for 1
   effect: {fileID: 3327814835574798436, guid: 808024e11e4bbe04fafbf15353abb673, type: 3}

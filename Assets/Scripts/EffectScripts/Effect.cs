@@ -26,7 +26,7 @@ public class Effect : MonoBehaviour
     public IEnumerator ShowEffect(int abilityTextNr = 0)
     {
         // showing text
-        unit.skillText.gameObject.SetActive(true);
+        unit.skillTextObj.gameObject.SetActive(true);
         string textToDisplay = (abilityText.Count < 1) ? unit.card.abilities[0].abilityData.abilityDescription : abilityText[abilityTextNr];
         unit.skillText.text = textToDisplay;
 
@@ -42,6 +42,6 @@ public class Effect : MonoBehaviour
     {
         yield return new WaitForSeconds(pauseAfterEffect);
         unit.cardEffectVFX.gameObject.SetActive(false);
-        unit.skillText.gameObject.SetActive(false);
+        unit.skillTextObj.gameObject.SetActive(false);
     }
 }

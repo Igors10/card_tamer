@@ -8,9 +8,11 @@ public class ManagerUI : MonoBehaviour
     [Header("refs")]
     [SerializeField] GameObject gameplayUI;
     [SerializeField] TextMeshProUGUI hintMessage;
-    [SerializeField] TextMeshProUGUI turnMessage;
+    [SerializeField] TextMeshProUGUI turnHint;
     [SerializeField] Color yourTurnColor;
     [SerializeField] Color oppTurnColor;
+    [SerializeField] GameObject turnMessageObj;
+    [SerializeField] TextMeshProUGUI turnMessage;
 
     [Header("card preview")]
     [SerializeField] Card previewCard;
@@ -68,8 +70,14 @@ public class ManagerUI : MonoBehaviour
 
     public void UpdateTurnMessage()
     {
+        // updating turn hint (top of the screen text)
+        turnHint.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;
+        turnHint.text = (GameManager.instance.yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
+
+        // enabling the turn message
         turnMessage.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;
         turnMessage.text = (GameManager.instance.yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
+        turnMessageObj.SetActive(true);
     }
 
     public void GameOverScreen(Player lostPlayer)

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Inkstain
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: -1
+  power: 0
   abilityDescription: Blocks opposing field for 2 turns
   effect: {fileID: 1827805099279404661, guid: c58753c752c60e74f828c26bb370978d, type: 3}

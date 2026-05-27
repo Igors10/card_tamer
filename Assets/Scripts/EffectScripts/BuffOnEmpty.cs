@@ -31,6 +31,7 @@ public class BuffOnEmpty : MonoBehaviour
 
         if (fieldEmpty == buffApplied) yield break;
 
+        int messageID = (fieldEmpty) ? 0 : 1;
         yield return StartCoroutine(effect.ShowEffect());
 
         int buffAmount = (fieldEmpty) ? baseBuffAmount : -baseBuffAmount;

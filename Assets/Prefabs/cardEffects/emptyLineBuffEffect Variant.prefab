@@ -12,6 +12,18 @@ PrefabInstance:
       propertyPath: effectObj
       value: 
       objectReference: {fileID: 2877074012354459571}
+    - target: {fileID: 2284446999035823668, guid: b92cc3cb0f385f643b628b0401941bd2, type: 3}
+      propertyPath: abilityText.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2284446999035823668, guid: b92cc3cb0f385f643b628b0401941bd2, type: 3}
+      propertyPath: 'abilityText.Array.data[0]'
+      value: <color=red>+2</color> power, field is empty
+      objectReference: {fileID: 0}
+    - target: {fileID: 2284446999035823668, guid: b92cc3cb0f385f643b628b0401941bd2, type: 3}
+      propertyPath: 'abilityText.Array.data[1]'
+      value: Field is no longer empty
+      objectReference: {fileID: 0}
     - target: {fileID: 4280820222960849075, guid: b92cc3cb0f385f643b628b0401941bd2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.75699
@@ -81,4 +93,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 530be95d93c16e24b9a0a7de3efd442d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuffOnEmpty
-  buffAmount: 2
+  baseBuffAmount: 2

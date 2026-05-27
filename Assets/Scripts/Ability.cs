@@ -38,14 +38,15 @@ public class Ability : MonoBehaviour
         card = cardAssignTo;
 
         // POWER
-        powerIcon.SetActive(abilityData.power != 0);
-        powerValue.text = (abilityData.power > 0) ? "+" + abilityData.power.ToString() : abilityData.power.ToString();
+        /*powerIcon.SetActive(abilityData.power != 0);
+        powerValue.text = (abilityData.power > 0) ? "+" + abilityData.power.ToString() : abilityData.power.ToString();*/
 
         // EFFECT DESCRIPTION
         effectDesc.text = abilityData.abilityDescription;
 
         // EFFECT FORMATING
         // text alignment
+        /*
         effectDesc.alignment = (abilityData.power != 0) ? TextAlignmentOptions.Center : TextAlignmentOptions.Left;
 
         // textbox size and position
@@ -65,7 +66,7 @@ public class Ability : MonoBehaviour
 
             // applying formating (making it take as much space as possible if some other elements are disabled)
             effectDesc.transform.localPosition = new Vector3(effectX, effectDesc.transform.localPosition.y, 0f);
-        effectDesc.rectTransform.sizeDelta = new Vector2(effectWidth, effectDesc.rectTransform.sizeDelta.y);
+        effectDesc.rectTransform.sizeDelta = new Vector2(effectWidth, effectDesc.rectTransform.sizeDelta.y);*/
     }
 
     // =====================

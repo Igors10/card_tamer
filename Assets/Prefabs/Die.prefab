@@ -206,7 +206,8 @@ MonoBehaviour:
   - {fileID: 1391421197841012777, guid: 5df7071b8dfb0e140b7531b492d32407, type: 3}
   - {fileID: 66230221666923653, guid: ff860d0b40ae51b45b7c72fbdbf8fb9e, type: 3}
   glow: {fileID: 5031903783797572478}
-  rollingTime: 0.7
+  rollingTime: 1
+  pauseAfterRolling: 0.4
   diceIntervals: 0.2
   rollDistance: 0
   rotationSpeed: 800

@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Attack
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 1
-  abilityDescription: 
+  power: 0
+  abilityDescription: <color=red>+1</color> power
+  effect: {fileID: 7443696793778283204, guid: a344919d9785f264fa822cd103cabee1, type: 3}

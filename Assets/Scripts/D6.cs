@@ -16,6 +16,7 @@ public class D6 : MonoBehaviour
     bool rolling = false;
     int diceValue = 1;
     [SerializeField] float rollingTime;
+    [SerializeField] float pauseAfterRolling;
     [SerializeField] float diceIntervals;
     [SerializeField] float rollDistance;
     [SerializeField] float rotationSpeed;
@@ -69,7 +70,10 @@ public class D6 : MonoBehaviour
         Animations.instance.PopAnim(this.gameObject, 0.3f, 0.004f);
 
         // adding rolled power
-        unit.card.GainPower(GetDiceValue());
+        unit.card.GainPower(GetDiceValue(), false);
+
+        // little pause after rolling
+        yield return new WaitForSeconds(pauseAfterRolling);
 
         // triggering event
         GameManager.instance.BroadcastOnDiceRolled(unit.card, GetDiceValue());

@@ -19,6 +19,7 @@ public class Card : MonoBehaviour
     [SerializeField] Image cardSprite;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] GameObject cardVisual;
+    [SerializeField] Image cardBackground;
     public OrderMarker orderMarker;
     [SerializeField] GameObject specialIcon;
     [HideInInspector] public Unit unit;
@@ -88,10 +89,11 @@ public class Card : MonoBehaviour
     {
         cardData = newCardData;
         AssignAbilies();
-        Refresh();
-
+        
         player = owner;
         cardName = newCardData.name;
+
+        Refresh();
     }
 
     /// <summary>
@@ -104,6 +106,9 @@ public class Card : MonoBehaviour
 
         // SPRITE
         cardSprite.sprite = cardData.unitSprite;
+
+        // BACKGROUND
+        cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);
 
         // SPECIAL OR NOT
         specialIcon.SetActive(cardData.isSpecial);
@@ -256,15 +261,19 @@ public class Card : MonoBehaviour
     /// Adds this much power to current unit power amount
     /// </summary>
     /// <param name="power"></param>
-    public void GainPower(int power)
+    public void GainPower(int power, bool animated = true)
     {
         Debug.Log("Card: " + cardData.name + "gains " + power + " power.");
 
         // showing added power as bonus
-        if (power != 0) unit.powerBonus.StartShowingBonus(power); 
+        //if (power != 0) unit.powerBonus.StartShowingBonus(power); 
+
+        // pop animation to signify that something has changed
+        if (animated) Animations.instance.PopAnim(unit.powerValue.gameObject, 0.4f, 0.3f);       
 
         currentPower += power;
         unit.RefreshUnitVisuals();
+        GameManager.instance.fieldManager.Refresh();
     }
 
     public void PlayCard()

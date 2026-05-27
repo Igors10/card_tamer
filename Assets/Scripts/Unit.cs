@@ -22,10 +22,12 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public ParticleSystem cardEffectVFX;
     [HideInInspector] public int unitSlot;
     [SerializeField] GameObject shieldVFX;
+    public TextMeshProUGUI skillText;
+    public GameObject skillTextObj;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
-    [SerializeField] TextMeshProUGUI powerValue;
+    public TextMeshProUGUI powerValue;
 
     [Header("power rolling")]
     public D6[] dice;
@@ -63,7 +65,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [Header("ability animation")]
     [SerializeField] float jumpHeight;
     [SerializeField] float jumpTime;
-    public TextMeshProUGUI skillText;
+    
 
     void Start()
     {
@@ -235,6 +237,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // waiting until all roll effects are resolved
         yield return StartCoroutine(GameManager.instance.executeManager.TriggerEffects("onRoll"));
 
+        // disable dice
+        DisableRollingUI();
+        /*
         // adding bonus power
         if (card.abilities[0].abilityData.power != 0)
         {
@@ -244,10 +249,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             yield return new WaitForSeconds(1f);
             Animations.instance.PopAnim(card.abilities[0].powerIcon, 0.3f, 0.4f);
             card.GainPower(card.abilities[0].abilityData.power);
-        }
-        
-        // wait a bit after rolling is finished
-        yield return new WaitForSeconds(afterDiePause);
+        }*/
     }
 
     public void DisableRollingUI()
@@ -262,7 +264,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         bonusPowerObj.SetActive(false);
     }
 
-    public IEnumerator AbilityAnimation(Ability ability)
+    public IEnumerator EntranceAnimation(Ability ability)
     {
         // disabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = false;
@@ -274,7 +276,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         Vector3 targetPosition = startingPosition + new Vector3(0, jumpHeight, 0);
 
         // ability text variables variables
-        skillText.gameObject.SetActive(true);
+        skillTextObj.SetActive(true);
         skillText.text = card.cardName;
         skillText.color = new Color(skillText.color.r, skillText.color.g, skillText.color.b, 1f);
         Color skillTextColor = skillText.color;
@@ -307,9 +309,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // snapping values to correct ones
         sprite.transform.localPosition = startingPosition;
 
-        yield return new WaitForSeconds(jumpTime * 2);
+        yield return new WaitForSeconds(jumpTime * 4);
         // deactivating ability text
-        skillText.gameObject.SetActive(false);
+        skillTextObj.SetActive(false);
 
         // enabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = true;
