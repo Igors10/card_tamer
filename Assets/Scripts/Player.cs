@@ -101,6 +101,7 @@ public class Player : MonoBehaviour
     {
         // refresh stars 
         currentStars = maxStars;
+        deadUnitsThisRound = 0;
 
         playerUI.Refresh();
     }

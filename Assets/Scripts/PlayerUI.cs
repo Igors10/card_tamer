@@ -14,6 +14,7 @@ public class PlayerUI : MonoBehaviour
 
     [Header("refs")]
     public List<SpriteRenderer> stunnedPlaceholders;
+    public GameObject UIobj;
 
     [Header("HP")]
     public GameObject healthbar;
@@ -70,7 +71,7 @@ public class PlayerUI : MonoBehaviour
             int damage = Convert.ToInt32(hpValue.text) - player.health;
             DamageEffect(damage);
         }
-        else if (Convert.ToInt32(hpValue.text) > player.health)
+        else if (Convert.ToInt32(hpValue.text) < player.health)
         {
             // effects when healed
 

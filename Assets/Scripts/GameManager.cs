@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using TMPro;
-using Unity.Multiplayer.Playmode;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.VFX;
 
 public enum GameState
 {
@@ -23,6 +21,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> gameStateUI = new List<GameObject>();
     public bool yourTurn;
     [HideInInspector] public bool gameOver;
+    public int roundNr = 1;
 
     [Header("Managers")]
     public HandManager handManager;
@@ -49,6 +48,7 @@ public class GameManager : MonoBehaviour
     public int startingMaxHealth;
     public int startingStars;
     public int startingResourceAmount;
+    public int startingCardAmount = 5;
     public int maxHandSize;
     public PlayerConfigObj playerConfig;
     
@@ -70,11 +70,28 @@ public class GameManager : MonoBehaviour
     {
         // in offline matches player always goes first
         if (playerConfig.offlineMatch) StartTurn();
+        StartCoroutine(StartGame());
+    }
 
+    IEnumerator StartGame()
+    {
         // Loading fog fading away effect
         loadingFog.gameObject.SetActive(true);
-        StartCoroutine(loadingFog.LoadingAnimation(loadingTime));
+        yield return StartCoroutine(loadingFog.LoadingAnimation(loadingTime));
+
+        // "Draw your minions text"
+        mainCamera.stateTransitionObj.SetActive(true);
+
+        // pause while intro text is on the screen
+        while (mainCamera.stateTransitionObj.activeSelf)
+        {
+            yield return null;
+        }
+
+        // starting workshop starting sequence after a short pause
+        managerUI.workshop.LaunchStartingSequence();
     }
+
 
     public void TransitionGameState(GameState newState)
     {
@@ -82,6 +99,9 @@ public class GameManager : MonoBehaviour
 
         // Changing the state
         currentState = newState;
+
+        // Enabling new UI 
+        managerUI.EnableUI(true);
 
         // Setting the button correctly
         readyButton.UpdateButtonState();
@@ -97,6 +117,8 @@ public class GameManager : MonoBehaviour
                 // disabling resource UI after shop
                 StartCoroutine(player.playerUI.ShowTokens(false));
                 StartCoroutine(opponent.playerUI.ShowTokens(false));
+
+                managerUI.EnableWorkshop(false);
 
                 // starting new round
                 RoundStart();
@@ -135,8 +157,13 @@ public class GameManager : MonoBehaviour
                 gameStateUI[0].SetActive(true);
 
                 // resetting shop values
+                shopManager.skipStarAppearance = false;
                 managerUI.EnableUI(true);
+                managerUI.EnableWorkshop(true);
                 readyButton.gameObject.SetActive(true);
+
+                // opponent buys cards
+                if (opponent.isAI) StartCoroutine(opponent.GetComponent<AIOpponent>().DrawNewCards());
                 break;
         }
 
@@ -165,6 +192,8 @@ public class GameManager : MonoBehaviour
         opponent.StartRound();
 
         fieldManager.Refresh();
+
+        roundNr++;
     }
     private void Update()
     {

@@ -7,7 +7,7 @@ public class Viewpoint : MonoBehaviour
 
     [Header("State transition text")]
     [SerializeField] TextMeshProUGUI stateTransitionText;
-    [SerializeField] GameObject stateTransitionObj;
+    public GameObject stateTransitionObj;
 
     [Header("Viewpoint config")]
     // Viewpoints
@@ -47,8 +47,7 @@ public class Viewpoint : MonoBehaviour
 
         // enable the big text with next state name
         stateTransitionObj.SetActive(true);
-        stateTransitionText.color = new Color(stateTransitionText.color.r, stateTransitionText.color.g, stateTransitionText.color.b, 1f);
-        stateTransitionText.text = GameManager.instance.GetState().stateName;
+        stateTransitionText.text = (GameManager.instance.currentState == GameState.PLACING) ? "Round " + GameManager.instance.roundNr : "Workshop";
 
         float t = 0;
 
@@ -65,8 +64,6 @@ public class Viewpoint : MonoBehaviour
 
             // making state name gradually disapper
             float fadeT = Mathf.Clamp01((t - 0.7f) / 0.3f);
-            float alpha = Mathf.Lerp(1f, 0f, fadeT);
-            stateTransitionText.color = new Color(stateTransitionText.color.r, stateTransitionText.color.g, stateTransitionText.color.b, alpha);
 
             yield return null;
         }
@@ -82,8 +79,8 @@ public class Viewpoint : MonoBehaviour
         prevSize = targetSize;
 
         // resetting and disabling the big text with next state name
-        stateTransitionObj.SetActive(false);
-  
+        //stateTransitionObj.SetActive(false);
+
         // turning the UI back on
         GameManager.instance.managerUI.EnableUI(true);
 

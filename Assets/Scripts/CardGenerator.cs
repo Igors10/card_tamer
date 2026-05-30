@@ -15,6 +15,7 @@ public class CardGenerator : MonoBehaviour
 
     [Header("prefabs")]
     [SerializeField] GameObject cardPrefab;
+    public CreatureObj basicCardData;
 
     [Header("Card search")]
     [SerializeField] bool searchEnabled;
@@ -23,7 +24,7 @@ public class CardGenerator : MonoBehaviour
     private void Start()
     {
         handManager = GameManager.instance.handManager;
-        CreateStartingHand(GameManager.instance.playerConfig.startingCards, GameManager.instance.player);
+        //CreateStartingHand(GameManager.instance.playerConfig.startingCards, GameManager.instance.player);
     }
 
     /// <summary>
@@ -91,6 +92,8 @@ public class CardGenerator : MonoBehaviour
 
         // Adding new card to the hand
         GameManager.instance.handManager.AddCardToHand(newCard, player);
+
+        Debug.Log("CardGenerator: card " + cardData.name + " has been added to " + player.playerName + "'s hand");
     }
 
     private void Update()

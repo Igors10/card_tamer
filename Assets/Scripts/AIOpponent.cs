@@ -1,3 +1,4 @@
+using FishNet.Demo.AdditiveScenes;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -8,6 +9,7 @@ public class AIOpponent : MonoBehaviour
     Player playerObj;
     [SerializeField] AIConfigObj config;
     Coroutine currentAction;
+    CardGenerator generator;
     void Awake()
     {
         // Checking if match is offline
@@ -23,17 +25,14 @@ public class AIOpponent : MonoBehaviour
     void CreateAIStartingHand()
     {
         List<CreatureObj> AIstartingHandCards = new List<CreatureObj>();
+        generator = GameManager.instance.cardGenerator;
 
-        // adding random rats
-        int randomStartingCard = Random.Range(0, config.startingCardOptions.Count);
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < GameManager.instance.startingCardAmount; i++)
         {
-            AIstartingHandCards.Add(config.startingCardOptions[randomStartingCard]);
+            // choosing random card
+            CreatureObj newCardToAdd = (Random.value > 0.5f) ? generator.basicCardData : generator.PickRandomCard("basic");
+            AIstartingHandCards.Add(newCardToAdd);
         }
-
-        // adding random special
-        int randomSpecialCard = Random.Range(0, config.startingSpecialOptions.Count);
-        AIstartingHandCards.Add(config.startingSpecialOptions[randomSpecialCard]);
 
         GameManager.instance.cardGenerator.CreateStartingHand(AIstartingHandCards, playerObj);
     }
@@ -45,22 +44,6 @@ public class AIOpponent : MonoBehaviour
             case GameState.PLACING:
                 currentAction = StartCoroutine(PlaceRandomCard());
                 break;
-
-                /*
-            case GameState.PLANNING:
-                PlanCards();
-                break;
-
-            case GameState.EXECUTING:
-                //currentAction = StartCoroutine(ResolvePlannedCard());
-                break;*/
-
-            case GameState.BATTLING:
-                break;
-            case GameState.BUYING:
-                //currentAction = StartCoroutine(BuyRandomCard());
-                break;
-
         }
     }
 
@@ -93,7 +76,7 @@ public class AIOpponent : MonoBehaviour
         List<Field> availableFields = GameManager.instance.fieldManager.FindEmptyFields(playerObj.fields);
 
         // if no cards or no empty space, AI ends turn and is ready with placing
-        if (playerObj.cardsInHand.Count < 1 || availableFields.Count <= 0) { AIReady();  yield break; }
+        if (playerObj.cardsInHand.Count < 1 || availableFields.Count <= 0) { AIReady(); yield break; }
 
         // chosing card to place
         int randomCard = Random.Range(0, playerObj.cardsInHand.Count);
@@ -109,51 +92,61 @@ public class AIOpponent : MonoBehaviour
 
     // =========================================================
     // ===================== BUYING ============================
-    /*
-    IEnumerator BuyRandomCard()
+
+    public IEnumerator DrawNewCards()
     {
-        yield return new WaitForSeconds(1.5f);
+        Debug.Log("AIOpponent: AI is about to draw cards.");
+        if (playerObj.endStateReady) { Debug.Log("AIOpponent: AI already bought all the cards"); yield break; }
 
-        ShopSlot[] slots = GameManager.instance.shopManager.shopSlots;
+        ShopManager shop = GameManager.instance.shopManager;
+        int starAmount = playerObj.shopStars + shop.shopStarsAfterBattle + playerObj.deadUnitsThisRound;
+        Debug.Log("AIOpponent: AI opponent has " + starAmount + " stars");
+        playerObj.shopStars = starAmount;
+        int nextStarAmount = playerObj.maxStars + 1;
+        bool starsUpgraded = false;
 
-        Debug.Log("AIOpponent: Opponent is about to buy a card");
+        bool nothingToBuy = false;
 
-        for (int i = 0; i < config.shopRerollsPerTurn + 1; i++)
+        while (nothingToBuy == false)
         {
-            yield return new WaitForSeconds(config.buyingDelay);
-
-            List<int> indices = new List<int>();
-            for (int a = 0; i < slots.Length; i++) indices.Add(i);
-
-            // shuffle
-            for (int a = indices.Count - 1; a > 0; a--)
+            if (playerObj.shopStars >= nextStarAmount && starsUpgraded == false) // upgrade stars
             {
-                int j = Random.Range(0, a + 1);
-                (indices[a], indices[j]) = (indices[j], indices[a]);
+                playerObj.maxStars = nextStarAmount; // do enemy AI shopping
+                playerObj.shopStars -= nextStarAmount;
+                starsUpgraded = true;
             }
-
-            // try buying
-            foreach (int index in indices)
+            else if (CountSpecialCards() < playerObj.maxStars && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
-                Debug.Log("AIOpponent: Opponent tries to buy a slot");
-                if (slots[index].gameObject.activeSelf)
-                {
-                    yield return StartCoroutine(slots[index].BuyCard(playerObj));
-                    yield return null;
-                }
+                generator.CreateCard(generator.PickRandomCard("special"), playerObj);
+                playerObj.shopStars -= shop.drawSpecialPrice;
             }
+            else if (playerObj.shopStars >= shop.drawCardPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
+            {
+                generator.CreateCard(generator.PickRandomCard("basic"), playerObj);
+                playerObj.shopStars -= shop.drawCardPrice;
+            }
+            else nothingToBuy = true;
 
-            // breaks for loop here since we dont need to reroll on last iteration
-            if (i == config.shopRerollsPerTurn) break;
-
-            // if couldnt buy anything it will try to reroll
-            GameManager.instance.shopManager.RerollShop(playerObj);
+            // checking just to not make the look go infinitely
+            yield return null;
         }
 
-        Debug.Log("AIOpponent: opponent went through slots and didnt buy anythng");
+        playerObj.endStateReady = true;
         AIEndTurn();
     }
-    */
+    
+    // Counts how many special cards opponent has
+    int CountSpecialCards()
+    {
+        int specialCardAmount = 0;
+        foreach (Card card in playerObj.cardsInHand)
+        {
+            if (card.cardData.isSpecial) specialCardAmount++;
+        }
+
+        return specialCardAmount;
+    }
+
     // =========================================================
 }
 

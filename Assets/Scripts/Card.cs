@@ -108,7 +108,7 @@ public class Card : MonoBehaviour
         cardSprite.sprite = cardData.unitSprite;
 
         // BACKGROUND
-        cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);
+        //cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);
 
         // SPECIAL OR NOT
         specialIcon.SetActive(cardData.isSpecial);
@@ -199,7 +199,7 @@ public class Card : MonoBehaviour
 
     public void StartDrag()
     {
-        if (GameManager.instance.executeManager.currentCard != null) return;
+        if (GameManager.instance.executeManager.currentCard != null || GameManager.instance.currentState != GameState.PLACING || !GameManager.instance.yourTurn) return;
 
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;

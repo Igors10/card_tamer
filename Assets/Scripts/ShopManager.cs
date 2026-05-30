@@ -17,12 +17,12 @@ public class ShopManager : MonoBehaviour
     [SerializeField] Player player;
 
     [Header("prices")]
-    [SerializeField] int drawCardPrice;
-    [SerializeField] int drawSpecialPrice;
+    public int drawCardPrice;
+    public int drawSpecialPrice;
     // upgrade price is current max star amount + 1
 
     [Header("shop stars")]
-    [SerializeField] int shopStarsAfterBattle;
+    public int shopStarsAfterBattle;
     [SerializeField] GameObject shopStarPrefab;
     [SerializeField] Color starColor;
     [SerializeField] Color deadUnitsStarColor;
@@ -30,7 +30,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] float starSpacing;
     [SerializeField] float starAppearIntervals;
     List<Image> shopStars = new List<Image>();
-    bool skipStarAppearance = false;
+    [HideInInspector] public bool skipStarAppearance = false;
     // you stopped here - make stars appear
 
     bool starsAlreadyUpgraded;
@@ -127,10 +127,12 @@ public class ShopManager : MonoBehaviour
 
     void DrawCard(Player playerToGetCard)
     {
+        GameManager.instance.managerUI.workshop.DrawCardOptions();
+        /*
         // Generating the card (temporary just random card)
         CardGenerator generator = GameManager.instance.cardGenerator;
         generator.CreateCard(generator.PickRandomCard("basic"), playerToGetCard);
-
+        */
         // Paying
         int cardPrice = Convert.ToInt32(prices[1].text);
         Pay(playerToGetCard, cardPrice);
@@ -138,10 +140,12 @@ public class ShopManager : MonoBehaviour
 
     void DrawSpecial(Player playerToGetSpecial)
     {
+        GameManager.instance.managerUI.workshop.DrawCardOptions(true);
+        /*
         // Generating Special (temporary just random card)
         CardGenerator generator = GameManager.instance.cardGenerator;
         generator.CreateCard(generator.PickRandomCard("special"), playerToGetSpecial);
-
+        */
         // Paying 
         int specialPrice = Convert.ToInt32(prices[2].text);
         Pay(playerToGetSpecial, specialPrice);
@@ -157,10 +161,30 @@ public class ShopManager : MonoBehaviour
 
     IEnumerator CreateShopStars()
     {
+        // if stars were already created don't make mode
+        if (skipStarAppearance) yield break;
+
+        // disabling buttons before workshop fully loaded
+        for (int a = 0; a < buttons.Count(); a++)
+        {
+            buttons[a].gameObject.SetActive(false);
+        }
+
+        // pause while intro text is on the screen
+        while (GameManager.instance.mainCamera.stateTransitionObj.activeSelf)
+        {
+            yield return null;
+        }
+
+        // disabling buttons before workshop fully loaded
+        for (int a = 0; a < buttons.Count(); a++)
+        {
+            buttons[a].gameObject.SetActive(true);
+        }
+
         // calculating player's shop stars
         int newStars = player.deadUnitsThisRound + shopStarsAfterBattle;
         player.shopStars += newStars;
-        player.deadUnitsThisRound = 0;
 
         Debug.Log("ShopManager: Player has " + player.shopStars + " shop stars");
         

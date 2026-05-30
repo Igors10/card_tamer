@@ -35,7 +35,21 @@ public class D6 : MonoBehaviour
         // randomly picking dice values while it is rolling
         StartCoroutine(RandomizeDiceValue());
 
-        yield return new WaitForSeconds(rollingTime);
+        // automatically stop the die after some time if its AI
+        if (unit.card.player.isAI)
+        {
+            yield return new WaitForSeconds(rollingTime);
+            rolling = false;
+        }
+        // way for input if it is player
+        else
+        {
+            while (rolling)
+            {
+                yield return null;   
+            }
+        }
+
         /*
         // Floating up
         float t = 0;
@@ -60,7 +74,8 @@ public class D6 : MonoBehaviour
             yield return null;
         }*/
 
-        rolling = false;
+        // changing dice value again to prevent player from clicking at the correct value
+        diceValue = ChangeDiceValue();
 
         // snapping to correct position and rotation
         transform.position = diceStartingPos;
@@ -85,6 +100,17 @@ public class D6 : MonoBehaviour
 
         // triggering event
         GameManager.instance.BroadcastOnDiceRolled(unit.card, GetDiceValue());
+    }
+
+    private void Update()
+    {
+        DiceInput();
+    }
+
+    // Die stops rolling when player clicks anywhere
+    void DiceInput()
+    {
+        if (Input.GetButtonDown("Fire1") && unit.card.player == GameManager.instance.player) { rolling = false; Debug.Log("ShopManager: star appearance anim skipped"); }
     }
 
     void RotateDice()

@@ -69,6 +69,9 @@ public class ColorSelect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         pencil.color = colorToSelect;
         TitleScreen.instance.playerConfigObj.playerColor = colorToSelect;
 
+        // playing soundeffect
+        AudioManager.instance.PlaySFX("ColorPickSFX");
+
         // closing the window
         colorWindow.SetActive(false);
         OnHover(false);

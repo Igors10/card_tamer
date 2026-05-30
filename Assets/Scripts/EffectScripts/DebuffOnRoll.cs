@@ -18,7 +18,8 @@ public class DebuffOnRoll : MonoBehaviour
 
     void TriggerUseEffect(Card cardRolled, int result)
     {
-        if (result == neededNumber) GameManager.instance.executeManager.rollEffectStack.Add(UseEffect(cardRolled));
+        Effect effect = GetComponent<Effect>();
+        if (result == neededNumber && cardRolled.player == GameManager.instance.GetOpponentOfPlayer(effect.unit.card.player)) GameManager.instance.executeManager.rollEffectStack.Add(UseEffect(cardRolled));
     }
 
     IEnumerator UseEffect(Card cardRolled)

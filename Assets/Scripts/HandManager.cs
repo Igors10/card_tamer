@@ -98,7 +98,7 @@ public class HandManager : MonoBehaviour
     void HandHidingCheck()
     {
         // Hide the hand if following
-        bool forceHide = (activeCard != null || GameManager.instance.currentState != GameState.PLACING);
+        bool forceHide = (activeCard != null);
         RectTransform handRT = hand.GetComponent<RectTransform>();
         float hideSpeed = 0;
 

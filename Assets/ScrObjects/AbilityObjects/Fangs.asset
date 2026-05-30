@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Fangs
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: '<color=red>-2</color> power to whoever rolled [4]'
+  abilityDescription: When an opponent rolls a [4], they get <color=red>-2</color>
+    power
   effect: {fileID: 7734693108408952331, guid: 2a72c4b068a077049b015a9d6c8bfd95, type: 3}

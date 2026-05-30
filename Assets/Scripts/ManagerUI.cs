@@ -13,6 +13,8 @@ public class ManagerUI : MonoBehaviour
     [SerializeField] Color oppTurnColor;
     [SerializeField] GameObject turnMessageObj;
     [SerializeField] TextMeshProUGUI turnMessage;
+    [SerializeField] GameObject workshopObj;
+    public Workshop workshop;
 
     [Header("card preview")]
     [SerializeField] Card previewCard;
@@ -77,6 +79,9 @@ public class ManagerUI : MonoBehaviour
         turnHint.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;
         turnHint.text = (GameManager.instance.yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
 
+        // enabling turn message only if it is a placing phase
+        if (GameManager.instance.currentState != GameState.PLACING) return;
+
         // enabling the turn message
         turnMessage.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;
         turnMessage.text = (GameManager.instance.yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
@@ -114,6 +119,15 @@ public class ManagerUI : MonoBehaviour
 
             yield return null;
         }
+    }
+
+    public void EnableWorkshop(bool isEnable, bool moveWorkshopBG = true)
+    {
+        if (isEnable) workshopObj.SetActive(true);
+        StartCoroutine(workshop.WorkshopAnim(isEnable, moveWorkshopBG));
+        hintMessage.gameObject.SetActive(!isEnable);
+        turnHint.gameObject.SetActive(!isEnable);
+        GameManager.instance.opponent.playerUI.UIobj.SetActive(!isEnable);
     }
 
 
