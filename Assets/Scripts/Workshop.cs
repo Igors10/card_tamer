@@ -1,6 +1,7 @@
-using UnityEngine;
-using TMPro;
 using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class Workshop : MonoBehaviour
 {
@@ -9,12 +10,19 @@ public class Workshop : MonoBehaviour
     [SerializeField] TextMeshProUGUI startingMinionCounter;
 
     [Header("creating cards")]
-    [SerializeField] GameObject drawingUI;
-    [SerializeField] WorkshopOption[] cardOptions = new WorkshopOption[2];
+    [SerializeField] GameObject cardCreationUI;
+    [SerializeField] GameObject abilitySelectUI;
+    [SerializeField] GameObject canvasUI;
+    [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
+    [SerializeField] TMP_InputField nameInput;
+    [HideInInspector] public AbilityObj chosenAbility;
+    [SerializeField] DrawingTool drawingCanvas;
 
     [Header("refs")]
     Player player;
     CardGenerator generator;
+    [SerializeField] TextMeshProUGUI abilityReminder;
+    [SerializeField] GameObject createButton;
 
     [Header("workshop animation")]
     [SerializeField] GameObject background;
@@ -31,9 +39,9 @@ public class Workshop : MonoBehaviour
         generator = GameManager.instance.cardGenerator;
 
         // passing workshop reference to card options
-        for (int a = 0; a < cardOptions.Length; a++)
+        for (int a = 0; a < abilityOption.Length; a++)
         {
-            cardOptions[a].workshop = this;
+            abilityOption[a].workshop = this;
         }
 
         // getting starting bg items positions
@@ -99,39 +107,64 @@ public class Workshop : MonoBehaviour
         GameManager.instance.readyButton.gameObject.SetActive(false);
 
         // enabling card choice buttons
-        EnableCardOptions(true);
+        EnableAbilityOptions(true);
 
+        
         if (drawSpecial) // options for special cards
         {
-            for (int a = 0; a < cardOptions.Length; a++)
+            for (int a = 0; a < abilityOption.Length; a++)
             {
-                CreatureObj specialToAssign = generator.PickRandomCard("special");
-                cardOptions[a].card.AssignCardData(specialToAssign, player);
+                AbilityObj specialAbilityToAssign = generator.PickRandomAbility("special");
+                abilityOption[a].abilityNote.InitAbilityNote(specialAbilityToAssign);
             }
         }
         else // options for basic cards
         {
             // first option is always a standart +1 power card
-            cardOptions[0].card.AssignCardData(generator.basicCardData, player);
+            abilityOption[0].abilityNote.InitAbilityNote(generator.PickRandomAbility("attack"));
 
             // second is a random card
-            CreatureObj dataToAssign = generator.PickRandomCard("basic");
-            cardOptions[1].card.AssignCardData(dataToAssign, player);
+            AbilityObj abilityToAssign = generator.PickRandomAbility("basic");
+            abilityOption[1].abilityNote.InitAbilityNote(abilityToAssign);
         }
     }
 
-    void EnableCardOptions(bool isEnable)
+    void EnableAbilityOptions(bool isEnable)
     {
-        drawingUI.SetActive(isEnable);
+        abilitySelectUI.SetActive(isEnable);
+        canvasUI.SetActive(false);
     }
 
-    public void PickCardOption(CreatureObj pickedCard)
+    void EnableDrawingCanvas()
     {
-        // adding chosen card to player's hand
-        generator.CreateCard(pickedCard, player);
+        // enalbing the drawing canvas gameObject
+        canvasUI.SetActive(true);
+
+        // passing the ability
+        abilityReminder.text = chosenAbility.abilityDescription;
+
+        // resetting name input field
+        nameInput.text = "";
+    }
+
+    public void PickAbilityOption(AbilityObj pickedAbility)
+    {
+        // save the ability
+        chosenAbility = pickedAbility;
 
         // play Audio Effect
         AudioManager.instance.PlaySFX("BuySFX");
+
+        // switching to drawing UI
+        abilitySelectUI.SetActive(false);
+        EnableDrawingCanvas();
+    }
+
+    public void CreateNewCard()
+    {
+        // creating the card and giving it to player
+        CreatureObj newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility);
+        generator.CreateCard(newCardData, GameManager.instance.player);
 
         // if starting sequence continue until player has 5 cards
         if (startingSequence)
@@ -148,8 +181,9 @@ public class Workshop : MonoBehaviour
         else
         {
             // go back to shop if it is not a starting sequence
-            EnableCardOptions(false);
+            cardCreationUI.SetActive(false);
             GameManager.instance.readyButton.gameObject.SetActive(true);
+            GameManager.instance.readyButton.buttonText.text = "Ready";
             GameManager.instance.gameStateUI[2].SetActive(true);
         }
     }
@@ -157,7 +191,7 @@ public class Workshop : MonoBehaviour
     void StopStartingSequence()
     {
         startingSequence = false;
-        EnableCardOptions(false);
+        cardCreationUI.SetActive(false);
         GameManager.instance.readyButton.gameObject.SetActive(true);
         startingMinionCounter.gameObject.SetActive(false);
     }

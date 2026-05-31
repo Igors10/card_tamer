@@ -1,5 +1,4 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -8,15 +7,10 @@ using UnityEngine.UI;
 public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("refs")]
-    [SerializeField] TextMeshProUGUI buttonText;
+    public TextMeshProUGUI buttonText;
     public Button button;
     [SerializeField] Image sprite;
     [SerializeField] GameObject buttonGlow;
-
-    private void Start()
-    {
-        //UpdateButtonState();
-    }
 
     public void UpdateButtonState(string customButtonText = null)
     {

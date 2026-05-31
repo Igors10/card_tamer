@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class PlayerConfigObj : ScriptableObject
 {
     public List<CreatureObj> startingCards = new List<CreatureObj>();
-    public Color playerColor = Color.white;
+    public Color playerColor = Color.green;
     public bool offlineMatch = true;
 
     public void ResetCardConfig()

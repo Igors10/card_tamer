@@ -26,7 +26,7 @@ public class Player : MonoBehaviour
     [HideInInspector] public PlayerConfigObj config;
     AIOpponent AIplayer;
     public bool isAI;
-    public Color playerColor;
+    public Color playerColor = Color.green;
     [HideInInspector] public bool isOpponent;
 
     [Header("resources")]

@@ -113,6 +113,7 @@ public class FieldManager : MonoBehaviour
             bool lineTie = playerField.GetFieldPower() == opponentField.GetFieldPower();
             bool playerWins = playerField.GetFieldPower() > opponentField.GetFieldPower() && !lineTie;
 
+            /*
             // player field color
             Color playerFieldColor = (playerField.GetFieldPower() != 0) ? player.playerColor : Color.white;
             if (!playerWins && !lineTie) playerFieldColor = DesaturateColor(playerFieldColor, 0.5f);
@@ -121,7 +122,7 @@ public class FieldManager : MonoBehaviour
             // opponent field color
             Color opponentFieldColor = (opponentField.GetFieldPower() != 0) ? opponent.playerColor : Color.white;
             if (playerWins && !lineTie) opponentFieldColor = DesaturateColor(opponentFieldColor, 0.5f);
-            opponentField.defaultColor = opponentFieldColor;
+            opponentField.defaultColor = opponentFieldColor;*/
 
             // applying colors
             playerField.RefreshFieldVisuals();

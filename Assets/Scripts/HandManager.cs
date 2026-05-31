@@ -129,7 +129,7 @@ public class HandManager : MonoBehaviour
         HandHidingCheck();
 
         // temp clearing hand solution
-        if (Input.GetKey(KeyCode.Backspace)) ClearHand();
+        if (Input.GetKey(KeyCode.Backspace) && GameManager.instance.currentState == GameState.PLACING) ClearHand();
     }
 
     void ClearHand()

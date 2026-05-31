@@ -18,21 +18,18 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
     private Texture2D drawingTexture;
     private Stack<Color[]> undoStack = new Stack<Color[]>();
 
-    void Start()
+    void OnEnable()
     {
         // Create a blank white texture
         drawingTexture = new Texture2D(textureSize, textureSize);
-        Color[] initialPixels = new Color[textureSize * textureSize];
-        for (int i = 0; i < initialPixels.Length; i++) initialPixels[i] = Color.clear;
-
-        drawingTexture.SetPixels(initialPixels);
-        drawingTexture.Apply();
+        ClearCanvas();
 
         // Assign the texture to the RawImage
         canvasImage.texture = drawingTexture;
 
         // setting default brush size
         currentBrushSize = smallBrushSize;
+        brushColor = GameManager.instance.player.playerColor;
     }
 
     public void SelectBrush(string brushSize)
@@ -161,5 +158,12 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
         }
         // Apply the pixel changes to the texture
         drawingTexture.Apply();
+    }
+
+    // gets the sprite drawn by player
+    public Sprite GetSprite()
+    {
+        Sprite customCardSprite = Sprite.Create(drawingTexture, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
+        return customCardSprite;
     }
 }

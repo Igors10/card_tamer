@@ -12,6 +12,9 @@ public class CardGenerator : MonoBehaviour
     [SerializeField] CardList mainList;
     [SerializeField] CardList basicList;
     [SerializeField] CardList specialList;
+    [SerializeField] AbiltiyList basicAbilityList;
+    [SerializeField] AbiltiyList specialAbilityList;
+    [SerializeField] AbilityObj defaultAbility;
 
     [Header("prefabs")]
     [SerializeField] GameObject cardPrefab;
@@ -51,6 +54,28 @@ public class CardGenerator : MonoBehaviour
         return list.cardList[randomCard_ID];
     }
 
+    public AbilityObj PickRandomAbility(string listName)
+    {
+        AbiltiyList list;
+
+        // Picking from a specific list if asked in parameters
+        switch (listName)
+        {
+            case "basic":
+                list = basicAbilityList;
+                break;
+
+            case "special":
+                list = specialAbilityList;
+                break;
+
+            default: return defaultAbility;
+                break;
+        }
+
+        int randomAbility_ID = Random.Range(0, list.abilityList.Count);
+        return list.abilityList[randomAbility_ID];
+    }
 
     /// <summary>
     /// Looks up a specific card from the pool
@@ -65,6 +90,18 @@ public class CardGenerator : MonoBehaviour
         }
 
         return null;
+    }
+
+    // creates new card scriptable object (temp before I remake cards into c# classes)
+    public CreatureObj ConstructNewCard(string cardName, Sprite cardSprite, AbilityObj cardAbility)
+    {
+        CreatureObj newCard = ScriptableObject.CreateInstance<CreatureObj>();
+
+        newCard.name = cardName;
+        newCard.unitSprite = cardSprite;
+        newCard.ability[0] = cardAbility;
+
+        return newCard;
     }
 
     public void CreateStartingHand(List<CreatureObj> startingCardList, Player player)
@@ -99,7 +136,7 @@ public class CardGenerator : MonoBehaviour
     private void Update()
     {
         // temp solution for adding cards to hand
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.A) && GameManager.instance.currentState == GameState.PLACING)
         {
             if (cardsName != null || searchEnabled == false) CreateCard(PickRandomCard(), GameManager.instance.player);
 
