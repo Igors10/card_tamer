@@ -1,7 +1,8 @@
 using System.Collections;
+using System.IO;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Workshop : MonoBehaviour
 {
@@ -17,12 +18,16 @@ public class Workshop : MonoBehaviour
     [SerializeField] TMP_InputField nameInput;
     [HideInInspector] public AbilityObj chosenAbility;
     [SerializeField] DrawingTool drawingCanvas;
+    string placeholderName = "Bobby";
+    [SerializeField] Sprite placeholderSprite;
 
     [Header("refs")]
     Player player;
     CardGenerator generator;
     [SerializeField] TextMeshProUGUI abilityReminder;
     [SerializeField] GameObject createButton;
+    [SerializeField] AutoFade createdCardPresenter;
+    [SerializeField] Card cardPresenterPreviewCard;
 
     [Header("workshop animation")]
     [SerializeField] GameObject background;
@@ -160,11 +165,49 @@ public class Workshop : MonoBehaviour
         EnableDrawingCanvas();
     }
 
+    void PresentNewCard(CreatureObj newCardData)
+    {
+        createdCardPresenter.gameObject.SetActive(true);
+        cardPresenterPreviewCard.AssignCardData(newCardData, GameManager.instance.player);
+    }
+
+    private void Update()
+    {
+        WorkshopInput();
+    }
+
+    void WorkshopInput()
+    {
+        // stop presenting card
+        if (createdCardPresenter.gameObject.activeSelf && Input.GetKeyDown(KeyCode.Mouse0)) createdCardPresenter.gameObject.SetActive(false);
+
+        // ctrl + z undo
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Z)) drawingCanvas.UndoStroke();
+
+        // enter developers mode (canvas for drawing sprites)
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.D)) drawingCanvas.DevelopersMode();
+    }
+
     public void CreateNewCard()
     {
+        // if in developers mode save the card
+        if (drawingCanvas.developersMode)
+        {
+            SaveCardToProject(nameInput.text, drawingCanvas.drawingTexture);
+
+            // reset the canvas
+            nameInput.text = "";
+            drawingCanvas.ClearCanvas();
+
+            return;
+        }
+
         // creating the card and giving it to player
         CreatureObj newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility);
         generator.CreateCard(newCardData, GameManager.instance.player);
+
+        // Present new card to player
+        PresentNewCard(newCardData);
 
         // if starting sequence continue until player has 5 cards
         if (startingSequence)
@@ -187,6 +230,60 @@ public class Workshop : MonoBehaviour
             GameManager.instance.gameStateUI[2].SetActive(true);
         }
     }
+
+    public void SaveCardToProject(string cardName, Texture2D drawnTexture)
+    {
+#if UNITY_EDITOR
+        // 1. Define where the files will be saved in your project
+        string spriteFolderPath = "Assets/Graphics/CardGraphics/UnitSprites/";
+        string presetFolderPath = "Assets/ScrObjects/UnitPresets/";
+
+        string spriteFilePath = spriteFolderPath + cardName + ".png";
+        string presetFilePath = presetFolderPath + cardName + ".asset";
+
+        // 2. Save the Texture2D as a PNG file
+        byte[] textureBytes = drawnTexture.EncodeToPNG();
+        File.WriteAllBytes(spriteFilePath, textureBytes);
+
+        // 3. Force Unity to recognize the new PNG file we just created
+        AssetDatabase.Refresh();
+
+        // 4. Change the PNG's import settings so Unity treats it as a 2D Sprite, not a 3D Texture
+        TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(spriteFilePath);
+        if (importer != null)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            // Optional: prevent blurry pixel art by setting filter mode to Point
+            importer.filterMode = FilterMode.Point;
+            importer.SaveAndReimport();
+        }
+
+        // 5. Load the newly imported Sprite asset
+        Sprite savedSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spriteFilePath);
+
+        // 6. Create a new instance of your ScriptableObject
+        UnitPreset newCardAsset = ScriptableObject.CreateInstance<UnitPreset>();
+
+        // 7. Assign the data to the ScriptableObject
+        newCardAsset.unitName = cardName;
+        newCardAsset.sprite = savedSprite;
+        // (Assign any other default dev data here)
+
+        // 8. Create the actual .asset file in the project folder
+        AssetDatabase.CreateAsset(newCardAsset, presetFilePath);
+
+        // 9. Save all changes and focus the project window on the new asset
+        AssetDatabase.SaveAssets();
+        EditorUtility.FocusProjectWindow();
+        Selection.activeObject = newCardAsset;
+
+        Debug.Log($"Successfully created and saved developer card: {cardName}");
+#else
+        Debug.LogWarning("Card saving is only supported inside the Unity Editor.");
+#endif
+    }
+
 
     void StopStartingSequence()
     {

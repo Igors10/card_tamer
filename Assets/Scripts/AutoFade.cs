@@ -9,6 +9,7 @@ public class AutoFade : MonoBehaviour
     SpriteRenderer[] sprites;
     Image[] images;
     TextMeshProUGUI[] texts;
+    Coroutine currentFade;
 
     float[] spriteAlphas;
     float[] imageAlphas;
@@ -54,11 +55,14 @@ public class AutoFade : MonoBehaviour
 
     private void OnEnable()
     {
-        StartCoroutine(FadeEffect());
+        currentFade = StartCoroutine(FadeEffect());
     }
 
     public IEnumerator FadeEffect(float newFadeInTime = 0f, float newFadeOutTime = 0f)
     {
+        // stopping prev fade
+        if (currentFade != null) StopCoroutine(currentFade);
+
         // choosing between base and new fade times
         float currentFadeInTime = (newFadeInTime == 0) ? fadeInTime : newFadeInTime;
         float currentFadeOutTine = (newFadeOutTime == 0) ? fadeOutTime : newFadeOutTime; 

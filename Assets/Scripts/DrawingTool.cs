@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
 {
+    [SerializeField] Image canvasBG;
     public RawImage canvasImage;
     public int textureSize = 256;
     public int smallBrushSize = 2;
@@ -15,9 +16,10 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
     private Vector2Int lastPixelPos;
     private bool isDrawing = false;
 
-    private Texture2D drawingTexture;
+    [HideInInspector] public Texture2D drawingTexture;
     private Stack<Color[]> undoStack = new Stack<Color[]>();
 
+    [HideInInspector] public bool developersMode = false;
     void OnEnable()
     {
         // Create a blank white texture
@@ -29,7 +31,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
 
         // setting default brush size
         currentBrushSize = smallBrushSize;
-        brushColor = GameManager.instance.player.playerColor;
+        brushColor = (developersMode) ? Color.white : GameManager.instance.player.playerColor;
     }
 
     public void SelectBrush(string brushSize)
@@ -158,6 +160,14 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
         }
         // Apply the pixel changes to the texture
         drawingTexture.Apply();
+    }
+
+    public void DevelopersMode()
+    {
+        ClearCanvas();
+        developersMode = !developersMode;
+        canvasBG.color = (canvasBG.color == Color.black) ? Color.white : Color.black;
+        brushColor = (brushColor == GameManager.instance.player.playerColor) ? Color.white : GameManager.instance.player.playerColor;
     }
 
     // gets the sprite drawn by player

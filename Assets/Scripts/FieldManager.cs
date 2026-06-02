@@ -113,35 +113,21 @@ public class FieldManager : MonoBehaviour
             bool lineTie = playerField.GetFieldPower() == opponentField.GetFieldPower();
             bool playerWins = playerField.GetFieldPower() > opponentField.GetFieldPower() && !lineTie;
 
-            /*
+            
             // player field color
-            Color playerFieldColor = (playerField.GetFieldPower() != 0) ? player.playerColor : Color.white;
-            if (!playerWins && !lineTie) playerFieldColor = DesaturateColor(playerFieldColor, 0.5f);
+            Color playerFieldColor = (playerField.GetFieldPower() != 0) ? Colors.instance.BlendColor(player.playerColor, 0.5f) : Color.white;
+            if (!playerWins && !lineTie) playerFieldColor = Colors.instance.BlendColor(player.playerColor, 0.3f);
             playerField.defaultColor = playerFieldColor;
 
             // opponent field color
-            Color opponentFieldColor = (opponentField.GetFieldPower() != 0) ? opponent.playerColor : Color.white;
-            if (playerWins && !lineTie) opponentFieldColor = DesaturateColor(opponentFieldColor, 0.5f);
-            opponentField.defaultColor = opponentFieldColor;*/
+            Color opponentFieldColor = (opponentField.GetFieldPower() != 0) ? Colors.instance.BlendColor(opponent.playerColor, 0.5f) : Color.white;
+            if (playerWins && !lineTie) opponentFieldColor = Colors.instance.BlendColor(opponent.playerColor, 0.3f);
+            opponentField.defaultColor = opponentFieldColor;
 
             // applying colors
             playerField.RefreshFieldVisuals();
             opponentField.RefreshFieldVisuals();
         }
-    }
-
-    public Color DesaturateColor(Color ogColor, float desatCoef)
-    {
-        float h, s, v;
-
-        // Convert the RGB color to HSV
-        Color.RGBToHSV(ogColor, out h, out s, out v);
-        // Reduce the saturation
-        s *= desatCoef;
-        // Convert it back to a standard RGB color
-        Color desatColor = Color.HSVToRGB(h, s, v);
-
-        return desatColor;
     }
 
     // ================

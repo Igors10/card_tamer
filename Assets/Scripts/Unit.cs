@@ -24,6 +24,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] GameObject shieldVFX;
     public TextMeshProUGUI skillText;
     public GameObject skillTextObj;
+    public AutoFade unitPresenter;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
@@ -268,6 +269,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         // disabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = false;
+
+        // enabling presenter
+        unitPresenter.gameObject.SetActive(true);
 
         // setting starting anim variables
         // position variables
