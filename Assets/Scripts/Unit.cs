@@ -104,6 +104,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         }
         else powerUI.SetActive(false);
 
+        // COLOR
+        sprite.color = card.player.playerColor;
+
         // FADE
         unitUI.SetActive(!faded);
         Color spriteColor = (faded) ? new Color(sprite.color.r, sprite.color.g, sprite.color.b, fadedAlpha) : new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);

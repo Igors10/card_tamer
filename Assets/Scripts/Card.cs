@@ -106,6 +106,7 @@ public class Card : MonoBehaviour
 
         // SPRITE
         cardSprite.sprite = cardData.unitSprite;
+        cardSprite.color = player.playerColor;
 
         // BACKGROUND
         //cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);

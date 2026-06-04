@@ -1,20 +1,33 @@
 using FishNet.Demo.AdditiveScenes;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AIOpponent : MonoBehaviour
 {
+    [Header("refs")]
     Player playerObj;
     [SerializeField] AIConfigObj config;
     Coroutine currentAction;
     CardGenerator generator;
+
+    [Header("Bot identity")]
+    [SerializeField] List<OpponentIndentity> possibleIdentities = new List<OpponentIndentity>();
+    public OpponentIndentity chosenIdentity;
+    List<UnitPreset> basicUnitPresets = new List<UnitPreset>();
+    List<UnitPreset> specialUnitPresets = new List<UnitPreset>();
+
+
     void Awake()
     {
         // Checking if match is offline
         if (GameManager.instance.playerConfig.offlineMatch == false) Destroy(this);
         else playerObj = GetComponent<Player>();
+
+        InitAIOpponent();
     }
 
     private void Start()
@@ -22,19 +35,57 @@ public class AIOpponent : MonoBehaviour
         CreateAIStartingHand();
     }
 
+    /// <summary>
+    /// Selects one of premade identities with specific card theme for the match
+    /// </summary>
+    void InitAIOpponent()
+    {
+        if (GameData.randomOpponentIdentity == true || chosenIdentity == null) chosenIdentity = possibleIdentities[Random.Range(0, possibleIdentities.Count)];
+        playerObj.playerUI.playerName.text = chosenIdentity.opponentName + " (Bot)";
+    }
+
     void CreateAIStartingHand()
     {
-        List<CreatureObj> AIstartingHandCards = new List<CreatureObj>();
         generator = GameManager.instance.cardGenerator;
 
         for (int i = 0; i < GameManager.instance.startingCardAmount; i++)
         {
-            // choosing random card
-            CreatureObj newCardToAdd = (Random.value > 0.5f) ? generator.basicCardData : generator.PickRandomCard("basic");
-            AIstartingHandCards.Add(newCardToAdd);
+            AddBasic();
         }
+    }
 
-        GameManager.instance.cardGenerator.CreateStartingHand(AIstartingHandCards, playerObj);
+    public void AddBasic()
+    {
+        // refills the list if its empty
+        if (basicUnitPresets.Count == 0) basicUnitPresets = chosenIdentity.basicUnits;
+
+        // choosing random ability
+        AbilityObj newAbility = (Random.value > 0.5f) ? generator.PickRandomAbility("default") : generator.PickRandomAbility("basic");
+        // choosing random unit preset
+        UnitPreset newUnitPreset = basicUnitPresets[Random.Range(0, basicUnitPresets.Count)];
+        basicUnitPresets.Remove(newUnitPreset);
+
+        // constructing cardData
+        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility);
+        // Adding card to the player
+        generator.CreateCard(newCreatureObj, playerObj);
+    }
+
+    public void AddSpecial()
+    {
+        // refills the list if its empty
+        if (specialUnitPresets.Count == 0) specialUnitPresets = chosenIdentity.specialUnits;
+
+        // choosing random ability
+        AbilityObj newAbility = generator.PickRandomAbility("special");
+        // choosing random unit preset
+        UnitPreset newUnitPreset = specialUnitPresets[Random.Range(0, specialUnitPresets.Count)];
+        specialUnitPresets.Remove(newUnitPreset);
+
+        // constructing cardData
+        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility);
+        // Adding card to the player
+        generator.CreateCard(newCreatureObj, playerObj);
     }
 
     public void AIStartTurn()
@@ -117,12 +168,12 @@ public class AIOpponent : MonoBehaviour
             }
             else if (CountSpecialCards() < playerObj.maxStars && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
-                generator.CreateCard(generator.PickRandomCard("special"), playerObj);
+                AddSpecial();
                 playerObj.shopStars -= shop.drawSpecialPrice;
             }
             else if (playerObj.shopStars >= shop.drawCardPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
-                generator.CreateCard(generator.PickRandomCard("basic"), playerObj);
+                AddBasic();
                 playerObj.shopStars -= shop.drawCardPrice;
             }
             else nothingToBuy = true;

@@ -15,6 +15,7 @@ public class PlayerUI : MonoBehaviour
     [Header("refs")]
     public List<SpriteRenderer> stunnedPlaceholders;
     public GameObject UIobj;
+    public TextMeshProUGUI playerName;
 
     [Header("HP")]
     public GameObject healthbar;

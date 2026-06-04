@@ -3502,6 +3502,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6773031840635954642, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
   m_PrefabInstance: {fileID: 259275793114704191}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &485405392 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5117308535725399448, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+  m_PrefabInstance: {fileID: 259275793114704191}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &510724988
 GameObject:
   m_ObjectHideFlags: 0
@@ -7967,8 +7978,8 @@ MonoBehaviour:
   canvasBG: {fileID: 1628558858}
   canvasImage: {fileID: 1336369966}
   textureSize: 256
-  smallBrushSize: 2
-  normalBrushSize: 4
+  smallBrushSize: 1
+  normalBrushSize: 2
   bigBrushSize: 7
   brushColor: {r: 0, g: 0, b: 0, a: 1}
   drawingTexture: {fileID: 0}
@@ -8664,6 +8675,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4312236905799503499, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
   m_PrefabInstance: {fileID: 1758015966}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1531550034 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5117308535725399448, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
+  m_PrefabInstance: {fileID: 1758015966}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1001 &1541516076
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8696,6 +8718,10 @@ PrefabInstance:
       propertyPath: starsText
       value: 
       objectReference: {fileID: 264118174}
+    - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: playerName
+      value: 
+      objectReference: {fileID: 1531550034}
     - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: healthbarFill
       value: 
@@ -8854,6 +8880,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIOpponent
   config: {fileID: 11400000, guid: 50164c7aa9a65054f8d3a84dfa775606, type: 2}
+  possibleIdentities:
+  - {fileID: 11400000, guid: b9ddd5ef177891747863c482c48420ce, type: 2}
+  chosenIdentity: {fileID: 11400000, guid: b9ddd5ef177891747863c482c48420ce, type: 2}
 --- !u!114 &1541516081 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
@@ -13661,6 +13690,10 @@ PrefabInstance:
       propertyPath: starsText
       value: 
       objectReference: {fileID: 1915433421}
+    - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: playerName
+      value: 
+      objectReference: {fileID: 485405392}
     - target: {fileID: 4287692715053019839, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: healthbarFill
       value: 
