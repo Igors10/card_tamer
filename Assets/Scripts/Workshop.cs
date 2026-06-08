@@ -112,6 +112,7 @@ public class Workshop : MonoBehaviour
         GameManager.instance.readyButton.gameObject.SetActive(false);
 
         // enabling card choice buttons
+        cardCreationUI.SetActive(true);
         EnableAbilityOptions(true);
 
         
@@ -203,7 +204,14 @@ public class Workshop : MonoBehaviour
         }
 
         // creating the card and giving it to player
-        CreatureObj newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility);
+        CreatureObj newCardData = newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility);
+        // if the canvas is empty applying a random unit sprite and name instead
+        if (drawingCanvas.IsCanvasEmpty())
+        {
+            UnitPreset randomUnitPreset = GameManager.instance.cardDatabase.GetRandomBasicPreset();
+            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility);
+        }
+
         generator.CreateCard(newCardData, GameManager.instance.player);
 
         // Present new card to player

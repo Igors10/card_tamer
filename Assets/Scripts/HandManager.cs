@@ -31,6 +31,7 @@ public class HandManager : MonoBehaviour
     /// </summary>
     public void AddCardToHand(Card card, Player player)
     {
+        if (player.cardsOnField.Contains(card)) player.cardsOnField.Remove(card);
         player.cardsInHand.Add(card);
         UpdateHandVisuals(player);
     }

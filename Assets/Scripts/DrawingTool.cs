@@ -59,6 +59,24 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
         }
     }
 
+    public bool IsCanvasEmpty()
+    {
+        // 1. Grab all the pixels from the texture at once
+        Color[] pixels = drawingTexture.GetPixels();
+
+        // 2. Loop through every single pixel
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            // 3. If even ONE pixel is NOT our transparent background color...
+            if (pixels[i] != Color.clear)
+            {
+                return false; // The canvas has been drawn on! It is NOT empty.
+            }
+        }
+
+        // 4. If the loop finishes, it means every single pixel was Color.clear
+        return true; // The canvas IS empty!
+    }
     public void OnDrag(PointerEventData eventData)
     {
         if (!isDrawing) return;

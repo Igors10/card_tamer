@@ -12,14 +12,16 @@ public class BattleManager : MonoBehaviour
     [SerializeField] PowerCounter playerPowerUI;
     [SerializeField] PowerCounter opponentPowerUI;
     public GameObject damageObj;
+    [SerializeField] DeathAnim death;
 
     [Header("prefabs")]
     public GameObject dmgParticlePrefab;
     
     [Header("round end")]
-    [SerializeField] TextMeshProUGUI roundEndsMessage;
-    [SerializeField] float stunnedOffsetY;
-    [SerializeField] float stunnedOffsetX;
+    [SerializeField] GameObject knockedUnitsMessege;
+    [SerializeField] float deathThinkingTime;
+    [SerializeField] float deathChoosingTime;
+    [SerializeField] float afterDeathTime;
 
     [HideInInspector] public int currentLine;
 
@@ -167,7 +169,7 @@ public class BattleManager : MonoBehaviour
         yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(centerCameraPosition, 0.6f));
 
         // Message that round ends
-        roundEndsMessage.gameObject.SetActive(true);
+        knockedUnitsMessege.SetActive(true);
 
         // DISCARDING STUNNED UNITS
         // ========================
@@ -176,14 +178,16 @@ public class BattleManager : MonoBehaviour
         List<Unit> playerStunnedUnits = GameManager.instance.fieldManager.GetStunnedUnits(GameManager.instance.player);
         List<Unit> opponentStunnedUnits = GameManager.instance.fieldManager.GetStunnedUnits(GameManager.instance.opponent);
 
-        //ShowStunnedUnits(playerStunnedUnits);
-        //ShowStunnedUnits(opponentStunnedUnits);
+        // Enalbing death 
+        death.gameObject.SetActive(true);
+        yield return new WaitForSeconds(deathThinkingTime);
 
         yield return StartCoroutine(StunnedUnitsDiscard(playerStunnedUnits));
         yield return StartCoroutine(StunnedUnitsDiscard(opponentStunnedUnits));
 
-        yield return new WaitForSeconds(5f);
-        roundEndsMessage.gameObject.SetActive(false);
+        yield return new WaitForSeconds(afterDeathTime);
+        knockedUnitsMessege.SetActive(false);
+        death.gameObject.SetActive(false);
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;
@@ -212,23 +216,10 @@ public class BattleManager : MonoBehaviour
             idsChosen.Add(randomUnitID);
 
             units[randomUnitID].card.DestroyCard();
-            yield return new WaitForSeconds(1.5f);
-        }
-    }
 
-    void ShowStunnedUnits(List<Unit> units)
-    {
-        Player player = units[0].card.player;
-
-        for (int i = 0; i < units.Count; i++)
-        {
-            float unitY = roundEndsMessage.transform.localPosition.y + stunnedOffsetY;
-            float unitX = stunnedOffsetX * (i - (units.Count - 1) / 2f);
-            Vector2 unitPos = new Vector2(unitX, unitY);
-
-            player.playerUI.stunnedPlaceholders[i].gameObject.SetActive(true);
-            player.playerUI.stunnedPlaceholders[i].transform.localPosition = unitPos;
-            player.playerUI.stunnedPlaceholders[i].sprite = units[i].card.cardData.unitSprite;
+            // making death point finger at the unit 
+            StartCoroutine(death.PointAnim(deathChoosingTime / 2));
+            yield return new WaitForSeconds(deathChoosingTime);
         }
     }
 }

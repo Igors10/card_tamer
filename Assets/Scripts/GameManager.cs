@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
     public Animations animations;
     public ShopManager shopManager;
     public Viewpoint mainCamera;
+    public CardDatabase cardDatabase;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -118,6 +119,9 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(player.playerUI.ShowTokens(false));
                 StartCoroutine(opponent.playerUI.ShowTokens(false));
 
+                // playing placing soundtrack
+                AudioManager.instance.PlaySoundtrack("AltMainTrack");
+
                 managerUI.EnableWorkshop(false);
 
                 // starting new round
@@ -147,11 +151,18 @@ public class GameManager : MonoBehaviour
             case GameState.BATTLING:
                 managerUI.EnableUI(true);
                 battleManager.ResetBattleVals();
+
+                // playing workshop soundtrack
+                AudioManager.instance.PlaySoundtrack("BattleTrack");
+
                 break;
 
             case GameState.BUYING:
                 // Ending round
                 RoundEnd();
+
+                // playing workshop soundtrack
+                AudioManager.instance.PlaySoundtrack("WorkshopTrack");
 
                 // Enabling hand UI
                 gameStateUI[0].SetActive(true);

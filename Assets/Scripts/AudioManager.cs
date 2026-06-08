@@ -56,6 +56,7 @@ public class AudioManager : MonoBehaviour
         if (soundtrack == null) Debug.Log("Sound Not Found");
         else
         {
+            musicSource.Stop();
             musicSource.PlayOneShot(soundtrack);
         }
     }

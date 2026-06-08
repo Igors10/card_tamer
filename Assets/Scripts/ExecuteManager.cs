@@ -96,6 +96,9 @@ public class ExecuteManager : MonoBehaviour
         {
             GameManager.instance.mainCamera.ZoomIn(card.unit.gameObject, zoomIntensity, zoomTime);
             yield return new WaitForSeconds(zoomTime);
+
+            // enabling presenter
+            card.unit.unitPresenter.gameObject.SetActive(true);
         }
         
         // Playing unit animation

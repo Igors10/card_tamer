@@ -15,7 +15,6 @@ public class AIOpponent : MonoBehaviour
     CardGenerator generator;
 
     [Header("Bot identity")]
-    [SerializeField] List<OpponentIndentity> possibleIdentities = new List<OpponentIndentity>();
     public OpponentIndentity chosenIdentity;
     List<UnitPreset> basicUnitPresets = new List<UnitPreset>();
     List<UnitPreset> specialUnitPresets = new List<UnitPreset>();
@@ -40,7 +39,7 @@ public class AIOpponent : MonoBehaviour
     /// </summary>
     void InitAIOpponent()
     {
-        if (GameData.randomOpponentIdentity == true || chosenIdentity == null) chosenIdentity = possibleIdentities[Random.Range(0, possibleIdentities.Count)];
+        if (GameData.randomOpponentIdentity == true || chosenIdentity == null) chosenIdentity = GameManager.instance.cardDatabase.GetRandomCardSet();
         playerObj.playerUI.playerName.text = chosenIdentity.opponentName + " (Bot)";
     }
 
@@ -57,8 +56,8 @@ public class AIOpponent : MonoBehaviour
     public void AddBasic()
     {
         // refills the list if its empty
-        if (basicUnitPresets.Count == 0) basicUnitPresets = chosenIdentity.basicUnits;
-
+        if (basicUnitPresets == null || basicUnitPresets.Count == 0) basicUnitPresets = new List<UnitPreset>(chosenIdentity.basicUnits);
+   
         // choosing random ability
         AbilityObj newAbility = (Random.value > 0.5f) ? generator.PickRandomAbility("default") : generator.PickRandomAbility("basic");
         // choosing random unit preset
@@ -74,7 +73,7 @@ public class AIOpponent : MonoBehaviour
     public void AddSpecial()
     {
         // refills the list if its empty
-        if (specialUnitPresets.Count == 0) specialUnitPresets = chosenIdentity.specialUnits;
+        if (specialUnitPresets.Count == 0 || specialUnitPresets == null) specialUnitPresets = new List<UnitPreset>(chosenIdentity.specialUnits);
 
         // choosing random ability
         AbilityObj newAbility = generator.PickRandomAbility("special");

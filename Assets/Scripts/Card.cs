@@ -127,7 +127,7 @@ public class Card : MonoBehaviour
 
         // removing the unit
         DeathParticle newParticle = Instantiate(deathParticle, unit.transform.position, unit.transform.rotation).GetComponent<DeathParticle>();
-        newParticle.Init(unit.sprite.sprite, player);
+        newParticle.Init(unit.sprite.sprite, unit.sprite.rectTransform, player);
         unit.RemoveFromBoard();
 
         // reporting to player a unit died

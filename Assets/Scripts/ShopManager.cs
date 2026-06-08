@@ -15,6 +15,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI[] prices;
     [SerializeField] TextMeshProUGUI nextStarAmountText;
     [SerializeField] Player player;
+    [SerializeField] Workshop workshop;
 
     [Header("prices")]
     public int drawCardPrice;
@@ -128,11 +129,7 @@ public class ShopManager : MonoBehaviour
     void DrawCard(Player playerToGetCard)
     {
         GameManager.instance.managerUI.workshop.DrawCardOptions();
-        /*
-        // Generating the card (temporary just random card)
-        CardGenerator generator = GameManager.instance.cardGenerator;
-        generator.CreateCard(generator.PickRandomCard("basic"), playerToGetCard);
-        */
+        
         // Paying
         int cardPrice = Convert.ToInt32(prices[1].text);
         Pay(playerToGetCard, cardPrice);
@@ -141,11 +138,7 @@ public class ShopManager : MonoBehaviour
     void DrawSpecial(Player playerToGetSpecial)
     {
         GameManager.instance.managerUI.workshop.DrawCardOptions(true);
-        /*
-        // Generating Special (temporary just random card)
-        CardGenerator generator = GameManager.instance.cardGenerator;
-        generator.CreateCard(generator.PickRandomCard("special"), playerToGetSpecial);
-        */
+       
         // Paying 
         int specialPrice = Convert.ToInt32(prices[2].text);
         Pay(playerToGetSpecial, specialPrice);

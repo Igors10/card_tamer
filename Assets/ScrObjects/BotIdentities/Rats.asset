@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08712177f7b01874595d3f1fcee924ba, type: 3}
+  m_Name: Rats
+  m_EditorClassIdentifier: Assembly-CSharp::OpponentIndentity
+  opponentName: Rats
+  basicUnits:
+  - {fileID: 11400000, guid: 2dfa436c3a44a7c47b54e4ded1ba773d, type: 2}
+  - {fileID: 11400000, guid: 3f1f9489ec012d0448de2365f607ac24, type: 2}
+  - {fileID: 11400000, guid: 11ab6cf476999464d9c2f8726449b2f1, type: 2}
+  - {fileID: 11400000, guid: 38de82cf1a0badc43ba77bca6fd45bc3, type: 2}
+  - {fileID: 11400000, guid: 4d17603bc51b7244aad0f4efd6e88343, type: 2}
+  - {fileID: 11400000, guid: 41f4cc2ddb6d7754a9bef28104e841ac, type: 2}
+  - {fileID: 11400000, guid: b1d8b9c73a1deb54485f45eae9a27571, type: 2}
+  - {fileID: 11400000, guid: 73f617576b824a44087b4366223c735f, type: 2}
+  - {fileID: 11400000, guid: a55ca9cf76a732a4aab5d79d39db5fd6, type: 2}
+  - {fileID: 11400000, guid: eef58a735048493448581403e699227b, type: 2}
+  - {fileID: 11400000, guid: 402b77dbf3435244e9f85692481d4d69, type: 2}
+  - {fileID: 11400000, guid: 65ab051af39a51f46a530accf8287d1a, type: 2}
+  specialUnits:
+  - {fileID: 11400000, guid: a7a05516ce7b17342b05cd4dbd36a361, type: 2}
+  - {fileID: 11400000, guid: 1af558e1e6105734bb7651dec3027741, type: 2}
+  - {fileID: 11400000, guid: b2fcb31a7891504418bb57fcae0f6ca3, type: 2}
