@@ -36,28 +36,21 @@ public class DeathParticle : MonoBehaviour
 
     void MatchSize(RectTransform imageRect)
     {
-        // 1. Get the pixel dimensions of the UI Image
-        Vector2 imageSizeInPixels = imageRect.rect.size;
+        Vector2 imageWorldSize = new Vector2(
+             imageRect.rect.width * imageRect.lossyScale.x,
+             imageRect.rect.height * imageRect.lossyScale.y
+         );
 
-        // 2. Get the Pixels Per Unit (PPU) of the sprite being used
-        float spritePPU = unitShadow.sprite.pixelsPerUnit;
+        // 2. Get the natural world size of the Sprite right now (before scaling)
+        // Sprite size in units = texture pixels / PPU
+        Vector2 spriteNaturalSize = unitShadow.sprite.rect.size / unitShadow.sprite.pixelsPerUnit;
 
-        // 3. Calculate the required world scale
-        // Formula: Target Pixel Size / Sprite PPU
+        // 3. Calculate the exact scale needed to match the Image
         Vector3 newScale = new Vector3(
-            imageSizeInPixels.x / spritePPU,
-            imageSizeInPixels.y / spritePPU,
+            imageWorldSize.x / spriteNaturalSize.x,
+            imageWorldSize.y / spriteNaturalSize.y,
             1f
         );
-
-        // 4. Handle UI Canvas scaling if necessary
-        // If your Canvas is set to "Scale With Screen Size", we must account for its local scale.
-        Canvas canvas = imageRect.GetComponentInParent<Canvas>();
-        if (canvas != null)
-        {
-            newScale.x *= canvas.transform.localScale.x;
-            newScale.y *= canvas.transform.localScale.y;
-        }
 
         // 5. Apply the scale to the SpriteRenderer's transform
         unitShadow.transform.localScale = newScale;

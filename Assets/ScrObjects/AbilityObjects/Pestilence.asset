@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
   abilityDescription: When [6] is rolled- knocks out opposing enemy
+  isSpecial: 1
   effect: {fileID: 1280059371378691263, guid: 229140cd1e5394e44a80e6945a8d7765, type: 3}

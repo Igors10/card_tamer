@@ -113,7 +113,7 @@ public class Player : MonoBehaviour
         endStateReady = false;
 
         // returning all cards back to hand
-        if (GameManager.instance.currentState == GameState.BATTLING) GameManager.instance.handManager.ReturnCardsToHand(this);
+        //if (GameManager.instance.currentState == GameState.BATTLING) GameManager.instance.handManager.ReturnCardsToHand(this);
     }
 
     public void TakeDamage(int damageAmount)
@@ -135,8 +135,10 @@ public class Player : MonoBehaviour
     }
 
     // Refreshes the battlefield on players side
-    public void EndRoundReset()
+    public void EndRound()
     {
+        GameManager.instance.handManager.ReturnCardsToHand(this);
+
         foreach (Field field in fields)
         {
             field.FieldEndRound();

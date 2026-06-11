@@ -163,12 +163,16 @@ public class BattleManager : MonoBehaviour
         // resetting battle visuals
         ResetLineVals();
 
+        // stop here if one of the players has lost
+        if (GameManager.instance.gameOver) yield break;
+
         // Putting the camera where it was before battling phase
         Vector3 stateCameraPosition = GameManager.instance.GetState().cameraPosition;
         Vector3 centerCameraPosition = new Vector3(0, Camera.main.transform.position.y, Camera.main.transform.position.z);
         yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(centerCameraPosition, 0.6f));
 
-        // Message that round ends
+        // Message that units are knocked out
+        GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false); // removing it so that the message about doodle collector could be seen
         knockedUnitsMessege.SetActive(true);
 
         // DISCARDING STUNNED UNITS
@@ -188,6 +192,15 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(afterDeathTime);
         knockedUnitsMessege.SetActive(false);
         death.gameObject.SetActive(false);
+
+        // ROUND ENDS
+        GameManager.instance.managerUI.StateChangeMessage("Round" + GameManager.instance.roundNr + " ends");
+
+        // pause while "round ends" text is on the screen
+        while (GameManager.instance.managerUI.stateTransitionObj.activeSelf)
+        {
+            yield return null;
+        }
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;

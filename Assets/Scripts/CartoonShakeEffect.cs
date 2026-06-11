@@ -23,7 +23,7 @@ public class CartoonShakeEffect : MonoBehaviour
         // determine first rotation randomly
         bool doodleRotateLeft = Random.Range(0, 2) == 0;
 
-        float t = 0;
+        float t = Random.Range(0f, idleRotateInterval);
 
         while (true)
         {

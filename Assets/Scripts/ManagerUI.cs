@@ -1,20 +1,24 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using System.Collections;
+using System.Collections.Generic;
+using NUnit.Framework;
 
 public class ManagerUI : MonoBehaviour
 {
     [Header("refs")]
     [SerializeField] GameObject gameplayUI;
-    [SerializeField] TextMeshProUGUI hintMessage;
-    [SerializeField] TextMeshProUGUI turnHint;
+    public TextMeshProUGUI hintMessage;
+    public TextMeshProUGUI turnHint;
     [SerializeField] Color yourTurnColor;
     [SerializeField] Color oppTurnColor;
     [SerializeField] GameObject turnMessageObj;
     [SerializeField] TextMeshProUGUI turnMessage;
     [SerializeField] GameObject workshopObj;
     public Workshop workshop;
+    [SerializeField] TextMeshProUGUI stateTransitionText;
+    public GameObject stateTransitionObj;
+    [SerializeField] Image[] gameOverDoodles;
 
     [Header("card preview")]
     [SerializeField] Card previewCard;
@@ -50,6 +54,11 @@ public class ManagerUI : MonoBehaviour
         if (cardTopY - 50f > Screen.height) previewCard.transform.position -= cardPreviewOffset * 2f;
     }
 
+    public void StateChangeMessage(string messageText)
+    {
+        stateTransitionObj.SetActive(true);
+        stateTransitionText.text = messageText;
+    }
 
     /// <summary>
     /// Enabling or disabling all in-game interaction UI
@@ -90,34 +99,19 @@ public class ManagerUI : MonoBehaviour
 
     public void GameOverScreen(Player lostPlayer)
     {
+        Player winner = (lostPlayer == GameManager.instance.player) ? GameManager.instance.opponent : GameManager.instance.player;
+
+        // creating game over text
         gameOverScreen.SetActive(true);
-        gameOverText.text = (lostPlayer == GameManager.instance.player) ? lostText : wonText;
+        gameOverText.text = winner.playerName + " won!";
+        gameOverText.color = winner.playerColor;
 
-        StartCoroutine(GameOverFadeIn());
-    }
-
-    IEnumerator GameOverFadeIn()
-    {
-        float t = 0;
-
-        // background color
-        Color startingBGColor = new Color(gameOverBG.color.r, gameOverBG.color.g, gameOverBG.color.b, 0f);
-        Color targetBGColor = new Color(gameOverBG.color.r, gameOverBG.color.g, gameOverBG.color.b, bgAlpha);
-
-        // text color
-        Color startingTextColor = new Color(gameOverText.color.r, gameOverText.color.g, gameOverText.color.b, 0f);
-        Color targetTextColor = gameOverText.color;
-
-        while (t < fadeInTime)
+        for (int i = 0; i < gameOverDoodles.Length && i < winner.cardsOnField.Count; i++)
         {
-            t += Time.deltaTime;
-            float actualT = t / fadeInTime;
-            float coolT = actualT * actualT;
-
-            gameOverBG.color = Color.Lerp(startingBGColor, targetBGColor, coolT);
-            gameOverText.color = Color.Lerp(startingTextColor, targetTextColor, coolT);
-
-            yield return null;
+            // copying sprites of units to doodles
+            gameOverDoodles[i].gameObject.SetActive(true);
+            gameOverDoodles[i].sprite = winner.cardsOnField[i].cardData.unitSprite;
+            gameOverDoodles[i].color = winner.playerColor;
         }
     }
 

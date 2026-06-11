@@ -128,7 +128,7 @@ public class ShopManager : MonoBehaviour
 
     void DrawCard(Player playerToGetCard)
     {
-        GameManager.instance.managerUI.workshop.DrawCardOptions();
+        GameManager.instance.managerUI.workshop.AbilityOptions();
         
         // Paying
         int cardPrice = Convert.ToInt32(prices[1].text);
@@ -137,7 +137,7 @@ public class ShopManager : MonoBehaviour
 
     void DrawSpecial(Player playerToGetSpecial)
     {
-        GameManager.instance.managerUI.workshop.DrawCardOptions(true);
+        GameManager.instance.managerUI.workshop.AbilityOptions(true);
        
         // Paying 
         int specialPrice = Convert.ToInt32(prices[2].text);
@@ -164,7 +164,7 @@ public class ShopManager : MonoBehaviour
         }
 
         // pause while intro text is on the screen
-        while (GameManager.instance.mainCamera.stateTransitionObj.activeSelf)
+        while (GameManager.instance.managerUI.stateTransitionObj.activeSelf)
         {
             yield return null;
         }
@@ -185,7 +185,7 @@ public class ShopManager : MonoBehaviour
         {
             Image newShopStar = Instantiate(shopStarPrefab, starsObj.transform.position, Quaternion.identity, starsObj.transform).GetComponent<Image>();
             shopStars.Add(newShopStar);
-            newShopStar.color = (i < shopStarsAfterBattle) ? starColor : deadUnitsStarColor;
+            newShopStar.color = starColor;
             Animations.instance.PopAnim(newShopStar.gameObject, 0.4f, 0.2f);
             Debug.Log("ShopManager: new shop star created");
 

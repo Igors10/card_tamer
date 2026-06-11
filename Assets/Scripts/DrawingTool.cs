@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
+public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
     [SerializeField] Image canvasBG;
     public RawImage canvasImage;
@@ -14,7 +14,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
     public Color brushColor = Color.black;
 
     private Vector2Int lastPixelPos;
-    private bool isDrawing = false;
+    [HideInInspector] public bool isDrawing = false;
 
     [HideInInspector] public Texture2D drawingTexture;
     private Stack<Color[]> undoStack = new Stack<Color[]>();
@@ -45,18 +45,9 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
 
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void OnPointerUp(PointerEventData eventData)
     {
-        // Save state for Undo
-        undoStack.Push(drawingTexture.GetPixels());
-
-        // Get the starting pixel and mark it as our last known position
-        if (TryGetPixelPosition(eventData, out Vector2Int currentPixel))
-        {
-            lastPixelPos = currentPixel;
-            PaintPixels(currentPixel.x, currentPixel.y);
-            isDrawing = true;
-        }
+        isDrawing = false;
     }
 
     public bool IsCanvasEmpty()
@@ -77,16 +68,36 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
         // 4. If the loop finishes, it means every single pixel was Color.clear
         return true; // The canvas IS empty!
     }
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        // Ignore middle clicks or any other weird buttons
+        if (eventData.button != PointerEventData.InputButton.Left && eventData.button != PointerEventData.InputButton.Right) return;
+
+        // Save state for Undo
+        undoStack.Push(drawingTexture.GetPixels());
+
+        // Determine what color to use based on the mouse button
+        Color activeColor = (eventData.button == PointerEventData.InputButton.Right) ? Color.clear : brushColor;
+        currentBrushSize = (eventData.button == PointerEventData.InputButton.Right) ? bigBrushSize : smallBrushSize;
+
+        if (TryGetPixelPosition(eventData, out Vector2Int currentPixel))
+        {
+            lastPixelPos = currentPixel;
+            PaintPixels(currentPixel.x, currentPixel.y, activeColor);
+            isDrawing = true;
+        }
+    }
+
     public void OnDrag(PointerEventData eventData)
     {
         if (!isDrawing) return;
 
+        // Determine what color to use based on the mouse button
+        Color activeColor = (eventData.button == PointerEventData.InputButton.Right) ? Color.clear : brushColor;
+
         if (TryGetPixelPosition(eventData, out Vector2Int currentPixel))
         {
-            // Draw a line connecting the previous frame's position to the current one
-            DrawLine(lastPixelPos, currentPixel);
-
-            // Update the last known position for the next frame
+            DrawLine(lastPixelPos, currentPixel, activeColor);
             lastPixelPos = currentPixel;
         }
     }
@@ -109,30 +120,6 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
         return false;
     }
 
-    // Fills in the gaps between the last mouse position and the current one
-    private void DrawLine(Vector2Int start, Vector2Int end)
-    {
-        float distance = Vector2Int.Distance(start, end);
-
-        if (distance == 0)
-        {
-            PaintPixels(start.x, start.y);
-            return;
-        }
-
-        // Interpolate along the line based on the distance
-        for (float i = 0; i <= distance; i++)
-        {
-            float t = i / distance;
-
-            // Lerp calculates the points in between the start and end
-            int x = Mathf.RoundToInt(Mathf.Lerp(start.x, end.x, t));
-            int y = Mathf.RoundToInt(Mathf.Lerp(start.y, end.y, t));
-
-            PaintPixels(x, y);
-        }
-    }
-
     public void UndoStroke()
     {
         if (undoStack.Count > 0)
@@ -153,31 +140,47 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IDragHandler
         drawingTexture.Apply();
     }
 
-    private void PaintPixels(int x, int y)
+    private void PaintPixels(int x, int y, Color colorToPaint)
     {
         int radiusSquared = currentBrushSize * currentBrushSize;
 
-        // Simple brush
         for (int i = -currentBrushSize; i <= currentBrushSize; i++)
         {
             for (int j = -currentBrushSize; j <= currentBrushSize; j++)
             {
-                // Check if the current pixel coordinate falls inside the circle
                 if ((i * i) + (j * j) <= radiusSquared)
                 {
                     int pX = x + i;
                     int pY = y + j;
 
-                    // Ensure we don't draw outside the texture bounds
                     if (pX >= 0 && pX < textureSize && pY >= 0 && pY < textureSize)
                     {
-                        drawingTexture.SetPixel(pX, pY, brushColor);
+                        drawingTexture.SetPixel(pX, pY, colorToPaint);
                     }
                 }
             }
         }
-        // Apply the pixel changes to the texture
         drawingTexture.Apply();
+    }
+
+    private void DrawLine(Vector2Int start, Vector2Int end, Color colorToPaint)
+    {
+        float distance = Vector2Int.Distance(start, end);
+
+        if (distance == 0)
+        {
+            PaintPixels(start.x, start.y, colorToPaint);
+            return;
+        }
+
+        for (float i = 0; i <= distance; i++)
+        {
+            float t = i / distance;
+            int x = Mathf.RoundToInt(Mathf.Lerp(start.x, end.x, t));
+            int y = Mathf.RoundToInt(Mathf.Lerp(start.y, end.y, t));
+
+            PaintPixels(x, y, colorToPaint);
+        }
     }
 
     public void DevelopersMode()

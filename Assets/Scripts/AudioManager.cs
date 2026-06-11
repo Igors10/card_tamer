@@ -57,7 +57,8 @@ public class AudioManager : MonoBehaviour
         else
         {
             musicSource.Stop();
-            musicSource.PlayOneShot(soundtrack);
+            musicSource.clip = soundtrack;
+            musicSource.Play();
         }
     }
 

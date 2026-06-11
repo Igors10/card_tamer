@@ -116,12 +116,12 @@ public class FieldManager : MonoBehaviour
             
             // player field color
             Color playerFieldColor = (playerField.GetFieldPower() != 0) ? Colors.instance.BlendColor(player.playerColor, 0.5f) : Color.white;
-            if (!playerWins && !lineTie) playerFieldColor = Colors.instance.BlendColor(player.playerColor, 0.3f);
+            if (!playerWins && !lineTie && playerField.GetFieldPower() != 0) playerFieldColor = Colors.instance.BlendColor(player.playerColor, 0.3f);
             playerField.defaultColor = playerFieldColor;
 
             // opponent field color
             Color opponentFieldColor = (opponentField.GetFieldPower() != 0) ? Colors.instance.BlendColor(opponent.playerColor, 0.5f) : Color.white;
-            if (playerWins && !lineTie) opponentFieldColor = Colors.instance.BlendColor(opponent.playerColor, 0.3f);
+            if (playerWins && !lineTie && opponentField.GetFieldPower() != 0) opponentFieldColor = Colors.instance.BlendColor(opponent.playerColor, 0.3f);
             opponentField.defaultColor = opponentFieldColor;
 
             // applying colors

@@ -6,7 +6,6 @@ public class CreatureObj : ScriptableObject
 {
     public string creatureName;
     public Sprite unitSprite;
-    public bool isSpecial;
     //public FoodType[] cost;
     public AbilityObj[] ability = new AbilityObj[1];
     

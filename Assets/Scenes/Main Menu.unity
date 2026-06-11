@@ -402,7 +402,7 @@ PrefabInstance:
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
-      objectReference: {fileID: 11400000, guid: bd957ca9279b6c044b2e8684667a06f6, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle
@@ -792,7 +792,7 @@ PrefabInstance:
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
-      objectReference: {fileID: 11400000, guid: 1e7f1b919283e9245a56cbfcd95aad0c, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle (1)
@@ -2912,7 +2912,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: audioClips.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: musicClips.Array.size
@@ -2931,9 +2931,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8300000, guid: a70a2ba457f3aac47b09c7b29fb8c7a0, type: 3}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[3]'
+      value: 
+      objectReference: {fileID: 8300000, guid: d671e26ef1dd7be4da7b537a94f029e1, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: 'musicClips.Array.data[0]'
       value: 
       objectReference: {fileID: 8300000, guid: cc8fd0346fd08446d9a0b5cde9e1d2a1, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'musicClips.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: a708f36c9daf9084ab90aa9a418ea797, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3030,7 +3038,7 @@ PrefabInstance:
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
-      objectReference: {fileID: 11400000, guid: 2178e2ce3c95a4640a68723240e3ead5, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle
@@ -3519,11 +3527,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 208707533881461998, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -343
+      value: -340
       objectReference: {fileID: 0}
     - target: {fileID: 208707533881461998, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 291
+      value: 317
       objectReference: {fileID: 0}
     - target: {fileID: 208707533881461998, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4179,6 +4187,7 @@ MonoBehaviour:
   startingCardChoice: {fileID: 4146348353068205542}
   startingSpecialChoice: {fileID: 575732156}
   playerConfigObj: {fileID: 11400000, guid: 4830222a87a796a489eb0184e93624f0, type: 2}
+  cardDatabase: {fileID: 11400000, guid: 0f23c4c6d31b9f4489d6137b0906e47d, type: 2}
   loadingFog: {fileID: 172761196}
 --- !u!4 &1253801476
 Transform:
@@ -4383,7 +4392,7 @@ MonoBehaviour:
   - {fileID: 646026944}
   - {fileID: 1261678070}
   - {fileID: 202374734}
-  selectMaterial: {fileID: 2100000, guid: ff32b4bb699f9f949aefca08366a2927, type: 2}
+  selectMaterial: {fileID: 2100000, guid: 724573b5fdbb1d644bcc9d737e998125, type: 2}
   colors:
   - {r: 0.19512273, g: 0.7660377, b: 0.24841012, a: 1}
   - {r: 0.24792443, g: 0.51478595, b: 0.82641506, a: 1}
@@ -4637,7 +4646,7 @@ PrefabInstance:
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
-      objectReference: {fileID: 11400000, guid: 4b5818845656d0146a6e4397b4f61b9d, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle (1)
@@ -5547,7 +5556,7 @@ PrefabInstance:
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
-      objectReference: {fileID: 11400000, guid: cf6467b59938c77408c9e64a4fd63ab2, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle (2)

@@ -80,11 +80,11 @@ public class GameManager : MonoBehaviour
         loadingFog.gameObject.SetActive(true);
         yield return StartCoroutine(loadingFog.LoadingAnimation(loadingTime));
 
-        // "Draw your minions text"
-        mainCamera.stateTransitionObj.SetActive(true);
+        // "Draw your minions" text
+        managerUI.StateChangeMessage("Workshop");       
 
         // pause while intro text is on the screen
-        while (mainCamera.stateTransitionObj.activeSelf)
+        while (managerUI.stateTransitionObj.activeSelf)
         {
             yield return null;
         }
@@ -128,28 +128,9 @@ public class GameManager : MonoBehaviour
                 RoundStart();
                 break;
 
-                /*
-            case GameState.PLANNING:
-                // Making field cards appear correctly
-                planningManager.InitPlanCards(player);
-                planningManager.UpdateFieldHandVisuals(player);
-
-                // Making AI shuffle the cards
-                if (playerConfig.offlineMatch) opponent.StartTurn();
-                break;
-
-            case GameState.EXECUTING:
-                // passing cards in the correct order to executing manager
-                executeManager.LoadCardStack(player.cardsOnField, player);
-                executeManager.LoadCardStack(opponent.cardsOnField, opponent);
-
-                // button is only available after choosing an ability
-                readyButton.gameObject.SetActive(false);
-                break;
-                */
-
             case GameState.BATTLING:
                 managerUI.EnableUI(true);
+                managerUI.turnHint.gameObject.SetActive(false);
                 battleManager.ResetBattleVals();
 
                 // playing workshop soundtrack
@@ -188,8 +169,8 @@ public class GameManager : MonoBehaviour
     void RoundEnd()
     {
         // Resets field state for next round
-        player.EndRoundReset();
-        opponent.EndRoundReset();
+        player.EndRound();
+        opponent.EndRound();
 
         OnRoundEnd?.Invoke();
     }

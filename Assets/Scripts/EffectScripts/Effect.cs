@@ -28,6 +28,9 @@ public class Effect : MonoBehaviour
         // play soundeffect
         AudioManager.instance.PlaySFX("EffectSFX");
 
+        // making the unit appear in front so that the effect is clearly visible
+        unit.AppearAbove(true);
+
         // showing text
         unit.skillTextObj.gameObject.SetActive(true);
         string textToDisplay = (abilityText.Count < 1) ? unit.card.abilities[0].abilityData.abilityDescription : abilityText[abilityTextNr];
@@ -46,5 +49,6 @@ public class Effect : MonoBehaviour
         yield return new WaitForSeconds(pauseAfterEffect);
         unit.cardEffectVFX.gameObject.SetActive(false);
         unit.skillTextObj.gameObject.SetActive(false);
+        unit.AppearAbove(false);
     }
 }

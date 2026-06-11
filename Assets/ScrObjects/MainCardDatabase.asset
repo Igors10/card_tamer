@@ -15,3 +15,4 @@ MonoBehaviour:
   cardSets:
   - {fileID: 11400000, guid: bcfa6b8de9f544d43a4d42cb57b575a5, type: 2}
   - {fileID: 11400000, guid: b9ddd5ef177891747863c482c48420ce, type: 2}
+  - {fileID: 11400000, guid: a7f2b6ef2c1c4c944a4b1263df649bee, type: 2}

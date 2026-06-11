@@ -1,10 +1,6 @@
-using FishNet.Demo.AdditiveScenes;
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class AIOpponent : MonoBehaviour
 {
@@ -191,7 +187,7 @@ public class AIOpponent : MonoBehaviour
         int specialCardAmount = 0;
         foreach (Card card in playerObj.cardsInHand)
         {
-            if (card.cardData.isSpecial) specialCardAmount++;
+            if (card.cardData.ability[0].isSpecial) specialCardAmount++;
         }
 
         return specialCardAmount;

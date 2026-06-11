@@ -17,8 +17,7 @@ public class Workshop : MonoBehaviour
     [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
     [SerializeField] TMP_InputField nameInput;
     [HideInInspector] public AbilityObj chosenAbility;
-    [SerializeField] DrawingTool drawingCanvas;
-    string placeholderName = "Bobby";
+    public DrawingTool drawingCanvas;
     [SerializeField] Sprite placeholderSprite;
 
     [Header("refs")]
@@ -28,6 +27,9 @@ public class Workshop : MonoBehaviour
     [SerializeField] GameObject createButton;
     [SerializeField] AutoFade createdCardPresenter;
     [SerializeField] Card cardPresenterPreviewCard;
+    [SerializeField] GameObject missingNameText;
+    [SerializeField] GameObject workshopHintObj;
+    [SerializeField] TextMeshProUGUI workshopHintText;
 
     [Header("workshop animation")]
     [SerializeField] GameObject background;
@@ -102,10 +104,10 @@ public class Workshop : MonoBehaviour
         GameManager.instance.managerUI.EnableWorkshop(true, false);
 
         startingSequence = true;
-        DrawCardOptions();
+        AbilityOptions();
     }
 
-    public void DrawCardOptions(bool drawSpecial = false)
+    public void AbilityOptions(bool drawSpecial = false)
     {
         // disabling shop UI
         GameManager.instance.gameStateUI[2].SetActive(false);
@@ -114,6 +116,9 @@ public class Workshop : MonoBehaviour
         // enabling card choice buttons
         cardCreationUI.SetActive(true);
         EnableAbilityOptions(true);
+
+        // writing the correct hint text
+        workshopHintText.text = "Choose an ability for a new card";
 
         
         if (drawSpecial) // options for special cards
@@ -145,6 +150,9 @@ public class Workshop : MonoBehaviour
     {
         // enalbing the drawing canvas gameObject
         canvasUI.SetActive(true);
+
+        // writing the correct hint text
+        workshopHintText.text = "Draw and name the card";
 
         // passing the ability
         abilityReminder.text = chosenAbility.abilityDescription;
@@ -202,14 +210,24 @@ public class Workshop : MonoBehaviour
 
             return;
         }
-
+        
         // creating the card and giving it to player
         CreatureObj newCardData = newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility);
+
         // if the canvas is empty applying a random unit sprite and name instead
         if (drawingCanvas.IsCanvasEmpty())
         {
             UnitPreset randomUnitPreset = GameManager.instance.cardDatabase.GetRandomBasicPreset();
             newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility);
+        }
+        // also checking if the minion is named
+        else if (nameInput.text == "")
+        {
+            // telling player to name the card
+            missingNameText.SetActive(true);
+            Animations.instance.ShakeAnim(nameInput.gameObject, 5f, 1f);
+
+            return;
         }
 
         generator.CreateCard(newCardData, GameManager.instance.player);
@@ -227,7 +245,7 @@ public class Workshop : MonoBehaviour
             if (player.cardsInHand.Count == GameManager.instance.startingCardAmount) { StopStartingSequence(); return; }
 
             // otherwise continue choosing (drawing) cards
-            DrawCardOptions();
+            AbilityOptions();
         }
         else
         {

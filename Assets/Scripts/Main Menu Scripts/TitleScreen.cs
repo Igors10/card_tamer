@@ -13,6 +13,7 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] MenuChoice startingCardChoice;
     [SerializeField] MenuChoice startingSpecialChoice;
     public PlayerConfigObj playerConfigObj;
+    public CardDatabase cardDatabase;
 
     [Header("menu transition")]
     [SerializeField] LoadingFog loadingFog;
@@ -34,22 +35,6 @@ public class TitleScreen : MonoBehaviour
     }
    
     
-
-    /// <summary>
-    /// Plays a soundeffect from title screen's audioSource
-    /// </summary>
-    /// <param name="audio"></param>
-    /// <param name="volume"></param>
-    /// <param name="pitch"></param>
-    public void PlaySound(AudioClip audio, float volume = 1, float pitch = 1)
-    {
-        titleAudioSource.clip = audio;
-        titleAudioSource.volume = volume;
-        titleAudioSource.pitch = pitch;
-
-        titleAudioSource.Play();
-    }
-
     /// <summary>
     /// Opens chosen menu, closes previous one
     /// </summary>
@@ -106,17 +91,6 @@ public class TitleScreen : MonoBehaviour
 
         // resetting player card config
         playerConfigObj.ResetCardConfig();
-
-        // Saving chosen cards
-        for (int i = 0; i < 4; i++)
-        {
-            CreatureObj chosenCard = startingCardChoice.GetCurrentChoice().GetComponent<MenuDoodle>().doodleData;
-            playerConfigObj.startingCards.Add(chosenCard);
-        }
-
-        // Saving chosen special card
-        CreatureObj chosenSpecial = startingSpecialChoice.GetCurrentChoice().GetComponent<MenuDoodle>().doodleData;
-        playerConfigObj.startingCards.Add(chosenSpecial);
 
         // Flagging match as offline
         playerConfigObj.offlineMatch = true;

@@ -5,10 +5,6 @@ public class Viewpoint : MonoBehaviour
 {
     Camera cam;
 
-    [Header("State transition text")]
-    [SerializeField] TextMeshProUGUI stateTransitionText;
-    public GameObject stateTransitionObj;
-
     [Header("Viewpoint config")]
     // Viewpoints
     Vector3 prevPosition;
@@ -45,9 +41,9 @@ public class Viewpoint : MonoBehaviour
     {
         Debug.Log("Viewpoint: beginning viewpoint transition");
 
-        // enable the big text with next state name
-        stateTransitionObj.SetActive(true);
-        stateTransitionText.text = (GameManager.instance.currentState == GameState.PLACING) ? "Round " + GameManager.instance.roundNr : "Workshop";
+        // message about current state
+        string transitionMessage = (GameManager.instance.currentState == GameState.PLACING) ? "Round " + GameManager.instance.roundNr : "Workshop";
+        GameManager.instance.managerUI.StateChangeMessage(transitionMessage);
 
         float t = 0;
 

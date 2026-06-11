@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.UI.CanvasScaler;
 
 public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerClickHandler
 {   
@@ -39,8 +40,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] TextMeshProUGUI bonusPowerValue;
 
     [Header("state")]
-    [SerializeField] Color healthValueColor = new Color(0.86f, 0.63f, 0.83f, 1f);
     [HideInInspector] public bool stunned = false;
+    bool rollingPower = false;
     [SerializeField] GameObject stunIndicator;
     [SerializeField] GameObject healthBar;
 
@@ -57,6 +58,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] GameObject unitUI;
     [SerializeField] Material selectMaterial;
     Material defaultMaterial;
+    int hierarchyIndex = 0;
 
     [Header("idle animation")]
     [SerializeField] float shakeTime;
@@ -111,7 +113,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         unitUI.SetActive(!faded);
         Color spriteColor = (faded) ? new Color(sprite.color.r, sprite.color.g, sprite.color.b, fadedAlpha) : new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
         sprite.color = spriteColor;
-        stunIndicator.GetComponent<Image>().color = spriteColor;
+        stunIndicator.GetComponent<Image>().color = new Color(1f, 1f, 1f, spriteColor.a);
         // cancelling card preview if it was on right before fading
         if (faded) 
         {
@@ -130,7 +132,18 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// <param name="isHighlighted"></param>
     public void HighlightUnit(bool isHighlighted)
     {
-        sprite.material = (isHighlighted) ? selectMaterial : defaultMaterial;
+        //sprite.material = (isHighlighted) ? selectMaterial : defaultMaterial;
+    }
+
+    public void AppearAbove(bool isAppearingAbove)
+    {
+        if (isAppearingAbove)
+        {
+            // Rendering unit over other units 
+            hierarchyIndex = transform.GetSiblingIndex();
+            transform.SetAsLastSibling();
+        }
+        else transform.SetSiblingIndex(hierarchyIndex); // back to original rendering layer
     }
 
     /// <summary>
@@ -214,7 +227,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public IEnumerator RollPower()
     {
-        int numberOfDice = (card.cardData.isSpecial) ? 2 : 1;
+        int numberOfDice = (card.cardData.ability[0].isSpecial) ? 2 : 1;
+        rollingPower = true;
 
         powerUI.SetActive(true);
 
@@ -243,17 +257,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         // disable dice
         DisableRollingUI();
-        /*
-        // adding bonus power
-        if (card.abilities[0].abilityData.power != 0)
-        {
-            //bonusPowerObj.SetActive(true);
-            //bonusPowerValue.text = "+ " + card.abilities[0].abilityData.power;
 
-            yield return new WaitForSeconds(1f);
-            Animations.instance.PopAnim(card.abilities[0].powerIcon, 0.3f, 0.4f);
-            card.GainPower(card.abilities[0].abilityData.power);
-        }*/
+        //yield return new WaitForSeconds(0.1f);
+        rollingPower = false;
     }
 
     public void DisableRollingUI()
@@ -272,6 +278,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         // disabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = false;
+
+        // making unit appear before other units
+        AppearAbove(true);
 
         // setting starting anim variables
         // position variables
@@ -313,9 +322,13 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // snapping values to correct ones
         sprite.transform.localPosition = startingPosition;
 
-        yield return new WaitForSeconds(jumpTime * 4);
+        // pause
+        yield return new WaitForSeconds(1.8f);
+
         // deactivating ability text
         skillTextObj.SetActive(false);
+        // making unit appear in the original place
+        AppearAbove(false);
 
         // enabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = true;
@@ -329,7 +342,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         // nothing happens when unit is selected during execute state
         if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this
-            && GameManager.instance.executeManager.readyRevealCard == false || faded) return;
+            && GameManager.instance.executeManager.readyRevealCard == false || faded || rollingPower) return;
 
         // call for preview card
         ViewCard(mouseOver);

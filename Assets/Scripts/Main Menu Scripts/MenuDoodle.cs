@@ -16,7 +16,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
     RectTransform rect;
     Coroutine currentAnim;
 
-    public CreatureObj doodleData;
+    public UnitPreset doodleData;
 
 
     void Start()
@@ -29,19 +29,16 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
     void AssignDoodleData()
     {
         // Picking random doodle if not assigned
-        if (doodleData == null) doodleData = TitleScreen.instance.cardlist.cardList[Random.Range(0, TitleScreen.instance.cardlist.cardList.Count)];
+        if (doodleData == null) doodleData = TitleScreen.instance.cardDatabase.GetRandomBasicPreset();
 
         // Sprite
-        sprite.sprite = doodleData.doodleSprite;
+        sprite.sprite = doodleData.sprite;
     }
 
     void PlayDoodleSound()
     {
-        // picking random sound from creature's sounds
-        AudioClip clipToPlay = doodleData.DoodleSound();
-
         // plays the sound
-        TitleScreen.instance.PlaySound(clipToPlay);
+        AudioManager.instance.PlaySFX("DoodleSFX");
     }
 
     // =======================

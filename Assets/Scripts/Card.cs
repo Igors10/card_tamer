@@ -112,7 +112,7 @@ public class Card : MonoBehaviour
         //cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);
 
         // SPECIAL OR NOT
-        specialIcon.SetActive(cardData.isSpecial);
+        specialIcon.SetActive(cardData.ability[0].isSpecial);
     }
 
     /// <summary>
@@ -306,7 +306,7 @@ public class Card : MonoBehaviour
     public bool SpecialCost()
     {
         // checking if card requires a star to be played
-        if (cardData.isSpecial == false || specialCostPaid) return true;
+        if (cardData.ability[0].isSpecial == false || specialCostPaid) return true;
 
         // checking if player has a star
         if (player.currentStars < 1) return false;

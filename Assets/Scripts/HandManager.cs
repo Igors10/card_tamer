@@ -31,7 +31,6 @@ public class HandManager : MonoBehaviour
     /// </summary>
     public void AddCardToHand(Card card, Player player)
     {
-        if (player.cardsOnField.Contains(card)) player.cardsOnField.Remove(card);
         player.cardsInHand.Add(card);
         UpdateHandVisuals(player);
     }
@@ -61,6 +60,8 @@ public class HandManager : MonoBehaviour
             card.CardEndRound();
             AddCardToHand(card, player);
         }
+
+        player.cardsOnField.Clear();
     }
 
     /// <summary>
@@ -99,7 +100,7 @@ public class HandManager : MonoBehaviour
     void HandHidingCheck()
     {
         // Hide the hand if following
-        bool forceHide = (activeCard != null);
+        bool forceHide = (activeCard != null || GameManager.instance.managerUI.workshop.drawingCanvas.isDrawing);
         RectTransform handRT = hand.GetComponent<RectTransform>();
         float hideSpeed = 0;
 

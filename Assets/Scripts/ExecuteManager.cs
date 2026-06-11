@@ -9,7 +9,6 @@ public class ExecuteManager : MonoBehaviour
     [SerializeField] NextCardButton nextCardButton;
     [SerializeField] Transform nextCardPos;
     [SerializeField] Transform revealedCardPos;
-    public GameObject cardStackObj;
 
     // cards
     [HideInInspector] public List<string> playedCardNames = new List<string>();
