@@ -38,7 +38,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
     void PlayDoodleSound()
     {
         // plays the sound
-        AudioManager.instance.PlaySFX("DoodleSFX");
+        //AudioManager.instance.PlaySFX("DoodleSFX");
     }
 
     // =======================

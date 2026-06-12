@@ -53,12 +53,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PowerCounter
   player: {fileID: 0}
   powerText: {fileID: 7459011284972097556}
-  powerIcon: {fileID: 3405830062024774628}
+  counterBG: {fileID: 2181701918508065300}
   currentPower: 0
   dice: {fileID: 4469668243677781190}
   playerCounterVisuals: {fileID: 8539483085803953277}
   unitScaleMod: 1.2
   textScaleMod: 1.5
+  counterScaleMod: 0.05
   timePerUnit: 0.3
   diceRolled: 0
   resolveSizeMod: 1.35
@@ -87,7 +88,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4440716507066305394
 RectTransform:
   m_ObjectHideFlags: 0
@@ -179,7 +180,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -55, y: 8}
+  m_AnchoredPosition: {x: -6, y: 22}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4590560383036373789
@@ -316,7 +317,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 340, y: 200}
+  m_SizeDelta: {x: 350, y: 36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4262589483734368208
 CanvasRenderer:
@@ -339,14 +340,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.6039216}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -4059032346458897999, guid: 250f5e8cb7ce4c044a15aed540651a3d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

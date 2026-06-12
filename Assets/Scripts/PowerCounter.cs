@@ -8,7 +8,7 @@ public class PowerCounter : MonoBehaviour
     [Header("refs")]
     public Player player;
     [SerializeField] TextMeshProUGUI powerText;
-    [SerializeField] Image powerIcon;
+    [SerializeField] Image counterBG;
     [HideInInspector] public float currentPower;
     [SerializeField] D6 dice;
     public GameObject playerCounterVisuals;
@@ -16,10 +16,12 @@ public class PowerCounter : MonoBehaviour
     [Header("default vals")]
     Vector3 defaultIconScale;
     float defaultFontSize;
+    Color powerTextColor = Color.white;
 
     [Header("Adding power")]
     [SerializeField] float unitScaleMod = 1.2f;
     [SerializeField] float textScaleMod = 1.5f;
+    [SerializeField] float counterScaleMod = 0.1f;
     [SerializeField] float timePerUnit = 0.5f;
     [HideInInspector] public bool diceRolled;
 
@@ -44,7 +46,8 @@ public class PowerCounter : MonoBehaviour
     {
         // saving default values
         defaultFontSize = powerText.fontSize;
-        defaultIconScale = powerIcon.transform.localScale;
+        defaultIconScale = counterBG.transform.localScale;
+        powerTextColor = Colors.instance.BlendColor(player.playerColor, 0.25f);
     }
 
     /// <summary>
@@ -53,41 +56,30 @@ public class PowerCounter : MonoBehaviour
     public void ResetCounter()
     {
         if (defaultFontSize != 0) powerText.fontSize = defaultFontSize;
-        powerText.color = player.playerColor;
-        powerIcon.color = player.playerColor;
-        if (defaultIconScale != Vector3.zero) powerIcon.transform.localScale = defaultIconScale;
+        powerText.color = powerTextColor;
+        counterBG.color = player.playerColor;
+        if (defaultIconScale != Vector3.zero) counterBG.transform.localScale = defaultIconScale;
         powerText.text = "0";
         currentPower= 0;
+        transform.localScale = new Vector3(1, 1, 1);
         diceRolled = false;
         resolved = false;
-        EnableDice(false);
     }
 
-    /// <summary>
-    /// Enables dice to be clicked on
-    /// </summary>
-    public void EnableDice(bool enable)
+    public void RefreshCounterScale()
     {
-        dice.gameObject.SetActive(enable);
-        dice.clickable = enable;
+        PowerCounter opponentCounter = GameManager.instance.GetOpponentOfPlayer(player).powerCounter;
+
+        // getting power difference
+        float opponentPower = opponentCounter.currentPower;
+        float powerDifference = currentPower - opponentPower;
+
+        // refreshing scale of the powerCounter
+        float newCounterScale = 1 + powerDifference * counterScaleMod;
+        if (newCounterScale < 0.1f) newCounterScale = 0.1f;
+        transform.localScale = new Vector3(newCounterScale, newCounterScale, 1f);
     }
 
-    /// <summary>
-    /// Rolls the dice and adds its value to power
-    /// </summary>
-    /// <returns></returns>
-    public IEnumerator RollDicePower()
-    {
-        // playing soundeffect
-        AudioManager.instance.PlaySFX("DiceRollSFX");
-
-        EnableDice(true);
-        dice.clickable = false;
-        yield return StartCoroutine(dice.RollAnimation());
-        yield return StartCoroutine(AddPower(dice.GetDiceValue()));
-
-        diceRolled = true;
-    }
 
     public IEnumerator AddPower(int power, Unit unit = null)
     {
@@ -121,7 +113,7 @@ public class PowerCounter : MonoBehaviour
             powerText.fontSize = currentFontSize;
 
             // Changing text color (from player color to white)
-            Color currentTextColor = Color.Lerp(player.playerColor, Color.white, coolT);
+            Color currentTextColor = Color.Lerp(powerTextColor, Color.white, coolT);
             powerText.color = currentTextColor;
 
             yield return null;
@@ -132,6 +124,11 @@ public class PowerCounter : MonoBehaviour
         {
             currentPower++;
             powerText.text = currentPower.ToString();
+
+            // refreshing counter size to show difference in power
+            RefreshCounterScale();
+            GameManager.instance.GetOpponentOfPlayer(player).powerCounter.RefreshCounterScale();
+
             yield return new WaitForSeconds(0.13f);
         }
         
@@ -156,7 +153,7 @@ public class PowerCounter : MonoBehaviour
         }
 
         powerText.fontSize = startingTextSize;
-        powerText.color = player.playerColor;
+        powerText.color = powerTextColor;
 
         // variables back to normal
         if (unit != null) unit.transform.localScale = defaultUnitScale;
@@ -170,10 +167,10 @@ public class PowerCounter : MonoBehaviour
         // When player loses (has less power on the current line
         if (!won)
         {
-            powerIcon.transform.localScale /= resolveSizeMod;
+            //Animations.instance.PopAnim(this.gameObject, 0.45f, -0.2f);
             powerText.fontSize = powerText.fontSize / resolveSizeMod;
-            powerText.color = lostColor;
-            powerIcon.color = lostColor;
+            powerText.color = Color.white;
+            counterBG.color = lostColor;
             resolved = true;
 
             // Removing power from losing units
@@ -184,7 +181,7 @@ public class PowerCounter : MonoBehaviour
         }
 
         // When player wins (has more power)
-        powerIcon.transform.localScale *= resolveSizeMod;
+        Animations.instance.PopAnim(this.gameObject, 0.45f, 0.4f);
         powerText.fontSize = powerText.fontSize * resolveSizeMod;
         if (winVFX != null) winVFX.Play();
 

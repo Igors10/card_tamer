@@ -53,9 +53,6 @@ public class ExecuteManager : MonoBehaviour
             currentCard.transform.localPosition = new Vector2(rightSideX - currentCard.transform.localPosition.x, currentCard.transform.localPosition.y);
             
         }
-
-        // Telling player to choose an ability
-        GameManager.instance.managerUI.NewHint("Pick one of card's abilities");
     }
 
     public void StopRevealCard()

@@ -42,6 +42,9 @@ public class Field : MonoBehaviour
     /// <param name="enable"></param>
     public void EnableSpawnSlot(int spawnSlot = 0)
     {
+        // checking if field is blocked
+        if (roundsBlocked > 0) return;
+
         // for moving units it first checks the front slot
         if (spawnSlot == 0 && units[spawnSlot] != null)
         { spawnSlot = 1; } // checking the backslot if front is taken
@@ -116,7 +119,7 @@ public class Field : MonoBehaviour
     {
         if (GameManager.instance.handManager.activeCard == null || GameManager.instance.currentState != GameState.PLACING
             || (units[0] != null && units[1] != null || GameManager.instance.executeManager.currentCard != null) || !spawnable 
-            || !GameManager.instance.yourTurn && roundsBlocked == 0) return;
+            || !GameManager.instance.yourTurn || roundsBlocked > 0) return;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 

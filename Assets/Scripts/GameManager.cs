@@ -220,7 +220,6 @@ public class GameManager : MonoBehaviour
         yourTurn = true;
 
         // updating UI
-        readyButton.gameObject.SetActive(true);
         managerUI.NewHint(GetState().defaultHintText);
         managerUI.UpdateTurnMessage();
 
@@ -228,6 +227,7 @@ public class GameManager : MonoBehaviour
         switch (GameManager.instance.currentState)
         {
             case GameState.PLACING:
+                readyButton.gameObject.SetActive(true);
 
                 // disables "finish placing" button if there are no units on player's side
                 if (player.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);

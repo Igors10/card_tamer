@@ -1,8 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using NUnit.Framework;
+using UnityEngine.SceneManagement;
 
 public class ManagerUI : MonoBehaviour
 {
@@ -115,6 +114,16 @@ public class ManagerUI : MonoBehaviour
         }
     }
 
+    public void BackToMainMenu()
+    {
+        SceneManager.LoadScene("Main Menu");
+    }
+
+    public void Rematch()
+    {
+        SceneManager.LoadScene("Board");
+    }
+
     public void EnableWorkshop(bool isEnable, bool moveWorkshopBG = true)
     {
         if (isEnable) workshopObj.SetActive(true);
@@ -123,6 +132,4 @@ public class ManagerUI : MonoBehaviour
         turnHint.gameObject.SetActive(!isEnable);
         GameManager.instance.opponent.playerUI.UIobj.SetActive(!isEnable);
     }
-
-
 }

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 08712177f7b01874595d3f1fcee924ba, type: 3}
-  m_Name: New hounds
+  m_Name: New Hounds
   m_EditorClassIdentifier: Assembly-CSharp::OpponentIndentity
   opponentName: New hounds
   basicUnits:

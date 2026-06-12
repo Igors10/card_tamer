@@ -6,6 +6,7 @@ public class CartoonShakeEffect : MonoBehaviour
     [Header("shake anim")]
     [SerializeField] float idleRotateInterval = 1.5f;
     [SerializeField] float idleRotationIntensity = 3f;
+    [SerializeField] bool randomStartingT = false; // 
     Coroutine anim;
     bool stop;
 
@@ -23,7 +24,7 @@ public class CartoonShakeEffect : MonoBehaviour
         // determine first rotation randomly
         bool doodleRotateLeft = Random.Range(0, 2) == 0;
 
-        float t = Random.Range(0f, idleRotateInterval);
+        float t = (randomStartingT) ? Random.Range(0f, idleRotateInterval) : 0f;
 
         while (true)
         {

@@ -167,7 +167,7 @@ public class Workshop : MonoBehaviour
         chosenAbility = pickedAbility;
 
         // play Audio Effect
-        AudioManager.instance.PlaySFX("BuySFX");
+        AudioManager.instance.PlaySFX("ShopStarSFX");
 
         // switching to drawing UI
         abilitySelectUI.SetActive(false);
@@ -239,7 +239,7 @@ public class Workshop : MonoBehaviour
         if (startingSequence)
         {
             // updating starting minion counter
-            startingMinionCounter.text = "minions " + player.cardsInHand.Count + "/" + GameManager.instance.startingCardAmount;
+            startingMinionCounter.text = "cards " + player.cardsInHand.Count + "/" + GameManager.instance.startingCardAmount;
 
             // no more options if player has 5 cards
             if (player.cardsInHand.Count == GameManager.instance.startingCardAmount) { StopStartingSequence(); return; }

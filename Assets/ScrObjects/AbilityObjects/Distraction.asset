@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Distraction
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: Next enemy gets <color=red>-2</color> power
+  abilityDescription: Next enemy on this line gets <color=red>-2</color> power
+  isSpecial: 0
   effect: {fileID: 5762393739908666132, guid: e6cf2166871f8844aa04c2fd63e25187, type: 3}
