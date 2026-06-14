@@ -91,6 +91,9 @@ public class GameManager : MonoBehaviour
 
         // starting workshop starting sequence after a short pause
         managerUI.workshop.LaunchStartingSequence();
+
+        // refreshing player UI
+        player.playerUI.Refresh();
     }
 
 
@@ -194,8 +197,6 @@ public class GameManager : MonoBehaviour
 
     void DebugStateInput()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && !yourTurn) StartTurn();
-
         if (Input.GetKeyDown(KeyCode.O)) opponent.endStateReady = true;
     }
 
@@ -205,7 +206,7 @@ public class GameManager : MonoBehaviour
 
         // updating UI
         readyButton.gameObject.SetActive(false);
-        managerUI.NewHint("It's your opponents turn (space to skip)");
+        managerUI.NewHint("It's your opponents turn");
         managerUI.UpdateTurnMessage();
 
 

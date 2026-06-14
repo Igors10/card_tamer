@@ -57,8 +57,6 @@ public class Workshop : MonoBehaviour
             bgItemStartingPositions[a] = bgItems[a].transform.localPosition;
             bgItemWorkshopPositions[a] = bgItemPositions[a].transform.localPosition;
         }
-
-    
     }
 
     public IEnumerator WorkshopAnim(bool isAppearing, bool moveBackground = true)

@@ -72,7 +72,7 @@ public class PlayerUI : MonoBehaviour
             int damage = Convert.ToInt32(hpValue.text) - player.health;
             DamageEffect(damage);
         }
-        else if (Convert.ToInt32(hpValue.text) < player.health)
+        else if (Convert.ToInt32(hpValue.text) < player.health && Convert.ToInt32(hpValue.text) > 0)
         {
             // effects when healed
 
