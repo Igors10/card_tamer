@@ -152,7 +152,7 @@ public class GameManager : MonoBehaviour
                 gameStateUI[0].SetActive(true);
 
                 // resetting shop values
-                shopManager.skipStarAppearance = false;
+                shopManager.ResetShopValues();
                 managerUI.EnableUI(true);
                 managerUI.EnableWorkshop(true);
                 readyButton.gameObject.SetActive(true);
@@ -176,6 +176,7 @@ public class GameManager : MonoBehaviour
         opponent.EndRound();
 
         OnRoundEnd?.Invoke();
+        roundNr++;
     }
 
     /// <summary>
@@ -187,8 +188,6 @@ public class GameManager : MonoBehaviour
         opponent.StartRound();
 
         fieldManager.Refresh();
-
-        roundNr++;
     }
     private void Update()
     {
@@ -232,6 +231,18 @@ public class GameManager : MonoBehaviour
 
                 // disables "finish placing" button if there are no units on player's side
                 if (player.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
+
+                // automatically pressing "Finish placing" when no more cards in hand
+                else if (player.cardsInHand.Count <= 0) 
+                { 
+                    player.endStateReady = true;
+
+                    // checking if opponent has any cards left, ending their turn right away if has no cards
+                    if (opponent.cardsInHand.Count <= 0) opponent.endStateReady = true;
+                        
+                    EndTurn(); 
+                }
+
                 // otherwise resetting its visuals
                 else readyButton.UpdateButtonState();
                 

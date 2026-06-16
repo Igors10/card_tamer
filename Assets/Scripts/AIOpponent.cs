@@ -155,9 +155,9 @@ public class AIOpponent : MonoBehaviour
 
         while (nothingToBuy == false)
         {
-            if (playerObj.shopStars >= nextStarAmount && starsUpgraded == false) // upgrade stars
+            if (playerObj.shopStars >= nextStarAmount && starsUpgraded == false && nextStarAmount < 2) // upgrade stars (for now made it so that bot only upgrades stars once)
             {
-                playerObj.maxStars = nextStarAmount; // do enemy AI shopping
+                playerObj.maxStars = nextStarAmount; 
                 playerObj.shopStars -= nextStarAmount;
                 starsUpgraded = true;
             }

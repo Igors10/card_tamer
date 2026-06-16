@@ -194,7 +194,7 @@ public class BattleManager : MonoBehaviour
         death.gameObject.SetActive(false);
 
         // ROUND ENDS
-        GameManager.instance.managerUI.StateChangeMessage("Round" + GameManager.instance.roundNr + " ends");
+        GameManager.instance.managerUI.StateChangeMessage("Round " + GameManager.instance.roundNr + " ends");
 
         // pause while "round ends" text is on the screen
         while (GameManager.instance.managerUI.stateTransitionObj.activeSelf)

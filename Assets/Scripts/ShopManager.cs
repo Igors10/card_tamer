@@ -60,6 +60,12 @@ public class ShopManager : MonoBehaviour
         DiscardSpendStars();
     }
 
+    public void ResetShopValues()
+    {
+        skipStarAppearance = false;
+        starsAlreadyUpgraded = false;
+    }
+
     void Refresh(bool onlyRefreshStars = false)
     {
         // refreshing shopStars
@@ -81,7 +87,7 @@ public class ShopManager : MonoBehaviour
         // refreshing up star button
         int nextStarAmount = player.maxStars + 1;
         prices[0].text = nextStarAmount.ToString();
-        nextStarAmountText.text = "Up Star (" + nextStarAmount.ToString() +")";
+        nextStarAmountText.text = "Increase stars (current:" + player.maxStars.ToString() +")";
         CheckButtonAvailability(0, nextStarAmount);
         if (starsAlreadyUpgraded) buttons[0].interactable = false;
 
@@ -119,7 +125,9 @@ public class ShopManager : MonoBehaviour
     {
         // Upgrading stars
         playerToUpgrade.maxStars += 1;
+        playerToUpgrade.currentStars = playerToUpgrade.maxStars;
         playerToUpgrade.playerUI.Refresh();
+        starsAlreadyUpgraded = true;
 
         // Paying
         int starPrice = Convert.ToInt32(prices[0].text);
