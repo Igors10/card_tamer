@@ -1,6 +1,7 @@
 using System.Collections;
 using System.IO;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -39,6 +40,8 @@ public class Workshop : MonoBehaviour
     Vector3[] bgItemWorkshopPositions = new Vector3[3];
     [SerializeField] float appearanceTime;
 
+    [Header("color select")]
+    [SerializeField] GameObject pencil;
 
     private void Start()
     {
@@ -102,7 +105,13 @@ public class Workshop : MonoBehaviour
         GameManager.instance.managerUI.EnableWorkshop(true, false);
 
         startingSequence = true;
-        AbilityOptions();
+        //AbilityOptions();
+        WorkshopColorSelect();
+    }
+
+    public void WorkshopColorSelect()
+    {
+        pencil.SetActive(true);
     }
 
     public void AbilityOptions(bool drawSpecial = false)

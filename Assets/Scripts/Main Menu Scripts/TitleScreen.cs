@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.UI;
 
 public class TitleScreen : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] MenuChoice startingSpecialChoice;
     public PlayerConfigObj playerConfigObj;
     public CardDatabase cardDatabase;
+    public Image[] doodles;
 
     [Header("menu transition")]
     [SerializeField] LoadingFog loadingFog;

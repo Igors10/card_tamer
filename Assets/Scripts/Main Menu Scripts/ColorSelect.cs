@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 
-public class ColorSelect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class ColorSelect : MonoBehaviour
 {
     [Header("refs")]
     [SerializeField] Image pencil;
@@ -27,10 +27,11 @@ public class ColorSelect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         // initializing default player color here as well
         TitleScreen.instance.playerConfigObj.playerColor = colors[0];
         // starting the pointer animation
-        StartCoroutine(PointerAnim());
+        //StartCoroutine(PointerAnim());
 
         // making the pencil reflect player color
         pencil.color = TitleScreen.instance.playerConfigObj.playerColor;
+        ColorMenuDoodles();
     }
     void InitColorWindow()
     {
@@ -38,9 +39,9 @@ public class ColorSelect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         {
             if (i >= colors.Length) return;
 
-            colorButtons[i].GetComponent<Image>().color = colors[i];
+            colorButtons[i].GetComponent<Image>().color = TitleScreen.instance.cardDatabase.allPlayerColors[i];
 
-            Color colorToSelect = colors[i];
+            Color colorToSelect = TitleScreen.instance.cardDatabase.allPlayerColors[i];
             colorButtons[i].onClick.AddListener(() => SelectColor(colorToSelect));
         }
     }
@@ -68,33 +69,10 @@ public class ColorSelect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         }
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+   
+    public void OpenColorWindow()
     {
-        OnHover(true);
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        OnHover(false);
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        OpenColorWindow();
-    }
-
-    void OnHover(bool isHovered)
-    {
-        // green select outline
-        pencil.material = (isHovered || colorWindow.activeSelf) ? selectMaterial : defaultMaterial;
-
-        // disabling pointers
-        colorSelectPointer.gameObject.SetActive(false);
-    }
-
-    void OpenColorWindow()
-    {
-        colorWindow.SetActive(true);
+        colorWindow.SetActive(!colorWindow.gameObject.activeSelf);
     }
 
     public void SelectColor(Color colorToSelect)
@@ -105,8 +83,19 @@ public class ColorSelect : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         // playing soundeffect
         AudioManager.instance.PlaySFX("ColorPickSFX");
 
+        // coloring doodles
+        ColorMenuDoodles();
+
         // closing the window
         colorWindow.SetActive(false);
-        OnHover(false);
+    }
+
+    void ColorMenuDoodles()
+    {
+        // coloring every doodle this color
+        for (int i = 0; i < TitleScreen.instance.doodles.Length; i++)
+        {
+            TitleScreen.instance.doodles[i].color = pencil.color;
+        }
     }
 }

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "card database", menuName = "Card Database")]
 public class CardDatabase : ScriptableObject
 {
+    // CARD SETS 
+    // =====================================================
     public List<OpponentIndentity> cardSets;
 
     public OpponentIndentity GetRandomCardSet()
@@ -24,4 +26,8 @@ public class CardDatabase : ScriptableObject
 
         return cardSet.specialUnits[Random.Range(0, cardSet.specialUnits.Count)];
     }
+
+    // COLORS
+    // ========================================================
+    public List<Color> allPlayerColors;
 }

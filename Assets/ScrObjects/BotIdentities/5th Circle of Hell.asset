@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08712177f7b01874595d3f1fcee924ba, type: 3}
+  m_Name: 5th Circle of Hell
+  m_EditorClassIdentifier: Assembly-CSharp::OpponentIndentity
+  opponentName: 5th Circle of Hell
+  basicUnits:
+  - {fileID: 11400000, guid: 9177dda76a34a0842bed7f635297c085, type: 2}
+  - {fileID: 11400000, guid: 455a8648964d5ac42a6514d0e3916f2b, type: 2}
+  - {fileID: 11400000, guid: dfffa6586a8b20e4a883d1b02ca9ed3d, type: 2}
+  - {fileID: 11400000, guid: 4df5cef0643c38c41bc4e08c18c18215, type: 2}
+  - {fileID: 11400000, guid: ea1204ab362107240babab11a2ecc07e, type: 2}
+  - {fileID: 11400000, guid: 37b3edbbd813ed34285344e0a5f39481, type: 2}
+  - {fileID: 11400000, guid: f40f9b1ace95a6d4199cf871f23fb4ee, type: 2}
+  - {fileID: 11400000, guid: 2e9f12774f63b364c860ebb02749407b, type: 2}
+  - {fileID: 11400000, guid: 18a06b65c335d2d41a4fb7b0c9e24e8e, type: 2}
+  - {fileID: 11400000, guid: 475d7e138acbc2546af199435f72414f, type: 2}
+  specialUnits:
+  - {fileID: 11400000, guid: 2483c3a293554c84eb68219fcda964ca, type: 2}
+  - {fileID: 11400000, guid: dabdb493bc65394479d42bfdcccdfb46, type: 2}
+  - {fileID: 11400000, guid: 8ca0c596e39efb944be520c84fa32b5c, type: 2}
+  - {fileID: 11400000, guid: 0f696f3ad773b8c4385d0ae62b943df5, type: 2}
+  - {fileID: 11400000, guid: ef6e2a9dbd92cf24e911d7abe39f6d32, type: 2}

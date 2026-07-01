@@ -58,8 +58,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 2100000, guid: 64080dbc8b782714db1e29c66ec8408d, type: 2}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Material: {fileID: 2100000, guid: ac3b5b6028d9ada449ab8aecd8a78a70, type: 2}
+  m_Color: {r: 0.13678122, g: 0.08443567, b: 0.7584905, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -91,8 +91,4 @@ MonoBehaviour:
   angle: 10
   duration: 0.15
   swings: 2
-  idleRotateInterval: 1.5
-  idleRotationIntensity: 3
-  isIdleAnim: 0
-  doodleRotateLeft: 0
   doodleData: {fileID: 0}
