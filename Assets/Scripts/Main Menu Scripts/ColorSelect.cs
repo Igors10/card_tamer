@@ -25,7 +25,7 @@ public class ColorSelect : MonoBehaviour
         InitColorWindow();
 
         // initializing default player color here as well
-        TitleScreen.instance.playerConfigObj.playerColor = colors[0];
+        //TitleScreen.instance.playerConfigObj.playerColor = colors[0];
         // starting the pointer animation
         //StartCoroutine(PointerAnim());
 

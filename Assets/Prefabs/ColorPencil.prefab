@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 4, y: -12}
-  m_SizeDelta: {x: 1200, y: 825}
+  m_SizeDelta: {x: 530, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5998475093901596964
 CanvasRenderer:
@@ -148,7 +148,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1200, y: 825}
+  m_SizeDelta: {x: 530, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5783744482694879322
 CanvasRenderer:
@@ -215,17 +215,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4930175467021802756}
-  m_LocalRotation: {x: 0, y: 0, z: 0.17364816, w: 0.9848078}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3899654539113936083}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 20}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 23, y: 4}
-  m_SizeDelta: {x: 1066.6868, y: 200.0042}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 450, y: 65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7359706769628862893
 CanvasRenderer:
@@ -322,7 +322,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PencilButton
   pencilColorImage: {fileID: 1138285929511781901}
+  pencil: {fileID: 6247353235601217649}
   selectMaterial: {fileID: 2100000, guid: 724573b5fdbb1d644bcc9d737e998125, type: 2}
+  workshopColorSelect: {fileID: 0}
+  defaultMaterial: {fileID: 0}
+  button: {fileID: 4927281375549999134}
+  cartoonShakeEffect: {fileID: 5769239046312353012}
+  upscaleOnHover: 1
+  upscaleIntensity: 1.2
+  upscaleTime: 0.15
+  selected: 0
 --- !u!1 &6247353235601217649
 GameObject:
   m_ObjectHideFlags: 0
@@ -333,6 +342,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3899654539113936083}
   - component: {fileID: 1164365169088418775}
+  - component: {fileID: 5769239046312353012}
   m_Layer: 0
   m_Name: ColorPencil
   m_TagString: Untagged
@@ -347,19 +357,19 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6247353235601217649}
-  m_LocalRotation: {x: -0, y: -0, z: -0.4520838, w: 0.8919755}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.79999995, y: 0.79999995, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8564209673262126079}
   - {fileID: 6181679066845979077}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -53.755}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 210, y: -399}
-  m_SizeDelta: {x: 1200, y: 825}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1164365169088418775
 CanvasRenderer:
@@ -369,6 +379,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6247353235601217649}
   m_CullTransparentMesh: 1
+--- !u!114 &5769239046312353012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6247353235601217649}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ab1780e9436f94ba67d86b4bf2a98f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CartoonShakeEffect
+  idleRotateInterval: 0.75
+  idleRotationIntensity: 1.25
+  randomStartingT: 1
 --- !u!1 &7929707116686088840
 GameObject:
   m_ObjectHideFlags: 0
@@ -404,7 +429,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1200, y: 825}
+  m_SizeDelta: {x: 530, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &667164544457918308
 CanvasRenderer:

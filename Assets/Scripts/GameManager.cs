@@ -90,7 +90,7 @@ public class GameManager : MonoBehaviour
         }
 
         // starting workshop starting sequence after a short pause
-        managerUI.workshop.LaunchStartingSequence();
+        //managerUI.workshop.LaunchStartingSequence();
 
         // refreshing player UI
         player.playerUI.Refresh();

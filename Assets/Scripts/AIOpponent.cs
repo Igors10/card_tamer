@@ -27,6 +27,9 @@ public class AIOpponent : MonoBehaviour
 
     private void Start()
     {
+        // picking random color
+        playerObj.playerColor = GameManager.instance.cardDatabase.allPlayerColors[Random.Range(0, GameManager.instance.cardDatabase.allPlayerColors.Count)];
+
         CreateAIStartingHand();
     }
 
@@ -35,6 +38,7 @@ public class AIOpponent : MonoBehaviour
     /// </summary>
     void InitAIOpponent()
     {
+        // picking one of the premade player identities (cardsets) for the opponent
         if (GameData.randomOpponentIdentity == true || chosenIdentity == null) chosenIdentity = GameManager.instance.cardDatabase.GetRandomCardSet();
         playerObj.playerUI.playerName.text = chosenIdentity.opponentName + " (Bot)";
     }

@@ -31,6 +31,7 @@ public class Workshop : MonoBehaviour
     [SerializeField] GameObject missingNameText;
     [SerializeField] GameObject workshopHintObj;
     [SerializeField] TextMeshProUGUI workshopHintText;
+    [SerializeField] GameObject colorSelectUI;
 
     [Header("workshop animation")]
     [SerializeField] GameObject background;
@@ -60,6 +61,9 @@ public class Workshop : MonoBehaviour
             bgItemStartingPositions[a] = bgItems[a].transform.localPosition;
             bgItemWorkshopPositions[a] = bgItemPositions[a].transform.localPosition;
         }
+
+        // enabling color select
+        WorkshopColorSelect();
     }
 
     public IEnumerator WorkshopAnim(bool isAppearing, bool moveBackground = true)
@@ -102,16 +106,16 @@ public class Workshop : MonoBehaviour
     public void LaunchStartingSequence()
     {
         // enabling correct workshop visuals
+        colorSelectUI.SetActive(false);
         GameManager.instance.managerUI.EnableWorkshop(true, false);
 
         startingSequence = true;
-        //AbilityOptions();
-        WorkshopColorSelect();
+        AbilityOptions();
     }
 
     public void WorkshopColorSelect()
     {
-        pencil.SetActive(true);
+        colorSelectUI.SetActive(true); 
     }
 
     public void AbilityOptions(bool drawSpecial = false)
