@@ -48,7 +48,7 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (selected) return;
 
         // playing SFX when hovering over only
-        if (isHovered) AudioManager.instance.PlaySFX("ButtonSFX");
+        if (isHovered) AudioManager.instance.PlaySFX("OnHoverSFX", 0.25f);
 
         // enabling green outline while hovered over
         pencilColorImage.material = (isHovered) ? selectMaterial : defaultMaterial;
@@ -121,8 +121,12 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         // select outline
         pencilColorImage.material = (isSelected) ? selectMaterial : defaultMaterial;
 
-        // shake animation
+        // sfx
+        AudioManager.instance.PlaySFX("ButtonSFX");
+
+        // animation
         cartoonShakeEffect.enabled = isSelected;
+        if (isSelected) Animations.instance.PopAnim(pencil, 0.18f, -0.12f);
 
         // setting rotation back to default when deselected
         if (isSelected == false) pencil.transform.localRotation = Quaternion.Euler(0, 0, -90);

@@ -48,6 +48,12 @@ public class HandManager : MonoBehaviour
         UpdateHandVisuals(player);
     }
 
+    public void AddCardToDiscarded(Card card, Player player)
+    {
+        player.cardsOnField.Remove(card);
+        player.cardsInDiscard.Add(card);
+    }
+
     public void ReturnCardsToHand(Player player)
     {
         foreach (Card card in player.cardsOnField)

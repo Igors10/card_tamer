@@ -178,9 +178,9 @@ public class FieldManager : MonoBehaviour
         Unit newUnit = newUnitObj.GetComponent<Unit>();
         fieldToSpawnOn.units[nextEmptySlot] = newUnit;
         newUnit.InitUnit(cardToSpawn, fieldToSpawnOn);
-
+       
         // Plays spawning "poof" VFX
-        GameManager.instance.VFXmanager.PlayVFX(newUnitObj.transform.position, spawnVFX);
+        ParticleManager.instance.SpawnVFX(newUnitObj.transform.position, "SpawnVFX");
 
         // playing soundeffect
         AudioManager.instance.PlaySFX("CardPlaySFX");

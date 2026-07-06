@@ -141,6 +141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CartoonShakeEffect
   idleRotateInterval: 0.8
   idleRotationIntensity: 9
+  randomStartingT: 0
 --- !u!1 &1756766998245664043
 GameObject:
   m_ObjectHideFlags: 0
@@ -890,6 +891,10 @@ MonoBehaviour:
   shakeFrequency: 40
   jumpHeight: 0.9
   jumpTime: 0.25
+  jumpForce: 8
+  gravity: 15
+  moveXSpeed: 8
+  rotationSpeed: 180
 --- !u!1 &4899674577250614773
 GameObject:
   m_ObjectHideFlags: 0
@@ -1413,6 +1418,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CartoonShakeEffect
   idleRotateInterval: 1.5
   idleRotationIntensity: 4
+  randomStartingT: 0
 --- !u!1 &6913014311538785610
 GameObject:
   m_ObjectHideFlags: 0

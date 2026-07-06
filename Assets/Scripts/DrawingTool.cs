@@ -191,9 +191,33 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         brushColor = (brushColor == GameManager.instance.player.playerColor) ? Color.white : GameManager.instance.player.playerColor;
     }
 
+    /// <summary>
+    /// Converting the whole sprite to white, the color will later be reaplied during card rendering.
+    /// </summary>
+    /// <returns></returns>
+    public void MakeSpriteWhite()
+    {
+        // no need to do it if the canvas is empty
+        if (IsCanvasEmpty()) return;
+
+        // getting the pixels and "whitening" them
+        Color[] pixels = drawingTexture.GetPixels();
+
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = new Color(1f, 1f, 1f, pixels[i].a);
+        }
+
+        drawingTexture.SetPixels(pixels);
+        drawingTexture.Apply();
+    }
+
     // gets the sprite drawn by player
     public Sprite GetSprite()
     {
+        // right before passing the sprite it needs to be made white, so that it can be colored any color in Card.Refresh();
+        MakeSpriteWhite();
+
         Sprite customCardSprite = Sprite.Create(drawingTexture, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
         return customCardSprite;
     }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEngine.UI.CanvasScaler;
 
 public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerClickHandler
 {   
@@ -68,7 +64,12 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [Header("ability animation")]
     [SerializeField] float jumpHeight;
     [SerializeField] float jumpTime;
-    
+
+    [Header("knockout animation")]
+    [SerializeField] float jumpForce = 10f;       
+    [SerializeField] float gravity = 35f;         
+    [SerializeField] float moveXSpeed = 5f;       
+    [SerializeField] float rotationSpeed = 360f;  
 
     void Start()
     {
@@ -154,19 +155,21 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);        
     }
 
+    void Update()
+    {
+        // temp debug to test unit knockout
+        if (Input.GetKeyDown(KeyCode.K)) StartCoroutine(KnockOut());
+    }
+
     public IEnumerator KnockOut()
     {
         // checking if shielded
         if (card.shielded) { ShieldedEffect(); yield break; }
 
-        // playing soundeffect
+        // do damage animation, VFX and SFX 
+        ParticleManager.instance.SpawnVFX(transform.position, "HitVFX");
         AudioManager.instance.PlaySFX("HitSFX");
-
-        stunned = true;
-        RefreshUnitVisuals();
-
-        // do damage VFX and SFX 
-        yield return StartCoroutine(ShakeAnim(false));
+        yield return StartCoroutine(KnockOutEffect());
     }
 
     void ShieldedEffect()
@@ -178,6 +181,38 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     }
 
+    private IEnumerator KnockOutEffect()
+    {
+        Vector3 velocity = new Vector3(
+            Random.Range(-moveXSpeed, moveXSpeed), // Randomly flies left or right
+            jumpForce,
+            jumpForce
+        );
+
+        float t = 0f;
+        while (t < 3f)
+        {
+            // Apply gravity to our custom vertical velocity
+            velocity.y -= gravity * Time.deltaTime;
+            velocity.z -= gravity * Time.deltaTime;
+
+            // Move the world canvas element based on the velocity
+            transform.position += velocity * Time.deltaTime;
+
+            // Spin the card on the Z-axis for that classic look
+            transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
+
+            t += Time.deltaTime;
+            yield return null; 
+        }
+
+        GameManager.instance.handManager.AddCardToDiscarded(card, card.player); // moving the card to discarded
+
+        // removes unit from board when it is off screen
+        RemoveFromBoard();
+    }
+
+
     /// <summary>
     /// Removes the unit off the board
     /// </summary>
@@ -187,42 +222,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         int unitSlot = (currentField.units[0] == this) ? 0 : 1;
         currentField.units[unitSlot] = null;
         Debug.Log("Removed unit gameObject from board");
+        GameManager.instance.fieldManager.Refresh();
 
         // remove the gameObject
         if (this.gameObject != null) Destroy(this.gameObject);
-    }
-
-    /// <summary>
-    /// Making unit shake left and right when taking damage
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator ShakeAnim(bool isDead)
-    {
-        float t = 0;
-        Vector3 startingPos = transform.localPosition;
-
-        // colors for fading out the unit if was killed
-        Color spriteColor = sprite.color;
-        Color fadedColor = new Color(spriteColor.r, spriteColor.g, spriteColor.b, 0f);
-
-        while (t < shakeTime)
-        {
-            t += Time.deltaTime;
-
-            float progress = t / shakeTime;          
-            float damper = 1f - progress;         
-            damper *= damper;                       
-
-            float offsetX = Mathf.Sin(t * shakeFrequency) * shakeIntensity * damper;
-            transform.localPosition = startingPos + new Vector3(offsetX, 0f, 0f);
-
-            // Fade out unit if the damage was deadly
-            if (isDead) sprite.color = Color.Lerp(spriteColor, fadedColor, progress);
-
-            yield return null;
-        }
-
-        transform.localPosition = startingPos;
     }
 
     public IEnumerator RollPower()

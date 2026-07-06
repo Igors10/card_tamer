@@ -9,7 +9,7 @@ public class Player : MonoBehaviour
     public PlayerUI playerUI;
     public List<Card> cardsInHand = new List<Card>();
     public List<Card> cardsOnField = new List<Card>();
-    public List<Card> plannedCardStack = new List<Card>();
+    public List<Card> cardsInDiscard = new List<Card>();
     public Field[] fields = new Field[4];
     public PowerCounter powerCounter;
 

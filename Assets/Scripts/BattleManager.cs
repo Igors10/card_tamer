@@ -177,7 +177,7 @@ public class BattleManager : MonoBehaviour
 
         // DISCARDING STUNNED UNITS
         // ========================
-
+        /*
         // getting all stunned units
         List<Unit> playerStunnedUnits = GameManager.instance.fieldManager.GetStunnedUnits(GameManager.instance.player);
         List<Unit> opponentStunnedUnits = GameManager.instance.fieldManager.GetStunnedUnits(GameManager.instance.opponent);
@@ -192,7 +192,7 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(afterDeathTime);
         knockedUnitsMessege.SetActive(false);
         death.gameObject.SetActive(false);
-
+        */
         // ROUND ENDS
         GameManager.instance.managerUI.StateChangeMessage("Round " + GameManager.instance.roundNr + " ends");
 

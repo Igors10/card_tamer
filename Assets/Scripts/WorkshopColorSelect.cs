@@ -33,13 +33,13 @@ public class WorkshopColorSelect : MonoBehaviour
             // Setting up the button
             PencilButton newPencilButton = newPencil.GetComponentInChildren<PencilButton>();
             pencils.Add(newPencilButton);
-            newPencilButton.workshopColorSelect = this;
         }
 
-        // Assigning colors
+        // Assigning colors 
         for (int i = 0; i < pencilAmount; i++)
         {
             pencils[i].SetColor(GameManager.instance.cardDatabase.allPlayerColors[i]);
+            pencils[i].workshopColorSelect = this;
 
             // prechoosing the pencil if the player had that color selected
             //if (GameManager.instance.cardDatabase.allPlayerColors[i] == GameManager.instance.player.playerColor) ChoosePencil(pencils[i]);

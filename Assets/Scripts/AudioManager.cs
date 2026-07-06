@@ -68,24 +68,10 @@ public class AudioManager : MonoBehaviour
     /// <param name="mute"></param>
     public bool MuteSound(bool mute)
     {
-        isSoundMuted = mute;
-
-        if (mute)
-        {
-            // saving the volume value
-            savedSoundVolume = audioSource.volume;
-
-            // setting volume to 0
-            audioSource.volume = 0;
-        }
-        else
-        {
-            // setting the volume back to pre-muted saved value
-            audioSource.volume = savedSoundVolume;
-        }
+        audioSource.mute = mute;
 
         // returns true if sound was muted
-        return isSoundMuted;
+        return audioSource.mute;
     }
 
     /// <summary>
