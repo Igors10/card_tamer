@@ -121,7 +121,7 @@ public class Workshop : MonoBehaviour
     public void AbilityOptions(bool drawSpecial = false)
     {
         // disabling shop UI
-        GameManager.instance.gameStateUI[2].SetActive(false);
+        GameManager.instance.gameStateUI[3].SetActive(false);
         GameManager.instance.readyButton.gameObject.SetActive(false);
 
         // enabling card choice buttons
@@ -264,7 +264,7 @@ public class Workshop : MonoBehaviour
             cardCreationUI.SetActive(false);
             GameManager.instance.readyButton.gameObject.SetActive(true);
             GameManager.instance.readyButton.buttonText.text = "Ready";
-            GameManager.instance.gameStateUI[2].SetActive(true);
+            GameManager.instance.gameStateUI[3].SetActive(true);
         }
     }
 

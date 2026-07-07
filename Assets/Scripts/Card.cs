@@ -126,18 +126,14 @@ public class Card : MonoBehaviour
         AudioManager.instance.PlaySFX("UnitDeathSFX");
 
         // removing the unit
-        DeathParticle newParticle = Instantiate(deathParticle, unit.transform.position, unit.transform.rotation).GetComponent<DeathParticle>();
-        newParticle.Init(unit.sprite.sprite, unit.sprite.rectTransform, player);
-        unit.RemoveFromBoard();
+        //unit.RemoveFromBoard();
 
         // reporting to player a unit died
         player.deadUnitsThisRound++;
 
-
         // Remove card from field cards (card cant really be destroyed when they are in hand)
+        player.cardsInDiscard.Remove(this);
         player.cardsOnField.Remove(this);
-        // removes unit gameObject
-        Destroy(unit.gameObject);
 
         Destroy(this.gameObject);
     }
@@ -328,7 +324,7 @@ public class Card : MonoBehaviour
         specialCostPaid = false;
         shielded = false;
 
-        unit.RefreshUnitVisuals();
+        //unit.RefreshUnitVisuals();
     }
 
 }

@@ -50,16 +50,17 @@ public class HandManager : MonoBehaviour
 
     public void AddCardToDiscarded(Card card, Player player)
     {
-        player.cardsOnField.Remove(card);
+        //player.cardsOnField.Remove(card);
         player.cardsInDiscard.Add(card);
     }
 
     public void ReturnCardsToHand(Player player)
     {
+        // moving all cards to cards in hand
         foreach (Card card in player.cardsOnField)
         {
             card.gameObject.SetActive(true);
-            card.unit.RemoveFromBoard();
+            if (card.unit != null) card.unit.RemoveFromBoard();
 
             Transform playerHand = (player == GameManager.instance.player) ? hand.transform : opponentHand.transform;
             card.transform.SetParent(playerHand, false);

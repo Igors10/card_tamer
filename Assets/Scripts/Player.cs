@@ -138,6 +138,7 @@ public class Player : MonoBehaviour
     public void EndRound()
     {
         GameManager.instance.handManager.ReturnCardsToHand(this);
+        cardsInDiscard.Clear();
 
         foreach (Field field in fields)
         {

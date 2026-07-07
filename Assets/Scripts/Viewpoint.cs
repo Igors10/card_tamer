@@ -42,7 +42,7 @@ public class Viewpoint : MonoBehaviour
         Debug.Log("Viewpoint: beginning viewpoint transition");
 
         // message about current state
-        string transitionMessage = (GameManager.instance.currentState == GameState.PLACING) ? "Round " + GameManager.instance.roundNr : "Workshop";
+        string transitionMessage = (GameManager.instance.currentState == GameState.PLACING) ? "Round " + GameManager.instance.roundNr : GameManager.instance.GetState().stateName;
         GameManager.instance.managerUI.StateChangeMessage(transitionMessage);
 
         float t = 0;

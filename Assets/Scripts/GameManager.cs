@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using Unity.VisualScripting;
 
 public enum GameState
 {
     PLACING,
     BATTLING,
+    DISCARDING,
     BUYING
 }
 
@@ -36,6 +38,7 @@ public class GameManager : MonoBehaviour
     public ShopManager shopManager;
     public Viewpoint mainCamera;
     public CardDatabase cardDatabase;
+    public DiscardManager discardManager;
 
     [Header("UI stuff")]
     [SerializeField] TextMeshProUGUI hintMessage;
@@ -138,7 +141,10 @@ public class GameManager : MonoBehaviour
 
                 // playing workshop soundtrack
                 AudioManager.instance.PlaySoundtrack("BattleTrack");
+                break;
 
+            case GameState.DISCARDING:
+                StartCoroutine(discardManager.DiscardSequence());
                 break;
 
             case GameState.BUYING:
@@ -251,6 +257,9 @@ public class GameManager : MonoBehaviour
             case GameState.BATTLING:
                 battleManager.NextLine();
                 readyButton.gameObject.SetActive(false);
+                break;
+
+            case GameState.DISCARDING:
                 break;
 
             case GameState.BUYING:
