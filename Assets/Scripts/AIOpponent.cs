@@ -94,6 +94,10 @@ public class AIOpponent : MonoBehaviour
             case GameState.PLACING:
                 currentAction = StartCoroutine(PlaceRandomCard());
                 break;
+
+            case GameState.DISCARDING:
+                currentAction = StartCoroutine(DiscardOpponentUnits());
+                break;
         }
     }
 
@@ -138,6 +142,20 @@ public class AIOpponent : MonoBehaviour
 
         // Spawning a unit
         fieldToSpawnOn.PlayCard(cardToPlay, playerObj);
+    }
+
+    // =========================================================
+    // ===================== DISCARDING=========================
+
+    IEnumerator DiscardOpponentUnits()
+    {
+        // waiting until discard becomes available
+        //while (GameManager.instance.discardManager.discardAvailable == false) yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(3.5f);
+        Debug.Log("AIOpponent: requesting auto discard");
+
+        // request autodiscard
+        StartCoroutine(GameManager.instance.discardManager.AutoDiscard(GameManager.instance.GetOpponentOfPlayer(playerObj)));
     }
 
     // =========================================================

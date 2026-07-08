@@ -4,6 +4,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using Unity.VisualScripting;
+using Unity.Multiplayer.Playmode;
 
 public enum GameState
 {
@@ -83,7 +84,7 @@ public class GameManager : MonoBehaviour
         loadingFog.gameObject.SetActive(true);
         yield return StartCoroutine(loadingFog.LoadingAnimation(loadingTime));
 
-        // "Draw your minions" text
+        // "workshop" text
         managerUI.StateChangeMessage("Workshop");       
 
         // pause while intro text is on the screen
@@ -144,7 +145,7 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameState.DISCARDING:
-                StartCoroutine(discardManager.DiscardSequence());
+                managerUI.turnHint.gameObject.SetActive(true);
                 break;
 
             case GameState.BUYING:
@@ -156,6 +157,7 @@ public class GameManager : MonoBehaviour
 
                 // Enabling hand UI
                 gameStateUI[0].SetActive(true);
+                managerUI.turnHint.gameObject.SetActive(false);
 
                 // resetting shop values
                 shopManager.ResetShopValues();
@@ -171,8 +173,8 @@ public class GameManager : MonoBehaviour
         // trigger the event
         OnStateTransition?.Invoke();
 
-        // temp
-        StartTurn();
+        // player always begins first
+        player.StartTurn();
     }
 
     void RoundEnd()
@@ -277,7 +279,7 @@ public class GameManager : MonoBehaviour
         if (gameOver) return;
 
         if (player.endStateReady && opponent.endStateReady) FinishCurrentState();
-        else if (opponent.endStateReady) StartTurn();
+        else if (opponent.endStateReady) player.StartTurn();
         else opponent.StartTurn();
     }
 

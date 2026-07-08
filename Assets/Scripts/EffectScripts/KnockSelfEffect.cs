@@ -31,7 +31,7 @@ public class KnockSelfEffect : MonoBehaviour
         yield return StartCoroutine(effect.ShowEffect(1));
 
         // knocking itself out
-        yield return StartCoroutine(effect.unit.KnockOut());
+        StartCoroutine(effect.unit.KnockOut());
 
         yield return StartCoroutine(effect.StopShowEffect());
     }

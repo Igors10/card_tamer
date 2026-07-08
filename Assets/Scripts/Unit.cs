@@ -165,6 +165,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         // checking if shielded
         if (card.shielded) { ShieldedEffect(); yield break; }
+        stunned = true;
 
         // do damage animation, VFX and SFX 
         ParticleManager.instance.SpawnVFX(transform.position, "HitVFX");

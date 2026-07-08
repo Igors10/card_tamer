@@ -94,7 +94,23 @@ public class Player : MonoBehaviour
     public void StartTurn()
     {
         Debug.Log("GameManager: [" + playerName + "] starting the turn.");
+
+        // Triggering player specific events
+        StartTurnEvents();
+
         if (isAI) AIplayer.AIStartTurn();
+        else GameManager.instance.StartTurn();
+    }
+
+    void StartTurnEvents()
+    {
+        switch (GameManager.instance.currentState)
+        {
+            case GameState.DISCARDING:
+                // initializing units during discard
+                StartCoroutine(GameManager.instance.discardManager.DiscardSequence(GameManager.instance.GetOpponentOfPlayer(this)));
+                break;
+        }
     }
 
     public void StartRound()

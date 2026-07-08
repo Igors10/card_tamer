@@ -756,8 +756,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -50}
-  m_SizeDelta: {x: 400, y: 100}
+  m_AnchoredPosition: {x: 50, y: -78.9875}
+  m_SizeDelta: {x: 400, y: 42.025}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &75486284
 MonoBehaviour:
@@ -1789,7 +1789,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.24364531, g: 0.23227477, b: 0.381132, a: 1}
+  m_Color: {r: 0.30351412, g: 0.2884514, b: 0.4792453, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3317,7 +3317,7 @@ Canvas:
   m_GameObject: {fileID: 385122619}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 1713707598}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -3329,7 +3329,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 6
   m_TargetDisplay: 0
 --- !u!224 &385122623
 RectTransform:
@@ -3652,7 +3652,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0, y: 434}
+  m_AnchoredPosition: {x: 0, y: 434}
   m_SizeDelta: {x: 600, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &451230716
@@ -4709,6 +4709,7 @@ MonoBehaviour:
   VFXs:
   - {fileID: 9167634517621324014, guid: ee04a3e7e3e200543840fec3643811b9, type: 3}
   - {fileID: 4870619945361379286, guid: 6a7fda63d9505c64c9197548b9f36ec3, type: 3}
+  canvasObj: {fileID: 385122619}
 --- !u!114 &603793832 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4310126619361781212, guid: 3b481f8585b7af8408cbfc1ad48a9117, type: 3}
@@ -7702,6 +7703,7 @@ MonoBehaviour:
   - {fileID: 528128637}
   - {fileID: 697688900}
   unitOffscreenPoint: {fileID: 1601010244}
+  discardAvailable: 0
 --- !u!1001 &865735022
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8995,7 +8997,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -27.4875}
+  m_AnchoredPosition: {x: 50, y: -50}
   m_SizeDelta: {x: 800, y: 43.39}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1043674312
@@ -9018,7 +9020,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: new text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b007cca46cd8d164ba3f8487d9bad7d1, type: 2}
   m_sharedMaterial: {fileID: 3258775908216779026, guid: b007cca46cd8d164ba3f8487d9bad7d1, type: 2}

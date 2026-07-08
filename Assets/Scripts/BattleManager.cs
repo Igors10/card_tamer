@@ -46,6 +46,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public void NextLine()
     {
+        Debug.Log("BattleManager: proceeding to next battle line.");
         currentLine++;
  
         if (currentLine < GameManager.instance.player.fields.Length && GameManager.instance.gameOver != true)
@@ -70,6 +71,8 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public IEnumerator InitBattleLine(List<Unit> playerUnits, List<Unit> opponentUnits)
     {
+        Debug.Log("BattleManager: inititalizing " + currentLine + " battle line.");
+
         // RESETTING VARIABLES
         ResetLineVals();
 
@@ -149,6 +152,7 @@ public class BattleManager : MonoBehaviour
 
         // Waiting for both power counters to get resolved
         while (!playerPowerUI.resolved || !opponentPowerUI.resolved) yield return null;
+        Debug.Log("BattleManager: counters got resolved");
 
         // trigger any end of line effects
         GameManager.instance.BroadcastOnLineResolved();
@@ -160,6 +164,8 @@ public class BattleManager : MonoBehaviour
 
     IEnumerator WrapUpBattle()
     {
+        Debug.Log("BattleManager: ending battle phase");
+
         // resetting battle visuals
         ResetLineVals();
 

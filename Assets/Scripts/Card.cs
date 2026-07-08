@@ -122,12 +122,6 @@ public class Card : MonoBehaviour
     {
         Debug.Log("Card: Card is getting destroyed.");
 
-        // playing soundeffect
-        AudioManager.instance.PlaySFX("UnitDeathSFX");
-
-        // removing the unit
-        //unit.RemoveFromBoard();
-
         // reporting to player a unit died
         player.deadUnitsThisRound++;
 
