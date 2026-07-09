@@ -892,7 +892,7 @@ MonoBehaviour:
   jumpHeight: 0.9
   jumpTime: 0.25
   jumpForce: 8
-  gravity: 15
+  gravity: 20
   moveXSpeed: 8
   rotationSpeed: 180
 --- !u!1 &4899674577250614773

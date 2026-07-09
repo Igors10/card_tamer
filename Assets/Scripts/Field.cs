@@ -158,7 +158,7 @@ public class Field : MonoBehaviour
         if ((player == GameManager.instance.player) && (cardIsOver == false || units[1] != null)
             || GameManager.instance.executeManager.currentCard != null && roundsBlocked == 0) return false;
 
-        if (!cardPlayed.SpecialCost()) return false;
+        //if (!cardPlayed.SpecialCost()) return false; // star mechanic was removed
 
         // spawn a creature
         GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);

@@ -177,22 +177,27 @@ public class AIOpponent : MonoBehaviour
 
         while (nothingToBuy == false)
         {
-            if (playerObj.shopStars >= nextStarAmount && starsUpgraded == false && nextStarAmount < 2) // upgrade stars (for now made it so that bot only upgrades stars once)
+            /*
+            if (playerObj.shopStars >= nextStarAmount && starsUpgraded == false && nextStarAmount < 2) 
             {
                 playerObj.maxStars = nextStarAmount; 
                 playerObj.shopStars -= nextStarAmount;
                 starsUpgraded = true;
-            }
-            else if (CountSpecialCards() < playerObj.maxStars && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
+            } */
+
+            // if has enough stars and no specials the AI will buy a special card
+            if (CountSpecialCards() < 1 && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
                 AddSpecial();
                 playerObj.shopStars -= shop.drawSpecialPrice;
             }
+            // otherwise it will buy regular card (if has enough stars)
             else if (playerObj.shopStars >= shop.drawCardPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
                 AddBasic();
                 playerObj.shopStars -= shop.drawCardPrice;
             }
+            // stops shopping only if it can't afford anything
             else nothingToBuy = true;
 
             // checking just to not make the look go infinitely

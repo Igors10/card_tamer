@@ -1,11 +1,8 @@
-using FishNet.Demo.AdditiveScenes;
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-
+using TMPro;
 
 public class DiscardManager : MonoBehaviour
 {
@@ -19,6 +16,8 @@ public class DiscardManager : MonoBehaviour
     [SerializeField] DeathAnim death;
     [SerializeField] Image[] units;
     [SerializeField] GameObject unitOffscreenPoint;
+    public GameObject previewPoint;
+    [SerializeField] TextMeshProUGUI discardCounter;
 
     List<Image> currentUnits = new List<Image>();
     int unitsDiscarded = 0;
@@ -45,13 +44,13 @@ public class DiscardManager : MonoBehaviour
     /// <returns></returns>
     IEnumerator UnitsDiscard(Player player)
     {
+        // reset discard unit counter text
+        discardCounter.text = "";
+
         // if no units lost then skip discard for this player
         if (player.cardsInDiscard.Count < 1)
         {
             yield return new WaitForSeconds(1f);
-            GameManager.instance.managerUI.StateChangeMessage("Damn, no units lost by " + player.playerName);
-            while (GameManager.instance.managerUI.stateTransitionObj.activeSelf) yield return null;
-
             StartCoroutine(FinishDiscard());
             yield break;
         }            
@@ -95,7 +94,7 @@ public class DiscardManager : MonoBehaviour
         {
             t += Time.deltaTime;
             float clampedT = t / unitsMovingTime;
-            float coolT = t * t;
+            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
 
             for (int i = 0; i < currentUnits.Count; i++)
             {
@@ -111,9 +110,6 @@ public class DiscardManager : MonoBehaviour
     {
         if (unitsDiscarded == unitsToDiscard)
         {
-            GameManager.instance.managerUI.StateChangeMessage(unitsDiscarded + " units were discarded");
-            
-
             StartCoroutine(FinishDiscard());
         }
     }
@@ -121,9 +117,13 @@ public class DiscardManager : MonoBehaviour
     IEnumerator FinishDiscard()
     {
         // notifying that all discards are made
+        yield return new WaitForSeconds(0.5f);
         GameManager.instance.managerUI.NewHint("Unit discard complete!");
+
+        // units discarded message
+        string newMessage = (unitsDiscarded > 0) ? unitsDiscarded + " units were discarded" : "Damn, no units were lost by " + GameManager.instance.GetOpponentOfPlayer(GameManager.instance.GetCurrentPlayer()); ;
+        GameManager.instance.managerUI.StateChangeMessage(newMessage);
         while (GameManager.instance.managerUI.stateTransitionObj.activeSelf) yield return null;
-        yield return new WaitForSeconds(afterDeathTime);
 
         // MAKING UNITS DISAPPEAR
         foreach (Image unit in currentUnits) unit.gameObject.SetActive(false);
@@ -166,8 +166,9 @@ public class DiscardManager : MonoBehaviour
 
     void UpdateDiscardHint()
     {
-        string newHintMessage = (unitsToDiscard == 0) ? GameManager.instance.GetState().defaultHintText : GameManager.instance.GetState().defaultHintText + " (" + unitsDiscarded + "/" + unitsToDiscard + " units discarded)";
-        GameManager.instance.managerUI.NewHint(newHintMessage);
+        //string newHintMessage = GameManager.instance.GetState().defaultHintText + " (" + unitsDiscarded + "/" + unitsToDiscard + " units discarded)";
+        //GameManager.instance.managerUI.NewHint(newHintMessage);
+        discardCounter.text = unitsDiscarded + "/" + unitsToDiscard;
     }
 
     public void DiscardUnit(UnitAtDiscard unit)

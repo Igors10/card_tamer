@@ -145,6 +145,7 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameState.DISCARDING:
+                AudioManager.instance.PlaySoundtrack("DiscardTrack");
                 managerUI.turnHint.gameObject.SetActive(true);
                 break;
 

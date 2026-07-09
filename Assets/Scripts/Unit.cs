@@ -194,7 +194,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         while (t < 3f)
         {
             // Apply gravity to our custom vertical velocity
-            velocity.y -= gravity * Time.deltaTime;
+            velocity.y -= gravity / 2 * Time.deltaTime;
             velocity.z -= gravity * Time.deltaTime;
 
             // Move the world canvas element based on the velocity

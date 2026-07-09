@@ -177,9 +177,11 @@ public class ShopManager : MonoBehaviour
             yield return null;
         }
 
-        // disabling buttons before workshop fully loaded
+        // enabling buttons back
         for (int a = 0; a < buttons.Count(); a++)
         {
+            if (a == 0) continue; // skip the star button (temp solution)
+
             buttons[a].gameObject.SetActive(true);
         }
 

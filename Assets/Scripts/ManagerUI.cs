@@ -37,14 +37,15 @@ public class ManagerUI : MonoBehaviour
     /// </summary>
     /// <param name="enable"></param>
     /// <param name="unit"></param>
-    public void PreviewCard(bool enable, CreatureObj cardData, Player player, Vector3 position)
+    public void PreviewCard(bool enable, CreatureObj cardData, Player player, Vector3 position, bool worldToScreen = true)
     {
         previewCard.gameObject.SetActive(enable);
 
         // Passing correct data to the card and positioning it above the unit
         if (!enable) return;
         previewCard.AssignCardData(cardData, player);
-        previewCard.transform.position = Camera.main.WorldToScreenPoint(position);
+        Vector3 previewPos = (worldToScreen) ? Camera.main.WorldToScreenPoint(position) : position;
+        previewCard.transform.position = previewPos;
         previewCard.transform.position += cardPreviewOffset;
 
         // If preview is away from the screen, move it down

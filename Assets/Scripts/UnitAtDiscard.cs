@@ -11,6 +11,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] Image[] unitPiece;
     [SerializeField] CartoonShakeEffect cartoonShakeEffect;
     [SerializeField] HoverEffect hoverEffect;
+    [SerializeField] GameObject CutVFX;
 
     [HideInInspector] public Card storedCard;
     bool discarded = false;
@@ -32,7 +33,14 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     void OnHover(bool isHover)
     {
+        if (!GameManager.instance.yourTurn) return; // only during player's turn
+
+        // color the unit as selectable
         sprite.material = (isHover && GameManager.instance.discardManager.discardAvailable) ? selectMaterial : defaultMaterial;
+
+        // creating card preview above the unit
+        Vector3 previewPos = GameManager.instance.discardManager.previewPoint.transform.position;
+        GameManager.instance.managerUI.PreviewCard(isHover, storedCard.cardData, storedCard.player, previewPos, false);
     }
 
     void TryDiscard()
@@ -47,8 +55,8 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     void UnitDeathAnim()
     {
         // VFX
-        ParticleManager.instance.SpawnVFX(transform.position, "HitVFX", true);
-        
+        //ParticleManager.instance.SpawnVFX(transform.position, "HitVFX", true); // doesnt work on a canvas
+        CutVFX.SetActive(true);
 
         // SFX
         AudioManager.instance.PlaySFX("UnitDeathSFX");

@@ -270,7 +270,7 @@ public class Card : MonoBehaviour
     public void PlayCard()
     {
         // checking for stars if special
-        if (!SpecialCost()) return;
+        //if (!SpecialCost()) return;
 
         // moving card to field cards
         GameManager.instance.handManager.AddCardToField(this, player);
@@ -293,6 +293,7 @@ public class Card : MonoBehaviour
     /// Returns true if player can afford to play the card
     /// </summary>
     /// <returns></returns>
+    /*
     public bool SpecialCost()
     {
         // checking if card requires a star to be played
@@ -306,7 +307,7 @@ public class Card : MonoBehaviour
         specialCostPaid = true;
         player.playerUI.Refresh();
         return true;
-    }
+    }*/
 
     /// <summary>
     /// Triggers at the end of round and resets all temporary card's attributes (like hp or power)
