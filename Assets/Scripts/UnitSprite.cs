@@ -5,7 +5,8 @@ public class UnitSprite : MonoBehaviour
 {
     [Header("refs")]
     [SerializeField] Image[] spriteArray;
-
+    [SerializeField] Image[] materialSpriteArray;
+ 
     /// <summary>
     /// Updates the visuals of combined sprite
     /// </summary>
@@ -16,9 +17,12 @@ public class UnitSprite : MonoBehaviour
     {
         for (int i = 0; i < sprites.Length; i++)
         {
-            if (sprites[i] == null) continue;
+            // disabling the image component if there's no sprite for current layer
+            spriteArray[i].enabled = sprites[i] != null;
+            materialSpriteArray[i].enabled = sprites[i] != null; 
 
             spriteArray[i].sprite = sprites[i];
+            materialSpriteArray[i].sprite = sprites[i];
             spriteArray[i].color = (i == 0) ? primaryColor : secondaryColor;
         }
     }
@@ -33,7 +37,7 @@ public class UnitSprite : MonoBehaviour
     {
         for (int i = 0; i < spriteArray.Length; i++)
         {
-            spriteArray[i].material = newMaterial;
+            materialSpriteArray[i].material = newMaterial;
         }
     }
 

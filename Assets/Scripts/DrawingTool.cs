@@ -295,7 +295,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         // Generate and return both sprites
         Sprite[] twoColorSprites = new Sprite[2];
         twoColorSprites[0] = Sprite.Create(primaryTex, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
-        twoColorSprites[0] = Sprite.Create(secondaryTex, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
+        twoColorSprites[1] = Sprite.Create(secondaryTex, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
 
         return twoColorSprites;
     }

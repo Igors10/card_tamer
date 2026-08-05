@@ -856,7 +856,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
   card: {fileID: 0}
-  sprite: {fileID: 0}
+  sprite: {fileID: 5601035197138867923}
   healthValue: {fileID: 0}
   currentField: {fileID: 0}
   orderMarker: {fileID: 4916268673209803088}
@@ -887,6 +887,7 @@ MonoBehaviour:
   fadedAlpha: 0.75
   unitUI: {fileID: 1252183568118034703}
   selectMaterial: {fileID: 2100000, guid: ff32b4bb699f9f949aefca08366a2927, type: 2}
+  defaultMaterial: {fileID: 2100000, guid: ac3b5b6028d9ada449ab8aecd8a78a70, type: 2}
   shakeTime: 0.9
   shakeIntensity: 0.3
   shakeFrequency: 40
@@ -2054,6 +2055,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4513581992025929299}
     m_Modifications:
+    - target: {fileID: 1338686848842808294, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1338686848842808294, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 3224983703710764941, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
       propertyPath: m_SizeDelta.x
       value: 5
@@ -2085,6 +2094,14 @@ PrefabInstance:
     - target: {fileID: 5704319345737988835, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5911213395812329245, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5911213395812329245, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6867085646348748786, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
       propertyPath: m_Pivot.x
@@ -2177,13 +2194,47 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7669909242915234565, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1087259295584339103}
   m_SourcePrefab: {fileID: 100100000, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
 --- !u!224 &1650740482129801545 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6867085646348748786, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
   m_PrefabInstance: {fileID: 5306456128399947451}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2581878058429158846 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7669909242915234565, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+  m_PrefabInstance: {fileID: 5306456128399947451}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1087259295584339103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2581878058429158846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ab1780e9436f94ba67d86b4bf2a98f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CartoonShakeEffect
+  idleRotateInterval: 1.5
+  idleRotationIntensity: 3
+  randomStartingT: 0
+--- !u!114 &5601035197138867923 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 296831228392579176, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+  m_PrefabInstance: {fileID: 5306456128399947451}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2581878058429158846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efe6e2872a806b04ab0ec13cf7346d67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitSprite
 --- !u!1001 &5588801918580921247
 PrefabInstance:
   m_ObjectHideFlags: 0

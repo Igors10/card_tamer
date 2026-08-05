@@ -95,7 +95,7 @@ public class ColorSelect : MonoBehaviour
         // coloring every doodle this color
         for (int i = 0; i < TitleScreen.instance.doodles.Length; i++)
         {
-            TitleScreen.instance.doodles[i].color = pencil.color;
+            TitleScreen.instance.doodles[i].RefreshColor(pencil.color, pencil.color);
         }
     }
 }

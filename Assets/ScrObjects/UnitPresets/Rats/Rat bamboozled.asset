@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
   - {fileID: 21300000, guid: a93ff3db2c5fa81438fbaf93827292ae, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: a09a30f67c20fc443b9ace09b0d311c5, type: 3}
   unitName: Rat bamboozled

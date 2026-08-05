@@ -53,7 +53,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float fadedAlpha;
     [SerializeField] GameObject unitUI;
     [SerializeField] Material selectMaterial;
-    Material defaultMaterial;
+    [SerializeField] Material defaultMaterial;
     int hierarchyIndex = 0;
 
     [Header("idle animation")]
