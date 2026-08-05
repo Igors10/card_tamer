@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 77f85110735b7e446b8de858f002477a
+guid: bc14a7b39a63d3f43b1e0dba094b4345
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6644324233019479917
-    second: "\u0417Princess frog_0"
+      213: 6639617541350586843
+    second: RS_talking1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\u0417Princess frog_0"
+      name: RS_talking1_0
       rect:
         serializedVersion: 2
-        x: 56
-        y: 47
-        width: 106
-        height: 113
+        x: 93
+        y: 0
+        width: 372
+        height: 303
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 398aa5e205e9ac3a0800000000000000
-      internalID: -6644324233019479917
+      spriteID: bd977a4c9f8a42c50800000000000000
+      internalID: 6639617541350586843
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\u0417Princess frog_0": -6644324233019479917
+      RS_talking1_0: 6639617541350586843
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

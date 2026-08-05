@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Workshop : MonoBehaviour
 {
@@ -14,10 +15,12 @@ public class Workshop : MonoBehaviour
     [Header("creating cards")]
     [SerializeField] GameObject cardCreationUI;
     [SerializeField] GameObject abilitySelectUI;
+    [SerializeField] GameObject secondaryColorSelectUI;
     [SerializeField] GameObject canvasUI;
     [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
     [SerializeField] TMP_InputField nameInput;
     [HideInInspector] public AbilityObj chosenAbility;
+    [HideInInspector] public Color chosenSecondColor;
     public DrawingTool drawingCanvas;
     [SerializeField] Sprite placeholderSprite;
 
@@ -109,6 +112,9 @@ public class Workshop : MonoBehaviour
         colorSelectUI.SetActive(false);
         GameManager.instance.managerUI.EnableWorkshop(true, false);
 
+        // creating starting hand for the opponent
+        if (GameManager.instance.opponent.isAI) GameManager.instance.opponent.AIplayer.CreateAIStartingHand();
+
         startingSequence = true;
         AbilityOptions();
     }
@@ -180,8 +186,19 @@ public class Workshop : MonoBehaviour
         // play Audio Effect
         AudioManager.instance.PlaySFX("ShopStarSFX");
 
-        // switching to drawing UI
+        // switching to second color UI
+        workshopHintText.text = "Pick second color for the card";
         abilitySelectUI.SetActive(false);
+        secondaryColorSelectUI.SetActive(true);
+    }
+
+    public void PickSecondaryColor(Color pickedColor)
+    {
+        // saving the picked color
+        chosenSecondColor = pickedColor;
+
+        // switching to drawing UI
+        secondaryColorSelectUI.SetActive(false);
         EnableDrawingCanvas();
     }
 
@@ -223,13 +240,13 @@ public class Workshop : MonoBehaviour
         }
         
         // creating the card and giving it to player
-        CreatureObj newCardData = newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility);
+        CreatureObj newCardData = newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility, chosenSecondColor);
 
         // if the canvas is empty applying a random unit sprite and name instead
         if (drawingCanvas.IsCanvasEmpty())
         {
             UnitPreset randomUnitPreset = GameManager.instance.cardDatabase.GetRandomBasicPreset();
-            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility);
+            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, chosenSecondColor);
         }
         // also checking if the minion is named
         else if (nameInput.text == "")
@@ -304,7 +321,7 @@ public class Workshop : MonoBehaviour
 
         // 7. Assign the data to the ScriptableObject
         newCardAsset.unitName = cardName;
-        newCardAsset.sprite = savedSprite;
+        //newCardAsset.sprite = savedSprite;                 <<<<<<<< !
         // (Assign any other default dev data here)
 
         // 8. Create the actual .asset file in the project folder

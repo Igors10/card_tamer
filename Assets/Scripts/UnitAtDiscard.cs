@@ -7,7 +7,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [Header("refs")]
     [SerializeField] Material defaultMaterial;
     [SerializeField] Material selectMaterial;
-    [SerializeField] Image sprite;
+    [SerializeField] UnitSprite sprite;
     [SerializeField] Image[] unitPiece;
     [SerializeField] CartoonShakeEffect cartoonShakeEffect;
     [SerializeField] HoverEffect hoverEffect;
@@ -36,7 +36,8 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (!GameManager.instance.yourTurn) return; // only during player's turn
 
         // color the unit as selectable
-        sprite.material = (isHover && GameManager.instance.discardManager.discardAvailable) ? selectMaterial : defaultMaterial;
+        Material newMaterial = (isHover && GameManager.instance.discardManager.discardAvailable) ? selectMaterial : defaultMaterial;
+        sprite.RefreshSpriteMaterial(newMaterial);
 
         // creating card preview above the unit
         Vector3 previewPos = GameManager.instance.discardManager.previewPoint.transform.position;
@@ -76,7 +77,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         for (int i = 0; i < unitPiece.Length; i++)
         {
             unitPiece[i].gameObject.SetActive(isDiscarded);
-            unitPiece[i].sprite = sprite.sprite;
+            //unitPiece[i].sprite = sprite.sprite;
         }
 
         sprite.enabled = !isDiscarded;

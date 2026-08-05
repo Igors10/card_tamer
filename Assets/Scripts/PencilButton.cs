@@ -24,12 +24,16 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     Vector3 defaultPos;
     Vector3 defaultScale;
+    Quaternion defaultRotation;
     void Start()
     {
         // getting current pencil material
         defaultMaterial = pencilColorImage.material;
         defaultScale = pencil.transform.localScale;
         defaultPos = pencil.transform.position;
+        defaultRotation = pencil.transform.localRotation;
+
+        OnHover(false);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -52,9 +56,6 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
         // enabling green outline while hovered over
         pencilColorImage.material = (isHovered) ? selectMaterial : defaultMaterial;
-
-        // triggering pencil highlight if it is a workshop pencil
-        if (workshopColorSelect != null) workshopColorSelect.HighlightPencil(pencil);
 
         // triggering upscale Animation
         if (upscaleOnHover)
@@ -129,7 +130,7 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (isSelected) Animations.instance.PopAnim(pencil, 0.18f, -0.12f);
 
         // setting rotation back to default when deselected
-        if (isSelected == false) pencil.transform.localRotation = Quaternion.Euler(0, 0, -90);
+        if (isSelected == false) pencil.transform.localRotation = defaultRotation; //Quaternion.Euler(0, 0, -90)
     }
 
     public void OffsetPencil(float offsetX)

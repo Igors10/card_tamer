@@ -16,7 +16,7 @@ public class Card : MonoBehaviour
     [Header("refs")]
     public Ability[] abilities = new Ability[1];
     [SerializeField] RectTransform rt;
-    [SerializeField] Image cardSprite;
+    [SerializeField] UnitSprite cardSprite;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] GameObject cardVisual;
     [SerializeField] Image cardBackground;
@@ -24,7 +24,7 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject specialIcon;
     [HideInInspector] public Unit unit;
     [HideInInspector] public Player player;
-    [SerializeField] DeathParticle deathParticle;
+    [SerializeField] DeathParticle deathParticle; 
 
     [Header("highlight")]
     [SerializeField] GameObject glowEffect;
@@ -105,8 +105,7 @@ public class Card : MonoBehaviour
         nameText.text = cardData.name;
 
         // SPRITE
-        cardSprite.sprite = cardData.unitSprite;
-        cardSprite.color = player.playerColor;
+        cardSprite.RefreshSprite(cardData.unitSprite, player.playerColor, cardData.secondaryColor);
 
         // BACKGROUND
         //cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);

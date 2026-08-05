@@ -12,7 +12,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
     bool shaking = false;
 
     [Header("refs")]
-    Image sprite;
+    [SerializeField] UnitSprite sprite;
     RectTransform rect;
     Coroutine currentAnim;
 
@@ -21,7 +21,6 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        sprite = GetComponent<Image>();
         rect = GetComponent<RectTransform>();
         AssignDoodleData();
     }
@@ -32,7 +31,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
         if (doodleData == null) doodleData = TitleScreen.instance.cardDatabase.GetRandomBasicPreset();
 
         // Sprite
-        sprite.sprite = doodleData.sprite;
+        sprite.RefreshSprite(doodleData.sprite, TitleScreen.instance.playerConfigObj.playerColor, TitleScreen.instance.playerConfigObj.playerColor);
     }
 
     void PlayDoodleSound()

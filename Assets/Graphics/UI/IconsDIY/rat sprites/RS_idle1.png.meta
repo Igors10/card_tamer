@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 48d5a2bf178bff247b106aeb19bb8896
+guid: 5432d7812cce7964d9fb4ca7ddbfd5d1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4048797990772462312
-    second: Worm educated_0
-  - first:
-      213: -5115007745619411322
-    second: Worm educated_1
-  - first:
-      213: -2051470265600686195
-    second: Worm educated_2
+      213: 4474542530999840477
+    second: RS_idle1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -43,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -52,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -106,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Worm educated_0
+      name: RS_idle1_0
       rect:
         serializedVersion: 2
-        x: 98
-        y: 83
-        width: 63
-        height: 93
+        x: 214
+        y: 0
+        width: 277
+        height: 322
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,52 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 81d21b8cda7cfc7c0800000000000000
-      internalID: -4048797990772462312
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Worm educated_1
-      rect:
-        serializedVersion: 2
-        x: 98
-        y: 60
-        width: 116
-        height: 62
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 68ebbfa4e87d309b0800000000000000
-      internalID: -5115007745619411322
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Worm educated_2
-      rect:
-        serializedVersion: 2
-        x: 127
-        y: 115
-        width: 83
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d87489f99a6b783e0800000000000000
-      internalID: -2051470265600686195
+      spriteID: dde6f9c89b4c81e30800000000000000
+      internalID: 4474542530999840477
       vertices: []
       indices: 
       edges: []
@@ -175,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -185,9 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Worm educated_0: -4048797990772462312
-      Worm educated_1: -5115007745619411322
-      Worm educated_2: -2051470265600686195
+      RS_idle1_0: 4474542530999840477
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

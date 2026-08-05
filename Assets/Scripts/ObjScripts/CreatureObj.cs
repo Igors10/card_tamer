@@ -5,7 +5,8 @@ using UnityEngine;
 public class CreatureObj : ScriptableObject
 {
     public string creatureName;
-    public Sprite unitSprite;
+    public Sprite[] unitSprite;
+    public Color secondaryColor;
     //public FoodType[] cost;
     public AbilityObj[] ability = new AbilityObj[1];
     

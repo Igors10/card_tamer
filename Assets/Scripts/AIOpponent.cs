@@ -29,8 +29,6 @@ public class AIOpponent : MonoBehaviour
     {
         // picking random color
         playerObj.playerColor = GameManager.instance.cardDatabase.allPlayerColors[Random.Range(0, GameManager.instance.cardDatabase.allPlayerColors.Count)];
-
-        CreateAIStartingHand();
     }
 
     /// <summary>
@@ -43,7 +41,7 @@ public class AIOpponent : MonoBehaviour
         playerObj.playerUI.playerName.text = chosenIdentity.opponentName + " (Bot)";
     }
 
-    void CreateAIStartingHand()
+    public void CreateAIStartingHand()
     {
         generator = GameManager.instance.cardGenerator;
 
@@ -65,7 +63,7 @@ public class AIOpponent : MonoBehaviour
         basicUnitPresets.Remove(newUnitPreset);
 
         // constructing cardData
-        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility);
+        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility, Colors.instance.GetRandomSecondaryColor());
         // Adding card to the player
         generator.CreateCard(newCreatureObj, playerObj);
     }
@@ -82,7 +80,7 @@ public class AIOpponent : MonoBehaviour
         specialUnitPresets.Remove(newUnitPreset);
 
         // constructing cardData
-        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility);
+        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility, Colors.instance.GetRandomSecondaryColor());
         // Adding card to the player
         generator.CreateCard(newCreatureObj, playerObj);
     }

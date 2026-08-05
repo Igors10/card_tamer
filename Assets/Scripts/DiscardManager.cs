@@ -14,12 +14,12 @@ public class DiscardManager : MonoBehaviour
 
     [Header("refs")]
     [SerializeField] DeathAnim death;
-    [SerializeField] Image[] units;
+    [SerializeField] UnitSprite[] units;
     [SerializeField] GameObject unitOffscreenPoint;
     public GameObject previewPoint;
     [SerializeField] TextMeshProUGUI discardCounter;
 
-    List<Image> currentUnits = new List<Image>();
+    List<UnitSprite> currentUnits = new List<UnitSprite>();
     int unitsDiscarded = 0;
     int unitsToDiscard = 0;
     [HideInInspector] public bool discardAvailable = false;
@@ -66,8 +66,7 @@ public class DiscardManager : MonoBehaviour
         {
             // activating units
             units[i].gameObject.SetActive(true);
-            units[i].sprite = player.cardsInDiscard[i].cardData.unitSprite;
-            units[i].color = player.playerColor;
+            units[i].RefreshSprite(player.cardsInDiscard[i].cardData.unitSprite, player.playerColor, player.cardsInDiscard[i].cardData.secondaryColor);
             units[i].GetComponent<UnitAtDiscard>().storedCard = player.cardsInDiscard[i];
             units[i].GetComponent<UnitAtDiscard>().Discard(false);
             currentUnits.Add(units[i]);
@@ -83,7 +82,7 @@ public class DiscardManager : MonoBehaviour
 
         // MOVING UNITS IN
         // all units start off screen
-        foreach (Image unit in currentUnits)
+        foreach (UnitSprite unit in currentUnits)
         {
             unit.gameObject.transform.position = unitOffscreenPoint.transform.position;
         }
@@ -126,7 +125,7 @@ public class DiscardManager : MonoBehaviour
         while (GameManager.instance.managerUI.stateTransitionObj.activeSelf) yield return null;
 
         // MAKING UNITS DISAPPEAR
-        foreach (Image unit in currentUnits) unit.gameObject.SetActive(false);
+        foreach (UnitSprite unit in currentUnits) unit.gameObject.SetActive(false);
 
         // resetting discard vals
         currentUnits.Clear();

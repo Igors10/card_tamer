@@ -10,7 +10,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [HideInInspector] public Card card;
 
     [Header("refs")]
-    public Image sprite;
+    public UnitSprite sprite;
     [SerializeField] TextMeshProUGUI healthValue;
     [HideInInspector] public Field currentField;
     public OrderMarker orderMarker;
@@ -83,9 +83,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // Getting card data
         card = cardToInitialize;
         cardToInitialize.unit = this;
-        sprite.sprite = card.cardData.unitSprite;
         RefreshUnitVisuals();
-        defaultMaterial = sprite.material;
+        sprite.RefreshSpriteMaterial(defaultMaterial);
 
         // Setting field position
         currentField = field;
@@ -108,13 +107,13 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         else powerUI.SetActive(false);
 
         // COLOR
-        sprite.color = card.player.playerColor;
+        sprite.RefreshSprite(card.cardData.unitSprite, card.player.playerColor, card.cardData.secondaryColor);
 
         // FADE
         unitUI.SetActive(!faded);
-        Color spriteColor = (faded) ? new Color(sprite.color.r, sprite.color.g, sprite.color.b, fadedAlpha) : new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
-        sprite.color = spriteColor;
-        stunIndicator.GetComponent<Image>().color = new Color(1f, 1f, 1f, spriteColor.a);
+        float spriteAlpha = (faded) ? fadedAlpha : 1f;
+        sprite.SetSpriteAlpha(spriteAlpha);
+        stunIndicator.GetComponent<Image>().color = new Color(1f, 1f, 1f, spriteAlpha);
         // cancelling card preview if it was on right before fading
         if (faded) 
         {

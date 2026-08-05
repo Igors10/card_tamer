@@ -93,13 +93,14 @@ public class CardGenerator : MonoBehaviour
     }
 
     // creates new card scriptable object (temp before I remake cards into c# classes)
-    public CreatureObj ConstructNewCard(string cardName, Sprite cardSprite, AbilityObj cardAbility)
+    public CreatureObj ConstructNewCard(string cardName, Sprite[] cardSprite, AbilityObj cardAbility, Color secondaryColor)
     {
         CreatureObj newCard = ScriptableObject.CreateInstance<CreatureObj>();
 
         newCard.name = cardName;
         newCard.unitSprite = cardSprite;
         newCard.ability[0] = cardAbility;
+        newCard.secondaryColor = secondaryColor;
 
         return newCard;
     }

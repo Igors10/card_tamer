@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 041a10f06e0bf694493b7678f0bfdc8e, type: 3}
   m_Name: Purple guy
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
-  sprite: {fileID: 21300000, guid: 60bfedfd6e46ed946a2282ac85f91fa4, type: 3}
+  sprite:
+  - {fileID: 21300000, guid: 60bfedfd6e46ed946a2282ac85f91fa4, type: 3}
+  - {fileID: 0}
   unitName: Purple guy

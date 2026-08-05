@@ -17,7 +17,7 @@ public class ManagerUI : MonoBehaviour
     public Workshop workshop;
     [SerializeField] TextMeshProUGUI stateTransitionText;
     public GameObject stateTransitionObj;
-    [SerializeField] Image[] gameOverDoodles;
+    [SerializeField] UnitSprite[] gameOverDoodles;
 
     [Header("card preview")]
     [SerializeField] Card previewCard;
@@ -110,8 +110,7 @@ public class ManagerUI : MonoBehaviour
         {
             // copying sprites of units to doodles
             gameOverDoodles[i].gameObject.SetActive(true);
-            gameOverDoodles[i].sprite = winner.cardsOnField[i].cardData.unitSprite;
-            gameOverDoodles[i].color = winner.playerColor;
+            gameOverDoodles[i].RefreshSprite(winner.cardsOnField[i].cardData.unitSprite, winner.playerColor, winner.cardsOnField[i].cardData.secondaryColor);
         }
     }
 

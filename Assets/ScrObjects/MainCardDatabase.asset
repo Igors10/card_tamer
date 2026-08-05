@@ -14,9 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardDatabase
   cardSets:
   - {fileID: 11400000, guid: bcfa6b8de9f544d43a4d42cb57b575a5, type: 2}
-  - {fileID: 11400000, guid: b9ddd5ef177891747863c482c48420ce, type: 2}
-  - {fileID: 11400000, guid: a7f2b6ef2c1c4c944a4b1263df649bee, type: 2}
   - {fileID: 11400000, guid: 183f2cd8497c4e94a9c35388474abaee, type: 2}
+  - {fileID: 11400000, guid: a7f2b6ef2c1c4c944a4b1263df649bee, type: 2}
   allPlayerColors:
   - {r: 0.18431373, g: 0.73333335, b: 0.2392157, a: 1}
   - {r: 0.72156864, g: 0.1254902, b: 0.53333336, a: 1}

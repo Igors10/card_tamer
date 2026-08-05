@@ -68,9 +68,6 @@ public class WorkshopColorSelect : MonoBehaviour
         // selecting new pencil
         chosenPencil.SelectPencil(true);
 
-        // moves the other pencils aside
-        //OffsetPencils();
-
         // enabling select button
         selectButton.SetActive(true);
     }
@@ -106,6 +103,9 @@ public class WorkshopColorSelect : MonoBehaviour
         // locking the color
         GameManager.instance.player.playerColor = selectedPencil.pencilColorImage.color;
         GameManager.instance.player.config.playerColor = selectedPencil.pencilColorImage.color;
+
+        // after locking the color game can create 3 secondary colors
+        Colors.instance.GenerateRandomSecondaryColors();
 
         // start creating player hand
         GameManager.instance.managerUI.workshop.LaunchStartingSequence();
