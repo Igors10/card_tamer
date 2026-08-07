@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: icarus
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: 1cac31f3d03415b48a1db5cd3fdef80d, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: 0bcd0663fc6078b4cb12139db368c0e0, type: 3}
+  - {fileID: 21300000, guid: d9e1814875866b348ac93c3198d37d6c, type: 3}
   unitName: icarus

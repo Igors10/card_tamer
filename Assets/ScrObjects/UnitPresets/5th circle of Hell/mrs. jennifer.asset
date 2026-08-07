@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: mrs. jennifer
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: a6998c3c3e24bbe4f87536e337648e54, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: 9b1dfa7ce4a29414c9430ea79d015c58, type: 3}
+  - {fileID: 21300000, guid: 79f0088b1fb156e42900cfce324c3217, type: 3}
   unitName: mrs. jennifer

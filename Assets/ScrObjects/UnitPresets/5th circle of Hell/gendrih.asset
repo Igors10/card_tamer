@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: gendrih
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: 57009338351d6a44781cdaa22cc7ee79, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: 697da22a2aa8e1f41b3b109179f8bfe8, type: 3}
+  - {fileID: 21300000, guid: 047d82601039dcf42b9a086bd0d1578f, type: 3}
   unitName: gendrih

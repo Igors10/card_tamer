@@ -230,7 +230,7 @@ public class Workshop : MonoBehaviour
         // if in developers mode save the card
         if (drawingCanvas.developersMode)
         {
-            SaveCardToProject(nameInput.text, drawingCanvas.drawingTexture);
+            SaveCardToProject(nameInput.text, drawingCanvas.GetTextures());
 
             // reset the canvas
             nameInput.text = "";
@@ -238,9 +238,18 @@ public class Workshop : MonoBehaviour
 
             return;
         }
-        
+
         // creating the card and giving it to player
-        CreatureObj newCardData = newCardData = generator.ConstructNewCard(nameInput.text, drawingCanvas.GetSprite(), chosenAbility, chosenSecondColor);
+        CreatureObj newCardData;
+
+        Sprite[] newCardSprites = new Sprite[2];
+        Texture2D[] canvasTextures = drawingCanvas.GetTextures();
+        for (int i = 0; i < newCardSprites.Length; i++)
+        {
+            if (drawingCanvas.IsCanvasEmpty() == false && canvasTextures[i] != null) newCardSprites[i] = Sprite.Create(canvasTextures[i], new Rect(0, 0, drawingCanvas.textureSize, drawingCanvas.textureSize), new Vector2(0.5f, 0.5f));
+        }
+      
+        newCardData = newCardData = generator.ConstructNewCard(nameInput.text, newCardSprites, chosenAbility, chosenSecondColor);
 
         // if the canvas is empty applying a random unit sprite and name instead
         if (drawingCanvas.IsCanvasEmpty())
@@ -285,56 +294,73 @@ public class Workshop : MonoBehaviour
         }
     }
 
-    public void SaveCardToProject(string cardName, Texture2D drawnTexture)
+    // Calling the function:
+    // Texture2D[] splitTextures = drawingCanvas.GetTwoToneTextures();
+    // if (splitTextures != null) SaveCardToProject(nameInput.text, splitTextures[0], splitTextures[1]);
+
+    public void SaveCardToProject(string cardName, Texture2D[] cardTextureArray)
     {
 #if UNITY_EDITOR
-        // 1. Define where the files will be saved in your project
+        // 1. Define folder and file paths for both layers
         string spriteFolderPath = "Assets/Graphics/CardGraphics/UnitSprites/";
         string presetFolderPath = "Assets/ScrObjects/UnitPresets/";
 
-        string spriteFilePath = spriteFolderPath + cardName + ".png";
-        string presetFilePath = presetFolderPath + cardName + ".asset";
+        string primaryPath = $"{spriteFolderPath}{cardName}_1.png";
+        string secondaryPath = $"{spriteFolderPath}{cardName}_2.png";
+        string presetFilePath = $"{presetFolderPath}{cardName}.asset";
 
-        // 2. Save the Texture2D as a PNG file
-        byte[] textureBytes = drawnTexture.EncodeToPNG();
-        File.WriteAllBytes(spriteFilePath, textureBytes);
+        // 2. Encode and save BOTH textures as PNG files 
+        File.WriteAllBytes(primaryPath, cardTextureArray[0].EncodeToPNG()); 
+        File.WriteAllBytes(secondaryPath, cardTextureArray[1].EncodeToPNG()); 
 
-        // 3. Force Unity to recognize the new PNG file we just created
+        // 3. Force Unity to recognize the new PNG files
+        AssetDatabase.Refresh(); 
+
+        // 4. Set import settings for both primary and secondary PNGs
+        ConfigureSpriteImporter(primaryPath);
+        ConfigureSpriteImporter(secondaryPath);
+
+        // Refresh database again to ensure Sprite sub-assets are generated
         AssetDatabase.Refresh();
 
-        // 4. Change the PNG's import settings so Unity treats it as a 2D Sprite, not a 3D Texture
-        TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(spriteFilePath);
+        // 5. Load the newly imported Sprite assets
+        Sprite[] presetSpritesArray = new Sprite[2];
+        presetSpritesArray[0] = AssetDatabase.LoadAssetAtPath<Sprite>(primaryPath);
+        presetSpritesArray[1] = AssetDatabase.LoadAssetAtPath<Sprite>(secondaryPath);
+
+        // 6. Create a new instance of your ScriptableObject 
+        UnitPreset newCardAsset = ScriptableObject.CreateInstance<UnitPreset>();
+
+        // 7. Assign both layer sprites to the ScriptableObject 
+        newCardAsset.unitName = cardName;
+        newCardAsset.sprite = presetSpritesArray;   
+        
+        // 8. Create the actual .asset file in the project folder 
+        AssetDatabase.CreateAsset(newCardAsset, presetFilePath);
+
+        // 9. Save changes and focus in Inspector 
+        AssetDatabase.SaveAssets(); 
+        EditorUtility.FocusProjectWindow();
+        Selection.activeObject = newCardAsset; 
+
+        Debug.Log($"Successfully created dual-layer preset for: {cardName}");
+#else
+    Debug.LogWarning("Card saving is only supported inside the Unity Editor.");
+#endif
+    }
+
+    // Helper method to keep importer logic clean
+    private void ConfigureSpriteImporter(string filePath)
+    {
+#if UNITY_EDITOR
+        TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(filePath);
         if (importer != null)
         {
-            importer.textureType = TextureImporterType.Sprite;
+            importer.textureType = TextureImporterType.Sprite; // [cite: 232]
             importer.spriteImportMode = SpriteImportMode.Single;
-            // Optional: prevent blurry pixel art by setting filter mode to Point
             importer.filterMode = FilterMode.Point;
             importer.SaveAndReimport();
         }
-
-        // 5. Load the newly imported Sprite asset
-        Sprite savedSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spriteFilePath);
-
-        // 6. Create a new instance of your ScriptableObject
-        UnitPreset newCardAsset = ScriptableObject.CreateInstance<UnitPreset>();
-
-        // 7. Assign the data to the ScriptableObject
-        newCardAsset.unitName = cardName;
-        //newCardAsset.sprite = savedSprite;                 <<<<<<<< !
-        // (Assign any other default dev data here)
-
-        // 8. Create the actual .asset file in the project folder
-        AssetDatabase.CreateAsset(newCardAsset, presetFilePath);
-
-        // 9. Save all changes and focus the project window on the new asset
-        AssetDatabase.SaveAssets();
-        EditorUtility.FocusProjectWindow();
-        Selection.activeObject = newCardAsset;
-
-        Debug.Log($"Successfully created and saved developer card: {cardName}");
-#else
-        Debug.LogWarning("Card saving is only supported inside the Unity Editor.");
 #endif
     }
 

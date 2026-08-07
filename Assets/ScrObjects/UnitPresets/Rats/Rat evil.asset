@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Rat evil
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: ef73d47001cbf054f82cd79c25e30b4b, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: cf9de6e11b7d5d74b8b1875998805089, type: 3}
+  - {fileID: 21300000, guid: 8b089a8f860b9544f8b8942bab66c02b, type: 3}
   unitName: Rat evil

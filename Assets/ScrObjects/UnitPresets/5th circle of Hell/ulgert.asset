@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ulgert
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: 0b94f43634216d34a8fff4516c507dd5, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: c2ee585eb3ea64646bbab0e51cc1e05e, type: 3}
+  - {fileID: 21300000, guid: fcee3872a412ea04686518dd07fb380c, type: 3}
   unitName: ulgert

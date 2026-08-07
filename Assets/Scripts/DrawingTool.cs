@@ -39,12 +39,8 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         // setting default brush size
         currentBrushSize = smallBrushSize;
 
-        // getting drawing colors
-        primaryColor = GameManager.instance.player.playerColor;
-        primaryColorImage.color = primaryColor;
-
-        secondaryColor = GameManager.instance.managerUI.workshop.chosenSecondColor;
-        secondaryColorImage.color = secondaryColor;
+        // setting the colors
+        SetCanvasColors(GameManager.instance.player.playerColor, GameManager.instance.managerUI.workshop.chosenSecondColor);
 
         ToggleBrushColor(true);
     }
@@ -57,6 +53,19 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             case "normal": currentBrushSize = normalBrushSize; break;
             case "big": currentBrushSize = bigBrushSize; break;
         }
+    }
+
+    void SetCanvasColors(Color primaryCol, Color secondaryCol)
+    {
+        // getting drawing colors
+        primaryColor = primaryCol;
+        primaryColorImage.color = primaryColor;
+
+        secondaryColor = secondaryCol;
+        secondaryColorImage.color = secondaryColor;
+
+        // selecting main color
+        ToggleBrushColor(true);
     }
 
     public void ToggleBrushColor(bool selectPrimary)
@@ -207,7 +216,9 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         ClearCanvas();
         developersMode = !developersMode;
         canvasBG.color = (canvasBG.color == Color.black) ? Color.white : Color.black;
-        brushColor = (brushColor == GameManager.instance.player.playerColor) ? Color.white : GameManager.instance.player.playerColor;
+
+        if (developersMode) SetCanvasColors(Color.white, Color.gray);
+        else SetCanvasColors(GameManager.instance.player.playerColor, GameManager.instance.managerUI.workshop.chosenSecondColor);
     }
 
     // === Getting the sprite ===
@@ -239,14 +250,13 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     /// <param name="primaryColor"></param>
     /// <param name="secondaryColor"></param>
     /// <returns></returns>
-    public Sprite[] GetSprite()
+    public Texture2D[] GetTextures()
     {
-        if (IsCanvasEmpty()) return new Sprite[0];
+        if (IsCanvasEmpty()) return null;
 
-        Color[] sourcePixels = drawingTexture.GetPixels();
+        Color[] sourcePixels = drawingTexture.GetPixels(); // [cite: 37]
         int length = sourcePixels.Length;
 
-        // Create pixel arrays for the two separate layers
         Color[] primaryPixels = new Color[length];
         Color[] secondaryPixels = new Color[length];
 
@@ -254,7 +264,6 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         {
             Color p = sourcePixels[i];
 
-            // Skip transparent pixels
             if (p.a < 0.1f)
             {
                 primaryPixels[i] = Color.clear;
@@ -262,42 +271,32 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                 continue;
             }
 
-            // Check if pixel belongs to Color 1 or Color 2 (with a small tolerance threshold)
             if (IsColorMatch(p, primaryColor))
             {
-                // Whitened for primary layer
-                primaryPixels[i] = new Color(1f, 1f, 1f, p.a);
+                primaryPixels[i] = new Color(1f, 1f, 1f, p.a); // [cite: 38]
                 secondaryPixels[i] = Color.clear;
             }
             else if (IsColorMatch(p, secondaryColor))
             {
-                // Whitened for secondary layer
                 primaryPixels[i] = Color.clear;
-                secondaryPixels[i] = new Color(1f, 1f, 1f, p.a);
+                secondaryPixels[i] = new Color(1f, 1f, 1f, p.a); // [cite: 38]
             }
             else
             {
-                // Fallback for blending/anti-aliased edges if any
                 primaryPixels[i] = Color.clear;
                 secondaryPixels[i] = Color.clear;
             }
         }
 
-        // Create separate Texture2Ds for each layer
         Texture2D primaryTex = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false);
         primaryTex.SetPixels(primaryPixels);
-        primaryTex.Apply();
+        primaryTex.Apply(); // [cite: 39]
 
         Texture2D secondaryTex = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false);
         secondaryTex.SetPixels(secondaryPixels);
-        secondaryTex.Apply();
+        secondaryTex.Apply(); // [cite: 39]
 
-        // Generate and return both sprites
-        Sprite[] twoColorSprites = new Sprite[2];
-        twoColorSprites[0] = Sprite.Create(primaryTex, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
-        twoColorSprites[1] = Sprite.Create(secondaryTex, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
-
-        return twoColorSprites;
+        return new Texture2D[] { primaryTex, secondaryTex };
     }
 
     // Helper to account for tiny floating-point variations when comparing colors

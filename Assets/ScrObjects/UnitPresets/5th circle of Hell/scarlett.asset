@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: scarlett
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: bafd9bcb3acde7d47879fe0b1d6641a1, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: 46925bc412c77ed4a931f502da7bf924, type: 3}
+  - {fileID: 21300000, guid: 410ec8358af68824bbfb1cc816ee22f0, type: 3}
   unitName: scarlett

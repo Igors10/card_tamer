@@ -7,7 +7,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [Header("refs")]
     [SerializeField] Material defaultMaterial;
     [SerializeField] Material selectMaterial;
-    [SerializeField] UnitSprite sprite;
+    public UnitSprite sprite;
     [SerializeField] Image[] unitPiece;
     [SerializeField] CartoonShakeEffect cartoonShakeEffect;
     [SerializeField] HoverEffect hoverEffect;

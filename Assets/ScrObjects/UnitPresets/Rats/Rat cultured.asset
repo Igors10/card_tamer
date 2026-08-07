@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Rat cultured
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: a43b39c7a2ded2c4daf40771a5cdcc95, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: de429270544e37c42b9c7731e63d26f7, type: 3}
+  - {fileID: 21300000, guid: 3c2e4693136c5a54b954139bd81b5127, type: 3}
   unitName: Rat cultured

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Rat smart
   m_EditorClassIdentifier: Assembly-CSharp::UnitPreset
   sprite:
-  - {fileID: 21300000, guid: d1312f5e7a68e6a4596cc3a06560698d, type: 3}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: 82b52a3e3038f1f429042f49cfe69c6f, type: 3}
+  - {fileID: 21300000, guid: 93456cf050743b044b7a277c9d827299, type: 3}
   unitName: Rat smart

@@ -14,12 +14,12 @@ public class DiscardManager : MonoBehaviour
 
     [Header("refs")]
     [SerializeField] DeathAnim death;
-    [SerializeField] UnitSprite[] units;
+    [SerializeField] UnitAtDiscard[] units;
     [SerializeField] GameObject unitOffscreenPoint;
     public GameObject previewPoint;
     [SerializeField] TextMeshProUGUI discardCounter;
 
-    List<UnitSprite> currentUnits = new List<UnitSprite>();
+    List<UnitAtDiscard> currentUnits = new List<UnitAtDiscard>();
     int unitsDiscarded = 0;
     int unitsToDiscard = 0;
     [HideInInspector] public bool discardAvailable = false;
@@ -66,9 +66,9 @@ public class DiscardManager : MonoBehaviour
         {
             // activating units
             units[i].gameObject.SetActive(true);
-            units[i].RefreshSprite(player.cardsInDiscard[i].cardData.unitSprite, player.playerColor, player.cardsInDiscard[i].cardData.secondaryColor);
-            units[i].GetComponent<UnitAtDiscard>().storedCard = player.cardsInDiscard[i];
-            units[i].GetComponent<UnitAtDiscard>().Discard(false);
+            units[i].sprite.RefreshSprite(player.cardsInDiscard[i].cardData.unitSprite, player.playerColor, player.cardsInDiscard[i].cardData.secondaryColor);
+            units[i].storedCard = player.cardsInDiscard[i];
+            units[i].Discard(false);
             currentUnits.Add(units[i]);
 
             // assigning units to a position
@@ -82,7 +82,7 @@ public class DiscardManager : MonoBehaviour
 
         // MOVING UNITS IN
         // all units start off screen
-        foreach (UnitSprite unit in currentUnits)
+        foreach (UnitAtDiscard unit in currentUnits)
         {
             unit.gameObject.transform.position = unitOffscreenPoint.transform.position;
         }
@@ -125,7 +125,7 @@ public class DiscardManager : MonoBehaviour
         while (GameManager.instance.managerUI.stateTransitionObj.activeSelf) yield return null;
 
         // MAKING UNITS DISAPPEAR
-        foreach (UnitSprite unit in currentUnits) unit.gameObject.SetActive(false);
+        foreach (UnitAtDiscard unit in currentUnits) unit.gameObject.SetActive(false);
 
         // resetting discard vals
         currentUnits.Clear();
@@ -158,7 +158,7 @@ public class DiscardManager : MonoBehaviour
             do { randomUnitID = Random.Range(0, currentUnits.Count); } while (idsChosen.Contains(randomUnitID));
             idsChosen.Add(randomUnitID);
 
-            DiscardUnit(currentUnits[randomUnitID].GetComponent<UnitAtDiscard>());
+            DiscardUnit(currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>());
             yield return new WaitForSeconds(deathChoosingTime);
         }
     }
