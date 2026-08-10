@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Sting
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: <color=red>+3</color> power,  Knocks out itself at the end
-    of battle
+  abilityDescription: +3 power,  Knocks out itself at the end of battle
+  isSpecial: 0
   effect: {fileID: 2123092775877491577, guid: 7b8200184dc9ec04aae0f70916828e0f, type: 3}

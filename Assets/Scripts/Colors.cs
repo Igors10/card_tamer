@@ -47,6 +47,17 @@ public class Colors : MonoBehaviour
         }
     }
 
+    public int GetSecondaryColorID(Color colorToIdentify)
+    {
+        int secondaryColorID = 0;
+
+        for (int i = 0; i < secondaryColorList.Count; i++)
+        {
+            if (colorToIdentify == secondaryColorList[i]) secondaryColorID = i;
+        }
+        return secondaryColorID;
+    }
+
     /// <summary>
     /// Checks if color is already used somewhere
     /// </summary>

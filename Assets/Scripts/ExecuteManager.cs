@@ -18,8 +18,6 @@ public class ExecuteManager : MonoBehaviour
     [Header("revealed card params")]
     [HideInInspector] public bool readyRevealCard = false;
     Vector3 revealedCardScale = new Vector3(1.8f, 1.8f, 1f);
-    //[SerializeField] float revealFadeInTime;
-    //[SerializeField] float revealFadeOutTime;
 
     [Header("card play params")]
     [SerializeField] float zoomIntensity;
@@ -69,9 +67,9 @@ public class ExecuteManager : MonoBehaviour
         GameManager.instance.fieldManager.Refresh();
     }
 
-    public void CardUseAbl(Card card, Ability ability)
+    public void CardUseAbl(Card card)
     {
-        StartCoroutine(CardUseAbility(card, ability));
+        StartCoroutine(CardUseAbility(card));
     }
     /// <summary>
     /// Triggers all necessary animations and switches after an ability is used
@@ -79,7 +77,7 @@ public class ExecuteManager : MonoBehaviour
     /// <param name="card"></param>
     /// <param name="ability"></param>
     /// <returns></returns>
-    public IEnumerator CardUseAbility(Card card, Ability ability)
+    public IEnumerator CardUseAbility(Card card)
     {
         // checking if the card being played first time this game
         bool playedFirstTime = !playedCardNames.Contains(card.cardData.name);
@@ -98,7 +96,7 @@ public class ExecuteManager : MonoBehaviour
         }
         
         // Playing unit animation
-        yield return StartCoroutine(card.unit.EntranceAnimation(ability));
+        yield return StartCoroutine(card.unit.EntranceAnimation());
 
         // Deactivating the card
         GameManager.instance.executeManager.StopRevealCard();

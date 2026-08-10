@@ -7,9 +7,9 @@ public class CreatureObj : ScriptableObject
     public string creatureName;
     public Sprite[] unitSprite = new Sprite[2];
     public Color secondaryColor;
-    //public FoodType[] cost;
+    public Color abilityColor;
     public AbilityObj[] ability = new AbilityObj[1];
-    
+
     // doodle varialbes
     public Sprite doodleSprite;
     public AudioClip[] audio = new AudioClip[0];

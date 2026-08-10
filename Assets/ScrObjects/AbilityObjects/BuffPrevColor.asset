@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
-  m_Name: Fangs
+  m_Name: BuffPrevColor
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: When an opponent rolls a [4], they get -2 power
+  abilityDescription: Previous {color} card gets +3 power
   isSpecial: 0
-  effect: {fileID: 7734693108408952331, guid: 2a72c4b068a077049b015a9d6c8bfd95, type: 3}
+  effect: {fileID: 2691227342308127848, guid: 71eb7c89971a72448bb4851b082940ac, type: 3}

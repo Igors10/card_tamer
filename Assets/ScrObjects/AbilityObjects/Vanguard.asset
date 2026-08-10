@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Vanguard
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: <color=red>+2 </color> power if is on an empty field
+  abilityDescription: +2 power if is on an empty field
+  isSpecial: 0
   effect: {fileID: 5888166341847222899, guid: e59435871228028418cee22e546c0cca, type: 3}

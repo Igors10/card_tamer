@@ -63,7 +63,8 @@ public class AIOpponent : MonoBehaviour
         basicUnitPresets.Remove(newUnitPreset);
 
         // constructing cardData
-        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility, Colors.instance.GetRandomSecondaryColor());
+        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility, 
+            Colors.instance.GetRandomSecondaryColor(), Colors.instance.GetRandomSecondaryColor());
         // Adding card to the player
         generator.CreateCard(newCreatureObj, playerObj);
     }
@@ -80,7 +81,8 @@ public class AIOpponent : MonoBehaviour
         specialUnitPresets.Remove(newUnitPreset);
 
         // constructing cardData
-        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility, Colors.instance.GetRandomSecondaryColor());
+        CreatureObj newCreatureObj = generator.ConstructNewCard(newUnitPreset.unitName, newUnitPreset.sprite, newAbility, 
+            Colors.instance.GetRandomSecondaryColor(), Colors.instance.GetRandomSecondaryColor());
         // Adding card to the player
         generator.CreateCard(newCreatureObj, playerObj);
     }

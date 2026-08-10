@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Turbo
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: <color=red>+1</color> power when a [2] is rolled
+  abilityDescription: +1 power when a [2] is rolled
+  isSpecial: 0
   effect: {fileID: 8146565597263968891, guid: fb6a1920fe9dd1d48be3facd1382277d, type: 3}

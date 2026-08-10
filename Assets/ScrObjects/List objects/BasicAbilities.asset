@@ -14,11 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbiltiyList
   abilityList:
   - {fileID: 11400000, guid: c35e2c253128d614a9cb42d491153a9f, type: 2}
-  - {fileID: 11400000, guid: 2727b98ed1e8a6e40957e96f44e38c6f, type: 2}
-  - {fileID: 11400000, guid: 3e15bc25600b060479840e4e61e3904a, type: 2}
-  - {fileID: 11400000, guid: d152bfda6ea698347b0c48d71445a93d, type: 2}
+  - {fileID: 11400000, guid: 6c687b48a48fa2044be8f33f91f9167d, type: 2}
+  - {fileID: 11400000, guid: 402027ffe8a7b7a498d018c0ea046d6b, type: 2}
   - {fileID: 11400000, guid: e36b4e1df2d56bd4ebd461ca040fce37, type: 2}
   - {fileID: 11400000, guid: 2fe7b715e9945ab4e8e21bb82950ba0c, type: 2}
-  - {fileID: 11400000, guid: 402027ffe8a7b7a498d018c0ea046d6b, type: 2}
-  - {fileID: 11400000, guid: a35493e6b5561c848a2f7f19b0db36bd, type: 2}
-  - {fileID: 11400000, guid: 7336f75a1ce72a84fa73d6384533863e, type: 2}
+  - {fileID: 11400000, guid: 19a409abc5bc53841a1c930114e4c356, type: 2}
+  - {fileID: 11400000, guid: 16a62eb1130c59b4ba9be34a2c6098ba, type: 2}

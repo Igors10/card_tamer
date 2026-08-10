@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEditor;
 
 public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -10,7 +11,7 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public GameObject pencil;
     [SerializeField] Material selectMaterial;
     [HideInInspector] public WorkshopColorSelect workshopColorSelect; // only assigned to pencils in the workshop
-    [HideInInspector] public Material defaultMaterial;
+    public Material defaultMaterial;
     public Button button;
     [SerializeField] CartoonShakeEffect cartoonShakeEffect;
 
@@ -23,18 +24,26 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     [HideInInspector] public bool selected;
 
     Vector3 defaultPos;
-    Vector3 defaultScale;
+    Vector3 defaultScale = new Vector3(1.6f, 1.6f, 1f);
     Quaternion defaultRotation;
+    
+    void Awake()
+    {
+        defaultScale = pencil.transform.localScale;
+        defaultRotation = pencil.transform.localRotation;
+    }
+
     void Start()
     {
         // getting current pencil material
-        defaultMaterial = pencilColorImage.material;
-        defaultScale = pencil.transform.localScale;
         defaultPos = pencil.transform.position;
-        defaultRotation = pencil.transform.localRotation;
+    }
 
+    void OnEnable()
+    {
         OnHover(false);
     }
+
 
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -46,7 +55,7 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         OnHover(false);
     }
 
-    void OnHover(bool isHovered)
+    public void OnHover(bool isHovered)
     {
         isHoveredOver = isHovered;
         if (selected) return;
@@ -54,8 +63,13 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         // playing SFX when hovering over only
         if (isHovered) AudioManager.instance.PlaySFX("OnHoverSFX", 0.25f);
 
+        Highlight(isHovered);
+    }
+
+    public void Highlight(bool highlight)
+    {
         // enabling green outline while hovered over
-        pencilColorImage.material = (isHovered) ? selectMaterial : defaultMaterial;
+        pencilColorImage.material = (highlight) ? selectMaterial : defaultMaterial;
 
         // triggering upscale Animation
         if (upscaleOnHover)
@@ -64,6 +78,7 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             currentUpscale = StartCoroutine(UpscaleEffect());
         }
     }
+   
 
     /// <summary>
     /// Upscales the pencil while hovered and downscales it back when released
@@ -113,11 +128,11 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     /// Visually marking pencil as selected
     /// </summary>
     /// <param name="isSelected"></param>
-    public void SelectPencil(bool isSelected)
+    public void SelectPencil(bool isSelected, bool rotationToDefault = true)
     {
         // marking selected and passing this pencil back to workshopColorSelect
         selected = isSelected;
-        workshopColorSelect.selectedPencil = this;
+        if (workshopColorSelect != null) workshopColorSelect.selectedPencil = this;
 
         // select outline
         pencilColorImage.material = (isSelected) ? selectMaterial : defaultMaterial;
@@ -130,7 +145,7 @@ public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (isSelected) Animations.instance.PopAnim(pencil, 0.18f, -0.12f);
 
         // setting rotation back to default when deselected
-        if (isSelected == false) pencil.transform.localRotation = defaultRotation; //Quaternion.Euler(0, 0, -90)
+        if (isSelected == false && rotationToDefault) pencil.transform.localRotation = defaultRotation; //Quaternion.Euler(0, 0, -90)
     }
 
     public void OffsetPencil(float offsetX)

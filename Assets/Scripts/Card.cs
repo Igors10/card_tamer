@@ -268,9 +268,6 @@ public class Card : MonoBehaviour
 
     public void PlayCard()
     {
-        // checking for stars if special
-        //if (!SpecialCost()) return;
-
         // moving card to field cards
         GameManager.instance.handManager.AddCardToField(this, player);
 

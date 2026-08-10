@@ -14,6 +14,18 @@ public class FieldManager : MonoBehaviour
     [Header("unit moving")]
     [SerializeField] float moveTriggerThreshold;
 
+    [Header("unit arrays")]
+    [HideInInspector] public List<Unit>[] coloredUnitList = new List<Unit>[3];
+
+    void Awake()
+    {
+        // Initializing unit arrays
+        for (int i = 0; i < coloredUnitList.Length; i++)
+        {
+            coloredUnitList[i] = new List<Unit>();
+        }
+    }
+
     Field[] GetCurrentPlayerFields()
     {
         return GameManager.instance.yourTurn ? GameManager.instance.player.fields : GameManager.instance.opponent.fields;
@@ -184,6 +196,9 @@ public class FieldManager : MonoBehaviour
 
         // playing soundeffect
         AudioManager.instance.PlaySFX("CardPlaySFX");
+
+        // Adding the unit to one of the lists
+        coloredUnitList[Colors.instance.GetSecondaryColorID(cardToSpawn.cardData.secondaryColor)].Add(newUnit);
     }
 
     public int GetUnitSlot(Unit unit)

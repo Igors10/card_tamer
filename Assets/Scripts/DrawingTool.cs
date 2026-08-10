@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
     [Header("refs")]
-    [SerializeField] Image primaryColorImage;
-    [SerializeField] Image secondaryColorImage;
+    [SerializeField] PencilButton primaryColorImage;
+    [SerializeField] PencilButton secondaryColorImage;
     Color primaryColor;
     Color secondaryColor;
 
@@ -41,8 +41,6 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
         // setting the colors
         SetCanvasColors(GameManager.instance.player.playerColor, GameManager.instance.managerUI.workshop.chosenSecondColor);
-
-        ToggleBrushColor(true);
     }
 
     public void SelectBrush(string brushSize)
@@ -59,10 +57,10 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         // getting drawing colors
         primaryColor = primaryCol;
-        primaryColorImage.color = primaryColor;
+        primaryColorImage.SetColor(primaryColor);
 
         secondaryColor = secondaryCol;
-        secondaryColorImage.color = secondaryColor;
+        secondaryColorImage.SetColor(secondaryColor);
 
         // selecting main color
         ToggleBrushColor(true);
@@ -71,6 +69,12 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public void ToggleBrushColor(bool selectPrimary)
     {
         brushColor = (selectPrimary) ? primaryColor : secondaryColor;
+
+        primaryColorImage.SelectPencil(selectPrimary, false);
+        //if (!selectPrimary) primaryColorImage.Highlight(false);
+
+        secondaryColorImage.SelectPencil(!selectPrimary, false);
+        //if (selectPrimary) secondaryColorImage.Highlight(false);
     }
 
     public void OnPointerUp(PointerEventData eventData)

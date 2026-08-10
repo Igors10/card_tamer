@@ -20,6 +20,7 @@ public class Workshop : MonoBehaviour
     [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
     [SerializeField] TMP_InputField nameInput;
     [HideInInspector] public AbilityObj chosenAbility;
+    [HideInInspector] public Color chosenAbilityColor;
     [HideInInspector] public Color chosenSecondColor;
     public DrawingTool drawingCanvas;
     [SerializeField] Sprite placeholderSprite;
@@ -172,16 +173,17 @@ public class Workshop : MonoBehaviour
         workshopHintText.text = "Draw and name the card";
 
         // passing the ability
-        abilityReminder.text = chosenAbility.abilityDescription;
+        abilityReminder.text = chosenAbility.GetAbilityDesc(chosenAbilityColor);
 
         // resetting name input field
         nameInput.text = "";
     }
 
-    public void PickAbilityOption(AbilityObj pickedAbility)
+    public void PickAbilityOption(AbilityObj pickedAbility, Color abilityColor)
     {
-        // save the ability
+        // save the ability and color
         chosenAbility = pickedAbility;
+        chosenAbilityColor = abilityColor;
 
         // play Audio Effect
         AudioManager.instance.PlaySFX("ShopStarSFX");
@@ -249,13 +251,13 @@ public class Workshop : MonoBehaviour
             if (drawingCanvas.IsCanvasEmpty() == false && canvasTextures[i] != null) newCardSprites[i] = Sprite.Create(canvasTextures[i], new Rect(0, 0, drawingCanvas.textureSize, drawingCanvas.textureSize), new Vector2(0.5f, 0.5f));
         }
       
-        newCardData = newCardData = generator.ConstructNewCard(nameInput.text, newCardSprites, chosenAbility, chosenSecondColor);
+        newCardData = newCardData = generator.ConstructNewCard(nameInput.text, newCardSprites, chosenAbility, chosenSecondColor, chosenAbilityColor);
 
         // if the canvas is empty applying a random unit sprite and name instead
         if (drawingCanvas.IsCanvasEmpty())
         {
             UnitPreset randomUnitPreset = GameManager.instance.cardDatabase.GetRandomBasicPreset();
-            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, chosenSecondColor);
+            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, chosenSecondColor, chosenAbilityColor);
         }
         // also checking if the minion is named
         else if (nameInput.text == "")

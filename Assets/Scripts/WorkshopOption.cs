@@ -7,6 +7,6 @@ public class WorkshopOption : MonoBehaviour, IPointerClickHandler
     [HideInInspector] public Workshop workshop;
     public void OnPointerClick(PointerEventData eventData)
     {
-        workshop.PickAbilityOption(abilityNote.storedAbility);
+        workshop.PickAbilityOption(abilityNote.storedAbility, abilityNote.storedAbilityColor);
     }
 }

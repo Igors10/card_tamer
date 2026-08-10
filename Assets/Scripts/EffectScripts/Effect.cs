@@ -33,7 +33,7 @@ public class Effect : MonoBehaviour
 
         // showing text
         unit.skillTextObj.gameObject.SetActive(true);
-        string textToDisplay = (abilityText.Count < 1) ? unit.card.abilities[0].abilityData.abilityDescription : abilityText[abilityTextNr];
+        string textToDisplay = (abilityText.Count < 1) ? unit.card.abilities[0].abilityData.GetAbilityDesc(unit.card.abilities[0].abilityColor) : abilityText[abilityTextNr];
         unit.skillText.text = textToDisplay;
 
         // playing particle effect

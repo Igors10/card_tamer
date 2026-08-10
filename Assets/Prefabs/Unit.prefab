@@ -869,6 +869,7 @@ MonoBehaviour:
   skillTextObj: {fileID: 7561140176354173893}
   unitPresenter: {fileID: 865086522738764164}
   powerUI: {fileID: 3795751108397365226}
+  powerBG: {fileID: 4982152648981304929}
   powerValue: {fileID: 532405815697476448}
   dice:
   - {fileID: 4517016545063126273}

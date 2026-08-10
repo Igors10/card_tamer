@@ -25,6 +25,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
+    [SerializeField] Image powerBG;
     public TextMeshProUGUI powerValue;
 
     [Header("power rolling")]
@@ -103,6 +104,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (card.currentPower > 0 && stunned == false)
         {
             powerValue.text = card.currentPower.ToString();
+            powerBG.color = Colors.instance.BlendColor(card.cardData.secondaryColor, 0.65f);
         }
         else powerUI.SetActive(false);
 
@@ -277,7 +279,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         bonusPowerObj.SetActive(false);
     }
 
-    public IEnumerator EntranceAnimation(Ability ability)
+    public IEnumerator EntranceAnimation()
     {
         // disabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = false;
