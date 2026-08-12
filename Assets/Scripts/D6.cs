@@ -93,6 +93,7 @@ public class D6 : MonoBehaviour
         AudioManager.instance.PlaySFX(sfxName);
 
         // adding rolled power
+        unit.card.rolledPower = GetDiceValue();
         unit.card.GainPower(GetDiceValue(), false);
 
         // little pause after rolling

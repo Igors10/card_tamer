@@ -22,11 +22,14 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public TextMeshProUGUI skillText;
     public GameObject skillTextObj;
     public AutoFade unitPresenter;
+    [SerializeField] Image unitColorInd;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
     [SerializeField] Image powerBG;
     public TextMeshProUGUI powerValue;
+    [SerializeField] Color buffedPowerColor;
+    [SerializeField] Color debuffedPowerColor;
 
     [Header("power rolling")]
     public D6[] dice;
@@ -104,12 +107,16 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (card.currentPower > 0 && stunned == false)
         {
             powerValue.text = card.currentPower.ToString();
-            powerBG.color = Colors.instance.BlendColor(card.cardData.secondaryColor, 0.65f);
+
+            // chaning the power indicator colors when buffed or debuffed
+            powerBG.color = (card.currentPower >= card.rolledPower) ? buffedPowerColor : debuffedPowerColor;
+            if (card.currentPower == card.rolledPower) powerBG.color = Color.white;
         }
         else powerUI.SetActive(false);
 
         // COLOR
         sprite.RefreshSprite(card.cardData.unitSprite, card.player.playerColor, card.cardData.secondaryColor);
+        unitColorInd.color = card.cardData.secondaryColor;
 
         // FADE
         unitUI.SetActive(!faded);
@@ -135,6 +142,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public void HighlightUnit(bool isHighlighted)
     {
         //sprite.material = (isHighlighted) ? selectMaterial : defaultMaterial;
+        unitHighlight.gameObject.SetActive(isHighlighted);
     }
 
     public void AppearAbove(bool isAppearingAbove)
@@ -224,7 +232,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         int unitSlot = (currentField.units[0] == this) ? 0 : 1;
         currentField.units[unitSlot] = null;
         Debug.Log("Removed unit gameObject from board");
-        //GameManager.instance.fieldManager.Refresh();
+
+        // removes unit reference from all units list
+        GameManager.instance.fieldManager.coloredUnitList[Colors.instance.GetSecondaryColorID(card.cardData.secondaryColor)].Remove(this);
 
         // remove the gameObject
         if (this.gameObject != null) Destroy(this.gameObject);
@@ -352,7 +362,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // call for preview card
         ViewCard(mouseOver);
 
-        // click 'juice'
+        // click 'juice' effect
         if (mouseOver) Animations.instance.PopAnim(sprite.gameObject, 0.15f, -0.15f);
     }
 
@@ -363,12 +373,12 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     
     public void OnPointerEnter(PointerEventData eventData)
     {
-        HighlightUnit(true);
+        //HighlightUnit(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        HighlightUnit(false);
+        //HighlightUnit(false);
         PreviewCard(false);
     }
 

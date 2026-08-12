@@ -16,3 +16,4 @@ MonoBehaviour:
   abilityDescription: Previous {color} card gets +3 power
   isSpecial: 0
   effect: {fileID: 2691227342308127848, guid: 71eb7c89971a72448bb4851b082940ac, type: 3}
+  highlightCon: {fileID: 4084243741406296042, guid: 7eea8a800db9bd846b4d65270120110b, type: 3}

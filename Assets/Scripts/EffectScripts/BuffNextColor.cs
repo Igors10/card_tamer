@@ -29,6 +29,9 @@ public class BuffNextColor : MonoBehaviour
         Effect effect = GetComponent<Effect>();
         yield return StartCoroutine(effect.ShowEffect());
 
+        // event shouldn't work on the card itself
+        if (unit == effect.unit) yield break;
+
         // debuffing enemy
         unit.card.GainPower(buffAmount);
         effectUsed = true;

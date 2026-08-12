@@ -1,6 +1,7 @@
 using FishNet.Editing;
 using NUnit.Framework.Internal;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FieldManager : MonoBehaviour
@@ -16,6 +17,7 @@ public class FieldManager : MonoBehaviour
 
     [Header("unit arrays")]
     [HideInInspector] public List<Unit>[] coloredUnitList = new List<Unit>[3];
+    [HideInInspector] public bool anyUnitHighlighted;
 
     void Awake()
     {
@@ -42,6 +44,25 @@ public class FieldManager : MonoBehaviour
         }
 
         return unitsToReturn;
+    }
+
+    /// <summary>
+    /// Returns a list containing all units on board
+    /// </summary>
+    /// <returns></returns>
+    public List<Unit> GetAllUnits()
+    {
+        List<Unit> unitList = new List<Unit>();
+
+        for (int i = 0; i < coloredUnitList.Length; i++)
+        {
+            for (int j = 0; j < coloredUnitList[i].Count; j++)
+            {
+                unitList.Add(coloredUnitList[i][j]);
+            }
+        }
+
+        return unitList;
     }
 
     /// <summary>
@@ -301,5 +322,36 @@ public class FieldManager : MonoBehaviour
 
         Debug.Log("FieldManager: " + movingUnit.name + " wasn't close to any of the unit slots");
         return false;
+    }
+
+    // =========================
+    // Highlighting units
+    // =========================
+
+    /// <summary>
+    /// Highlights all chosen units on board
+    /// </summary>
+    /// <param name="unitsToHighlight"></param>
+    public void HighlightUnits(List<Unit> unitsToHighlight)
+    {
+        anyUnitHighlighted = true;
+
+        for (int i = 0; i < unitsToHighlight.Count; i++)
+        {
+            unitsToHighlight[i].HighlightUnit(true);
+        }
+    }
+
+    public void StopHighlightUnits()
+    {
+        if (anyUnitHighlighted == false) return; // stop immideately if no units are highlighted
+
+        List<Unit> allUnits = GetAllUnits();
+        for (int i = 0; i < allUnits.Count; i++)
+        {
+            allUnits[i].HighlightUnit(false);
+        }
+
+        anyUnitHighlighted = false;
     }
 }

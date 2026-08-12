@@ -9,6 +9,7 @@ public class AbilityObj : ScriptableObject
     public bool isSpecial;
 
     public GameObject effect;
+    public GameObject highlightCon; // highlight condition
 
     public string GetAbilityDesc(Color abilityColor)
     {

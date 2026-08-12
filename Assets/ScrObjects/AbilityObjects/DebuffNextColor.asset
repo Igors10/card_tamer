@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
-  m_Name: BuffAllColor
+  m_Name: DebuffNextColor
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: All {color} cards get +2 power
+  abilityDescription: Next {color} card gets -3 power
   isSpecial: 0
-  effect: {fileID: 2811669287745351542, guid: 1db4a9a34aa495b4f9800e2e131d0870, type: 3}
-  highlightCon: {fileID: 4525327215008690078, guid: 070cb2a6548622f449a859b544db7b44, type: 3}
+  effect: {fileID: 5357370047200593594, guid: 2c33a2c946fd55746a4b2a7a1addd807, type: 3}
+  highlightCon: {fileID: 0}

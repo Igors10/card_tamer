@@ -31,6 +31,9 @@ public class Ability : MonoBehaviour
 
         // EFFECT DESCRIPTION
         effectDesc.text = abilityData.GetAbilityDesc(abilityColor);
+
+        // spawning highlight condition object
+        if (abilityData.highlightCon != null) Instantiate(abilityData.highlightCon, card.transform);
     }
 
     // =====================

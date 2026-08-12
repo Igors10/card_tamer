@@ -17,6 +17,8 @@ public class Card : MonoBehaviour
     public Ability[] abilities = new Ability[1];
     [SerializeField] RectTransform rt;
     [SerializeField] UnitSprite cardSprite;
+    [SerializeField] Image secondaryColorIndicator;
+    [SerializeField] Image primaryColorIndicator;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] GameObject cardVisual;
     [SerializeField] Image cardBackground;
@@ -43,6 +45,7 @@ public class Card : MonoBehaviour
 
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
+    [HideInInspector] public int rolledPower = 0;
     bool specialCostPaid = false;
     [HideInInspector] public bool shielded = false;
 
@@ -104,6 +107,10 @@ public class Card : MonoBehaviour
         // NAME
         nameText.text = cardData.name;
 
+        // COLOR INDICATOR
+        secondaryColorIndicator.color = cardData.secondaryColor;
+        primaryColorIndicator.color = player.playerColor;
+
         // SPRITE
         cardSprite.RefreshSprite(cardData.unitSprite, player.playerColor, cardData.secondaryColor);
 
@@ -164,18 +171,17 @@ public class Card : MonoBehaviour
             // Rendering over other cards
             if (mouseOver) { hierarchyIndex = transform.GetSiblingIndex(); transform.SetAsLastSibling(); }
             else transform.SetSiblingIndex(hierarchyIndex);
-            // Enable glow effect
-            //HightlightCard(mouseOver);
+            
+            // Highlighting the units potentially affected by card's effect
+            if (GameManager.instance.currentState == GameState.PLACING)
+            {
+                if (mouseOver) GameManager.instance.BroadcastOnCardHovered(this);
+                else GameManager.instance.fieldManager.StopHighlightUnits();
+            }
 
             // resetting visuals when mouse leaves the card
             if (mouseOver == false) GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.player);
         }
-        
-        /*
-        if (GameManager.instance.currentState == GameState.PLANNING)
-        {
-            transform.localScale = (mouseOver) ? dragScale : defaultScale;
-        }*/
     }
     
     public void HighlightCard(bool isHightlighted)

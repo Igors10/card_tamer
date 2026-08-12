@@ -111,6 +111,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitAtDiscard
   defaultMaterial: {fileID: 2100000, guid: ac3b5b6028d9ada449ab8aecd8a78a70, type: 2}
   selectMaterial: {fileID: 2100000, guid: 7174432f7b014db4692314e43d39d783, type: 2}
+  discardMaterial: {fileID: 2100000, guid: ee0b41e288858804584137c9eb44f740, type: 2}
   sprite: {fileID: 7657530410159667606}
   unitPiece:
   - {fileID: 6651585046034701786}
@@ -118,6 +119,7 @@ MonoBehaviour:
   cartoonShakeEffect: {fileID: 7736234372672870096}
   hoverEffect: {fileID: 8879636440874054206}
   CutVFX: {fileID: 3230157483957034053}
+  discardedUnitColor: {r: 0.22264141, g: 0.22264141, b: 0.22264141, a: 1}
   storedCard: {fileID: 0}
 --- !u!114 &8879636440874054206
 MonoBehaviour:

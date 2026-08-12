@@ -7,11 +7,15 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [Header("refs")]
     [SerializeField] Material defaultMaterial;
     [SerializeField] Material selectMaterial;
+    [SerializeField] Material discardMaterial;
     public UnitSprite sprite;
     [SerializeField] Image[] unitPiece;
     [SerializeField] CartoonShakeEffect cartoonShakeEffect;
     [SerializeField] HoverEffect hoverEffect;
     [SerializeField] GameObject CutVFX;
+
+    [Header("discard attributes")]
+    [SerializeField] Color discardedUnitColor;
 
     [HideInInspector] public Card storedCard;
     bool discarded = false;
@@ -33,7 +37,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     void OnHover(bool isHover)
     {
-        if (!GameManager.instance.yourTurn) return; // only during player's turn
+        if (!GameManager.instance.yourTurn || !discarded) return; // only during player's turn
 
         // color the unit as selectable
         Material newMaterial = (isHover && GameManager.instance.discardManager.discardAvailable) ? selectMaterial : defaultMaterial;
@@ -74,13 +78,23 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (discarded) UnitDeathAnim();
 
         // Making unit appear cut in half
+        /*
         for (int i = 0; i < unitPiece.Length; i++)
         {
             unitPiece[i].gameObject.SetActive(isDiscarded);
             //unitPiece[i].sprite = sprite.sprite;
-        }
+        }*/
 
-        sprite.enabled = !isDiscarded;
+        // chaning the material
+        Material material = (isDiscarded) ? discardMaterial : defaultMaterial; 
+        sprite.RefreshSpriteMaterial(material);
+
+        // changing the color
+        Color primColor = (isDiscarded) ? discardedUnitColor : storedCard.player.playerColor;
+        Color secColor = (isDiscarded) ? discardedUnitColor : storedCard.cardData.secondaryColor;
+        sprite.RefreshColor(primColor, secColor);
+
+        // disabling cartoon shake animation and hovering functionality
         cartoonShakeEffect.enabled = !isDiscarded;
         hoverEffect.enabled = !isDiscarded;
     }
