@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 208707533881461998}
   - component: {fileID: 6826776840061103153}
   - component: {fileID: 4032568765807228934}
+  - component: {fileID: 6256712310380481801}
   m_Layer: 0
   m_Name: doodle
   m_TagString: Untagged
@@ -63,6 +64,21 @@ MonoBehaviour:
   swings: 2
   sprite: {fileID: 6009986734639666602}
   doodleData: {fileID: 0}
+--- !u!114 &6256712310380481801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5462010757837182238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ab1780e9436f94ba67d86b4bf2a98f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CartoonShakeEffect
+  idleRotateInterval: 1.2
+  idleRotationIntensity: 3
+  randomStartingT: 0
 --- !u!1001 &6303154340694914498
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -71,6 +87,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 208707533881461998}
     m_Modifications:
+    - target: {fileID: 896052788308803070, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6285550666014230733, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6867085646348748786, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

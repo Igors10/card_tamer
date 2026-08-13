@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: PlayerConfigData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerConfigObj
   startingCards: []
+  playerColor: {r: 0.9169811, g: 0.46771854, b: 0.2197294, a: 1}
   offlineMatch: 1
