@@ -89,7 +89,7 @@ public class ExecuteManager : MonoBehaviour
         if (playedFirstTime)
         {
             GameManager.instance.mainCamera.ZoomIn(card.unit.gameObject, zoomIntensity, zoomTime);
-            yield return new WaitForSeconds(zoomTime);
+            yield return StartCoroutine(Animations.instance.SkippablePause(zoomTime));
 
             // enabling presenter
             card.unit.unitPresenter.gameObject.SetActive(true);

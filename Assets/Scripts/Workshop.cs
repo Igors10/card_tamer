@@ -66,7 +66,6 @@ public class Workshop : MonoBehaviour
             bgItemWorkshopPositions[a] = bgItemPositions[a].transform.localPosition;
         }
 
-        // enabling color select
         WorkshopColorSelect();
     }
 
@@ -109,6 +108,9 @@ public class Workshop : MonoBehaviour
 
     public void LaunchStartingSequence()
     {
+        // getting secondary color (darker version of the main color)
+        chosenSecondColor = Colors.instance.GetDarkenColor(player.playerColor);
+
         // enabling correct workshop visuals
         colorSelectUI.SetActive(false);
         GameManager.instance.managerUI.EnableWorkshop(true, false);
@@ -191,7 +193,7 @@ public class Workshop : MonoBehaviour
         // switching to second color UI
         workshopHintText.text = "Pick second color for the card";
         abilitySelectUI.SetActive(false);
-        secondaryColorSelectUI.SetActive(true);
+        EnableDrawingCanvas();
     }
 
     public void PickSecondaryColor(Color pickedColor)

@@ -1,10 +1,12 @@
 using UnityEngine;
 using System.Collections;
 using Unity.VisualScripting;
+using Unity.Burst.CompilerServices;
 
 public class Animations : MonoBehaviour
 {
     public static Animations instance;
+    public bool skipPause = false; // when true skips all current animations
 
     private void Awake()
     {
@@ -88,5 +90,27 @@ public class Animations : MonoBehaviour
             // Reverting the offset
             obj.transform.localPosition = startingPosition;
         }
+    }
+
+
+    // Coroutine stuff
+    public IEnumerator SkippablePause(float time)
+    {
+        float t = 0;
+        while (t < time)
+        {
+            // immediately skipping the pause (when clicked)
+            if (skipPause && t > time * 0.05f) yield break;
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private void Update()
+    {
+        // registering clicks
+        if (Input.GetButtonDown("Fire1")) skipPause = true;
+        if (Input.GetButtonUp("Fire1")) skipPause = false;
     }
 }

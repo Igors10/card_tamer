@@ -105,7 +105,7 @@ public class WorkshopColorSelect : MonoBehaviour
         GameManager.instance.player.config.playerColor = selectedPencil.pencilColorImage.color;
 
         // after locking the color game can create 3 secondary colors
-        Colors.instance.GenerateRandomSecondaryColors();
+        //Colors.instance.GenerateRandomSecondaryColors();
 
         // start creating player hand
         GameManager.instance.managerUI.workshop.LaunchStartingSequence();

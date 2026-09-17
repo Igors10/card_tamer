@@ -12,8 +12,9 @@ public class Viewpoint : MonoBehaviour
     float prevSize; // field of view
 
     [Header("zoom")]
-    bool zoomedIn;
-    
+    [HideInInspector] public bool zoomedIn;
+    [HideInInspector] public bool zoom;
+
     [SerializeField] float viewChangeSpeed;
 
     private void Start()
@@ -94,6 +95,7 @@ public class Viewpoint : MonoBehaviour
 
         // starting values
         Vector3 startingPosition = transform.position;
+        Vector3 storedStartingPosition = transform.position;
         Quaternion startingRotation = transform.rotation;
 
         // target values
@@ -107,8 +109,40 @@ public class Viewpoint : MonoBehaviour
 
         float t = 0;
         zoomedIn = true;
+        zoom = true;
 
         // zooming in
+        while (t < zoomTime)
+        {
+            // skipping zooming in when clicked
+            if (Animations.instance.skipPause && t > 0) break;
+
+            t += Time.deltaTime;
+            float clampedT = t / (zoomTime);
+            float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
+
+            transform.position = Vector3.Lerp(startingPosition, targetPosition, coolT);
+            transform.rotation = Quaternion.Slerp(startingRotation, targetRotation, coolT);
+
+            yield return null;
+        }
+
+        // waiting for command to stop zooming in
+        while (zoomedIn && !Animations.instance.skipPause)
+        {
+            yield return null;
+        }
+
+        Debug.Log("Viewport: in zoomout phase");
+
+        t = 0;
+        // renewing positions
+        targetPosition = startingPosition; 
+        targetRotation = startingRotation;
+        startingPosition = transform.position;
+        startingRotation = transform.rotation;
+
+        // zooming out
         while (t < zoomTime)
         {
             t += Time.deltaTime;
@@ -121,31 +155,9 @@ public class Viewpoint : MonoBehaviour
             yield return null;
         }
 
-        // waiting for command to stop zooming in
-        while (zoomedIn)
-        {
-            yield return null;
-        }
-
-        Debug.Log("Viewport: in zoomout phase");
-
-        t = 0;
-
-        // zooming out
-        while (t < zoomTime)
-        {
-            t += Time.deltaTime;
-            float clampedT = t / (zoomTime);
-            float coolT = Mathf.SmoothStep(0f, 1f, clampedT);
-
-            transform.position = Vector3.Lerp(targetPosition, startingPosition, coolT);
-            transform.rotation = Quaternion.Slerp(targetRotation, startingRotation, coolT);
-
-            yield return null;
-        }
-
         // snapping to correct values
-        transform.position = startingPosition;
+        transform.position = storedStartingPosition;
+        zoom = false;
         //transform.rotation = targetRotation;
 
         Debug.Log("Viewport: zoom in finished");

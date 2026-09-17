@@ -2702,7 +2702,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.39
+      value: 5.54
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3727,7 +3727,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 12.150001
+      value: 8.35
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5099,7 +5099,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.2699995
+      value: 6.03
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5351,7 +5351,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &462532357
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6276,7 +6276,7 @@ MonoBehaviour:
   startingMaxHealth: 12
   startingStars: 0
   startingResourceAmount: 3
-  startingCardAmount: 5
+  startingCardAmount: 4
   maxHandSize: 8
   playerConfig: {fileID: 11400000, guid: 4830222a87a796a489eb0184e93624f0, type: 2}
 --- !u!1 &572443349
@@ -6523,6 +6523,10 @@ PrefabInstance:
     - target: {fileID: 5723387639953197474, guid: 610212ad8552b3b43bc3ebc065ebace3, type: 3}
       propertyPath: m_Name
       value: frontField4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5723387639953197474, guid: 610212ad8552b3b43bc3ebc065ebace3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6446858007754876085, guid: 610212ad8552b3b43bc3ebc065ebace3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9534,6 +9538,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: backField4
       objectReference: {fileID: 0}
+    - target: {fileID: 5723387639953197474, guid: 610212ad8552b3b43bc3ebc065ebace3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6446858007754876085, guid: 610212ad8552b3b43bc3ebc065ebace3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.652
@@ -10430,6 +10438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcf68add3e62d9f4f850cf40e379dc36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animations
+  skipPause: 0
 --- !u!1001 &917927107
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10997,7 +11006,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.28
+      value: 6.59
       objectReference: {fileID: 0}
     - target: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
       propertyPath: m_LocalPosition.y
@@ -15341,6 +15350,10 @@ PrefabInstance:
       value: 0.93962264
       objectReference: {fileID: 0}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: fields.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: 'fields.Array.data[0]'
       value: 
       objectReference: {fileID: 1750382873}
@@ -16731,7 +16744,7 @@ Transform:
   m_GameObject: {fileID: 1713707596}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0, y: 10, z: -2}
+  m_LocalPosition: {x: -2, y: 10, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21888,6 +21901,10 @@ PrefabInstance:
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: playerColor.r
       value: 0.49928796
+      objectReference: {fileID: 0}
+    - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
+      propertyPath: fields.Array.size
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4674054684845155786, guid: af16ecbc573e0b44ba3e3c8e592fcc5b, type: 3}
       propertyPath: 'fields.Array.data[0]'

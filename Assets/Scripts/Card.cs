@@ -17,8 +17,6 @@ public class Card : MonoBehaviour
     public Ability[] abilities = new Ability[1];
     [SerializeField] RectTransform rt;
     [SerializeField] UnitSprite cardSprite;
-    [SerializeField] Image secondaryColorIndicator;
-    [SerializeField] Image primaryColorIndicator;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] GameObject cardVisual;
     [SerializeField] Image cardBackground;
@@ -106,10 +104,6 @@ public class Card : MonoBehaviour
     {
         // NAME
         nameText.text = cardData.name;
-
-        // COLOR INDICATOR
-        secondaryColorIndicator.color = cardData.secondaryColor;
-        primaryColorIndicator.color = player.playerColor;
 
         // SPRITE
         cardSprite.RefreshSprite(cardData.unitSprite, player.playerColor, cardData.secondaryColor);

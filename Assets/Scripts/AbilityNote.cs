@@ -9,7 +9,7 @@ public class AbilityNote : MonoBehaviour
     public void InitAbilityNote(AbilityObj ability)
     {
         // ability color
-        storedAbilityColor = Colors.instance.GetRandomSecondaryColor();
+        //storedAbilityColor = Colors.instance.GetRandomSecondaryColor();
 
         // ability and desc
         storedAbility = ability;

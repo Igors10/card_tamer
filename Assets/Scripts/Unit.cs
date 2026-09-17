@@ -68,6 +68,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [Header("ability animation")]
     [SerializeField] float jumpHeight;
     [SerializeField] float jumpTime;
+    bool enteringAnim = true;
 
     [Header("knockout animation")]
     [SerializeField] float jumpForce = 10f;       
@@ -311,7 +312,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         Color skillTextTargetColor = new Color(skillTextColor.r, skillTextColor.g, skillTextColor.b, 0f);
 
         // jumping up
-        while (t < jumpTime)
+        while (t < jumpTime && !Animations.instance.skipPause)
         {
             t += Time.deltaTime;
             float clampedT = t / jumpTime;
@@ -323,7 +324,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         t = 0f;
         // landing and fading text away
-        while (t < jumpTime)
+        while (t < jumpTime && !Animations.instance.skipPause)
         {
             t += Time.deltaTime;
             float clampedT = t / jumpTime;
@@ -338,7 +339,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         sprite.transform.localPosition = startingPosition;
 
         // pause
-        yield return new WaitForSeconds(1.8f);
+        yield return StartCoroutine(Animations.instance.SkippablePause(1.8f));
 
         // deactivating ability text
         skillTextObj.SetActive(false);
@@ -347,6 +348,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         // enabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = true;
+        enteringAnim = false;
     }
 
     // ===============
@@ -357,7 +359,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         // nothing happens when unit is selected during execute state
         if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this
-            && GameManager.instance.executeManager.readyRevealCard == false || faded || rollingPower) return;
+            && GameManager.instance.executeManager.readyRevealCard == false || faded || rollingPower || Camera.main.GetComponent<Viewpoint>().zoom) return;
 
         // call for preview card
         ViewCard(mouseOver);

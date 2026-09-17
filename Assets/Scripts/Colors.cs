@@ -7,6 +7,7 @@ public class Colors : MonoBehaviour
     public List<Color> secondaryColorList = new List<Color>();
     public int secondaryColorAmount = 3;
     public List<Color> allColorList = new List<Color>();
+    float secDarkColorCoof = 0.65f;
 
     void Awake()
     {
@@ -18,12 +19,18 @@ public class Colors : MonoBehaviour
         allColorList = GameManager.instance.cardDatabase.allPlayerColors;
     }
 
-    // Blends provided color with white
-    public Color BlendColor(Color color, float blendCoof)
+    // Whitens or darkens chosen color
+    public Color BlendColor(Color color, float blendCoof, bool blendWhite = true)
     {
-        Color colorToReturn = Color.Lerp(Color.white, color, blendCoof);
+        // deciding on the color to blend with
+        Color colorToBlendWith = (blendWhite) ? Color.white : Color.black;
+
+        Color colorToReturn = Color.Lerp(colorToBlendWith, color, blendCoof);
         return colorToReturn;
     }
+
+    public Color GetDarkenColor(Color color) => BlendColor(color, secDarkColorCoof, false);
+    
 
     /// <summary>
     /// Picks 3 random colors that neither player has as their primary color

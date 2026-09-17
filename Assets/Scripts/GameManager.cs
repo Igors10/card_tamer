@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
     public int startingMaxHealth;
     public int startingStars;
     public int startingResourceAmount;
-    public int startingCardAmount = 5;
+    public int startingCardAmount = 4;
     public int maxHandSize;
     public PlayerConfigObj playerConfig;
     
@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
 
         // Moving the camera
         if (currentState != GameState.BATTLING)
-        mainCamera.ChangeViewpoint(GetState());
+        //mainCamera.ChangeViewpoint(GetState());   No longer there is a need to move the camera between game states
 
         // Applying new state to the game
         switch (currentState)
