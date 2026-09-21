@@ -28,7 +28,8 @@ public class BattleManager : MonoBehaviour
     public void ResetBattleVals()
     {
         currentLine = -1;
-        
+        Debug.Log("BattleManager: resetting battle values, currentLine is now " + currentLine);
+
         ResetLineVals();
     }
 
@@ -46,9 +47,9 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     public void NextLine()
     {
-        Debug.Log("BattleManager: proceeding to next battle line.");
         currentLine++;
- 
+        Debug.Log("BattleManager: proceeding to next battle line. Current battle line is " + currentLine);
+        
         if (currentLine < GameManager.instance.player.fields.Length && GameManager.instance.gameOver != true)
         {
             // Getting all the units battling on currentLine and initialize battle

@@ -140,6 +140,7 @@ public class GameManager : MonoBehaviour
                 managerUI.EnableUI(true);
                 managerUI.turnHint.gameObject.SetActive(false);
                 battleManager.ResetBattleVals();
+                battleManager.NextLine();
 
                 // playing workshop soundtrack
                 AudioManager.instance.PlaySoundtrack("BattleTrack");
@@ -259,7 +260,7 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GameState.BATTLING:
-                battleManager.NextLine();
+                
                 readyButton.gameObject.SetActive(false);
                 break;
 
