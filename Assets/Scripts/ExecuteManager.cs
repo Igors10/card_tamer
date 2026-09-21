@@ -85,6 +85,9 @@ public class ExecuteManager : MonoBehaviour
         // add to the played card list
         if (playedFirstTime) playedCardNames.Add(card.cardData.name);
 
+        // marking that a player played a card
+        card.player.cardPlayed = true;
+
         // zooming in on the unit
         if (playedFirstTime)
         {

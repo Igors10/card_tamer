@@ -189,7 +189,8 @@ public class Card : MonoBehaviour
 
     public void StartDrag()
     {
-        if (GameManager.instance.executeManager.currentCard != null || GameManager.instance.currentState != GameState.PLACING || !GameManager.instance.yourTurn) return;
+        if (GameManager.instance.executeManager.currentCard != null || GameManager.instance.currentState != GameState.PLACING
+            || !GameManager.instance.yourTurn || player.cardPlayed) return;
 
         isDragged = true;
         GameManager.instance.handManager.activeCard = this;
@@ -205,7 +206,7 @@ public class Card : MonoBehaviour
         OnHover(false);
         //transform.SetParent(GameManager.instance.handManager.hand.transform, false);
 
-        if (GameManager.instance.currentState == GameState.PLACING)
+        if (GameManager.instance.currentState == GameState.PLACING && player.cardPlayed == false)
         {
             GameManager.instance.fieldManager.PlayCard(this, GameManager.instance.player);
             GameManager.instance.handManager.activeCard = null;

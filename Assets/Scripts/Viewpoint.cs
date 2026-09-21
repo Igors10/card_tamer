@@ -145,6 +145,9 @@ public class Viewpoint : MonoBehaviour
         // zooming out
         while (t < zoomTime)
         {
+            // skipping zooming out when clicked
+            if (Animations.instance.skipPause && t > 0) break;
+
             t += Time.deltaTime;
             float clampedT = t / (zoomTime);
             float coolT = Mathf.SmoothStep(0f, 1f, clampedT);

@@ -1,12 +1,20 @@
-using UnityEngine;
 using System.Collections;
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class Animations : MonoBehaviour
 {
     public static Animations instance;
     public bool skipPause = false; // when true skips all current animations
+
+    // For overlay click check
+    [SerializeField] private GraphicRaycaster overlayRaycaster; // Drag your Overlay Canvas's GraphicRaycaster here
+    private PointerEventData pointerEventData;
+    private List<RaycastResult> raycastResults = new List<RaycastResult>();
 
     private void Awake()
     {
@@ -92,8 +100,16 @@ public class Animations : MonoBehaviour
         }
     }
 
+    // ===========================
+    //  **** COROUTINE STUFF ****
+    // ===========================
 
-    // Coroutine stuff
+
+    /// <summary>
+    /// Can be used instead of yield return new WaitForSeconds() if you want to make the pause skipped when player clicks
+    /// </summary>
+    /// <param name="time"></param>
+    /// <returns></returns>
     public IEnumerator SkippablePause(float time)
     {
         float t = 0;
@@ -106,11 +122,32 @@ public class Animations : MonoBehaviour
             yield return null;
         }
     }
+    
+    private bool IsPointerOverOverlayUI()
+    {
+        if (overlayRaycaster == null || EventSystem.current == null) return false;
+
+        // Set up the pointer event at the current mouse position
+        pointerEventData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        raycastResults.Clear();
+        overlayRaycaster.Raycast(pointerEventData, raycastResults);
+
+        // If any raycast result hit a target on this canvas, it's over Overlay UI
+        return raycastResults.Count > 0;
+    }
 
     private void Update()
     {
         // registering clicks
-        if (Input.GetButtonDown("Fire1")) skipPause = true;
+        if (Input.GetButtonDown("Fire1"))
+        {
+            skipPause = true;
+            if (IsPointerOverOverlayUI()) skipPause = false; // not letting it trigger if the pointer is over a UI object
+        }
         if (Input.GetButtonUp("Fire1")) skipPause = false;
     }
 }

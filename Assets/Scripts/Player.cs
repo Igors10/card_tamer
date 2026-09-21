@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     public int currentStars;
     public string playerName;
     public bool endStateReady = false;
+    public bool cardPlayed = false; 
     [HideInInspector] public bool dead;
 
 
@@ -91,9 +92,12 @@ public class Player : MonoBehaviour
         else GameManager.instance.EndTurn();
     }
 
-    public void StartTurn()
+    public void StartTurn() // this doesnt even trigger every time ??? 
     {
-        Debug.Log("GameManager: [" + playerName + "] starting the turn.");
+        Debug.Log("Player: [" + playerName + "] starting the turn.");
+
+        // resetting vals
+        cardPlayed = false;
 
         // Triggering player specific events
         StartTurnEvents();

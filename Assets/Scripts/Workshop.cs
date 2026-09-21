@@ -124,7 +124,8 @@ public class Workshop : MonoBehaviour
 
     public void WorkshopColorSelect()
     {
-        colorSelectUI.SetActive(true); 
+        colorSelectUI.SetActive(true);
+        workshopHintText.text = "Pick a color you like!";
     }
 
     public void AbilityOptions(bool drawSpecial = false)

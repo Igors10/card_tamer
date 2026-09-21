@@ -116,7 +116,7 @@ public class GameManager : MonoBehaviour
         readyButton.UpdateButtonState();
 
         // Moving the camera
-        if (currentState != GameState.BATTLING)
+        //if (currentState != GameState.BATTLING)
         //mainCamera.ChangeViewpoint(GetState());   No longer there is a need to move the camera between game states
 
         // Applying new state to the game
@@ -219,7 +219,6 @@ public class GameManager : MonoBehaviour
         managerUI.NewHint("It's your opponents turn");
         managerUI.UpdateTurnMessage();
 
-
         // debug solution for transitioning states
         CheckEndState();
     }
@@ -239,6 +238,7 @@ public class GameManager : MonoBehaviour
         {
             case GameState.PLACING:
                 readyButton.gameObject.SetActive(true);
+                GetCurrentPlayer().cardPlayed = false;
 
                 // disables "finish placing" button if there are no units on player's side
                 if (player.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
@@ -276,13 +276,18 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Transitions to next state if both players are finished with current one, or restarts the turn if only opponent is finished
     /// </summary>
-    public void CheckEndState()
+    public void CheckEndState() // rework it so that it keeps track of the current players and stores both players in a list
     {
         // Do nothing if game over
         if (gameOver) return;
 
+        // go to next state if both players are finished with the current one
         if (player.endStateReady && opponent.endStateReady) FinishCurrentState();
+
+        // start player's turn
         else if (opponent.endStateReady) player.StartTurn();
+
+        // start opponent's turn
         else opponent.StartTurn();
     }
 
