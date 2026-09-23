@@ -94,10 +94,6 @@ public class AIOpponent : MonoBehaviour
             case GameState.PLACING:
                 currentAction = StartCoroutine(PlaceRandomCard());
                 break;
-
-            case GameState.DISCARDING:
-                currentAction = StartCoroutine(DiscardOpponentUnits());
-                break;
         }
     }
 
@@ -146,7 +142,7 @@ public class AIOpponent : MonoBehaviour
 
     // =========================================================
     // ===================== DISCARDING=========================
-
+    // ( autodiscard no longer has input)
     IEnumerator DiscardOpponentUnits()
     {
         // waiting until discard becomes available
@@ -183,16 +179,16 @@ public class AIOpponent : MonoBehaviour
                 playerObj.maxStars = nextStarAmount; 
                 playerObj.shopStars -= nextStarAmount;
                 starsUpgraded = true;
-            } */
+            } 
 
             // if has enough stars and no specials the AI will buy a special card
             if (CountSpecialCards() < 1 && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
                 AddSpecial();
                 playerObj.shopStars -= shop.drawSpecialPrice;
-            }
+            }*/
             // otherwise it will buy regular card (if has enough stars)
-            else if (playerObj.shopStars >= shop.drawCardPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
+            if (playerObj.shopStars >= shop.drawCardPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
                 AddBasic();
                 playerObj.shopStars -= shop.drawCardPrice;

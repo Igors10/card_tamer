@@ -35,6 +35,7 @@ public class ShopManager : MonoBehaviour
     // you stopped here - make stars appear
 
     bool starsAlreadyUpgraded;
+    [HideInInspector] public bool cardDisarded = false;
 
     private void Start()
     {
@@ -52,6 +53,9 @@ public class ShopManager : MonoBehaviour
         starsAlreadyUpgraded = player.maxStars >= 4;
         StartCoroutine(CreateShopStars());
 
+        // if no card was discarded enable auto discard
+        GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true);
+
         Refresh();
     }
 
@@ -64,6 +68,7 @@ public class ShopManager : MonoBehaviour
     {
         skipStarAppearance = false;
         starsAlreadyUpgraded = false;
+        cardDisarded = false;
     }
 
     void Refresh(bool onlyRefreshStars = false)

@@ -108,13 +108,7 @@ public class Player : MonoBehaviour
 
     void StartTurnEvents()
     {
-        switch (GameManager.instance.currentState)
-        {
-            case GameState.DISCARDING:
-                // initializing units during discard
-                StartCoroutine(GameManager.instance.discardManager.DiscardSequence(GameManager.instance.GetOpponentOfPlayer(this)));
-                break;
-        }
+       
     }
 
     public void StartRound()
@@ -122,6 +116,7 @@ public class Player : MonoBehaviour
         // refresh stars 
         currentStars = maxStars;
         deadUnitsThisRound = 0;
+        cardsInDiscard.Clear();
 
         playerUI.Refresh();
     }
@@ -158,7 +153,6 @@ public class Player : MonoBehaviour
     public void EndRound()
     {
         GameManager.instance.handManager.ReturnCardsToHand(this);
-        cardsInDiscard.Clear();
 
         foreach (Field field in fields)
         {

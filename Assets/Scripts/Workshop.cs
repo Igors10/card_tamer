@@ -71,6 +71,9 @@ public class Workshop : MonoBehaviour
 
     public IEnumerator WorkshopAnim(bool isAppearing, bool moveBackground = true)
     {
+        // disabling workshop hint
+        workshopHintObj.SetActive(isAppearing);
+
         Vector3[] startingPos = (isAppearing) ? bgItemStartingPositions : bgItemWorkshopPositions;
         Vector3[] targetPos = (isAppearing) ? bgItemWorkshopPositions : bgItemStartingPositions;
         Vector3 bgTargetPos = (isAppearing) ? Vector3.zero : new Vector3(0, -Camera.main.pixelHeight -200f, 0);
@@ -122,6 +125,11 @@ public class Workshop : MonoBehaviour
         AbilityOptions();
     }
 
+    public void ChangeHint(string newHintText)
+    {
+        workshopHintText.text = newHintText;
+    }
+
     public void WorkshopColorSelect()
     {
         colorSelectUI.SetActive(true);
@@ -131,7 +139,7 @@ public class Workshop : MonoBehaviour
     public void AbilityOptions(bool drawSpecial = false)
     {
         // disabling shop UI
-        GameManager.instance.gameStateUI[3].SetActive(false);
+        GameManager.instance.gameStateUI[(int)GameState.BUYING].SetActive(false);
         GameManager.instance.readyButton.gameObject.SetActive(false);
 
         // enabling card choice buttons

@@ -10,7 +10,6 @@ public enum GameState
 {
     PLACING,
     BATTLING,
-    DISCARDING,
     BUYING
 }
 
@@ -146,11 +145,6 @@ public class GameManager : MonoBehaviour
                 AudioManager.instance.PlaySoundtrack("BattleTrack");
                 break;
 
-            case GameState.DISCARDING:
-                AudioManager.instance.PlaySoundtrack("DiscardTrack");
-                managerUI.turnHint.gameObject.SetActive(true);
-                break;
-
             case GameState.BUYING:
                 // Ending round
                 RoundEnd();
@@ -262,9 +256,6 @@ public class GameManager : MonoBehaviour
             case GameState.BATTLING:
                 
                 readyButton.gameObject.SetActive(false);
-                break;
-
-            case GameState.DISCARDING:
                 break;
 
             case GameState.BUYING:

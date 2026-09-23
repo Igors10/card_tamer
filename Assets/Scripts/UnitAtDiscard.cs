@@ -16,9 +16,11 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     [Header("discard attributes")]
     [SerializeField] Color discardedUnitColor;
+    [SerializeField] float discardedUnitSizeMod = 0.75f;
 
     [HideInInspector] public Card storedCard;
     bool discarded = false;
+    [HideInInspector] public bool lockHovering = false;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -37,7 +39,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     void OnHover(bool isHover)
     {
-        if (!GameManager.instance.yourTurn || !discarded) return; // only during player's turn
+        if (!GameManager.instance.yourTurn || !discarded || lockHovering) return; // only during player's turn
 
         // color the unit as selectable
         Material newMaterial = (isHover && GameManager.instance.discardManager.discardAvailable) ? selectMaterial : defaultMaterial;
@@ -60,7 +62,6 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     void UnitDeathAnim()
     {
         // VFX
-        //ParticleManager.instance.SpawnVFX(transform.position, "HitVFX", true); // doesnt work on a canvas
         CutVFX.SetActive(true);
 
         // SFX
@@ -75,7 +76,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         discarded = isDiscarded;
 
-        if (discarded) UnitDeathAnim();
+        if (isDiscarded) UnitDeathAnim();
 
         // Making unit appear cut in half
         /*
@@ -93,6 +94,9 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         Color primColor = (isDiscarded) ? discardedUnitColor : storedCard.player.playerColor;
         Color secColor = (isDiscarded) ? discardedUnitColor : storedCard.cardData.secondaryColor;
         sprite.RefreshColor(primColor, secColor);
+
+        // chaning the size
+        transform.localScale *= discardedUnitSizeMod;
 
         // disabling cartoon shake animation and hovering functionality
         cartoonShakeEffect.enabled = !isDiscarded;

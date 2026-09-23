@@ -7,21 +7,19 @@ using TMPro;
 public class DiscardManager : MonoBehaviour
 {
     [Header("animation times")]
-    [SerializeField] float deathThinkingTime;
-    [SerializeField] float afterDeathTime;
-    [SerializeField] float deathChoosingTime;
+    [SerializeField] float ratPointingTime;
+    [SerializeField] float beforeDiscardTime;
+    [SerializeField] float afterDiscardTime;
     [SerializeField] float unitsMovingTime;
 
     [Header("refs")]
     [SerializeField] DeathAnim death;
     [SerializeField] UnitAtDiscard[] units;
-    [SerializeField] GameObject unitOffscreenPoint;
     public GameObject previewPoint;
-    [SerializeField] TextMeshProUGUI discardCounter;
+    [SerializeField] GameObject discardUI;
 
     List<UnitAtDiscard> currentUnits = new List<UnitAtDiscard>();
-    int unitsDiscarded = 0;
-    int unitsToDiscard = 0;
+    bool currentDiscardRandom = true;
     [HideInInspector] public bool discardAvailable = false;
 
     private void Start()
@@ -30,11 +28,24 @@ public class DiscardManager : MonoBehaviour
         GameManager.instance.discardManager = this;
     }
 
-    public IEnumerator DiscardSequence(Player player)
+    public void StartDiscardSequence(Player player, bool randomDiscard)
     {
+        // Little juice effect for the whole discard window
+        Animations.instance.PopAnim(discardUI, 0.25f, 0.3f);
+
+        discardUI.SetActive(true);
+        currentDiscardRandom = randomDiscard;
+
         // discard player units
-        yield return StartCoroutine(UnitsDiscard(player));
-        UpdateDiscardHint();
+        List<Card> listOfCardsForDiscard = (randomDiscard) ? player.cardsInDiscard : player.cardsInHand;
+        AssignDiscardedUnits(listOfCardsForDiscard, player, randomDiscard);
+
+        // Changing workshop hint
+        string hintMessage = (randomDiscard) ? "Rat Wicked destroys one knocked card" : "Choose a card to destroy for 1 coin";
+        GameManager.instance.managerUI.workshop.ChangeHint(hintMessage);
+
+        if (randomDiscard && GameManager.instance.player.cardsInDiscard.Count == 0) StartCoroutine(FinishDiscard());
+        else if (randomDiscard) StartCoroutine(AutoDiscard(player));
     }
 
     /// <summary>
@@ -42,101 +53,55 @@ public class DiscardManager : MonoBehaviour
     /// </summary>
     /// <param name="units"></param>
     /// <returns></returns>
-    IEnumerator UnitsDiscard(Player player)
+    void AssignDiscardedUnits(List<Card> listOfCards, Player player, bool lockHoveringOver)
     {
-        // reset discard unit counter text
-        discardCounter.text = "";
-
         // if no units lost then skip discard for this player
-        if (player.cardsInDiscard.Count < 1)
+        if (listOfCards.Count < 1)
         {
-            yield return new WaitForSeconds(1f);
             StartCoroutine(FinishDiscard());
-            yield break;
+            return;
         }            
 
         // making the discard available
         discardAvailable = true;
-        UpdateDiscardHint();
 
         // INITIALYZING UNITS
         List<Vector3> unitDiscardPos = new List<Vector3>();
 
-        for (int i = 0; i < player.cardsInDiscard.Count; i++)
+        // deactivating units 
+        foreach (UnitAtDiscard unit in currentUnits) unit.gameObject.SetActive(false);
+
+        for (int i = 0; i < listOfCards.Count; i++)
         {
             // activating units
             units[i].gameObject.SetActive(true);
-            units[i].sprite.RefreshSprite(player.cardsInDiscard[i].cardData.unitSprite, player.playerColor, player.cardsInDiscard[i].cardData.secondaryColor);
+            units[i].sprite.RefreshSprite(listOfCards[i].cardData.unitSprite, player.playerColor, listOfCards[i].cardData.secondaryColor);
             units[i].storedCard = player.cardsInDiscard[i];
             units[i].Discard(false);
+            units[i].lockHovering = lockHoveringOver;
             currentUnits.Add(units[i]);
 
             // assigning units to a position
             Vector3 newUnitPosition = units[i].transform.position + new Vector3(Random.Range(-40, 40), Random.Range(-40, 40), 0f);
             unitDiscardPos.Add(newUnitPosition);
         }
-
-        // calculating how many units needs to be discarded
-        unitsToDiscard = (currentUnits.Count + 1) / 2;
-        UpdateDiscardHint();
-
-        // MOVING UNITS IN
-        // all units start off screen
-        foreach (UnitAtDiscard unit in currentUnits)
-        {
-            unit.gameObject.transform.position = unitOffscreenPoint.transform.position;
-        }
-        float t = 0;
-
-        // moving units from off screen to their positions
-        while (t < unitsMovingTime)
-        {
-            t += Time.deltaTime;
-            float clampedT = t / unitsMovingTime;
-            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
-
-            for (int i = 0; i < currentUnits.Count; i++)
-            {
-                currentUnits[i].transform.position = Vector3.Lerp(unitOffscreenPoint.transform.position, unitDiscardPos[i], coolT);
-            }
-
-            yield return null;
-        }
-    }
-
-    // Checks if half of the units were discarded
-    public void FinishDiscardCheck()
-    {
-        if (unitsDiscarded == unitsToDiscard)
-        {
-            StartCoroutine(FinishDiscard());
-        }
     }
 
     IEnumerator FinishDiscard()
     {
-        // notifying that all discards are made
-        yield return new WaitForSeconds(0.5f);
-        GameManager.instance.managerUI.NewHint("Unit discard complete!");
+        // pause to let all the anims play out and let player understand which card was discarded
+        //yield return Animations.instance.SkippablePause(afterDiscardTime);
+        yield return new WaitForSeconds(afterDiscardTime);
 
-        // units discarded message
-        string newMessage = (unitsDiscarded > 0) ? unitsDiscarded + " units were discarded" : "Damn, no units were lost by " + GameManager.instance.GetOpponentOfPlayer(GameManager.instance.GetCurrentPlayer()); ;
-        GameManager.instance.managerUI.StateChangeMessage(newMessage);
-        while (GameManager.instance.managerUI.stateTransitionObj.activeSelf) yield return null;
-
-        // MAKING UNITS DISAPPEAR
-        foreach (UnitAtDiscard unit in currentUnits) unit.gameObject.SetActive(false);
+        // deactivating units 
+        //foreach (UnitAtDiscard unit in currentUnits) unit.gameObject.SetActive(false);
 
         // resetting discard vals
         currentUnits.Clear();
-        unitsDiscarded = 0;
-        unitsToDiscard = 0;
         discardAvailable = false;
 
-        // finishing the turn
-        Player player = GameManager.instance.GetCurrentPlayer();
-        player.endStateReady = true;
-        player.EndTurn();
+        discardUI.SetActive(false);
+        GameManager.instance.shopManager.cardDisarded = true;
     }
 
     /// <summary>
@@ -146,50 +111,33 @@ public class DiscardManager : MonoBehaviour
         /// <returns></returns>
     public IEnumerator AutoDiscard(Player player)
     {
+        //yield return Animations.instance.SkippablePause(beforeDiscardTime);
+        yield return new WaitForSeconds(beforeDiscardTime);
         Debug.Log("DiscardManager: auto discard started");
 
-        int discardUnitsAmount = (currentUnits.Count + 1) / 2; // returns half of the unit amount rounded up
-        List<int> idsChosen = new List<int>();
-
-        for (int i = 0; i < discardUnitsAmount; i++)
-        {
-            // chosing random unit that hasn't been chosen before
-            int randomUnitID = 0;
-            do { randomUnitID = Random.Range(0, currentUnits.Count); } while (idsChosen.Contains(randomUnitID));
-            idsChosen.Add(randomUnitID);
-
-            DiscardUnit(currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>());
-            yield return new WaitForSeconds(deathChoosingTime);
-        }
-    }
-
-    void UpdateDiscardHint()
-    {
-        //string newHintMessage = GameManager.instance.GetState().defaultHintText + " (" + unitsDiscarded + "/" + unitsToDiscard + " units discarded)";
-        //GameManager.instance.managerUI.NewHint(newHintMessage);
-        discardCounter.text = unitsDiscarded + "/" + unitsToDiscard;
+        // choosing random unit and discarding it
+        int randomUnitID = Random.Range(0, currentUnits.Count);
+        DiscardUnit(currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>());
     }
 
     public void DiscardUnit(UnitAtDiscard unit)
     {
-        // checking to not discard more units than necessary
-        if (unitsDiscarded == unitsToDiscard) return;
-
-        // updating discarded units amount
-        unitsDiscarded++;
         Debug.Log("DiscardManager: unit discarded");
-        UpdateDiscardHint();
 
         // dead unit animation
         unit.Discard(true);
 
         // making death point finger at the unit 
-        StartCoroutine(death.PointAnim(deathChoosingTime / 2));
+        StartCoroutine(death.PointAnim(afterDiscardTime / 2));
+        // displaying destroyed units name
+        string newHintMessage = unit.storedCard.cardData.name + " is destroyed";
+        if (!currentDiscardRandom) newHintMessage += " for +1 coin";
+        GameManager.instance.managerUI.workshop.ChangeHint(newHintMessage);
 
-        // removing the card
+        // removing the card from game
         unit.storedCard.DestroyCard();
 
-        // check if half was disacrded
-        FinishDiscardCheck();
+        GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.player);
+        StartCoroutine(FinishDiscard());
     }
 }

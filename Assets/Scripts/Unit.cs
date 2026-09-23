@@ -339,7 +339,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         sprite.transform.localPosition = startingPosition;
 
         // pause
-        yield return StartCoroutine(Animations.instance.SkippablePause(1.8f));
+        if (!Animations.instance.skipPause) yield return StartCoroutine(Animations.instance.SkippablePause(1.8f));
 
         // deactivating ability text
         skillTextObj.SetActive(false);
