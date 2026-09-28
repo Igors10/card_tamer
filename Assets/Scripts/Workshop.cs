@@ -303,7 +303,7 @@ public class Workshop : MonoBehaviour
             cardCreationUI.SetActive(false);
             GameManager.instance.readyButton.gameObject.SetActive(true);
             GameManager.instance.readyButton.buttonText.text = "Ready";
-            GameManager.instance.gameStateUI[3].SetActive(true);
+            GameManager.instance.gameStateUI[(int)GameState.BUYING].SetActive(true);
         }
     }
 

@@ -54,7 +54,7 @@ public class ShopManager : MonoBehaviour
         StartCoroutine(CreateShopStars());
 
         // if no card was discarded enable auto discard
-        GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true);
+        StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
 
         Refresh();
     }

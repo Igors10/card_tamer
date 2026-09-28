@@ -108,7 +108,7 @@ public class ExecuteManager : MonoBehaviour
         if (playedFirstTime)
         {
             GameManager.instance.mainCamera.ZoomOut();
-            yield return new WaitForSeconds(zoomTime);
+            yield return Animations.instance.SkippablePause(zoomTime);
         }
 
         // Card effect + power

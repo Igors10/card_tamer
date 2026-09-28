@@ -161,7 +161,7 @@ public class Viewpoint : MonoBehaviour
         // snapping to correct values
         transform.position = storedStartingPosition;
         zoom = false;
-        //transform.rotation = targetRotation;
+        transform.rotation = targetRotation;
 
         Debug.Log("Viewport: zoom in finished");
     }

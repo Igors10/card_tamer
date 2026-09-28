@@ -7,16 +7,18 @@ using TMPro;
 public class DiscardManager : MonoBehaviour
 {
     [Header("animation times")]
-    [SerializeField] float ratPointingTime;
+    [SerializeField] float ratThinkingTime;
     [SerializeField] float beforeDiscardTime;
     [SerializeField] float afterDiscardTime;
     [SerializeField] float unitsMovingTime;
+    [SerializeField] float pointerInterval;
 
     [Header("refs")]
     [SerializeField] DeathAnim death;
     [SerializeField] UnitAtDiscard[] units;
     public GameObject previewPoint;
     [SerializeField] GameObject discardUI;
+    [SerializeField] GameObject discardPointer;
 
     List<UnitAtDiscard> currentUnits = new List<UnitAtDiscard>();
     bool currentDiscardRandom = true;
@@ -28,10 +30,13 @@ public class DiscardManager : MonoBehaviour
         GameManager.instance.discardManager = this;
     }
 
-    public void StartDiscardSequence(Player player, bool randomDiscard)
+    public IEnumerator StartDiscardSequence(Player player, bool randomDiscard)
     {
+        // little pause before enabling the discard 
+        yield return new WaitForSeconds(beforeDiscardTime);
+
         // Little juice effect for the whole discard window
-        Animations.instance.PopAnim(discardUI, 0.25f, 0.3f);
+        Animations.instance.PopAnim(discardUI, 0.35f, 0.3f);
 
         discardUI.SetActive(true);
         currentDiscardRandom = randomDiscard;
@@ -55,6 +60,9 @@ public class DiscardManager : MonoBehaviour
     /// <returns></returns>
     void AssignDiscardedUnits(List<Card> listOfCards, Player player, bool lockHoveringOver)
     {
+        // deactivating units 
+        foreach (UnitAtDiscard unit in units) unit.gameObject.SetActive(false);
+
         // if no units lost then skip discard for this player
         if (listOfCards.Count < 1)
         {
@@ -66,10 +74,7 @@ public class DiscardManager : MonoBehaviour
         discardAvailable = true;
 
         // INITIALYZING UNITS
-        List<Vector3> unitDiscardPos = new List<Vector3>();
-
-        // deactivating units 
-        foreach (UnitAtDiscard unit in currentUnits) unit.gameObject.SetActive(false);
+        List<Vector3> unitDiscardPos = new List<Vector3>();        
 
         for (int i = 0; i < listOfCards.Count; i++)
         {
@@ -90,7 +95,10 @@ public class DiscardManager : MonoBehaviour
     IEnumerator FinishDiscard()
     {
         // pause to let all the anims play out and let player understand which card was discarded
-        //yield return Animations.instance.SkippablePause(afterDiscardTime);
+        yield return Animations.instance.SkippablePause(afterDiscardTime);
+        //yield return StartCoroutine(Animations.instance.SkippablePause(2000f));
+        
+        Animations.instance.PopAnim(discardUI, afterDiscardTime * 4, -2f);
         yield return new WaitForSeconds(afterDiscardTime);
 
         // deactivating units 
@@ -104,6 +112,28 @@ public class DiscardManager : MonoBehaviour
         GameManager.instance.shopManager.cardDisarded = true;
     }
 
+    void MovePointer(Vector3 unitPos, bool randomUnitPos = false)
+    {
+        if (currentUnits.Count < 1) return;
+
+        // enabling the pointer
+        discardPointer.SetActive(true);
+        
+        // moving the pointer to a random different unit
+        Vector3 newPointerPosition = unitPos;
+
+        if (randomUnitPos) // choosing a random position 
+        {
+            do
+            {
+                newPointerPosition = currentUnits[Random.Range(0, currentUnits.Count)].transform.position;
+            } while (newPointerPosition != discardPointer.transform.position); // making sure the new chosen unit is different from the prev one
+        }
+        discardPointer.transform.position = newPointerPosition;
+
+        //AudioManager.instance.PlaySFX();
+    }
+
     /// <summary>
         /// Lets the game choose discarded units for the player;
         /// </summary>
@@ -112,11 +142,31 @@ public class DiscardManager : MonoBehaviour
     public IEnumerator AutoDiscard(Player player)
     {
         //yield return Animations.instance.SkippablePause(beforeDiscardTime);
-        yield return new WaitForSeconds(beforeDiscardTime);
         Debug.Log("DiscardManager: auto discard started");
+
+
+        // Pointer randomly moving around simulating rat choosing a target
+        float t = 0;
+        float pointerT = 0;
+
+        while (t < ratThinkingTime)
+        {
+            t += Time.deltaTime;
+            pointerT += Time.deltaTime;
+
+            // jumping the pointer to another unit when interval time is reached
+            if (pointerT >= pointerInterval)
+            {
+                pointerT = 0;
+                MovePointer(Vector3.zero, true);
+            }
+            yield return null;
+        }
+
 
         // choosing random unit and discarding it
         int randomUnitID = Random.Range(0, currentUnits.Count);
+        MovePointer(currentUnits[randomUnitID].transform.position);
         DiscardUnit(currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>());
     }
 
