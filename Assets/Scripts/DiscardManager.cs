@@ -18,7 +18,8 @@ public class DiscardManager : MonoBehaviour
     [SerializeField] UnitAtDiscard[] units;
     public GameObject previewPoint;
     [SerializeField] GameObject discardUI;
-    [SerializeField] GameObject discardPointer;
+    public GameObject discardPointer;
+    [SerializeField] Button closeButton;
 
     List<UnitAtDiscard> currentUnits = new List<UnitAtDiscard>();
     bool currentDiscardRandom = true;
@@ -32,14 +33,13 @@ public class DiscardManager : MonoBehaviour
 
     public IEnumerator StartDiscardSequence(Player player, bool randomDiscard)
     {
-        // little pause before enabling the discard 
-        yield return new WaitForSeconds(beforeDiscardTime);
+        // little pause before enabling the discards
+        if (randomDiscard) yield return new WaitForSeconds(beforeDiscardTime);
 
-        // Little juice effect for the whole discard window
-        Animations.instance.PopAnim(discardUI, 0.35f, 0.3f);
-
-        discardUI.SetActive(true);
         currentDiscardRandom = randomDiscard;
+
+        // Enabling the discard button if the discard is not random
+        closeButton.gameObject.SetActive(!randomDiscard);
 
         // discard player units
         List<Card> listOfCardsForDiscard = (randomDiscard) ? player.cardsInDiscard : player.cardsInHand;
@@ -68,9 +68,10 @@ public class DiscardManager : MonoBehaviour
         {
             StartCoroutine(FinishDiscard());
             return;
-        }            
+        }
 
-        // making the discard available
+        // enabling the discard available
+        discardUI.SetActive(true);
         discardAvailable = true;
 
         // INITIALYZING UNITS
@@ -81,7 +82,7 @@ public class DiscardManager : MonoBehaviour
             // activating units
             units[i].gameObject.SetActive(true);
             units[i].sprite.RefreshSprite(listOfCards[i].cardData.unitSprite, player.playerColor, listOfCards[i].cardData.secondaryColor);
-            units[i].storedCard = player.cardsInDiscard[i];
+            units[i].storedCard = listOfCards[i];
             units[i].Discard(false);
             units[i].lockHovering = lockHoveringOver;
             currentUnits.Add(units[i]);
@@ -92,27 +93,39 @@ public class DiscardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// If player decides not to discard a card, this closes the discard UI
+    /// </summary>
+    public void CloseDiscardWindow()
+    {
+        StartCoroutine(FinishDiscard());
+    }
+
     IEnumerator FinishDiscard()
     {
         // pause to let all the anims play out and let player understand which card was discarded
-        yield return Animations.instance.SkippablePause(afterDiscardTime);
-        //yield return StartCoroutine(Animations.instance.SkippablePause(2000f));
-        
-        Animations.instance.PopAnim(discardUI, afterDiscardTime * 4, -2f);
-        yield return new WaitForSeconds(afterDiscardTime);
+        if (currentDiscardRandom) yield return new WaitForSeconds(afterDiscardTime);
 
-        // deactivating units 
-        //foreach (UnitAtDiscard unit in currentUnits) unit.gameObject.SetActive(false);
+        // Animating the dicard UI disappearance
+        //Animations.instance.PopAnim(discardUI, afterDiscardTime * 5, -3f);
+        float fadeOutTime = afterDiscardTime / 3;
+        if (discardUI.activeSelf && currentDiscardRandom)
+        {
+            discardUI.GetComponent<AutoFade>().FadeOut(fadeOutTime);
+            yield return new WaitForSeconds(fadeOutTime);
+        }
 
         // resetting discard vals
         currentUnits.Clear();
         discardAvailable = false;
 
+        discardPointer.SetActive(false);
         discardUI.SetActive(false);
         GameManager.instance.shopManager.cardDisarded = true;
+        GameManager.instance.managerUI.workshop.ChangeHint("Create new cards!");
     }
 
-    void MovePointer(Vector3 unitPos, bool randomUnitPos = false)
+    public void MovePointer(Vector3 unitPos, bool randomUnitPos = false)
     {
         if (currentUnits.Count < 1) return;
 
@@ -127,11 +140,12 @@ public class DiscardManager : MonoBehaviour
             do
             {
                 newPointerPosition = currentUnits[Random.Range(0, currentUnits.Count)].transform.position;
-            } while (newPointerPosition != discardPointer.transform.position); // making sure the new chosen unit is different from the prev one
+            } while (newPointerPosition == discardPointer.transform.position && currentUnits.Count != 1); // making sure the new chosen unit is different from the prev one
         }
         discardPointer.transform.position = newPointerPosition;
 
-        //AudioManager.instance.PlaySFX();
+        // Playing SFX
+        if (currentUnits.Count > 1) AudioManager.instance.PlaySFX("NewTurnSFX");
     }
 
     /// <summary>
@@ -141,7 +155,7 @@ public class DiscardManager : MonoBehaviour
         /// <returns></returns>
     public IEnumerator AutoDiscard(Player player)
     {
-        //yield return Animations.instance.SkippablePause(beforeDiscardTime);
+        yield return Animations.instance.SkippablePause(beforeDiscardTime);
         Debug.Log("DiscardManager: auto discard started");
 
 

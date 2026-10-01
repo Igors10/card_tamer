@@ -1,10 +1,11 @@
-using UnityEngine;
+using FishNet.Demo.AdditiveScenes;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
-using UnityEngine.UI;
-using FishNet.Demo.AdditiveScenes;
 using System.ComponentModel.Design;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class BattleManager : MonoBehaviour
 {
@@ -104,7 +105,8 @@ public class BattleManager : MonoBehaviour
         field.sprite.color = player.playerColor;
         oppField.sprite.color = opponent.playerColor;
 
-        yield return new WaitForSeconds(1f);
+        yield return Animations.instance.SkippablePause(1f);
+        yield return new WaitForSeconds(0.1f); // prevents from skipping power increase animation right after skipping movement
 
         // ADDING UNIT POWER
 
@@ -141,9 +143,8 @@ public class BattleManager : MonoBehaviour
         {
             yield return null;
         }
-        yield return new WaitForSeconds(0.5f);
+        yield return Animations.instance.SkippablePause(1.5f);
 
-        yield return new WaitForSeconds(1f);
         // COMPARING POWER
         if (playerPowerUI.currentPower > opponentPowerUI.currentPower) Debug.Log("BattleManager: player has more power");
         if (playerPowerUI.currentPower < opponentPowerUI.currentPower) Debug.Log("BattleManager: opponent has more power");
@@ -174,9 +175,11 @@ public class BattleManager : MonoBehaviour
         if (GameManager.instance.gameOver) yield break;
 
         // Putting the camera where it was before battling phase
-        Vector3 stateCameraPosition = GameManager.instance.GetState().cameraPosition;
-        Vector3 centerCameraPosition = new Vector3(0, Camera.main.transform.position.y, Camera.main.transform.position.z);
-        yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(centerCameraPosition, 0.6f));
+        Vector3 playerCentralFieldPos = GameManager.instance.player.fields[1].transform.position;
+        Vector3 opponentCentralFieldPos = GameManager.instance.opponent.fields[1].transform.position;
+        Vector3 posBetweenFields = Vector3.Lerp(playerCentralFieldPos, opponentCentralFieldPos, 0.5f);
+        Vector3 targetPos = new Vector3(posBetweenFields.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
+        yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(targetPos, 0.6f));
 
         // Message that units are knocked out
         //GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false); // removing it so that the message about doodle collector could be seen

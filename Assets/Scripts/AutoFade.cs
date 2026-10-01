@@ -19,6 +19,7 @@ public class AutoFade : MonoBehaviour
     [SerializeField] float fadeInTime;
     [SerializeField] float stayTime;
     [SerializeField] float fadeOutTime;
+    [SerializeField] bool allowSkipToFadeOut;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -85,15 +86,32 @@ public class AutoFade : MonoBehaviour
 
         // stay
         DefaultObjectAlphas();
-        yield return new WaitForSeconds(stayTime);
+        if (allowSkipToFadeOut) yield return Animations.instance.SkippablePause(stayTime);
+        else yield return new WaitForSeconds(stayTime);
 
         // fade out
-        if (fadeOutTime > 0)
+        FadeOut(fadeOutTime);
+    }
+
+    /// <summary>
+    /// Call to fade out the object
+    /// </summary>
+    /// <param name="fadeOutTime"></param>
+    public void FadeOut(float fadeOutT)
+    {
+        StartCoroutine(OnlyFadeOut(fadeOutT));
+    }
+
+    IEnumerator OnlyFadeOut(float fadeOutT)
+    {
+        float t = 0;
+
+        if (fadeOutT > 0)
         {
-            while (t < fadeOutTime)
+            while (t < fadeOutT)
             {
                 t += Time.deltaTime;
-                float clampedT = t / fadeOutTime;
+                float clampedT = t / fadeOutT;
                 SetObjectsAlpha(1 - clampedT);
                 yield return null;
             }

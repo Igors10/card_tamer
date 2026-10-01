@@ -43,7 +43,8 @@ public class Animations : MonoBehaviour
             float clampedT = t / phaseTime;
             float coolT = 1 - (1 - clampedT) * (1 - clampedT);
 
-            obj.transform.localScale = Vector3.Lerp(startingScale, targetScale, coolT);
+            Vector3 newScale = Vector3.Lerp(startingScale, targetScale, coolT);
+            obj.transform.localScale = Vector3.Max(Vector3.zero, newScale);
             yield return null;
         }
 
@@ -58,7 +59,8 @@ public class Animations : MonoBehaviour
             float clampedT = t / phaseTime;
             float coolT = clampedT * clampedT;
 
-            obj.transform.localScale = Vector3.Lerp(targetScale, startingScale, coolT);
+            Vector3 newScale = Vector3.Lerp(targetScale, startingScale, coolT);
+            obj.transform.localScale = Vector3.Max(Vector3.zero, newScale);
             yield return null;
         }
 
@@ -112,6 +114,8 @@ public class Animations : MonoBehaviour
     /// <returns></returns>
     public IEnumerator SkippablePause(float time)
     {
+        if (skipPause) yield break;
+
         float t = 0;
         while (t < time)
         {

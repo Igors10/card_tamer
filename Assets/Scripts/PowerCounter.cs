@@ -102,7 +102,7 @@ public class PowerCounter : MonoBehaviour
         // Making power text bigger and have white color
         float t = 0;
 
-        while (t < timePerUnit)
+        while (t < timePerUnit && !Animations.instance.skipPause)
         {
             t += Time.deltaTime;
             float actualT = t / timePerUnit;
@@ -129,14 +129,14 @@ public class PowerCounter : MonoBehaviour
             RefreshCounterScale();
             GameManager.instance.GetOpponentOfPlayer(player).powerCounter.RefreshCounterScale();
 
-            yield return new WaitForSeconds(0.13f);
+            yield return Animations.instance.SkippablePause(0.13f);
         }
         
 
         // Quickly making text back to normal
         t = 0;
 
-        while (t < timePerUnit)
+        while (t < timePerUnit && !Animations.instance.skipPause)
         {
             t += Time.deltaTime * 2;
             float actualT = t / timePerUnit;
@@ -159,7 +159,7 @@ public class PowerCounter : MonoBehaviour
         if (unit != null) unit.transform.localScale = defaultUnitScale;
 
         // pause between units
-        yield return new WaitForSeconds(0.5f);
+        yield return Animations.instance.SkippablePause(0.5f);
     }
 
     public void ResolveCounter(bool won, Field[] field)

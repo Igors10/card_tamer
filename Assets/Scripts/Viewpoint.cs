@@ -177,7 +177,7 @@ public class Viewpoint : MonoBehaviour
         float t = 0;
         Vector3 startingPosition = transform.position;
 
-        while (t <= 1) 
+        while (t <= 1 && !Animations.instance.skipPause) 
         {
             t += Time.deltaTime * moveSpeed;
             float coolT = t * t;

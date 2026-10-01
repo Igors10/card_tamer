@@ -39,7 +39,11 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     void OnHover(bool isHover)
     {
-        if (!GameManager.instance.yourTurn || !discarded || lockHovering) return; // only during player's turn
+        if (discarded || lockHovering) return; // only during player's turn
+
+        // moving discard pointer over it 
+        GameManager.instance.discardManager.discardPointer.SetActive(isHover);
+        GameManager.instance.discardManager.MovePointer(transform.position);
 
         // color the unit as selectable
         Material newMaterial = (isHover && GameManager.instance.discardManager.discardAvailable) ? selectMaterial : defaultMaterial;
@@ -57,6 +61,9 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
         // tell discard manager that you want to discard this unit
         GameManager.instance.discardManager.DiscardUnit(this);
+
+        // add a shop star for discarding a unit
+        GameManager.instance.shopManager.AddShopStar();
     }
 
     void UnitDeathAnim()
@@ -85,6 +92,9 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             unitPiece[i].gameObject.SetActive(isDiscarded);
             //unitPiece[i].sprite = sprite.sprite;
         }*/
+
+        // Disabling the preview
+        GameManager.instance.managerUI.PreviewCard(false, storedCard.cardData, storedCard.player, Vector3.zero);
 
         // chaning the material
         Material material = (isDiscarded) ? discardMaterial : defaultMaterial; 

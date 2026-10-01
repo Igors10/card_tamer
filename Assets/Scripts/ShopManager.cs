@@ -19,7 +19,7 @@ public class ShopManager : MonoBehaviour
 
     [Header("prices")]
     public int drawCardPrice;
-    public int drawSpecialPrice;
+    public int discardReward;
     // upgrade price is current max star amount + 1
 
     [Header("shop stars")]
@@ -42,7 +42,7 @@ public class ShopManager : MonoBehaviour
         // adding functionality to buttons
         buttons[0].onClick.AddListener(() => UpgradeStars(player));
         buttons[1].onClick.AddListener(() => DrawCard(player));
-        buttons[2].onClick.AddListener(() => DrawSpecial(player));
+        buttons[2].onClick.AddListener(() => DiscardCard(player));
     }
 
     private void OnEnable()
@@ -100,9 +100,9 @@ public class ShopManager : MonoBehaviour
         prices[1].text = drawCardPrice.ToString();
         CheckButtonAvailability(1, drawCardPrice);
 
-        // refreshing draw special button
-        prices[2].text = drawSpecialPrice.ToString();
-        CheckButtonAvailability(2, drawSpecialPrice);
+        // refreshing discard button
+        //prices[2].text = "+ " + discardReward.ToString();
+        //CheckButtonAvailability(2, discardReward);
     }
 
     // SHOP BUTTONS
@@ -148,6 +148,7 @@ public class ShopManager : MonoBehaviour
         Pay(playerToGetCard, cardPrice);
     }
 
+    /*
     void DrawSpecial(Player playerToGetSpecial)
     {
         GameManager.instance.managerUI.workshop.AbilityOptions(true);
@@ -155,6 +156,11 @@ public class ShopManager : MonoBehaviour
         // Paying 
         int specialPrice = Convert.ToInt32(prices[2].text);
         Pay(playerToGetSpecial, specialPrice);
+    }*/
+
+    void DiscardCard(Player playerToDiscard)
+    {
+        StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(playerToDiscard, false));
     }
 
     // SHOP STARS (MONEY)
@@ -167,7 +173,7 @@ public class ShopManager : MonoBehaviour
 
     IEnumerator CreateShopStars()
     {
-        // if stars were already created don't make mode
+        // if stars were already created don't make more
         if (skipStarAppearance) yield break;
 
         // disabling buttons before workshop fully loaded
@@ -192,26 +198,39 @@ public class ShopManager : MonoBehaviour
 
         // calculating player's shop stars
         int newStars = player.deadUnitsThisRound + shopStarsAfterBattle;
-        player.shopStars += newStars;
+        //player.shopStars += newStars;
 
         Debug.Log("ShopManager: Player has " + player.shopStars + " shop stars");
         
         for (int i = 0; i < newStars; i++)
         {
-            Image newShopStar = Instantiate(shopStarPrefab, starsObj.transform.position, Quaternion.identity, starsObj.transform).GetComponent<Image>();
-            shopStars.Add(newShopStar);
-            newShopStar.color = starColor;
-            Animations.instance.PopAnim(newShopStar.gameObject, 0.4f, 0.2f);
-            Debug.Log("ShopManager: new shop star created");
+            AddShopStar();
 
-            // playing sound effect
-            AudioManager.instance.PlaySFX("ShopStarSFX");
-
-            Refresh(true);
             if (skipStarAppearance) starAppearIntervals = 0.05f; 
             yield return new WaitForSeconds(starAppearIntervals);
         }
         Refresh();
+    }
+
+    /// <summary>
+    /// Adds one shop star
+    /// </summary>
+    public void AddShopStar()
+    {
+        // creating the star
+        Image newShopStar = Instantiate(shopStarPrefab, starsObj.transform.position, Quaternion.identity, starsObj.transform).GetComponent<Image>();
+        shopStars.Add(newShopStar);
+        newShopStar.color = starColor;
+        Animations.instance.PopAnim(newShopStar.gameObject, 0.4f, 0.2f);
+        Debug.Log("ShopManager: new shop star created");
+
+        // updating player's star count
+        player.shopStars++;
+
+        // playing sound effect
+        AudioManager.instance.PlaySFX("ShopStarSFX");
+
+        Refresh(true);
     }
 
     /// <summary>
