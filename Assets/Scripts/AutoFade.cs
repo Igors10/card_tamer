@@ -16,7 +16,7 @@ public class AutoFade : MonoBehaviour
     float[] textAlphas;
 
     [Header("fade settings")]
-    [SerializeField] float fadeInTime;
+    public float fadeInTime;
     [SerializeField] float stayTime;
     [SerializeField] float fadeOutTime;
     [SerializeField] bool allowSkipToFadeOut;

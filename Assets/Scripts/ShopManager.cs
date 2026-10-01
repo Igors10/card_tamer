@@ -54,7 +54,7 @@ public class ShopManager : MonoBehaviour
         StartCoroutine(CreateShopStars());
 
         // if no card was discarded enable auto discard
-        StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
+        //StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
 
         Refresh();
     }
@@ -71,7 +71,7 @@ public class ShopManager : MonoBehaviour
         cardDisarded = false;
     }
 
-    void Refresh(bool onlyRefreshStars = false)
+    public void Refresh(bool onlyRefreshStars = false)
     {
         // refreshing shopStars
         for (int i = 0; i < shopStars.Count; i++)
@@ -101,6 +101,7 @@ public class ShopManager : MonoBehaviour
         CheckButtonAvailability(1, drawCardPrice);
 
         // refreshing discard button
+        buttons[2].interactable = player.cardsInHand.Count > 1;
         //prices[2].text = "+ " + discardReward.ToString();
         //CheckButtonAvailability(2, discardReward);
     }

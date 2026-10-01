@@ -20,10 +20,12 @@ public class DiscardManager : MonoBehaviour
     [SerializeField] GameObject discardUI;
     public GameObject discardPointer;
     [SerializeField] Button closeButton;
+    [SerializeField] TextMeshProUGUI discardText;
 
     List<UnitAtDiscard> currentUnits = new List<UnitAtDiscard>();
     bool currentDiscardRandom = true;
     [HideInInspector] public bool discardAvailable = false;
+    bool discarding = false;
 
     private void Start()
     {
@@ -36,6 +38,7 @@ public class DiscardManager : MonoBehaviour
         // little pause before enabling the discards
         if (randomDiscard) yield return new WaitForSeconds(beforeDiscardTime);
 
+        discarding = true;
         currentDiscardRandom = randomDiscard;
 
         // Enabling the discard button if the discard is not random
@@ -47,10 +50,13 @@ public class DiscardManager : MonoBehaviour
 
         // Changing workshop hint
         string hintMessage = (randomDiscard) ? "Rat Wicked destroys one knocked card" : "Choose a card to destroy for 1 coin";
-        GameManager.instance.managerUI.workshop.ChangeHint(hintMessage);
+        discardText.text = hintMessage;
 
         if (randomDiscard && GameManager.instance.player.cardsInDiscard.Count == 0) StartCoroutine(FinishDiscard());
         else if (randomDiscard) StartCoroutine(AutoDiscard(player));
+
+        // not finishing the coroutine before the discard is finished so that the battle phase doesnt change for the shop
+        while (discarding) { yield return null; }
     }
 
     /// <summary>
@@ -106,8 +112,7 @@ public class DiscardManager : MonoBehaviour
         // pause to let all the anims play out and let player understand which card was discarded
         if (currentDiscardRandom) yield return new WaitForSeconds(afterDiscardTime);
 
-        // Animating the dicard UI disappearance
-        //Animations.instance.PopAnim(discardUI, afterDiscardTime * 5, -3f);
+        // Animating the discard UI disappearance
         float fadeOutTime = afterDiscardTime / 3;
         if (discardUI.activeSelf && currentDiscardRandom)
         {
@@ -118,11 +123,15 @@ public class DiscardManager : MonoBehaviour
         // resetting discard vals
         currentUnits.Clear();
         discardAvailable = false;
+        discarding = false;
 
         discardPointer.SetActive(false);
         discardUI.SetActive(false);
         GameManager.instance.shopManager.cardDisarded = true;
-        GameManager.instance.managerUI.workshop.ChangeHint("Create new cards!");
+
+        // refreshin the shop (to see if the discard button still available)
+        GameManager.instance.shopManager.Refresh();
+        //GameManager.instance.managerUI.workshop.ChangeHint("Create new cards!");
     }
 
     public void MovePointer(Vector3 unitPos, bool randomUnitPos = false)
@@ -145,7 +154,7 @@ public class DiscardManager : MonoBehaviour
         discardPointer.transform.position = newPointerPosition;
 
         // Playing SFX
-        if (currentUnits.Count > 1) AudioManager.instance.PlaySFX("NewTurnSFX");
+        if (currentUnits.Count > 1) AudioManager.instance.PlaySFX("RerollSFX");
     }
 
     /// <summary>
@@ -196,7 +205,7 @@ public class DiscardManager : MonoBehaviour
         // displaying destroyed units name
         string newHintMessage = unit.storedCard.cardData.name + " is destroyed";
         if (!currentDiscardRandom) newHintMessage += " for +1 coin";
-        GameManager.instance.managerUI.workshop.ChangeHint(newHintMessage);
+        discardText.text = newHintMessage;
 
         // removing the card from game
         unit.storedCard.DestroyCard();

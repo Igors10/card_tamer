@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
     [HideInInspector] public int deadUnitsThisRound = 0;
     [HideInInspector] public int shopStars = 0;
 
+    [HideInInspector] public int damageTakenThisRound = 0;
 
     private void Start()
     {
@@ -116,6 +117,7 @@ public class Player : MonoBehaviour
         // refresh stars 
         currentStars = maxStars;
         deadUnitsThisRound = 0;
+        damageTakenThisRound = 0;
         cardsInDiscard.Clear();
 
         playerUI.Refresh();
@@ -138,6 +140,7 @@ public class Player : MonoBehaviour
 
         damageAmount = (damageAmount > health) ? health : damageAmount;
 
+        damageTakenThisRound += damageAmount;
         health -= damageAmount;
         playerUI.Refresh();
 

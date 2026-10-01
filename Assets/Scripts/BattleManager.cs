@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
@@ -14,6 +15,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] PowerCounter opponentPowerUI;
     public GameObject damageObj;
     [SerializeField] DeathAnim death;
+    [SerializeField] RSDialogueObj plusStarDial;
+    [SerializeField] RSDialogueObj discardDescDial;
 
     [Header("prefabs")]
     public GameObject dmgParticlePrefab;
@@ -211,6 +214,22 @@ public class BattleManager : MonoBehaviour
         {
             yield return null;
         }
+
+        // Chat with the rat
+        if (GameManager.instance.player.damageTakenThisRound > GameManager.instance.opponent.damageTakenThisRound)
+        {
+            yield return RatSmart.instance.PlayThemeDialogue("lose");
+            yield return RatSmart.instance.PlayDialogue(plusStarDial);
+        }
+        else
+        {
+            yield return RatSmart.instance.PlayThemeDialogue("win");
+            if (GameManager.instance.roundNr == 1) yield return RatSmart.instance.PlayDialogue(discardDescDial);
+        }
+
+        // Discarding a card
+        GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false);
+        yield return StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;
