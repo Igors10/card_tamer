@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c875b8cf3824674d8769cd030b413b4, type: 3}
+  m_Name: DrawingExplainDial
+  m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
+  line:
+  - Ok here's the best part
+  - Drawing and naming a card
+  - Draw whatever, but I'd advice to keep a common theme between cards you make
+  - You can draw stick figures, cool monsters, your irl friends,  TV characters ...
+  - Or anything else, what do I know, Im just a rat
+  - Humans have better imagination than rats, you can do this!

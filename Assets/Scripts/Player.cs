@@ -155,6 +155,8 @@ public class Player : MonoBehaviour
     // Refreshes the battlefield on players side
     public void EndRound()
     {
+        GameData.firstTimePlaying = true;
+
         GameManager.instance.handManager.ReturnCardsToHand(this);
 
         foreach (Field field in fields)

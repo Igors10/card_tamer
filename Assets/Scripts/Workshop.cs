@@ -132,6 +132,12 @@ public class Workshop : MonoBehaviour
 
     public void WorkshopColorSelect()
     {
+        // Welcoming message from Rat Smart
+        if (GameData.firstTimePlaying)
+        {
+            StartCoroutine(RatSmart.instance.PlayDialogue("WelcomeDial"));
+        }
+
         colorSelectUI.SetActive(true);
         workshopHintText.text = "Pick a color you like!";
     }
@@ -167,6 +173,13 @@ public class Workshop : MonoBehaviour
             AbilityObj abilityToAssign = generator.PickRandomAbility("basic");
             abilityOption[1].abilityNote.InitAbilityNote(abilityToAssign);
         }
+
+        // Rat explaining the abilites
+        if (RatSmart.instance.abilitiesExplained == false && GameData.firstTimePlaying)
+        {
+            StartCoroutine(RatSmart.instance.PlayDialogue("AbilityExplainDial"));
+            RatSmart.instance.abilitiesExplained = true;
+        }
     }
 
     void EnableAbilityOptions(bool isEnable)
@@ -188,6 +201,13 @@ public class Workshop : MonoBehaviour
 
         // resetting name input field
         nameInput.text = "";
+
+        // Rat explaining the drawing
+        if (RatSmart.instance.drawingExplained == false && GameData.firstTimePlaying)
+        {
+            StartCoroutine(RatSmart.instance.PlayDialogue("DrawingExplainDial"));
+            RatSmart.instance.drawingExplained = true;
+        }
     }
 
     public void PickAbilityOption(AbilityObj pickedAbility, Color abilityColor)

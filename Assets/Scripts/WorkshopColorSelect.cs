@@ -44,8 +44,6 @@ public class WorkshopColorSelect : MonoBehaviour
             // prechoosing the pencil if the player had that color selected
             //if (GameManager.instance.cardDatabase.allPlayerColors[i] == GameManager.instance.player.playerColor) ChoosePencil(pencils[i]);
         }
-
-
     }
 
     /// <summary>

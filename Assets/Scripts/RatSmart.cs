@@ -1,8 +1,9 @@
-using UnityEngine;
-using System.Collections.Generic;
+using System;
 using System.Collections;
-using UnityEngine.UI;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 public class RatSmart : MonoBehaviour
 {
     public static RatSmart instance;
@@ -14,11 +15,18 @@ public class RatSmart : MonoBehaviour
 
     [Header("dialogue settings")]
     [SerializeField] float fadeTime = 0.5f;
+    [SerializeField] bool soundOn = true;
 
     [Header("dialogue list")]
     [SerializeField] List<RSDialogueObj> winDialogues = new List<RSDialogueObj>();
     [SerializeField] List<RSDialogueObj> lostDialogues = new List<RSDialogueObj>();
+    [SerializeField] RSDialogueObj[] allDialogues;
     [SerializeField] RSDialogueObj defaultDialogue;
+
+    [Header("completed dialogues")]
+    [HideInInspector] public bool discardingExplained;
+    [HideInInspector] public bool abilitiesExplained;
+    [HideInInspector] public bool drawingExplained;
 
     bool clicked;
 
@@ -27,24 +35,33 @@ public class RatSmart : MonoBehaviour
         instance = this;
     }
 
-    public IEnumerator PlayThemeDialogue(string dialogueType = "win")
+    /// <summary>
+    /// Can be called from anywhere to launch a specific dialogue
+    /// </summary>
+    /// <param name="dialogueName"></param>
+    /// <returns></returns>
+    public IEnumerator PlayDialogue(string dialogueName = "win")
     {
         RSDialogueObj dialogueToPlay = defaultDialogue;
 
-        switch (dialogueType)
+        switch (dialogueName)
         {
             case "win":
-                dialogueToPlay = winDialogues[Random.Range(0, winDialogues.Count)];
+                dialogueToPlay = winDialogues[UnityEngine.Random.Range(0, winDialogues.Count)];
                 break;
             case "lose":
-                dialogueToPlay = lostDialogues[Random.Range(0, lostDialogues.Count)];
+                dialogueToPlay = lostDialogues[UnityEngine.Random.Range(0, lostDialogues.Count)];
+                break;
+            default:
+                dialogueToPlay = Array.Find(allDialogues, x => x.name == dialogueName); // finding the dialogue with the matching name
+                if (dialogueToPlay == null) { dialogueToPlay = defaultDialogue; Debug.Log("RatSmart: dialogue was not found"); }
                 break;
         }
 
-        yield return PlayDialogue(dialogueToPlay);
+        yield return PlayDialogueObj(dialogueToPlay);
     }
 
-    public IEnumerator PlayDialogue(RSDialogueObj dialogue)
+    public IEnumerator PlayDialogueObj(RSDialogueObj dialogue)
     {
         // Enabling the rat
         RSobj.SetActive(true);
@@ -57,6 +74,14 @@ public class RatSmart : MonoBehaviour
 
             // changing the text
             ratText.text = dialogue.line[i];
+
+            // playing random SFX
+            if (soundOn)
+            {
+                int ratSFXnr = UnityEngine.Random.Range(1, 5);
+                string ratSFXname = "Rat" + ratSFXnr.ToString() + "SFX";
+                AudioManager.instance.PlaySFX(ratSFXname);
+            }
 
             // pause here until player presses LMB
             do
@@ -86,6 +111,6 @@ public class RatSmart : MonoBehaviour
         if (Input.GetButtonUp("Fire1")) clicked = false;
 
         // test dialogue
-        if (Input.GetKeyDown(KeyCode.D)) StartCoroutine(PlayDialogue(defaultDialogue));
+        if (Input.GetKeyDown(KeyCode.D)) StartCoroutine(PlayDialogueObj(defaultDialogue));
     }
 }

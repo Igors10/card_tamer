@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c875b8cf3824674d8769cd030b413b4, type: 3}
+  m_Name: ShopExplainDial
+  m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
+  line:
+  - Welcome to workshop!
+  - Here you can spend 2 stars to draw a new card
+  - If you don't have enough stars you can also discard a card to get +1 star
+  - Have fun creating!

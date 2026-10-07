@@ -15,7 +15,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] PowerCounter opponentPowerUI;
     public GameObject damageObj;
     [SerializeField] DeathAnim death;
-    [SerializeField] RSDialogueObj plusStarDial;
     [SerializeField] RSDialogueObj discardDescDial;
 
     [Header("prefabs")]
@@ -28,10 +27,12 @@ public class BattleManager : MonoBehaviour
     [SerializeField] float afterDeathTime;
 
     [HideInInspector] public int currentLine;
+    [HideInInspector] public bool lostCurrentRound;
 
     public void ResetBattleVals()
     {
         currentLine = -1;
+        lostCurrentRound = false;
         Debug.Log("BattleManager: resetting battle values, currentLine is now " + currentLine);
 
         ResetLineVals();
@@ -215,21 +216,24 @@ public class BattleManager : MonoBehaviour
             yield return null;
         }
 
-        // Chat with the rat
-        if (GameManager.instance.player.damageTakenThisRound > GameManager.instance.opponent.damageTakenThisRound)
+        lostCurrentRound = GameManager.instance.player.damageTakenThisRound > GameManager.instance.opponent.damageTakenThisRound;
+
+        // CHAT WITH THE RAT
+        // Rat encouraging you 
+        if (lostCurrentRound) yield return RatSmart.instance.PlayDialogue("lose");
+        else yield return RatSmart.instance.PlayDialogue("win");
+
+        // Rat explaining the discard
+        if (RatSmart.instance.discardingExplained == false && GameManager.instance.player.cardsInDiscard.Count > 1)
         {
-            yield return RatSmart.instance.PlayThemeDialogue("lose");
-            yield return RatSmart.instance.PlayDialogue(plusStarDial);
-        }
-        else
-        {
-            yield return RatSmart.instance.PlayThemeDialogue("win");
-            if (GameManager.instance.roundNr == 1) yield return RatSmart.instance.PlayDialogue(discardDescDial);
+            yield return RatSmart.instance.PlayDialogueObj(discardDescDial);
+            RatSmart.instance.discardingExplained = true;
         }
 
         // Discarding a card
         GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false);
-        yield return StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
+        if (GameManager.instance.player.cardsInDiscard.Count > 0) 
+            yield return StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;

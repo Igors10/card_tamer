@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: DialLose1
   m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
   line:
-  - That was bad
-  - 'Pro tip: use gray matter to think'
+  - Ok that was pretty bad
+  - 'Pro tip: next time use gray matter in your brain to think'

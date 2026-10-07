@@ -7,6 +7,7 @@ using System.Collections;
 using System.Linq;
 using System.Data;
 using Unity.VisualScripting;
+using System.Diagnostics.CodeAnalysis;
 
 public class ShopManager : MonoBehaviour
 {
@@ -49,8 +50,6 @@ public class ShopManager : MonoBehaviour
     {
         Debug.Log("ShopManager: OnEnable triggers");
 
-        // player can't upgrade stars if there are more than 4
-        starsAlreadyUpgraded = player.maxStars >= 4;
         StartCoroutine(CreateShopStars());
 
         // if no card was discarded enable auto discard
@@ -79,22 +78,9 @@ public class ShopManager : MonoBehaviour
             // star position
             float starX = starSpacing * (i - (shopStars.Count - 1) / 2f);
             shopStars[i].transform.localPosition = new Vector2(starX, 0f);
-
-            // star transparency (used stars are half transparent
-            if (player.shopStars <= i)
-            {
-                shopStars[i].color = new Color(shopStars[i].color.r, shopStars[i].color.g, shopStars[i].color.b, 0.5f);
-            }
         }
 
         if (onlyRefreshStars) return;
-
-        // refreshing up star button
-        int nextStarAmount = player.maxStars + 1;
-        prices[0].text = nextStarAmount.ToString();
-        nextStarAmountText.text = "Increase stars (current:" + player.maxStars.ToString() +")";
-        CheckButtonAvailability(0, nextStarAmount);
-        if (starsAlreadyUpgraded) buttons[0].interactable = false;
 
         // refreshing draw card button
         prices[1].text = drawCardPrice.ToString();
@@ -123,6 +109,14 @@ public class ShopManager : MonoBehaviour
         playerToPay.shopStars -= price;
         if (playerToPay.shopStars < 0) playerToPay.shopStars = 0;
         Debug.Log("ShopManager: player pays " + price + " stars; player has " + playerToPay.shopStars + " stars left");
+
+        for (int i = 0; i < price; i++)
+        {
+            if (shopStars.Count < 1) break;
+            Image nextShopStar = shopStars[0]; 
+            shopStars.Remove(nextShopStar);
+            Destroy(nextShopStar.gameObject);
+        }
 
         Refresh();
     }
@@ -198,7 +192,7 @@ public class ShopManager : MonoBehaviour
         }
 
         // calculating player's shop stars
-        int newStars = player.deadUnitsThisRound + shopStarsAfterBattle;
+        int newStars = shopStarsAfterBattle;
         //player.shopStars += newStars;
 
         Debug.Log("ShopManager: Player has " + player.shopStars + " shop stars");
@@ -210,6 +204,20 @@ public class ShopManager : MonoBehaviour
             if (skipStarAppearance) starAppearIntervals = 0.05f; 
             yield return new WaitForSeconds(starAppearIntervals);
         }
+
+        // CHAT WITH RAT
+        // shop tutorial
+        if (GameData.firstTimePlaying)
+        {
+            yield return RatSmart.instance.PlayDialogue("ShopExplainDial");
+        }
+        // adding the star if player lost previous round
+        if (GameManager.instance.battleManager.lostCurrentRound)
+        {
+            yield return RatSmart.instance.PlayDialogue("PlusStarDial");
+            AddShopStar();
+        }
+
         Refresh();
     }
 
@@ -239,6 +247,7 @@ public class ShopManager : MonoBehaviour
     /// </summary>
     void DiscardSpendStars()
     {
+        /*
         List<Image> shopStarsToRemove = new List<Image>();
         foreach (Image shopStar in shopStars.Where(r => r.color.a < 1))
         {
@@ -249,6 +258,6 @@ public class ShopManager : MonoBehaviour
         {
             shopStars.Remove(shopStarsToRemove[i]);
             Destroy(shopStarsToRemove[i]);
-        }
+        }*/
     }
 }

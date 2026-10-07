@@ -5333,7 +5333,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -36.048035, y: -63.478302}
+  m_AnchoredPosition: {x: -36.048035, y: -343.4783}
   m_SizeDelta: {x: 700, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &434566687
@@ -5896,6 +5896,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!1 &495687193
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 495687194}
+  m_Layer: 0
+  m_Name: RatSmart
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &495687194
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495687193}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2113098668}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &510724988
 GameObject:
   m_ObjectHideFlags: 0
@@ -11039,6 +11070,7 @@ GameObject:
   - component: {fileID: 966030068}
   - component: {fileID: 966030070}
   - component: {fileID: 966030069}
+  - component: {fileID: 966030071}
   m_Layer: 5
   m_Name: RS
   m_TagString: Untagged
@@ -11062,7 +11094,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -12, y: 104}
+  m_AnchoredPosition: {x: -12, y: -176}
   m_SizeDelta: {x: 364.9164, y: 387.291}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &966030069
@@ -11078,7 +11110,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -11103,6 +11135,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 966030067}
   m_CullTransparentMesh: 1
+--- !u!114 &966030071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 966030067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ab1780e9436f94ba67d86b4bf2a98f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CartoonShakeEffect
+  idleRotateInterval: 1
+  idleRotationIntensity: 3
+  randomStartingT: 0
 --- !u!1001 &1013467353
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12835,9 +12882,9 @@ MonoBehaviour:
   workshop: {fileID: 0}
   drawCardPrice: 2
   discardReward: 0
-  shopStarsAfterBattle: 2
+  shopStarsAfterBattle: 3
   shopStarPrefab: {fileID: 8485228647327631986, guid: c2a1de9d1668cc14094ab9d5ef2d133b, type: 3}
-  starColor: {r: 1, g: 1, b: 1, a: 1}
+  starColor: {r: 0.5320754, g: 0.107418984, b: 0.52510643, a: 1}
   deadUnitsStarColor: {r: 1, g: 1, b: 1, a: 1}
   starsObj: {fileID: 2006467038}
   starSpacing: 90
@@ -14810,11 +14857,24 @@ MonoBehaviour:
   ratAvatar: {fileID: 966030069}
   ratText: {fileID: 2092178521}
   fadeTime: 0.2
+  soundOn: 0
   winDialogues:
   - {fileID: 11400000, guid: 90be234597a04f447b1e006fb9a88b01, type: 2}
   lostDialogues:
   - {fileID: 11400000, guid: 50df8a04b4307934880368e302a3bebb, type: 2}
+  - {fileID: 11400000, guid: a5b64c978445dcd42abfe6d3ab0e5a15, type: 2}
+  - {fileID: 11400000, guid: 5387bc97033afb84f83e1f49682b909b, type: 2}
+  - {fileID: 11400000, guid: 373bdb189278f6b41ac98105f14af17b, type: 2}
+  allDialogues:
+  - {fileID: 11400000, guid: 79186e23c0800294d9c1f67d2b8cef5f, type: 2}
+  - {fileID: 11400000, guid: 728417ce21ad63b4a8bf29d22d4d3fb9, type: 2}
+  - {fileID: 11400000, guid: 69b7e7937b8dac94da17a9723199134b, type: 2}
+  - {fileID: 11400000, guid: b3412f27e293692459898ead0c4a64e9, type: 2}
+  - {fileID: 11400000, guid: 257399c2164a6374191f9436360ca490, type: 2}
   defaultDialogue: {fileID: 11400000, guid: 7a064bacbbe331f41a8e0504a5f66fb2, type: 2}
+  discardingExplained: 0
+  abilitiesExplained: 0
+  drawingExplained: 0
 --- !u!224 &1434645165 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 319955221886507501, guid: 0864943ccdfbf704f9db1ef9718d9cbe, type: 3}
@@ -18679,7 +18739,6 @@ MonoBehaviour:
   opponentPowerUI: {fileID: 632663721}
   damageObj: {fileID: 933939374}
   death: {fileID: 753760493}
-  plusStarDial: {fileID: 11400000, guid: 79186e23c0800294d9c1f67d2b8cef5f, type: 2}
   discardDescDial: {fileID: 11400000, guid: d4a43ca0db2d79d488e37dd4b60d77ee, type: 2}
   dmgParticlePrefab: {fileID: 8590069785806615365, guid: 0d6b9694322ad0d4c8fe2ecad5251f3b, type: 3}
   knockedUnitsMessege: {fileID: 666224141}
@@ -18687,6 +18746,7 @@ MonoBehaviour:
   deathChoosingTime: 2.5
   afterDeathTime: 2.5
   currentLine: 0
+  lostCurrentRound: 0
 --- !u!114 &1863142942 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3142292742626784239, guid: 039cbfc3d87927c41af85a06685e89ba, type: 3}
@@ -19968,6 +20028,81 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -47}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &2009216352
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2009216353}
+  - component: {fileID: 2009216355}
+  - component: {fileID: 2009216354}
+  m_Layer: 5
+  m_Name: ratBG
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2009216353
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009216352}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2068120539}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -46, y: -149}
+  m_SizeDelta: {x: 435.57, y: 435.56}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2009216354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009216352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.45490196}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 70586d4d0df05514b901f70452a56da8, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &2009216355
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009216352}
+  m_CullTransparentMesh: 1
 --- !u!1 &2012383221
 GameObject:
   m_ObjectHideFlags: 0
@@ -20928,6 +21063,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 667940305}
+  - {fileID: 2009216353}
   - {fileID: 966030068}
   - {fileID: 434566686}
   - {fileID: 2092178520}
@@ -21178,7 +21314,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -31.003, y: -54.6935}
+  m_AnchoredPosition: {x: -31.003, y: -334.69348}
   m_SizeDelta: {x: 635.6608, y: 164.3589}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2092178521
@@ -21605,6 +21741,7 @@ Transform:
   - {fileID: 1871519211}
   - {fileID: 589244842}
   - {fileID: 847735270}
+  - {fileID: 495687194}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2116043104
@@ -22746,7 +22883,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: audioClips.Array.size
-      value: 24
+      value: 28
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: musicClips.Array.size
@@ -22864,6 +23001,22 @@ PrefabInstance:
       propertyPath: 'audioClips.Array.data[23]'
       value: 
       objectReference: {fileID: 8300000, guid: d84f3c35e55effd4f8d4d83cc90a2283, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[24]'
+      value: 
+      objectReference: {fileID: 8300000, guid: fa9485260832b63458a11e3973f39e1a, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[25]'
+      value: 
+      objectReference: {fileID: 8300000, guid: a9054eda742f92d4487eac17e866fe1b, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[26]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 2ad2326675780ec469749f73a29edba8, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[27]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 0ed53495769a933439daf21e63d42b78, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
