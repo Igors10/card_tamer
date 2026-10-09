@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: DrawingExplainDial
   m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
   line:
-  - Ok here's the best part
-  - Drawing and naming a card
+  - Ok here's the best part- Drawing
   - Draw whatever, but I'd advice to keep a common theme between cards you make
   - You can draw stick figures, cool monsters, your irl friends,  TV characters ...
-  - Or anything else, what do I know, Im just a rat
-  - Humans have better imagination than rats, you can do this!
+  - Or anything else, what do I know? Im just a rat
+  - You are a human, humans have amazing imagination, you can do this!

@@ -11,6 +11,7 @@ public class Ability : MonoBehaviour
 
     [Header("refs")]
     [SerializeField] TextMeshProUGUI effectDesc;
+    [SerializeField] TextMeshProUGUI powerText;
 
     // ====================
     // Initialization
@@ -31,6 +32,9 @@ public class Ability : MonoBehaviour
 
         // EFFECT DESCRIPTION
         effectDesc.text = abilityData.GetAbilityDesc(abilityColor);
+
+        // Power
+        powerText.text = abilityData.power.ToString();
 
         // spawning highlight condition object
         if (abilityData.highlightCon != null) Instantiate(abilityData.highlightCon, card.transform);

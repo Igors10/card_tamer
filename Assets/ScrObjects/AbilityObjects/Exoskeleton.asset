@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Exoskeleton
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 0
+  power: 4
   abilityDescription: Can't be knocked out
-  isSpecial: 1
+  isSpecial: 0
   effect: {fileID: 8445383871852742455, guid: 616fec89bc1cd6f46b5d6ddf6a8745d4, type: 3}
+  highlightCon: {fileID: 0}

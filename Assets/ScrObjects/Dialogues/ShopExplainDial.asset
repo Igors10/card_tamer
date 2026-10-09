@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ShopExplainDial
   m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
   line:
-  - Welcome to workshop!
+  - Time to get back to workshop
   - Here you can spend 2 stars to draw a new card
   - If you don't have enough stars you can also discard a card to get +1 star
   - Have fun creating!

@@ -46,6 +46,7 @@ public class HandManager : MonoBehaviour
         card.transform.SetParent(fieldHand.transform, false);
         //card.gameObject.SetActive(false);
         UpdateHandVisuals(player);
+        GameManager.instance.managerUI.Refresh();
     }
 
     public void AddCardToDiscarded(Card card, Player player)

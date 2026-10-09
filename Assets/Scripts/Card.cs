@@ -43,7 +43,7 @@ public class Card : MonoBehaviour
 
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
-    [HideInInspector] public int rolledPower = 0;
+    [HideInInspector] public int startingPower = 0;
     bool specialCostPaid = false;
     [HideInInspector] public bool shielded = false;
 
@@ -250,9 +250,20 @@ public class Card : MonoBehaviour
     // =====================
 
     /// <summary>
+    /// Triggers when card enters the play
+    /// </summary>
+    public void GetStartingPower()
+    {
+        int powerToGain = abilities[0].abilityData.power;
+        startingPower = powerToGain;
+        GainPower(powerToGain, false);
+    }
+
+    /// <summary>
     /// Adds this much power to current unit power amount
     /// </summary>
     /// <param name="power"></param>
+    /// 
     public void GainPower(int power, bool animated = true)
     {
         Debug.Log("Card: " + cardData.name + "gains " + power + " power.");

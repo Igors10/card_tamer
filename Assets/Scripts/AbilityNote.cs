@@ -5,6 +5,7 @@ public class AbilityNote : MonoBehaviour
     public AbilityObj storedAbility;
     public Color storedAbilityColor;
     [SerializeField] TextMeshProUGUI noteText;
+    [SerializeField] TextMeshProUGUI powerValue;
 
     public void InitAbilityNote(AbilityObj ability)
     {
@@ -14,5 +15,7 @@ public class AbilityNote : MonoBehaviour
         // ability and desc
         storedAbility = ability;
         noteText.text = ability.GetAbilityDesc(storedAbilityColor);
+
+        powerValue.text = ability.power.ToString();
     }
 }

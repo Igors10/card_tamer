@@ -10,7 +10,7 @@ public class KnockSelfEffect : MonoBehaviour
         GameManager.OnLineResolved += TriggerUseEffect;
 
         // adding the initial buff to on play stack
-        GameManager.instance.executeManager.effectStack.Add(UseBuffEffect());
+        //GameManager.instance.executeManager.effectStack.Add(UseBuffEffect());
     }
 
     private void OnDisable()

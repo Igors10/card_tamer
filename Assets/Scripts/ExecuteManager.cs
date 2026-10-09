@@ -81,7 +81,6 @@ public class ExecuteManager : MonoBehaviour
     {
         // checking if the card being played first time this game
         bool playedFirstTime = !playedCardNames.Contains(card.cardData.name);
-
         // add to the played card list
         if (playedFirstTime) playedCardNames.Add(card.cardData.name);
 
@@ -112,7 +111,8 @@ public class ExecuteManager : MonoBehaviour
         }
 
         // Card effect + power
-        yield return StartCoroutine(card.unit.RollPower());
+        //yield return StartCoroutine(card.unit.RollPower());
+        card.GetStartingPower();
 
         // Triggering on play card effects
         GameManager.instance.BroadcastOnCardPlayed(card);

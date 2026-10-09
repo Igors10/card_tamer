@@ -49,7 +49,7 @@ public class DiscardManager : MonoBehaviour
         AssignDiscardedUnits(listOfCardsForDiscard, player, randomDiscard);
 
         // Changing workshop hint
-        string hintMessage = (randomDiscard) ? "Rat Wicked destroys one knocked card" : "Choose a card to destroy for 1 coin";
+        string hintMessage = (randomDiscard) ? "Scissor Rat destroys one knocked card" : "Choose a card to destroy for 1 coin";
         discardText.text = hintMessage;
 
         if (randomDiscard && GameManager.instance.player.cardsInDiscard.Count == 0) StartCoroutine(FinishDiscard());

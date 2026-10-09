@@ -107,11 +107,12 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // POWER
         if (card.currentPower > 0 && stunned == false)
         {
+            powerUI.SetActive(true);
             powerValue.text = card.currentPower.ToString();
 
             // chaning the power indicator colors when buffed or debuffed
-            powerBG.color = (card.currentPower >= card.rolledPower) ? buffedPowerColor : debuffedPowerColor;
-            if (card.currentPower == card.rolledPower) powerBG.color = Color.white;
+            powerBG.color = (card.currentPower >= card.startingPower) ? buffedPowerColor : debuffedPowerColor;
+            if (card.currentPower == card.startingPower) powerBG.color = Color.white;
         }
         else powerUI.SetActive(false);
 

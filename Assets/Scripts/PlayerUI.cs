@@ -45,6 +45,10 @@ public class PlayerUI : MonoBehaviour
     Vector3 defaultTokenPos;
     Vector3 shownTokenPos;
 
+    [Header("Card Count")]
+    [SerializeField] TextMeshProUGUI cardCountText;
+    [SerializeField] GameObject cardCountObj;
+
 
     private void Start()
     {
@@ -90,7 +94,14 @@ public class PlayerUI : MonoBehaviour
             healthbarFill.fillAmount = newHealthbarFill;
         }
 
-       
+        // REFRESHING CARD COUNT
+        if (cardCountObj != null)
+        {
+            cardCountObj.SetActive(GameManager.instance.currentState == GameState.PLACING);
+            cardCountText.text = player.cardsInHand.Count.ToString();
+        }
+
+
         // REFRESHING STARS
         // ================
         starsObj.SetActive(player.currentStars > 0);

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Flow
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 0
+  power: 3
   abilityDescription: Ally from same field moves 1 field to the left
+  isSpecial: 0
   effect: {fileID: 5807869535008068974, guid: b01c135012b4bb44e8bae7f026a92609, type: 3}
+  highlightCon: {fileID: 0}

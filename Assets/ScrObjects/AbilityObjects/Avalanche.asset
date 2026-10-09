@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Avalanche
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 0
+  power: 3
   abilityDescription: Pushes one random opposing enemy to an adjacent field
+  isSpecial: 0
   effect: {fileID: 588685956693649962, guid: 451b96a181ad1b0408056e274ef50936, type: 3}
+  highlightCon: {fileID: 0}

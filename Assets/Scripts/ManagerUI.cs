@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class ManagerUI : MonoBehaviour
 {
@@ -68,6 +69,12 @@ public class ManagerUI : MonoBehaviour
     {
         gameplayUI.SetActive(enable);
         GameManager.instance.gameStateUI[(int)GameManager.instance.currentState].SetActive(enable);
+    }
+
+    public void Refresh()
+    {
+        GameManager.instance.player.playerUI.Refresh();
+        GameManager.instance.opponent.playerUI.Refresh();
     }
 
     /// <summary>

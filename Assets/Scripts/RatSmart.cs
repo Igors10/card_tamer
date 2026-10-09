@@ -27,6 +27,8 @@ public class RatSmart : MonoBehaviour
     [HideInInspector] public bool discardingExplained;
     [HideInInspector] public bool abilitiesExplained;
     [HideInInspector] public bool drawingExplained;
+    [HideInInspector] public bool battleExplained;
+
 
     bool clicked;
 

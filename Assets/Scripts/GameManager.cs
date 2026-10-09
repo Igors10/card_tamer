@@ -110,6 +110,7 @@ public class GameManager : MonoBehaviour
 
         // Enabling new UI 
         managerUI.EnableUI(true);
+        managerUI.Refresh();
 
         // Setting the button correctly
         readyButton.UpdateButtonState();
@@ -133,6 +134,9 @@ public class GameManager : MonoBehaviour
 
                 // starting new round
                 RoundStart();
+
+                // Rat tutorial
+                if (GameData.firstTimePlaying) StartCoroutine(RatSmart.instance.PlayDialogue("PlaceExplainDial"));
                 break;
 
             case GameState.BATTLING:

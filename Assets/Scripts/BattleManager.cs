@@ -1,4 +1,5 @@
 using FishNet.Demo.AdditiveScenes;
+using FishNet.Transporting.Tugboat.Editing;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -8,14 +9,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
-public class BattleManager : MonoBehaviour
+public class BattleManager : MonoBehaviour // info@entrypoint.lv
 {
     [Header("refs")]
     [SerializeField] PowerCounter playerPowerUI;
     [SerializeField] PowerCounter opponentPowerUI;
     public GameObject damageObj;
     [SerializeField] DeathAnim death;
-    [SerializeField] RSDialogueObj discardDescDial;
 
     [Header("prefabs")]
     public GameObject dmgParticlePrefab;
@@ -111,6 +111,13 @@ public class BattleManager : MonoBehaviour
 
         yield return Animations.instance.SkippablePause(1f);
         yield return new WaitForSeconds(0.1f); // prevents from skipping power increase animation right after skipping movement
+
+        // Rat tutorial
+        if (GameData.firstTimePlaying && RatSmart.instance.battleExplained == false)
+        {
+            yield return RatSmart.instance.PlayDialogue("BattleExplainDial");
+            RatSmart.instance.battleExplained = true;
+        }
 
         // ADDING UNIT POWER
 
@@ -224,9 +231,9 @@ public class BattleManager : MonoBehaviour
         else yield return RatSmart.instance.PlayDialogue("win");
 
         // Rat explaining the discard
-        if (RatSmart.instance.discardingExplained == false && GameManager.instance.player.cardsInDiscard.Count > 1)
+        if (RatSmart.instance.discardingExplained == false && GameManager.instance.player.cardsInDiscard.Count >= 1)
         {
-            yield return RatSmart.instance.PlayDialogueObj(discardDescDial);
+            yield return RatSmart.instance.PlayDialogue("DiscardDescDial");
             RatSmart.instance.discardingExplained = true;
         }
 
