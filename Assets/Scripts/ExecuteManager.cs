@@ -27,6 +27,7 @@ public class ExecuteManager : MonoBehaviour
     public List<IEnumerator> effectStack = new List<IEnumerator>();
     public List<IEnumerator> rollEffectStack = new List<IEnumerator>();
     public List<IEnumerator> battleOverEffectStack = new List<IEnumerator>();
+    public Unit effectTarget;
 
     public void RevealCard(Card cardToReveal)
     {
@@ -125,6 +126,74 @@ public class ExecuteManager : MonoBehaviour
 
         // ending the turn 
         card.player.EndTurn();
+    }
+
+    // ** EFFECTS STUFF **
+    // -------------------
+
+    /// <summary>
+    /// Highlights certain units and waits for the player to choose one of them as a target
+    /// </summary>
+    /// <param name="units"></param>
+    /// <returns></returns>
+    public IEnumerator ShowTargets(List<Unit> units, string targetingDesc)
+    {
+        Debug.Log("ExecuteManager: potential targets: " + units.Count);
+
+        // chaning hint text
+        string savedHintText = GameManager.instance.managerUI.hintMessage.text;
+        GameManager.instance.managerUI.NewHint(targetingDesc);
+
+        // highlighting potential targets
+        for (int i = 0; i < units.Count; i++)
+        {
+            units[i].EnableTarget(true);
+        }
+
+        // wait until player chooses a target
+        while (effectTarget == null && units.Count > 0)
+        {
+            // immediately choose a target if it's an AI opponent
+            if (GameManager.instance.yourTurn == false && GameManager.instance.opponent.isAI)
+            {
+                Debug.Log("ExecuteManager: AI chose a card");
+                effectTarget = units[Random.Range(0, units.Count)];
+            }
+
+            yield return null;
+        }
+
+        if (effectTarget != null) Debug.Log("ExecuteManager: target chosen: " + effectTarget.card.cardName);
+
+        // returning hint to what it was
+        GameManager.instance.managerUI.NewHint(savedHintText);
+
+        // removing target highlight
+        for (int i = 0; i < units.Count; i++)
+        {
+            units[i].EnableTarget(false);
+        }
+    }
+
+    private void Update()
+    {
+        // debug testing target show
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            List<Unit> allUnits = GameManager.instance.fieldManager.GetAllUnits();
+            StartCoroutine(ShowTargets(allUnits, "testing targeting"));
+        }
+        if (Input.GetKeyUp(KeyCode.E))
+        {
+            Unit throwawayUnit = GetTarget();
+        }
+    }
+
+    public Unit GetTarget(bool removeReferenceToTarget = true)
+    {
+        Unit unitToReturn = effectTarget;
+        if (removeReferenceToTarget) effectTarget = null;
+        return unitToReturn;
     }
 
     public IEnumerator TriggerEffects(string effectType = "onPlay")

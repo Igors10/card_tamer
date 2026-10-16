@@ -21,8 +21,8 @@ public class PrevColorHL : MonoBehaviour
 
         // finding the last unit in a given color array and highlighting it
         int listID = Colors.instance.GetSecondaryColorID(card.abilities[0].abilityColor);
-        if (GameManager.instance.fieldManager.coloredUnitList[listID].Count < 1) return;
-        GameManager.instance.fieldManager.coloredUnitList[listID][GameManager.instance.fieldManager.coloredUnitList[listID].Count - 1].HighlightUnit(true);
+        //if (GameManager.instance.fieldManager.unitList[listID].Count < 1) return;
+        //GameManager.instance.fieldManager.unitList[listID][GameManager.instance.fieldManager.unitList[listID].Count - 1].HighlightUnit(true);
 
         // marking that there is a highlighted unit
         GameManager.instance.fieldManager.anyUnitHighlighted = true;

@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using CartoonFX;
 
 public enum TriggerTime
 {
@@ -48,7 +49,7 @@ public class Effect : MonoBehaviour
     {
         yield return new WaitForSeconds(pauseAfterEffect);
         unit.cardEffectVFX.gameObject.SetActive(false);
-        unit.skillTextObj.gameObject.SetActive(false);
+        unit.skillTextObj.gameObject.GetComponent<AutoFade>().FadeOut(0.3f);
         unit.AppearAbove(false);
     }
 }

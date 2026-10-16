@@ -16,17 +16,8 @@ public class FieldManager : MonoBehaviour
     [SerializeField] float moveTriggerThreshold;
 
     [Header("unit arrays")]
-    [HideInInspector] public List<Unit>[] coloredUnitList = new List<Unit>[3];
+    [HideInInspector] public List<Unit> unitList = new List<Unit>();
     [HideInInspector] public bool anyUnitHighlighted;
-
-    void Awake()
-    {
-        // Initializing unit arrays
-        for (int i = 0; i < coloredUnitList.Length; i++)
-        {
-            coloredUnitList[i] = new List<Unit>();
-        }
-    }
 
     Field[] GetCurrentPlayerFields()
     {
@@ -47,22 +38,22 @@ public class FieldManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns a list containing all units on board
+    /// Returns a list containing all units on board or units from a specific player
     /// </summary>
     /// <returns></returns>
-    public List<Unit> GetAllUnits()
+    public List<Unit> GetAllUnits(bool bothplayers = true, Player player = null)
     {
-        List<Unit> unitList = new List<Unit>();
+        List<Unit> unitsToReturn = new List<Unit>();
 
-        for (int i = 0; i < coloredUnitList.Length; i++)
+        for (int i = 0; i < unitList.Count; i++)
         {
-            for (int j = 0; j < coloredUnitList[i].Count; j++)
+            if (bothplayers == true || unitList[i].card.player == player)
             {
-                unitList.Add(coloredUnitList[i][j]);
+                unitsToReturn.Add(unitList[i]);
             }
         }
 
-        return unitList;
+        return unitsToReturn;
     }
 
     /// <summary>
@@ -219,7 +210,7 @@ public class FieldManager : MonoBehaviour
         AudioManager.instance.PlaySFX("CardPlaySFX");
 
         // Adding the unit to one of the lists
-        coloredUnitList[Colors.instance.GetSecondaryColorID(cardToSpawn.cardData.secondaryColor)].Add(newUnit);
+        unitList.Add(newUnit);
     }
 
     public int GetUnitSlot(Unit unit)

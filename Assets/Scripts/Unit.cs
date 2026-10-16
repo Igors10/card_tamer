@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerClickHandler
-{   
+{
     // Card this unit is represents on the board
     [HideInInspector] public Card card;
 
@@ -23,6 +23,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public GameObject skillTextObj;
     public AutoFade unitPresenter;
     [SerializeField] Image unitColorInd;
+    [SerializeField] GameObject targetHighlightObj;
 
     [Header("power")]
     [SerializeField] GameObject powerUI;
@@ -42,6 +43,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [Header("state")]
     [HideInInspector] public bool stunned = false;
     bool rollingPower = false;
+    bool targeted = false;
     [SerializeField] GameObject stunIndicator;
     [SerializeField] GameObject healthBar;
 
@@ -71,10 +73,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     bool enteringAnim = true;
 
     [Header("knockout animation")]
-    [SerializeField] float jumpForce = 10f;       
-    [SerializeField] float gravity = 35f;         
-    [SerializeField] float moveXSpeed = 5f;       
-    [SerializeField] float rotationSpeed = 360f;  
+    [SerializeField] float jumpForce = 10f;
+    [SerializeField] float gravity = 35f;
+    [SerializeField] float moveXSpeed = 5f;
+    [SerializeField] float rotationSpeed = 360f;
 
     void Start()
     {
@@ -126,7 +128,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         sprite.SetSpriteAlpha(spriteAlpha);
         stunIndicator.GetComponent<Image>().color = new Color(1f, 1f, 1f, spriteAlpha);
         // cancelling card preview if it was on right before fading
-        if (faded) 
+        if (faded)
         {
             ViewCard(false);
             HighlightUnit(false);
@@ -147,6 +149,12 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         unitHighlight.gameObject.SetActive(isHighlighted);
     }
 
+    public void EnableTarget(bool enable)
+    {
+        targetHighlightObj.SetActive(enable);
+        targeted = enable;
+    }
+
     public void AppearAbove(bool isAppearingAbove)
     {
         if (isAppearingAbove)
@@ -163,7 +171,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// </summary>
     void ViewCard(bool isViewed)
     {
-        GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);        
+        GameManager.instance.managerUI.PreviewCard(isViewed, card.cardData, card.player, transform.position);
     }
 
     void Update()
@@ -215,7 +223,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
 
             t += Time.deltaTime;
-            yield return null; 
+            yield return null;
         }
 
         GameManager.instance.handManager.AddCardToDiscarded(card, card.player); // moving the card to discarded
@@ -236,7 +244,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         Debug.Log("Removed unit gameObject from board");
 
         // removes unit reference from all units list
-        GameManager.instance.fieldManager.coloredUnitList[Colors.instance.GetSecondaryColorID(card.cardData.secondaryColor)].Remove(this);
+        GameManager.instance.fieldManager.unitList.Remove(this);
 
         // remove the gameObject
         if (this.gameObject != null) Destroy(this.gameObject);
@@ -329,7 +337,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         {
             t += Time.deltaTime;
             float clampedT = t / jumpTime;
-            float coolT = 1 - (1 -clampedT) * (1 - clampedT);
+            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
 
             sprite.transform.localPosition = Vector3.Lerp(targetPosition, startingPosition, coolT);
             //skillText.color = Color.Lerp(skillTextColor, skillTextTargetColor, coolT);
@@ -360,7 +368,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         // nothing happens when unit is selected during execute state
         if (GameManager.instance.executeManager.currentCard != null && GameManager.instance.executeManager.currentCard.unit == this
-            && GameManager.instance.executeManager.readyRevealCard == false || faded || rollingPower || Camera.main.GetComponent<Viewpoint>().zoom) return;
+            && GameManager.instance.executeManager.readyRevealCard == false || faded || rollingPower || Camera.main.GetComponent<Viewpoint>().zoom
+            || targetHighlightObj.activeSelf) return;
 
         // call for preview card
         ViewCard(mouseOver);
@@ -372,20 +381,39 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public void OnPointerClick(PointerEventData eventData)
     {
         PreviewCard(true);
+        TargetOnClick();
     }
-    
+
     public void OnPointerEnter(PointerEventData eventData)
     {
-        //HighlightUnit(true);
+        TargetOnHover(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        //HighlightUnit(false);
+        TargetOnHover(false);
         PreviewCard(false);
     }
 
+    void TargetOnClick()
+    {
+        if (!targeted || !GameManager.instance.yourTurn) return;
 
+        GameManager.instance.executeManager.effectTarget = this;
+        TargetOnHover(false);
+    }
+
+    void TargetOnHover(bool hoverOver)
+    {
+        if (!targeted || !GameManager.instance.yourTurn) return;
+
+        transform.localScale = (hoverOver) ? hoveredScale : defaultScale;
+        HighlightUnit(hoverOver);
+        targetHighlightObj.SetActive(!hoverOver);
+
+        //FrameAnim frameAnim = targetHighlightObj.GetComponent<FrameAnim>();
+        //frameAnim.PauseAnimation(hoverOver);
+    }
 
     public void OnBeginDrag(PointerEventData eventData)
     {

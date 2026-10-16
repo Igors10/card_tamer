@@ -6287,6 +6287,7 @@ MonoBehaviour:
   spawnVFX: {fileID: 4870619945361379286, guid: 6a7fda63d9505c64c9197548b9f36ec3, type: 3}
   unitPrefab: {fileID: 4710258510420537553, guid: 9442b25799403874e92553fab53de198, type: 3}
   moveTriggerThreshold: 1
+  unitList: []
   anyUnitHighlighted: 0
 --- !u!1 &570817578
 GameObject:
@@ -18876,6 +18877,7 @@ MonoBehaviour:
   readyRevealCard: 0
   zoomIntensity: 0.45
   zoomTime: 1.75
+  effectTarget: {fileID: 0}
 --- !u!1 &1871519210
 GameObject:
   m_ObjectHideFlags: 0

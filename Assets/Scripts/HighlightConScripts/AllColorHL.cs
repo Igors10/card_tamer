@@ -19,9 +19,9 @@ public class AllColorHL : MonoBehaviour
         if (cardHovered != card) return;
 
         // getting reference to the list of respective color
-        List<Unit> unitsToHighlight = GameManager.instance.fieldManager.coloredUnitList[Colors.instance.GetSecondaryColorID(card.abilities[0].abilityColor)];
+        //List<Unit> unitsToHighlight = GameManager.instance.fieldManager.unitList[Colors.instance.GetSecondaryColorID(card.abilities[0].abilityColor)];
 
         // highlighting all units in the list
-        GameManager.instance.fieldManager.HighlightUnits(unitsToHighlight);
+        //GameManager.instance.fieldManager.HighlightUnits(unitsToHighlight);
     }
 }
