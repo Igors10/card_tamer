@@ -28,6 +28,19 @@ public class ExecuteManager : MonoBehaviour
     public List<IEnumerator> rollEffectStack = new List<IEnumerator>();
     public List<IEnumerator> battleOverEffectStack = new List<IEnumerator>();
     public Unit effectTarget;
+    public AbilityRunner abilityRunner { get; private set; }
+
+    private void OnEnable()
+    {
+        // new ability system listens to game events and fills the effect stacks
+        if (abilityRunner == null) abilityRunner = new AbilityRunner(this);
+        abilityRunner.Subscribe();
+    }
+
+    private void OnDisable()
+    {
+        abilityRunner.Unsubscribe();
+    }
 
     public void RevealCard(Card cardToReveal)
     {
@@ -121,6 +134,10 @@ public class ExecuteManager : MonoBehaviour
         // waiting until all effects are resolved
         yield return StartCoroutine(TriggerEffects());
 
+        // the card's starting power is final now (base or rolled), so effects reacting to it can trigger
+        GameManager.instance.BroadcastOnCardPlayResolved(card);
+        yield return StartCoroutine(TriggerEffects());
+
         // refreshing field colors
         GameManager.instance.fieldManager.Refresh();
 
@@ -211,11 +228,12 @@ public class ExecuteManager : MonoBehaviour
                 break;
         }
 
-        foreach (IEnumerator effect in stack)
+        // taking effects one by one so effects can safely add new effects to the stack while it is resolving
+        while (stack.Count > 0)
         {
+            IEnumerator effect = stack[0];
+            stack.RemoveAt(0);
             yield return StartCoroutine(effect);
         }
-
-        stack.Clear();
     }
 }

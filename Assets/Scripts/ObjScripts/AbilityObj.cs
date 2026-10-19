@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -6,10 +7,9 @@ public class AbilityObj : ScriptableObject
 {
     public int power;
     public string abilityDescription;
-    public bool isSpecial;
+    [HideInInspector] public bool isSpecial; // maybe I'll use it for later
 
-    public GameObject effect;
-    public GameObject highlightCon; // highlight condition
+    [SerializeReference, EffectPicker] public List<AbilityEffect> effects = new List<AbilityEffect>();
 
     public string GetAbilityDesc(Color abilityColor)
     {

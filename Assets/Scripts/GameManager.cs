@@ -61,6 +61,7 @@ public class GameManager : MonoBehaviour
     public static event Action OnRoundEnd;
     public static event Action<Card, int> OnDiceRolled;
     public static event Action<Card> OnCardPlayed;
+    public static event Action<Card> OnCardPlayResolved;
     public static event Action OnLineResolved;
     public static event Action<Card> OnCardHovered;
 
@@ -342,6 +343,11 @@ public class GameManager : MonoBehaviour
     public void BroadcastOnCardPlayed(Card card)
     {
         OnCardPlayed?.Invoke(card);
+    }
+
+    public void BroadcastOnCardPlayResolved(Card card)
+    {
+        OnCardPlayResolved?.Invoke(card);
     }
 
     public void BroadcastOnDiceRolled(Card card, int diceResult)

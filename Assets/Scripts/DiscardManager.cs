@@ -90,7 +90,7 @@ public class DiscardManager : MonoBehaviour
             units[i].sprite.RefreshSprite(listOfCards[i].cardData.unitSprite, player.playerColor, listOfCards[i].cardData.secondaryColor);
             units[i].storedCard = listOfCards[i];
             units[i].Discard(false);
-            units[i].lockHovering = lockHoveringOver;
+            units[i].lockInteraction = lockHoveringOver;
             currentUnits.Add(units[i]);
 
             // assigning units to a position

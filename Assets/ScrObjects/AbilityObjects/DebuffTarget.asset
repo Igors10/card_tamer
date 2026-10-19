@@ -15,5 +15,18 @@ MonoBehaviour:
   power: 2
   abilityDescription: '-2 power to any opponent '
   isSpecial: 0
-  effect: {fileID: 2220197784722309835, guid: 866dacf2276678a4387945c6c89f4d83, type: 3}
-  highlightCon: {fileID: 0}
+  effects:
+  - rid: 1003
+  references:
+    version: 2
+    RefIds:
+    - rid: 1003
+      type: {class: ModifyTargetPowerEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 0
+        customText: 
+        showPresentation: 1
+        oncePerRound: 0
+        targets: 0
+        amount: -2
+        targetHint: Choose an opponent to give -2 power

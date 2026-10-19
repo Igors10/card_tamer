@@ -15,5 +15,15 @@ MonoBehaviour:
   power: 4
   abilityDescription: Can't be knocked out
   isSpecial: 0
-  effect: {fileID: 8445383871852742455, guid: 616fec89bc1cd6f46b5d6ddf6a8745d4, type: 3}
-  highlightCon: {fileID: 0}
+  effects:
+  - rid: 1008
+  references:
+    version: 2
+    RefIds:
+    - rid: 1008
+      type: {class: PreventKnockOutEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 5
+        customText: 
+        showPresentation: 1
+        oncePerRound: 0

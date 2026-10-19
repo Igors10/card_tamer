@@ -35,9 +35,6 @@ public class Ability : MonoBehaviour
 
         // Power
         powerText.text = abilityData.power.ToString();
-
-        // spawning highlight condition object
-        if (abilityData.highlightCon != null) Instantiate(abilityData.highlightCon, card.transform);
     }
 
     // =====================
@@ -56,8 +53,5 @@ public class Ability : MonoBehaviour
 
         // Effect
         GameManager.instance.executeManager.CardUseAbl(card);
-
-        // effect prefab
-        if (abilityData.effect != null) Instantiate(abilityData.effect, card.unit.transform);
     }
 }

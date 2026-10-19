@@ -160,8 +160,19 @@ public class Field : MonoBehaviour
 
         //if (!cardPlayed.SpecialCost()) return false; // star mechanic was removed
 
+        // under a random lane effect the card goes to a random free lane instead
+        Field fieldToSpawnOn = this;
+        if (player.playsOnRandomLane)
+        {
+            player.playsOnRandomLane = false;
+            player.playerUI.Refresh();
+
+            List<Field> freeFields = GameManager.instance.fieldManager.FindEmptyFields(player.fields);
+            if (freeFields.Count > 0) fieldToSpawnOn = freeFields[Random.Range(0, freeFields.Count)];
+        }
+
         // spawn a creature
-        GameManager.instance.fieldManager.SpawnUnit(cardPlayed, this);
+        GameManager.instance.fieldManager.SpawnUnit(cardPlayed, fieldToSpawnOn);
 
         // activating cards ability
         cardPlayed.PlayCard();

@@ -15,5 +15,15 @@ MonoBehaviour:
   power: 5
   abilityDescription: Knocks out itself at the end of battle
   isSpecial: 0
-  effect: {fileID: 2123092775877491577, guid: 7b8200184dc9ec04aae0f70916828e0f, type: 3}
-  highlightCon: {fileID: 0}
+  effects:
+  - rid: 1004
+  references:
+    version: 2
+    RefIds:
+    - rid: 1004
+      type: {class: KnockSelfOutEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 3
+        customText: knocks itself out
+        showPresentation: 1
+        oncePerRound: 0

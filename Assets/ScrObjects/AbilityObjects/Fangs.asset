@@ -12,7 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Fangs
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 0
-  abilityDescription: When an opponent rolls a [4], they get -2 power
+  power: 3
+  abilityDescription: Enemies that enter play with 4 power get -2 power
   isSpecial: 0
-  effect: {fileID: 7734693108408952331, guid: 2a72c4b068a077049b015a9d6c8bfd95, type: 3}
+  effects:
+  - rid: 1005
+  references:
+    version: 2
+    RefIds:
+    - rid: 1005
+      type: {class: SpawnedWithPowerEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 4
+        customText: '<color=red>-2</color> power'
+        showPresentation: 1
+        oncePerRound: 0
+        neededPower: 4
+        spawnedBy: 0
+        receiver: 0
+        amount: -2

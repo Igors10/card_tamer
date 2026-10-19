@@ -12,7 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Turbo
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 0
-  abilityDescription: +1 power when a [2] is rolled
+  power: 2
+  abilityDescription: +1 power when a unit with 2 power enters play
   isSpecial: 0
-  effect: {fileID: 8146565597263968891, guid: fb6a1920fe9dd1d48be3facd1382277d, type: 3}
+  effects:
+  - rid: 1006
+  references:
+    version: 2
+    RefIds:
+    - rid: 1006
+      type: {class: SpawnedWithPowerEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 4
+        customText: '<color=red>+1</color> power'
+        showPresentation: 1
+        oncePerRound: 0
+        neededPower: 2
+        spawnedBy: 2
+        receiver: 1
+        amount: 1

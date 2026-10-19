@@ -19,8 +19,9 @@ public class Player : MonoBehaviour
     public int currentStars;
     public string playerName;
     public bool endStateReady = false;
-    public bool cardPlayed = false; 
+    public bool cardPlayed = false;
     [HideInInspector] public bool dead;
+    [HideInInspector] public bool playsOnRandomLane; // next card goes to a random free lane
 
 
     [Header("config")]

@@ -49,6 +49,9 @@ public class PlayerUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI cardCountText;
     [SerializeField] GameObject cardCountObj;
 
+    [Header("Status effects")]
+    [SerializeField] GameObject randomLaneIndicator;
+
 
     private void Start()
     {
@@ -100,6 +103,9 @@ public class PlayerUI : MonoBehaviour
             cardCountObj.SetActive(GameManager.instance.currentState == GameState.PLACING);
             cardCountText.text = player.cardsInHand.Count.ToString();
         }
+
+        // REFRESHING STATUS EFFECTS
+        if (randomLaneIndicator != null) randomLaneIndicator.SetActive(player.playsOnRandomLane);
 
 
         // REFRESHING STARS

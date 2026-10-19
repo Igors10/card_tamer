@@ -152,6 +152,65 @@ public class FieldManager : MonoBehaviour
             playerField.RefreshFieldVisuals();
             opponentField.RefreshFieldVisuals();
         }
+
+        RefreshAuras();
+    }
+
+    // ================
+    // AURAS
+    // ================
+
+    /// <summary>
+    /// Recalculates aura bonus power for every unit on board and applies only the difference to its current power
+    /// </summary>
+    public void RefreshAuras()
+    {
+        foreach (Unit target in unitList)
+        {
+            if (target.stunned) continue;
+            int targetLane = GetLane(target);
+
+            int auraPower = 0;
+            foreach (Unit source in unitList)
+            {
+                // knocked out units don't give auras
+                if (source == target || source.stunned) continue;
+                int sourceLane = GetLane(source);
+
+                foreach (Ability ability in source.card.abilities)
+                {
+                    if (ability == null || ability.abilityData == null) continue;
+
+                    foreach (AbilityEffect effect in ability.abilityData.effects)
+                    {
+                        if (effect is AuraPowerEffect aura && aura.Affects(source, sourceLane, target, targetLane)) auraPower += aura.amount;
+                    }
+                }
+            }
+
+            int difference = auraPower - target.card.auraPower;
+            if (difference == 0) continue;
+
+            target.card.auraPower = auraPower;
+            target.card.currentPower = Mathf.Max(0, target.card.currentPower + difference);
+            Animations.instance.PopAnim(target.powerValue.gameObject, 0.4f, 0.3f);
+            target.RefreshUnitVisuals();
+        }
+    }
+
+    /// <summary>
+    /// Lane index of the unit (same as GetFieldID, without the logging)
+    /// </summary>
+    int GetLane(Unit unit)
+    {
+        Player player = GameManager.instance.player;
+        Player opponent = GameManager.instance.opponent;
+
+        for (int i = 0; i < player.fields.Length; i++)
+        {
+            if (player.fields[i] == unit.currentField || opponent.fields[i] == unit.currentField) return i;
+        }
+        return 0;
     }
 
     // ================
@@ -263,18 +322,34 @@ public class FieldManager : MonoBehaviour
     // ================
 
     /// <summary>
-    /// Moving a unit to a specified slot on a field
+    /// Moving a unit to the next available slot on a field (front first, back if front is taken)
     /// </summary>
     /// <param name="unit"></param>
     /// <param name="targetField"></param>
-    /// <param name="targetSlot"></param>
-    public void MoveUnit(Unit unit, Field targetField, int targetSlot, bool activatePrevSlot = false)
+    public void MoveUnit(Unit unit, Field targetField)
     {
+        // finding the first free slot (the unit's own slot counts as free)
+        int targetSlot = -1;
+        for (int i = 0; i < targetField.units.Length; i++)
+        {
+            if (targetField.units[i] == null || targetField.units[i] == unit)
+            {
+                targetSlot = i;
+                break;
+            }
+        }
+
+        if (targetSlot < 0)
+        {
+            Debug.Log("FieldManager: no free slot to move " + unit.name + " to");
+            return;
+        }
+
         // play soundeffect
         AudioManager.instance.PlaySFX("UnitMoveSFX");
 
         // making prev unit slot empty
-        unit.currentField.unitSlots[GetUnitSlot(unit)].gameObject.SetActive(activatePrevSlot);
+        unit.currentField.unitSlots[GetUnitSlot(unit)].gameObject.SetActive(false);
         unit.currentField.units[GetUnitSlot(unit)] = null;
 
         // moving the unit to a new field slot
@@ -303,7 +378,7 @@ public class FieldManager : MonoBehaviour
                 if (Vector3.Distance(movingUnit.transform.position, field.unitSlots[i].transform.position) < moveTriggerThreshold 
                     && field.units[i] == null && field.unitSlots[i].gameObject.activeSelf)
                 {
-                    MoveUnit(movingUnit, field, i);
+                    MoveUnit(movingUnit, field);
                     Debug.Log("FieldManager: " + movingUnit.name + " was dropped on one of the unit slots");
 
                     return true;

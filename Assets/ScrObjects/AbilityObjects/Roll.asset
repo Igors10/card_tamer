@@ -15,6 +15,15 @@ MonoBehaviour:
   power: 0
   abilityDescription: +1-6 power
   isSpecial: 0
-  isBasic: 0
-  effect: {fileID: 6378143024485958373, guid: d662867f9ba62dc4397467eba11144df, type: 3}
-  highlightCon: {fileID: 0}
+  effects:
+  - rid: 1001
+  references:
+    version: 2
+    RefIds:
+    - rid: 1001
+      type: {class: RollPowerEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 0
+        customText: 1 - 6 power
+        showPresentation: 1
+        oncePerRound: 0

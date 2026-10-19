@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -182,23 +183,21 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public IEnumerator KnockOut()
     {
-        // checking if shielded
-        if (card.shielded) { ShieldedEffect(); yield break; }
+        // abilities like Exoskeleton can react to the knock out or prevent it
+        List<IEnumerator> knockOutEffects = new List<IEnumerator>();
+        bool prevented = GameManager.instance.executeManager.abilityRunner.QueueKnockOutEffects(this, knockOutEffects);
+        foreach (IEnumerator effect in knockOutEffects) yield return StartCoroutine(effect);
+        if (prevented) yield break;
+
         stunned = true;
+
+        // knocked out units stop giving aura power
+        GameManager.instance.fieldManager.RefreshAuras();
 
         // do damage animation, VFX and SFX 
         ParticleManager.instance.SpawnVFX(transform.position, "HitVFX");
         AudioManager.instance.PlaySFX("HitSFX");
         yield return StartCoroutine(KnockOutEffect());
-    }
-
-    void ShieldedEffect()
-    {
-        // playing soundeffect
-        AudioManager.instance.PlaySFX("HitSFX"); // put different soundeffect
-
-        // activate shield sprite
-
     }
 
     private IEnumerator KnockOutEffect()

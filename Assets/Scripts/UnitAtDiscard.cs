@@ -20,7 +20,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     [HideInInspector] public Card storedCard;
     bool discarded = false;
-    [HideInInspector] public bool lockHovering = false;
+    [HideInInspector] public bool lockInteraction = false;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -39,7 +39,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     void OnHover(bool isHover)
     {
-        if (discarded || lockHovering) return; // only during player's turn
+        if (discarded || lockInteraction) return; // only during player's turn
 
         // moving discard pointer over it 
         GameManager.instance.discardManager.discardPointer.SetActive(isHover);
@@ -57,7 +57,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     void TryDiscard()
     {
         // can only discard on player's turn and when units have appeared on the screen
-        if (!GameManager.instance.yourTurn || !GameManager.instance.discardManager.discardAvailable || discarded) return;
+        if (!GameManager.instance.yourTurn || !GameManager.instance.discardManager.discardAvailable || discarded || lockInteraction) return;
 
         // tell discard manager that you want to discard this unit
         GameManager.instance.discardManager.DiscardUnit(this);

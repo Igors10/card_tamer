@@ -13,7 +13,18 @@ MonoBehaviour:
   m_Name: Inkstain
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 2
-  abilityDescription: Blocks opposing field for 2 turns
+  abilityDescription: Blocks opposing field for 2 rounds
   isSpecial: 0
-  effect: {fileID: 1827805099279404661, guid: c58753c752c60e74f828c26bb370978d, type: 3}
-  highlightCon: {fileID: 0}
+  effects:
+  - rid: 1007
+  references:
+    version: 2
+    RefIds:
+    - rid: 1007
+      type: {class: BlockOpposingFieldEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 0
+        customText: 
+        showPresentation: 1
+        oncePerRound: 0
+        rounds: 2

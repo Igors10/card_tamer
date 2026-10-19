@@ -15,5 +15,15 @@ MonoBehaviour:
   power: 3
   abilityDescription: Pushes one random opposing enemy to an adjacent field
   isSpecial: 0
-  effect: {fileID: 588685956693649962, guid: 451b96a181ad1b0408056e274ef50936, type: 3}
-  highlightCon: {fileID: 0}
+  effects:
+  - rid: 1002
+  references:
+    version: 2
+    RefIds:
+    - rid: 1002
+      type: {class: PushOpposingEnemyEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 0
+        customText: 
+        showPresentation: 1
+        oncePerRound: 0
