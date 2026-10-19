@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 471c393a1dde2f8469e693c49afd7504, type: 3}
+  m_Name: GalleryPresets
+  m_EditorClassIdentifier: Assembly-CSharp::UnitPresetList
+  presets:
+  - {fileID: 11400000, guid: ea139025182a33c4f83165bcef4dd2a0, type: 2}
+  - {fileID: 11400000, guid: 890bcb461887d5947b3e5ee195d1b665, type: 2}

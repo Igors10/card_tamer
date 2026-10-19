@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using Unity.VisualScripting;
@@ -29,6 +30,11 @@ public class Workshop : MonoBehaviour
     Player player;
     CardGenerator generator;
     [SerializeField] TextMeshProUGUI abilityReminder;
+    [SerializeField] TextMeshProUGUI abilityReminderPower;
+    [SerializeField] GameObject savePresetButton; // saving presets only works in the editor
+    [SerializeField] GameObject randomPresetButton;
+    [SerializeField] UnitPresetList galleryList;
+    UnitPreset loadedGalleryPreset;
     [SerializeField] GameObject createButton;
     [SerializeField] AutoFade createdCardPresenter;
     [SerializeField] Card cardPresenterPreviewCard;
@@ -111,8 +117,8 @@ public class Workshop : MonoBehaviour
 
     public void LaunchStartingSequence()
     {
-        // getting secondary color (darker version of the main color)
-        chosenSecondColor = Colors.instance.GetDarkenColor(player.playerColor);
+        // getting secondary color (lighter version of the main color, used by the marker)
+        chosenSecondColor = Colors.instance.GetLightenColor(player.playerColor);
 
         // enabling correct workshop visuals
         colorSelectUI.SetActive(false);
@@ -198,9 +204,12 @@ public class Workshop : MonoBehaviour
 
         // passing the ability
         abilityReminder.text = chosenAbility.GetAbilityDesc(chosenAbilityColor);
+        abilityReminderPower.text = chosenAbility.power.ToString();
 
         // resetting name input field
         nameInput.text = "";
+
+        savePresetButton.SetActive(Application.isEditor);
 
         // Rat explaining the drawing
         if (RatSmart.instance.drawingExplained == false && GameData.firstTimePlaying)
@@ -288,7 +297,8 @@ public class Workshop : MonoBehaviour
         if (drawingCanvas.IsCanvasEmpty())
         {
             UnitPreset randomUnitPreset = GameManager.instance.cardDatabase.GetRandomBasicPreset();
-            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, chosenSecondColor, chosenAbilityColor);
+            // presets are made with the darker second color in mind (same as AI cards)
+            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, Colors.instance.GetDarkenColor(player.playerColor), chosenAbilityColor);
         }
         // also checking if the minion is named
         else if (nameInput.text == "")
@@ -327,16 +337,107 @@ public class Workshop : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Save button: saves the current drawing as a unit preset (same as developers mode), without creating the card
+    /// </summary>
+    public void SaveCanvasAsPreset()
+    {
+        AudioManager.instance.PlaySFX("ButtonSFX");
+
+        // nothing to save
+        if (drawingCanvas.IsCanvasEmpty()) { Animations.instance.ShakeAnim(drawingCanvas.gameObject, 5f, 1f); return; }
+
+        // presets need a name
+        if (nameInput.text == "")
+        {
+            missingNameText.SetActive(true);
+            Animations.instance.ShakeAnim(nameInput.gameObject, 5f, 1f);
+            return;
+        }
+
+        UnitPreset savedPreset = SaveCardToProject(GetFreePresetName(nameInput.text), drawingCanvas.GetTextures(), galleryTextureFolderPath, galleryFolderPath, false);
+
+#if UNITY_EDITOR
+        if (savedPreset != null)
+        {
+            // file name can have a number added, the preset keeps the typed name
+            savedPreset.unitName = nameInput.text;
+            EditorUtility.SetDirty(savedPreset);
+            AssetDatabase.SaveAssets();
+        }
+        SyncGalleryList();
+#endif
+    }
+
+    // drawings saved with the save button (presets in the gallery folder, their layer sprites in a subfolder)
+    const string galleryFolderPath = "Assets/ScrObjects/Gallery/";
+    const string galleryTextureFolderPath = galleryFolderPath + "Textures/";
+
+    /// <summary>
+    /// Random preset button: puts a random gallery drawing (different from the current one) on the canvas and enters its name
+    /// </summary>
+    public void LoadRandomGalleryPreset()
+    {
+        AudioManager.instance.PlaySFX("ButtonSFX");
+
+#if UNITY_EDITOR
+        SyncGalleryList();
+#endif
+
+        List<UnitPreset> options = galleryList.presets.FindAll(preset => preset != null && preset != loadedGalleryPreset);
+        // only one drawing in the gallery and it's already loaded
+        if (options.Count == 0 && loadedGalleryPreset != null) options.Add(loadedGalleryPreset);
+        if (options.Count == 0) { Animations.instance.ShakeAnim(randomPresetButton, 5f, 1f); return; }
+
+        loadedGalleryPreset = options[Random.Range(0, options.Count)];
+        drawingCanvas.LoadLayers(loadedGalleryPreset.sprite);
+
+        nameInput.text = loadedGalleryPreset.unitName;
+        missingNameText.SetActive(false);
+    }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// Makes the gallery list match the presets in the gallery folder (the list is what builds use)
+    /// </summary>
+    void SyncGalleryList()
+    {
+        List<UnitPreset> folderPresets = new List<UnitPreset>();
+        foreach (string guid in AssetDatabase.FindAssets("t:UnitPreset", new[] { galleryFolderPath.TrimEnd('/') }))
+        {
+            folderPresets.Add(AssetDatabase.LoadAssetAtPath<UnitPreset>(AssetDatabase.GUIDToAssetPath(guid)));
+        }
+
+        galleryList.presets = folderPresets;
+        EditorUtility.SetDirty(galleryList);
+        AssetDatabase.SaveAssets();
+    }
+#endif
+
+    /// <summary>
+    /// Removes characters that can't be in a file name and adds a number if a preset with that name already exists
+    /// </summary>
+    string GetFreePresetName(string cardName)
+    {
+        foreach (char invalidChar in Path.GetInvalidFileNameChars()) cardName = cardName.Replace(invalidChar.ToString(), "");
+
+        string freeName = cardName;
+        int number = 2;
+        while (File.Exists($"{galleryFolderPath}{freeName}.asset")) freeName = cardName + " " + number++;
+        return freeName;
+    }
+
     // Calling the function:
     // Texture2D[] splitTextures = drawingCanvas.GetTwoToneTextures();
     // if (splitTextures != null) SaveCardToProject(nameInput.text, splitTextures[0], splitTextures[1]);
 
-    public void SaveCardToProject(string cardName, Texture2D[] cardTextureArray)
+    public UnitPreset SaveCardToProject(string cardName, Texture2D[] cardTextureArray,
+        string spriteFolderPath = "Assets/Graphics/CardGraphics/UnitSprites/", string presetFolderPath = "Assets/ScrObjects/UnitPresets/", bool selectInProject = true)
     {
 #if UNITY_EDITOR
         // 1. Define folder and file paths for both layers
-        string spriteFolderPath = "Assets/Graphics/CardGraphics/UnitSprites/";
-        string presetFolderPath = "Assets/ScrObjects/UnitPresets/";
+        Directory.CreateDirectory(spriteFolderPath);
+        Directory.CreateDirectory(presetFolderPath);
 
         string primaryPath = $"{spriteFolderPath}{cardName}_1.png";
         string secondaryPath = $"{spriteFolderPath}{cardName}_2.png";
@@ -372,13 +473,18 @@ public class Workshop : MonoBehaviour
         AssetDatabase.CreateAsset(newCardAsset, presetFilePath);
 
         // 9. Save changes and focus in Inspector 
-        AssetDatabase.SaveAssets(); 
-        EditorUtility.FocusProjectWindow();
-        Selection.activeObject = newCardAsset; 
+        AssetDatabase.SaveAssets();
+        if (selectInProject)
+        {
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = newCardAsset;
+        }
 
         Debug.Log($"Successfully created dual-layer preset for: {cardName}");
+        return newCardAsset;
 #else
     Debug.LogWarning("Card saving is only supported inside the Unity Editor.");
+    return null;
 #endif
     }
 
@@ -392,6 +498,8 @@ public class Workshop : MonoBehaviour
             importer.textureType = TextureImporterType.Sprite; // [cite: 232]
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.filterMode = FilterMode.Point;
+            importer.isReadable = true; // needed to load the drawing back onto the canvas
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.SaveAndReimport();
         }
 #endif

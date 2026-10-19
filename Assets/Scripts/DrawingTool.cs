@@ -2,13 +2,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
+public enum DrawTool
+{
+    Pencil,     // primary color, thin, always on top
+    Marker,     // secondary color, thicker, always under the pencil
+    Eraser
+}
+
 public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
     [Header("refs")]
     [SerializeField] PencilButton primaryColorImage;
-    [SerializeField] PencilButton secondaryColorImage;
+    [SerializeField] PencilButton secondaryColorImage; // marker
+    [SerializeField] PencilButton eraserButton;
     Color primaryColor;
     Color secondaryColor;
+    DrawTool currentTool = DrawTool.Pencil;
 
     [Header("canvas attributes")]
     [SerializeField] Image canvasBG;
@@ -63,18 +73,32 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         secondaryColorImage.SetColor(secondaryColor);
 
         // selecting main color
-        ToggleBrushColor(true);
+        SelectTool(DrawTool.Pencil);
     }
 
-    public void ToggleBrushColor(bool selectPrimary)
+    // button callbacks (enums can't be passed from the inspector)
+    public void SelectPencil() => SelectTool(DrawTool.Pencil);
+    public void SelectMarker() => SelectTool(DrawTool.Marker);
+    public void SelectEraser() => SelectTool(DrawTool.Eraser);
+
+    void SelectTool(DrawTool tool)
     {
-        brushColor = (selectPrimary) ? primaryColor : secondaryColor;
+        currentTool = tool;
+        brushColor = (tool == DrawTool.Marker) ? secondaryColor : primaryColor;
 
-        primaryColorImage.SelectPencil(selectPrimary, false);
-        //if (!selectPrimary) primaryColorImage.Highlight(false);
+        primaryColorImage.SelectPencil(tool == DrawTool.Pencil, false);
+        secondaryColorImage.SelectPencil(tool == DrawTool.Marker, false);
+        eraserButton.SelectPencil(tool == DrawTool.Eraser, false);
+    }
 
-        secondaryColorImage.SelectPencil(!selectPrimary, false);
-        //if (selectPrimary) secondaryColorImage.Highlight(false);
+    int GetToolBrushSize(DrawTool tool)
+    {
+        switch (tool)
+        {
+            case DrawTool.Marker: return normalBrushSize;
+            case DrawTool.Eraser: return bigBrushSize;
+            default: return smallBrushSize;
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -108,14 +132,14 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         // Save state for Undo
         undoStack.Push(drawingTexture.GetPixels());
 
-        // Determine what color to use based on the mouse button
-        Color activeColor = (eventData.button == PointerEventData.InputButton.Right) ? Color.clear : brushColor;
-        currentBrushSize = (eventData.button == PointerEventData.InputButton.Right) ? bigBrushSize : smallBrushSize;
+        // right click always erases, left click uses the selected tool
+        DrawTool activeTool = GetActiveTool(eventData);
+        currentBrushSize = GetToolBrushSize(activeTool);
 
         if (TryGetPixelPosition(eventData, out Vector2Int currentPixel))
         {
             lastPixelPos = currentPixel;
-            PaintPixels(currentPixel.x, currentPixel.y, activeColor);
+            PaintPixels(currentPixel.x, currentPixel.y, GetToolColor(activeTool), activeTool == DrawTool.Marker);
             isDrawing = true;
         }
     }
@@ -124,15 +148,18 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         if (!isDrawing) return;
 
-        // Determine what color to use based on the mouse button
-        Color activeColor = (eventData.button == PointerEventData.InputButton.Right) ? Color.clear : brushColor;
+        DrawTool activeTool = GetActiveTool(eventData);
 
         if (TryGetPixelPosition(eventData, out Vector2Int currentPixel))
         {
-            DrawLine(lastPixelPos, currentPixel, activeColor);
+            DrawLine(lastPixelPos, currentPixel, GetToolColor(activeTool), activeTool == DrawTool.Marker);
             lastPixelPos = currentPixel;
         }
     }
+
+    DrawTool GetActiveTool(PointerEventData eventData) => (eventData.button == PointerEventData.InputButton.Right) ? DrawTool.Eraser : currentTool;
+
+    Color GetToolColor(DrawTool tool) => (tool == DrawTool.Eraser) ? Color.clear : brushColor;
 
     // Helper function to turn a screen click into a Texture Pixel coordinate
     private bool TryGetPixelPosition(PointerEventData eventData, out Vector2Int pixelPos)
@@ -163,6 +190,41 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         }
     }
 
+    /// <summary>
+    /// Replaces the drawing with two layer sprites (like the ones GetTextures makes), colored with the pencil and marker colors.
+    /// The textures have to be readable
+    /// </summary>
+    public void LoadLayers(Sprite[] layers)
+    {
+        // so the loaded drawing can be undone
+        undoStack.Push(drawingTexture.GetPixels());
+
+        Color[] pixels = new Color[textureSize * textureSize];
+        for (int y = 0; y < textureSize; y++)
+        {
+            for (int x = 0; x < textureSize; x++)
+            {
+                // pencil layer goes over the marker layer
+                Color pixel = Color.clear;
+                if (GetLayerAlpha(layers, 1, x, y) >= 0.1f) pixel = secondaryColor;
+                if (GetLayerAlpha(layers, 0, x, y) >= 0.1f) pixel = primaryColor;
+                pixels[y * textureSize + x] = pixel;
+            }
+        }
+
+        drawingTexture.SetPixels(pixels);
+        drawingTexture.Apply();
+    }
+
+    float GetLayerAlpha(Sprite[] layers, int layer, int x, int y)
+    {
+        if (layers == null || layer >= layers.Length || layers[layer] == null) return 0f;
+
+        // layer textures can have a different size than the canvas
+        Texture2D layerTexture = layers[layer].texture;
+        return layerTexture.GetPixel(x * layerTexture.width / textureSize, y * layerTexture.height / textureSize).a;
+    }
+
     public void ClearCanvas()
     {
         Color[] emptyPixels = new Color[textureSize * textureSize];
@@ -172,7 +234,10 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         drawingTexture.Apply();
     }
 
-    private void PaintPixels(int x, int y, Color colorToPaint)
+    /// <summary>
+    /// Paints a brush dot. With keepPencilOnTop pixels already drawn with the pencil (primary color) are left untouched
+    /// </summary>
+    private void PaintPixels(int x, int y, Color colorToPaint, bool keepPencilOnTop = false)
     {
         int radiusSquared = currentBrushSize * currentBrushSize;
 
@@ -187,6 +252,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
                     if (pX >= 0 && pX < textureSize && pY >= 0 && pY < textureSize)
                     {
+                        if (keepPencilOnTop && IsPencilPixel(drawingTexture.GetPixel(pX, pY))) continue;
                         drawingTexture.SetPixel(pX, pY, colorToPaint);
                     }
                 }
@@ -195,13 +261,15 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         drawingTexture.Apply();
     }
 
-    private void DrawLine(Vector2Int start, Vector2Int end, Color colorToPaint)
+    bool IsPencilPixel(Color pixel) => pixel.a >= 0.1f && IsColorMatch(pixel, primaryColor);
+
+    private void DrawLine(Vector2Int start, Vector2Int end, Color colorToPaint, bool keepPencilOnTop = false)
     {
         float distance = Vector2Int.Distance(start, end);
 
         if (distance == 0)
         {
-            PaintPixels(start.x, start.y, colorToPaint);
+            PaintPixels(start.x, start.y, colorToPaint, keepPencilOnTop);
             return;
         }
 
@@ -211,7 +279,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             int x = Mathf.RoundToInt(Mathf.Lerp(start.x, end.x, t));
             int y = Mathf.RoundToInt(Mathf.Lerp(start.y, end.y, t));
 
-            PaintPixels(x, y, colorToPaint);
+            PaintPixels(x, y, colorToPaint, keepPencilOnTop);
         }
     }
 

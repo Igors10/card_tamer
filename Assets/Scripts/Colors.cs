@@ -8,6 +8,7 @@ public class Colors : MonoBehaviour
     public int secondaryColorAmount = 3;
     public List<Color> allColorList = new List<Color>();
     float secDarkColorCoof = 0.65f;
+    float secLightColorCoof = 0.55f;
 
     void Awake()
     {
@@ -30,6 +31,7 @@ public class Colors : MonoBehaviour
     }
 
     public Color GetDarkenColor(Color color) => BlendColor(color, secDarkColorCoof, false);
+    public Color GetLightenColor(Color color) => BlendColor(color, secLightColorCoof, true);
     
 
     /// <summary>
