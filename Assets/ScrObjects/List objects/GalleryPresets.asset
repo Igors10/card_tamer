@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: GalleryPresets
   m_EditorClassIdentifier: Assembly-CSharp::UnitPresetList
   presets:
+  - {fileID: 11400000, guid: 6fe999c32211d6a478ac5368e416c6a7, type: 2}
+  - {fileID: 11400000, guid: 5729981b931ff13459e7a1b6593fc992, type: 2}
   - {fileID: 11400000, guid: ea139025182a33c4f83165bcef4dd2a0, type: 2}
   - {fileID: 11400000, guid: 890bcb461887d5947b3e5ee195d1b665, type: 2}
