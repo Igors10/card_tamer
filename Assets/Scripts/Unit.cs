@@ -71,13 +71,40 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [Header("ability animation")]
     [SerializeField] float jumpHeight;
     [SerializeField] float jumpTime;
+    [SerializeField] float jumpAnticipationTime = 0.08f;
+    [SerializeField] float jumpSquash = 0.18f; // squash before jumping and stretch while going up
+    [SerializeField] float landSquash = 0.28f;
     bool enteringAnim = true;
+
+    [Header("spawn animation")]
+    [SerializeField] float spawnDropHeight = 3f;
+    [SerializeField] float spawnDropTime = 0.15f;
+    [SerializeField] float spawnSquash = 0.3f;
+    [SerializeField] float spawnCameraShake = 0.008f;
+
+    [Header("slide animation")]
+    [SerializeField] float slideTime = 0.22f;
+    [SerializeField] float slideSquash = 0.15f;
+    Coroutine slideRoutine;
+    Vector3 slideTarget;
+
+    // sprite resting values, so squash and jump animations always return to the right place
+    Vector3 spriteRestPos;
+    Vector3 spriteRestScale;
+    Coroutine spawnRoutine;
+    Coroutine squashRoutine;
 
     [Header("knockout animation")]
     [SerializeField] float jumpForce = 10f;
     [SerializeField] float gravity = 35f;
     [SerializeField] float moveXSpeed = 5f;
     [SerializeField] float rotationSpeed = 360f;
+
+    void Awake()
+    {
+        spriteRestPos = sprite.transform.localPosition;
+        spriteRestScale = sprite.transform.localScale;
+    }
 
     void Start()
     {
@@ -202,6 +229,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     private IEnumerator KnockOutEffect()
     {
+        StopSlide();
+
         Vector3 velocity = new Vector3(
             Random.Range(-moveXSpeed, moveXSpeed), // Randomly flies left or right
             jumpForce,
@@ -298,10 +327,121 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         bonusPowerObj.SetActive(false);
     }
 
+    // ===============
+    // JUICE ANIMATIONS
+    // ===============
+
+    /// <summary>
+    /// Unit drops onto the field, squashes on landing and kicks up some dust
+    /// </summary>
+    public void PlaySpawnAnim()
+    {
+        spawnRoutine = StartCoroutine(SpawnAnim());
+    }
+
+    IEnumerator SpawnAnim()
+    {
+        Transform spriteTransform = sprite.transform;
+        Vector3 dropStartPos = spriteRestPos + new Vector3(0f, spawnDropHeight, 0f);
+
+        // falling down
+        float t = 0;
+        while (t < spawnDropTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / spawnDropTime);
+            float coolT = clampedT * clampedT;
+
+            spriteTransform.localPosition = Vector3.Lerp(dropStartPos, spriteRestPos, coolT);
+            Animations.instance.SetSquash(spriteTransform, spriteRestScale, -jumpSquash * (1 - coolT * 0.5f)); // stretched while falling
+            yield return null;
+        }
+        spriteTransform.localPosition = spriteRestPos;
+
+        // landing
+        ParticleManager.instance.SpawnVFX(transform.position, "DustVFX");
+        GameManager.instance.mainCamera.Shake(spawnCameraShake, 0.15f);
+        PlaySquash(spawnSquash, 0.35f);
+        spawnRoutine = null;
+    }
+
+    void PlaySquash(float amount, float time)
+    {
+        if (squashRoutine != null) StopCoroutine(squashRoutine);
+        squashRoutine = StartCoroutine(SquashRoutine(amount, time));
+    }
+
+    IEnumerator SquashRoutine(float amount, float time)
+    {
+        yield return Animations.instance.SquashStretch(sprite.transform, spriteRestScale, amount, time);
+        squashRoutine = null;
+    }
+
+    /// <summary>
+    /// Stops spawn and squash animations and puts the sprite back to its resting position and scale
+    /// </summary>
+    void ResetSpriteAnims()
+    {
+        if (spawnRoutine != null) { StopCoroutine(spawnRoutine); spawnRoutine = null; }
+        if (squashRoutine != null) { StopCoroutine(squashRoutine); squashRoutine = null; }
+        sprite.transform.localPosition = spriteRestPos;
+        sprite.transform.localScale = spriteRestScale;
+    }
+
+    /// <summary>
+    /// Smoothly moves the unit to a new position and makes it squash when it arrives
+    /// </summary>
+    public void SlideTo(Vector3 targetPosition)
+    {
+        StopSlide();
+
+        // can't animate inactive units, just placing them
+        if (!gameObject.activeInHierarchy) { transform.position = targetPosition; return; }
+
+        slideTarget = targetPosition;
+        slideRoutine = StartCoroutine(Slide(targetPosition));
+    }
+
+    IEnumerator Slide(Vector3 targetPosition)
+    {
+        Vector3 startingPosition = transform.position;
+
+        float t = 0;
+        while (t < slideTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / slideTime);
+            float coolT = 1 - Mathf.Pow(1 - clampedT, 3);
+
+            transform.position = Vector3.Lerp(startingPosition, targetPosition, coolT);
+            yield return null;
+        }
+
+        transform.position = targetPosition;
+        slideRoutine = null;
+        PlaySquash(slideSquash, 0.3f);
+    }
+
+    /// <summary>
+    /// Stops sliding and snaps the unit where it was sliding to
+    /// </summary>
+    void StopSlide()
+    {
+        if (slideRoutine == null) return;
+
+        StopCoroutine(slideRoutine);
+        slideRoutine = null;
+        transform.position = slideTarget;
+    }
+
     public IEnumerator EntranceAnimation()
     {
         // disabling idle animation
         sprite.gameObject.GetComponent<CartoonShakeEffect>().enabled = false;
+
+        // making sure spawn animation is not moving the sprite anymore
+        ResetSpriteAnims();
+        Transform spriteTransform = sprite.transform;
 
         // making unit appear before other units
         AppearAbove(true);
@@ -309,7 +449,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // setting starting anim variables
         // position variables
         float t = 0;
-        Vector3 startingPosition = sprite.transform.localPosition;
+        Vector3 startingPosition = spriteRestPos;
         Vector3 targetPosition = startingPosition + new Vector3(0, jumpHeight, 0);
 
         // ability text variables variables
@@ -319,7 +459,17 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         Color skillTextColor = skillText.color;
         Color skillTextTargetColor = new Color(skillTextColor.r, skillTextColor.g, skillTextColor.b, 0f);
 
-        // jumping up
+        // squashing down before the jump
+        while (t < jumpAnticipationTime && !Animations.instance.skipPause)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / jumpAnticipationTime);
+            Animations.instance.SetSquash(spriteTransform, spriteRestScale, jumpSquash * clampedT);
+            yield return null;
+        }
+
+        t = 0;
+        // jumping up (stretched at takeoff, back to normal at the top)
         while (t < jumpTime && !Animations.instance.skipPause)
         {
             t += Time.deltaTime;
@@ -327,8 +477,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             float coolT = clampedT * clampedT;
 
             sprite.transform.localPosition = Vector3.Lerp(startingPosition, targetPosition, coolT);
+            Animations.instance.SetSquash(spriteTransform, spriteRestScale, Mathf.Lerp(-jumpSquash, 0f, Mathf.Clamp01(clampedT)));
             yield return null;
         }
+        spriteTransform.localScale = spriteRestScale;
 
         t = 0f;
         // landing and fading text away
@@ -346,11 +498,15 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // snapping values to correct ones
         sprite.transform.localPosition = startingPosition;
 
+        // squashing on landing
+        PlaySquash(landSquash, 0.35f);
+
         // pause
         yield return StartCoroutine(Animations.instance.SkippablePause(1.8f));
 
         // deactivating ability text
         skillTextObj.SetActive(false);
+        ResetSpriteAnims();
         // making unit appear in the original place
         AppearAbove(false);
 
@@ -373,8 +529,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // call for preview card
         ViewCard(mouseOver);
 
-        // click 'juice' effect
-        if (mouseOver) Animations.instance.PopAnim(sprite.gameObject, 0.15f, -0.15f);
+        // click 'juice' effect (not while squashing, the pop would remember the squashed scale)
+        if (mouseOver && squashRoutine == null && spawnRoutine == null) Animations.instance.PopAnim(sprite.gameObject, 0.15f, -0.15f);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -418,6 +574,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         if (!readyToMove) return;
         
+        // if the unit was still sliding, it belongs where it was sliding to
+        StopSlide();
         moveStartingPos = transform.position;
         
     }
@@ -441,7 +599,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
          if (GameManager.instance.fieldManager.CheckUnitMove(this) == false)
          { 
                 // if there was no slot put unit back
-                transform.position = moveStartingPos;
+                SlideTo(moveStartingPos);
          }
 
          PreviewCard(false);

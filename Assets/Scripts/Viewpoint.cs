@@ -17,6 +17,12 @@ public class Viewpoint : MonoBehaviour
 
     [SerializeField] float viewChangeSpeed;
 
+    [Header("shake")]
+    float shakeIntensity;
+    float shakeDuration;
+    float shakeTimeLeft;
+    bool shaking;
+
     private void Start()
     {
         cam = GetComponent<Camera>();
@@ -164,6 +170,39 @@ public class Viewpoint : MonoBehaviour
         transform.rotation = targetRotation;
 
         Debug.Log("Viewport: zoom in finished");
+    }
+
+    /// <summary>
+    /// Shakes the screen. Intensity is a fraction of the screen size (0.01 is a small bump).
+    /// Shakes by offsetting the projection, so it doesn't fight with anything that moves the camera
+    /// </summary>
+    public void Shake(float intensity, float duration)
+    {
+        // a weaker shake doesn't override a stronger one that is still going
+        float currentStrength = (shakeTimeLeft > 0) ? shakeIntensity * (shakeTimeLeft / shakeDuration) : 0f;
+        if (intensity < currentStrength) return;
+
+        shakeIntensity = intensity;
+        shakeDuration = duration;
+        shakeTimeLeft = duration;
+    }
+
+    private void LateUpdate()
+    {
+        if (shakeTimeLeft <= 0)
+        {
+            // back to the normal projection after shaking
+            if (shaking) { cam.ResetProjectionMatrix(); shaking = false; }
+            return;
+        }
+
+        shakeTimeLeft -= Time.deltaTime;
+        float strength = shakeIntensity * Mathf.Clamp01(shakeTimeLeft / shakeDuration);
+        Vector2 offset = Random.insideUnitCircle * strength;
+
+        cam.ResetProjectionMatrix();
+        cam.projectionMatrix = Matrix4x4.Translate(new Vector3(offset.x, offset.y, 0f)) * cam.projectionMatrix;
+        shaking = true;
     }
 
     public void ZoomOut()

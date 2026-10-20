@@ -67,9 +67,9 @@ public class Animations : MonoBehaviour
         obj.transform.localScale = startingScale;
     }
 
-    public void ShakeAnim(GameObject obj, float shakeLength, float shakeIntensity)
+    public void ShakeAnim(GameObject obj, float shakeIntensity, float shakeLength)
     {
-        StartCoroutine(Shake(obj, shakeIntensity, shakeLength));
+        StartCoroutine(Shake(obj, shakeLength, shakeIntensity));
     }
 
     IEnumerator Shake(GameObject obj, float shakeLength, float shakeIntensity)
@@ -90,8 +90,8 @@ public class Animations : MonoBehaviour
             float currentIntensity = Mathf.Lerp(maxIntensity, 0f, actualT);
 
             // Random position offset
-            float xOffset = UnityEngine.Random.Range(-1, 1) * currentIntensity;
-            float yOffset = UnityEngine.Random.Range(-1, 1) * currentIntensity;
+            float xOffset = UnityEngine.Random.Range(-1f, 1f) * currentIntensity;
+            float yOffset = UnityEngine.Random.Range(-1f, 1f) * currentIntensity;
 
             obj.transform.localPosition += new Vector3(xOffset, yOffset, 0);
 
@@ -100,6 +100,38 @@ public class Animations : MonoBehaviour
             // Reverting the offset
             obj.transform.localPosition = startingPosition;
         }
+    }
+
+    /// <summary>
+    /// Squashes (amount > 0) or stretches (amount < 0) the object, then springs it back to restScale with a little wobble
+    /// </summary>
+    public IEnumerator SquashStretch(Transform target, Vector3 restScale, float amount, float time)
+    {
+        float t = 0;
+        while (t < time)
+        {
+            // checking if object still exists
+            if (target == null) yield break;
+
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / time);
+
+            // damped wobble that starts at full squash
+            float damping = (1 - clampedT) * (1 - clampedT);
+            float squash = amount * Mathf.Cos(clampedT * Mathf.PI * 2.5f) * damping;
+            SetSquash(target, restScale, squash);
+            yield return null;
+        }
+
+        if (target != null) target.localScale = restScale;
+    }
+
+    /// <summary>
+    /// Sets a squashed (amount > 0) or stretched (amount < 0) scale, keeping the volume roughly the same
+    /// </summary>
+    public void SetSquash(Transform target, Vector3 restScale, float amount)
+    {
+        target.localScale = new Vector3(restScale.x * (1 + amount), restScale.y * (1 - amount), restScale.z);
     }
 
     // ===========================

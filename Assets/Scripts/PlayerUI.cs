@@ -28,6 +28,8 @@ public class PlayerUI : MonoBehaviour
 
     [Header("Damage effects")]
     [SerializeField] ParticleSystem damageVFX;
+    [SerializeField] UIParticleBurst damageBurst; // UI particles that burst out of the healthbar when taking damage
+    [SerializeField] Color damageBurstColor = new Color(0.87f, 0.33f, 0.39f); // heart red
     [SerializeField] float shakeLenght;
     [SerializeField] float shakeIntensity; 
 
@@ -126,6 +128,11 @@ public class PlayerUI : MonoBehaviour
     {
         // playing the particle effect
         if (damageVFX != null) damageVFX.Play();
+        if (damageBurst != null)
+        {
+            Transform canvas = healthbar.GetComponentInParent<Canvas>().rootCanvas.transform;
+            UIParticleBurst.Spawn(damageBurst, healthbar.transform.position, canvas, damageBurstColor, Mathf.Clamp(damage, 1f, 3f));
+        }
 
         // playing the shaking effect
         Animations.instance.ShakeAnim(healthbar, shakeLenght, shakeIntensity);

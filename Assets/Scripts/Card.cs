@@ -33,19 +33,44 @@ public class Card : MonoBehaviour
     Vector3 dragScale = new Vector3();
     float highlightOffsetY = 220f;
     Vector3 originalHandPosition = new Vector3();
-    Vector3 highlightedHandPosition = new Vector3();
     float cardRotation = 0f;
     int hierarchyIndex = 0;
+    bool hovered = false;
 
     [Header("Drag")]
     [HideInInspector] public bool isDragged;
     float dragFollowSpeed = 0.15f;
+
+    [Header("Juice")]
+    [SerializeField] Image dragShadow;
+    [SerializeField] float layoutEaseSpeed = 14f; // how fast cards move to their place in the hand
+    [SerializeField] float visualEaseSpeed = 18f; // how fast hover / drag visuals change
+    [SerializeField] float dragLiftScale = 1.08f; // extra scale while dragging
+    [SerializeField] float maxDragTilt = 15f;
+    [SerializeField] float dragTiltPerSpeed = 0.012f; // degrees of tilt per pixel/second of movement
+    [SerializeField] Vector2 dragShadowOffset = new Vector2(14f, -18f);
+    [SerializeField] float dragShadowAlpha = 0.35f;
+    Vector3 handTargetPosition;
+    bool inHandLayout = false; // when true the card eases to its place in the hand fan
+    float dragTilt = 0f;
+    float dragLift = 0f; // 0 = resting, 1 = fully lifted
+    Vector3 lastDragPosition;
+    Vector3 shadowRestPosition;
 
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
     [HideInInspector] public int startingPower = 0;
     [HideInInspector] public int auraPower = 0; // part of currentPower that comes from auras, managed by FieldManager.RefreshAuras
     bool specialCostPaid = false;
+
+    private void Awake()
+    {
+        if (dragShadow != null)
+        {
+            shadowRestPosition = dragShadow.rectTransform.localPosition;
+            SetShadowAlpha(0f);
+        }
+    }
 
     private void Start()
     {
@@ -55,13 +80,108 @@ public class Card : MonoBehaviour
     void SetScales()
     {
         defaultScale = transform.localScale;
-        highlightedScale = defaultScale * 1.5f;
+        highlightedScale = defaultScale * 1.2f;
         dragScale = defaultScale * 1.1f;
     }
 
     private void Update()
     {
         Drag();
+        AnimateHandLayout();
+        AnimateVisual();
+    }
+
+    /// <summary>
+    /// Sets where the card should be in the hand, the card then eases there
+    /// </summary>
+    public void SetHandLayout(Vector3 localPosition, float rotationAngle)
+    {
+        handTargetPosition = localPosition;
+        cardRotation = rotationAngle;
+        inHandLayout = true;
+    }
+
+    public void ExitHandLayout()
+    {
+        inHandLayout = false;
+    }
+
+    /// <summary>
+    /// Eases the card to its place and rotation in the hand fan
+    /// </summary>
+    void AnimateHandLayout()
+    {
+        if (!inHandLayout) return;
+
+        float easeT = 1 - Mathf.Exp(-layoutEaseSpeed * Time.deltaTime);
+
+        // straightening the card while it is being read or dragged
+        float targetRotation = (hovered || isDragged) ? 0f : cardRotation;
+        transform.localRotation = Quaternion.Slerp(transform.localRotation, Quaternion.Euler(0f, 0f, targetRotation), easeT);
+
+        if (!isDragged) transform.localPosition = Vector3.Lerp(transform.localPosition, handTargetPosition, easeT);
+    }
+
+    /// <summary>
+    /// Eases hover and drag visuals (scale, raise, tilt, shadow)
+    /// </summary>
+    void AnimateVisual()
+    {
+        float deltaTime = Time.deltaTime;
+        if (deltaTime <= 0f) return;
+        float easeT = 1 - Mathf.Exp(-visualEaseSpeed * deltaTime);
+        Transform visual = cardVisual.transform;
+
+        // scale and raise
+        bool raised = hovered || isDragged;
+        Vector3 targetScale = (isDragged) ? highlightedScale * dragLiftScale : (hovered) ? highlightedScale : defaultScale;
+        Vector3 targetPosition = (raised) ? transform.InverseTransformVector(new Vector3(0f, highlightOffsetY, 0f)) : Vector3.zero;
+        visual.localScale = Vector3.Lerp(visual.localScale, targetScale, easeT);
+        visual.localPosition = Vector3.Lerp(visual.localPosition, targetPosition, easeT);
+
+        // tilting towards the direction the card is dragged
+        float targetTilt = 0f;
+        if (isDragged)
+        {
+            float speedX = (transform.position.x - lastDragPosition.x) / deltaTime;
+            targetTilt = Mathf.Clamp(-speedX * dragTiltPerSpeed, -maxDragTilt, maxDragTilt);
+        }
+        lastDragPosition = transform.position;
+        dragTilt = Mathf.Lerp(dragTilt, targetTilt, easeT);
+        visual.localRotation = Quaternion.Euler(0f, 0f, dragTilt);
+
+        // shadow under the lifted card
+        dragLift = Mathf.Lerp(dragLift, (isDragged) ? 1f : 0f, easeT);
+        if (dragShadow != null)
+        {
+            dragShadow.rectTransform.localPosition = shadowRestPosition + (Vector3)dragShadowOffset * dragLift;
+            SetShadowAlpha(dragShadowAlpha * dragLift);
+        }
+    }
+
+    void SetShadowAlpha(float alpha)
+    {
+        Color color = dragShadow.color;
+        dragShadow.color = new Color(color.r, color.g, color.b, alpha);
+        dragShadow.enabled = alpha > 0.005f;
+    }
+
+    /// <summary>
+    /// Instantly puts hover and drag visuals back to the resting state
+    /// </summary>
+    void SnapVisual()
+    {
+        hovered = false;
+        dragTilt = 0f;
+        dragLift = 0f;
+        cardVisual.transform.localScale = defaultScale;
+        cardVisual.transform.localPosition = Vector3.zero;
+        cardVisual.transform.localRotation = Quaternion.identity;
+        if (dragShadow != null)
+        {
+            dragShadow.rectTransform.localPosition = shadowRestPosition;
+            SetShadowAlpha(0f);
+        }
     }
 
     /// <summary>
@@ -147,22 +267,8 @@ public class Card : MonoBehaviour
         {
             if (GameManager.instance.executeManager.currentCard == this || isDragged) return;
 
-            // Putting the card in "reading mode" when hovering over it in hand
-            // Scale
-            cardVisual.transform.localScale = (mouseOver) ? highlightedScale : defaultScale;
-            // Rotation
-            transform.localRotation = (mouseOver) ? Quaternion.Euler(0f, 0f, 0f) : Quaternion.Euler(0f, 0f, cardRotation);
-            // Position
-            if (mouseOver)
-            {
-                //originalHandPosition = cardVisual.transform.position;
-                highlightedHandPosition = cardVisual.transform.position + new Vector3(0f, highlightOffsetY, 0f);
-                cardVisual.transform.position = highlightedHandPosition;
-            }
-            else
-            {
-                cardVisual.transform.position = transform.position;
-            }
+            // Putting the card in "reading mode" when hovering over it in hand (scale, raise and rotation get eased in Update)
+            hovered = mouseOver;
             // Rendering over other cards
             if (mouseOver) { hierarchyIndex = transform.GetSiblingIndex(); transform.SetAsLastSibling(); }
             else transform.SetSiblingIndex(hierarchyIndex);
@@ -194,6 +300,7 @@ public class Card : MonoBehaviour
             || !GameManager.instance.yourTurn || player.cardPlayed) return;
 
         isDragged = true;
+        lastDragPosition = transform.position;
         GameManager.instance.handManager.activeCard = this;
         //transform.SetParent(GameManager.instance.handManager.activeCard.transform, false);
 
@@ -285,6 +392,8 @@ public class Card : MonoBehaviour
         GameManager.instance.handManager.AddCardToField(this, player);
 
         // resetting visual params
+        ExitHandLayout();
+        SnapVisual();
         RotateCard(0);
         transform.localScale = defaultScale;
 

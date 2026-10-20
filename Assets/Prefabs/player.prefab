@@ -48,7 +48,7 @@ MonoBehaviour:
   playerUI: {fileID: 4287692715053019839}
   cardsInHand: []
   cardsOnField: []
-  plannedCardStack: []
+  cardsInDiscard: []
   fields:
   - {fileID: 0}
   - {fileID: 0}
@@ -60,12 +60,18 @@ MonoBehaviour:
   currentStars: 0
   playerName: 
   endStateReady: 0
+  cardPlayed: 0
   dead: 0
+  playsOnRandomLane: 0
+  config: {fileID: 0}
+  AIplayer: {fileID: 0}
   isAI: 0
   playerColor: {r: 0, g: 0, b: 0, a: 0}
   isOpponent: 0
   food: 000000000000000000000000
   deadUnitsThisRound: 0
+  shopStars: 0
+  damageTakenThisRound: 0
 --- !u!114 &4287692715053019839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,12 +85,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerUI
   stunnedPlaceholders: []
+  UIobj: {fileID: 0}
+  playerName: {fileID: 0}
   healthbar: {fileID: 0}
   healthbarFill: {fileID: 0}
   hpValue: {fileID: 0}
   starsObj: {fileID: 0}
   starsText: {fileID: 0}
   damageVFX: {fileID: 0}
+  damageBurst: {fileID: 7991567730774861023, guid: 730c8aafaaa827243ac3df74c0464f69, type: 3}
+  damageBurstColor: {r: 0.87, g: 0.33, b: 0.39, a: 1}
   shakeLenght: 10
   shakeIntensity: 1
   head: {fileID: 0}
@@ -98,3 +108,6 @@ MonoBehaviour:
   offsetX: 250
   tokenStayTime: 0.7
   tokenShowTime: 0.6
+  cardCountText: {fileID: 0}
+  cardCountObj: {fileID: 0}
+  randomLaneIndicator: {fileID: 0}

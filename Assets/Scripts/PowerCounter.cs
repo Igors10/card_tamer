@@ -24,6 +24,13 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] float counterScaleMod = 0.1f;
     [SerializeField] float timePerUnit = 0.5f;
     [HideInInspector] public bool diceRolled;
+    [SerializeField] float tickPopIntensity = 0.35f; // how much the number pops on each +1
+    [SerializeField] float tickPopTime = 0.12f;
+    [SerializeField] float tickBasePitch = 0.9f; // pitch of the first +1 sound, every next +1 is a little higher
+    [SerializeField] float tickPitchStep = 0.06f;
+    [SerializeField] float tickMaxPitch = 2f;
+    Vector3 defaultTextScale;
+    Coroutine tickPopRoutine;
 
     [Header("Resolving")]
     [SerializeField] float resolveSizeMod = 1.5f;
@@ -34,6 +41,9 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] float powerDecreaseInterval;
     [HideInInspector] public bool resolved;
     [SerializeField] int damagePowerCost; 
+    [SerializeField] float loseAnimTime = 0.45f;
+    [SerializeField] float loseScaleMod = 0.8f; // how much the counter deflates when losing
+    [SerializeField] float loseShakeIntensity = 6f;
     List<GameObject> damageParticles = new List<GameObject>();
     [HideInInspector] public float damageParticleOffset = 40f;
     private void Start()
@@ -47,6 +57,7 @@ public class PowerCounter : MonoBehaviour
         // saving default values
         defaultFontSize = powerText.fontSize;
         defaultIconScale = counterBG.transform.localScale;
+        defaultTextScale = powerText.transform.localScale;
         powerTextColor = Colors.instance.BlendColor(player.playerColor, 0.25f);
     }
 
@@ -59,6 +70,7 @@ public class PowerCounter : MonoBehaviour
         powerText.color = powerTextColor;
         counterBG.color = player.playerColor;
         if (defaultIconScale != Vector3.zero) counterBG.transform.localScale = defaultIconScale;
+        if (defaultTextScale != Vector3.zero) powerText.transform.localScale = defaultTextScale;
         powerText.text = "0";
         currentPower= 0;
         transform.localScale = new Vector3(1, 1, 1);
@@ -83,9 +95,6 @@ public class PowerCounter : MonoBehaviour
 
     public IEnumerator AddPower(int power, Unit unit = null)
     {
-        // playing soundeffect
-        AudioManager.instance.PlaySFX("GainPowerSFX");
-
         // Setting Unit Scale
         Vector3 defaultUnitScale = new Vector3();
         if (unit != null)
@@ -125,6 +134,14 @@ public class PowerCounter : MonoBehaviour
             currentPower++;
             powerText.text = currentPower.ToString();
 
+            // pop and a sound that gets higher with every point (not spamming sounds when the animation is skipped)
+            PopPowerText();
+            if (i == 0 || !Animations.instance.skipPause)
+            {
+                float pitch = Mathf.Min(tickBasePitch + tickPitchStep * (currentPower - 1), tickMaxPitch);
+                AudioManager.instance.PlaySFX("GainPowerSFX", 0, pitch);
+            }
+
             // refreshing counter size to show difference in power
             RefreshCounterScale();
             GameManager.instance.GetOpponentOfPlayer(player).powerCounter.RefreshCounterScale();
@@ -146,8 +163,8 @@ public class PowerCounter : MonoBehaviour
             float currentFontSize = Mathf.RoundToInt(Mathf.Lerp(scaledTextSize, startingTextSize, coolT));
             powerText.fontSize = currentFontSize;
 
-            // Changing text color (from player color to white)
-            Color currentTextColor = Color.Lerp(Color.white, player.playerColor, coolT);
+            // Changing text color (from white back to the default text color)
+            powerText.color = Color.Lerp(Color.white, powerTextColor, coolT);
 
             yield return null;
         }
@@ -162,15 +179,81 @@ public class PowerCounter : MonoBehaviour
         yield return Animations.instance.SkippablePause(0.5f);
     }
 
+    /// <summary>
+    /// Quick pop of the power number, restarts if it is already popping so the size never drifts
+    /// </summary>
+    void PopPowerText()
+    {
+        if (tickPopRoutine != null) StopCoroutine(tickPopRoutine);
+        tickPopRoutine = StartCoroutine(PopPowerTextAnim());
+    }
+
+    IEnumerator PopPowerTextAnim()
+    {
+        Transform text = powerText.transform;
+        Vector3 poppedScale = defaultTextScale * (1 + tickPopIntensity);
+        text.localScale = poppedScale;
+
+        float t = 0;
+        while (t < tickPopTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = t / tickPopTime;
+            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
+
+            text.localScale = Vector3.Lerp(poppedScale, defaultTextScale, coolT);
+            yield return null;
+        }
+
+        text.localScale = defaultTextScale;
+        tickPopRoutine = null;
+    }
+
+    /// <summary>
+    /// Losing counter deflates, wobbles, shakes and fades to the lost color
+    /// </summary>
+    IEnumerator LoseAnim()
+    {
+        AudioManager.instance.PlaySFX("NegativeSFX", 0, 0.8f);
+        Animations.instance.ShakeAnim(gameObject, loseShakeIntensity, loseAnimTime);
+
+        Vector3 startingScale = transform.localScale;
+        Vector3 targetScale = startingScale * loseScaleMod;
+        float startingFontSize = powerText.fontSize;
+        float targetFontSize = startingFontSize / resolveSizeMod;
+        Color startingTextColor = powerText.color;
+        Color startingBGColor = counterBG.color;
+
+        float t = 0;
+        while (t < loseAnimTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / loseAnimTime);
+            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
+
+            // deflating with a wobble that dies down
+            Vector3 currentScale = Vector3.Lerp(startingScale, targetScale, coolT);
+            float wobble = 0.15f * Mathf.Sin(clampedT * Mathf.PI * 3f) * (1 - clampedT);
+            Animations.instance.SetSquash(transform, currentScale, wobble);
+
+            powerText.fontSize = Mathf.Lerp(startingFontSize, targetFontSize, coolT);
+            powerText.color = Color.Lerp(startingTextColor, Color.white, coolT);
+            counterBG.color = Color.Lerp(startingBGColor, lostColor, coolT);
+            yield return null;
+        }
+
+        transform.localScale = targetScale;
+        powerText.fontSize = targetFontSize;
+        powerText.color = Color.white;
+        counterBG.color = lostColor;
+    }
+
     public void ResolveCounter(bool won, Field[] field)
     {
         // When player loses (has less power on the current line
         if (!won)
         {
-            //Animations.instance.PopAnim(this.gameObject, 0.45f, -0.2f);
-            powerText.fontSize = powerText.fontSize / resolveSizeMod;
-            powerText.color = Color.white;
-            counterBG.color = lostColor;
+            StartCoroutine(LoseAnim());
             resolved = true;
 
             // Removing power from losing units

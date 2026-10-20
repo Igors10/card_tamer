@@ -261,6 +261,7 @@ public class FieldManager : MonoBehaviour
         Unit newUnit = newUnitObj.GetComponent<Unit>();
         fieldToSpawnOn.units[nextEmptySlot] = newUnit;
         newUnit.InitUnit(cardToSpawn, fieldToSpawnOn);
+        newUnit.PlaySpawnAnim();
        
         // Plays spawning "poof" VFX
         ParticleManager.instance.SpawnVFX(newUnitObj.transform.position, "SpawnVFX");
@@ -353,7 +354,7 @@ public class FieldManager : MonoBehaviour
         unit.currentField.units[GetUnitSlot(unit)] = null;
 
         // moving the unit to a new field slot
-        unit.transform.position = targetField.unitSlots[targetSlot].transform.position;
+        unit.SlideTo(targetField.unitSlots[targetSlot].transform.position);
         unit.currentField = targetField;
         targetField.units[targetSlot] = unit;
         targetField.unitSlots[targetSlot].gameObject.SetActive(false);

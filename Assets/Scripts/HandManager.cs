@@ -43,6 +43,7 @@ public class HandManager : MonoBehaviour
     {
         player.cardsInHand.Remove(card);
         player.cardsOnField.Add(card);
+        card.ExitHandLayout();
         card.transform.SetParent(fieldHand.transform, false);
         //card.gameObject.SetActive(false);
         UpdateHandVisuals(player);
@@ -83,22 +84,21 @@ public class HandManager : MonoBehaviour
 
         if (cardCount == 1)
         {
-            player.cardsInHand[0].transform.localPosition = Vector3.zero;
-            player.cardsInHand[0].transform.localRotation = Quaternion.identity;
+            player.cardsInHand[0].SetHandLayout(Vector3.zero, 0f);
             return;
         }
 
         for (int a = 0; a < cardCount; a++) 
         {
             float rotationAngle = fanSpread * (a - (cardCount - 1) / 2f);
-            player.cardsInHand[a].RotateCard(rotationAngle);
 
             float cardSpacing = (cardsInHand.Count < 7) ? -defaultCardSpacing : -defaultCardSpacing / cardsInHand.Count * 6;
             float horizontalOffset = cardSpacing * (a - (cardCount - 1) / 2f);
 
             float normalizedPosition = 2f * a / (cardCount - 1) - 1f; 
             float verticalOffset = verticalSpacing * (1 - normalizedPosition * normalizedPosition);
-            player.cardsInHand[a].transform.localPosition = new Vector3(horizontalOffset, verticalOffset, 0f);
+            // cards ease to their new place instead of snapping
+            player.cardsInHand[a].SetHandLayout(new Vector3(horizontalOffset, verticalOffset, 0f), rotationAngle);
         }
     }
 
