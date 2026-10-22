@@ -1,0 +1,240 @@
+JUICE - HOW THE CODE WORKS
+=========================
+
+These notes cover the "game feel" changes from the "Claude adds juice" commit.
+Each section lists the script, what you see in the game, and how the code
+does it. Values marked [SerializeField] can be tuned in the Inspector.
+
+
+------------------------------------------------------------
+COMMON IDEAS USED EVERYWHERE
+------------------------------------------------------------
+
+1) Easing curves ("coolT")
+   Most animations run a timer t from 0 to 1 and then bend it:
+     coolT = t * t                      -> starts slow, ends fast (falling, jumping)
+     coolT = 1 - (1 - t) * (1 - t)      -> starts fast, ends slow (pops, deflating)
+     coolT = 1 - (1 - t)^3              -> stronger ease-out (sliding)
+   Lerp(start, end, coolT) then gives motion that feels natural instead of robotic.
+
+2) Frame-rate independent smoothing
+   Card.cs uses   easeT = 1 - Mathf.Exp(-speed * Time.deltaTime)
+   and then       value = Lerp(value, target, easeT)   every frame.
+   The value chases its target and slows down as it gets close. Using Exp
+   keeps the speed the same at 30 fps and at 144 fps. Higher speed = snappier.
+
+3) Squash and stretch (Animations.cs)
+   SetSquash(target, restScale, amount)
+     amount > 0  -> wider and shorter (squashed)
+     amount < 0  -> taller and thinner (stretched)
+     x = rest.x * (1 + amount), y = rest.y * (1 - amount), so the size
+     looks about the same.
+   SquashStretch(target, restScale, amount, time)  (coroutine)
+     Starts fully squashed and then wobbles back to restScale:
+       squash = amount * cos(t * PI * 2.5) * (1 - t)^2
+     The cosine makes it bounce and (1 - t)^2 makes the bounces die down.
+     Stops safely if the object gets destroyed during the animation.
+
+4) "Rest" values
+   Unit stores spriteRestPos / spriteRestScale in Awake. Every animation
+   starts from these values and returns to them, so overlapping animations
+   can't leave the sprite slightly moved or scaled.
+
+5) One coroutine handle per animation
+   Animations that can be retriggered (squash, slide, text pop) keep their
+   Coroutine in a variable and stop the old one before starting a new one.
+   This prevents two copies fighting over the same transform.
+
+
+------------------------------------------------------------
+UNITS  (Unit.cs, FieldManager.cs)
+------------------------------------------------------------
+
+Spawn drop  - PlaySpawnAnim() / SpawnAnim()
+  FieldManager.SpawnUnit calls newUnit.PlaySpawnAnim() right after InitUnit.
+  - The sprite starts spawnDropHeight above its rest position and falls with
+    coolT = t*t (speeds up like gravity) over spawnDropTime.
+  - While it falls the sprite is stretched (negative squash).
+  - On landing: a small camera shake (spawnCameraShake) and a squash wobble
+    (spawnSquash). The star "SpawnVFX" particles are still spawned by
+    FieldManager like before.
+  - Only the sprite child moves; the unit's real position never changes.
+
+Ability jump - EntranceAnimation()
+  Before an ability triggers, the unit now:
+  1. squashes down for jumpAnticipationTime (wind-up)
+  2. jumps up stretched (-jumpSquash) and returns to normal shape at the top
+  3. after landing, plays a squash wobble (landSquash)
+  ResetSpriteAnims() runs at the start and end, so a spawn or squash that is
+  still running can't mess up the jump. Skipping (skipPause) still works
+  because the new loops check it too.
+
+Sliding - SlideTo(position) / Slide() / StopSlide()
+  Used by FieldManager.MoveUnit and when a dragged unit has no valid slot and
+  goes back. Instead of jumping to the new spot, the unit slides there with a
+  cubic ease-out over slideTime and does a small squash (slideSquash) when it
+  arrives.
+  StopSlide() stops a slide that is still running and puts the unit exactly at
+  the target. It is called when:
+    - a new slide starts
+    - the player starts dragging the unit (OnBeginDrag)
+    - the unit is knocked out
+  so the unit is always where the game logic thinks it is.
+  Inactive units can't run coroutines, so they are just placed at the target.
+
+Hover pop
+  The old PopAnim on mouse over is skipped while a squash or spawn animation
+  is running. Otherwise PopAnim would save the squashed scale as the "normal"
+  scale and the unit would stay deformed.
+
+
+------------------------------------------------------------
+CARDS IN HAND  (Card.cs, HandManager.cs)
+------------------------------------------------------------
+
+Before, cards snapped instantly to their hand position, rotation and hover
+state. Now Card.Update() does three things every frame:
+  Drag() -> AnimateHandLayout() -> AnimateVisual()
+
+Hand layout - SetHandLayout(pos, rot) / ExitHandLayout() / AnimateHandLayout()
+  HandManager.UpdateHandVisuals no longer sets transform values directly. It
+  calls card.SetHandLayout(target position, target rotation) and the card
+  eases there (layoutEaseSpeed). When a card is drawn or played the other
+  cards slide over smoothly.
+  Hovered or dragged cards rotate to 0 so they are easy to read.
+  ExitHandLayout() is called when the card leaves the hand (played to the
+  field) so the hand easing stops controlling it.
+
+Hover / drag visuals - AnimateVisual()
+  These are applied to cardVisual (the child), not the card root, so the
+  hitbox stays where it is:
+  - Scale: default -> highlightedScale (hover, now x1.2 instead of x1.5)
+           -> highlightedScale * dragLiftScale (dragging)
+  - Raise: moves up by highlightOffsetY while hovered/dragged
+  - Tilt:  while dragging, horizontal speed is measured from lastDragPosition
+           and the card leans the other way, like it has weight
+           (dragTiltPerSpeed, max maxDragTilt degrees)
+  - Shadow: the dragShadow image (new child in card.prefab) fades in to
+           dragShadowAlpha and moves by dragShadowOffset while dragging. The
+           image is disabled when it is invisible.
+  OnPointerEnter/Exit now only sets the "hovered" flag; Update does the rest.
+
+SnapVisual()
+  When a card is played, all hover/drag visuals are reset instantly so the
+  card doesn't arrive on the field still tilted or scaled.
+
+
+------------------------------------------------------------
+POWER COUNTER  (PowerCounter.cs)
+------------------------------------------------------------
+
+Rising +1 sound and number pop - in AddPower()
+  - Every +1 now calls PopPowerText(): the number jumps to
+    (1 + tickPopIntensity) size and eases back over tickPopTime. If it is
+    already popping, the old pop is stopped first so the size can't grow
+    out of control.
+  - Every +1 plays GainPowerSFX with a higher pitch:
+      pitch = tickBasePitch + tickPitchStep * (currentPower - 1), max tickMaxPitch
+    so bigger numbers sound more exciting.
+  - When the animation is skipped only the first tick plays a sound, so
+    skipping doesn't play a wall of sound.
+  - Also fixed: the text color fade after adding power was calculated but
+    never applied. It now goes from white back to the normal text color.
+
+Losing animation - LoseAnim()
+  ResolveCounter(won = false) used to change the size and color instantly.
+  Now over loseAnimTime it:
+  - plays NegativeSFX at a lower pitch (0.8)
+  - shakes the counter (loseShakeIntensity)
+  - shrinks to loseScaleMod with a wobble that fades out
+  - shrinks the font, turns the text white and fades the background to
+    lostColor
+  Reset values also restore the text scale (defaultTextScale).
+
+
+------------------------------------------------------------
+HEALTH DAMAGE BURST  (UIParticleBurst.cs, PlayerUI.cs)
+------------------------------------------------------------
+
+Why a custom script: the healthbar is on a Screen Space - Overlay canvas, and
+normal ParticleSystems don't render there. UIParticleBurst fakes particles
+using UI Images.
+
+Usage: UIParticleBurst.Spawn(prefab, position, canvas, color, intensity)
+  - Creates the prefab on the root canvas, at the front (SetAsLastSibling)
+  - Creates "shards" (paper_shard sprites, tinted with the color) and
+    "sparks" (spark sprite, always white). The number of each is multiplied
+    by intensity.
+  - Each particle gets a random direction and speed, extra upward speed
+    (upwardBias), random spin and random lifetime.
+  - Every frame: velocity slows down by drag, gravity pulls it down, it
+    moves and rotates, shrinks over its life and fades out in the last 40%.
+  - A ring sprite grows from ringStartSize to ringEndSize and fades out
+    over ringTime.
+  - The whole object destroys itself when the longest particle is done.
+
+PlayerUI.TakeDamage effect spawns the HealthDamageBurst prefab (assigned in
+player.prefab) at the healthbar, in damageBurstColor (heart red).
+Intensity = damage clamped to 1..3, so bigger hits give bigger bursts.
+
+
+------------------------------------------------------------
+CAMERA SHAKE  (Viewpoint.cs)
+------------------------------------------------------------
+
+Shake(intensity, duration)
+  intensity is a fraction of the screen (0.01 is a small bump).
+  A weaker shake does not replace a stronger one that is still running.
+
+How: in LateUpdate the camera's projection matrix is shifted by a random
+offset that gets smaller over time. The camera's Transform is never changed,
+so the shake can't conflict with the zoom/move code in Viewpoint.
+When the shake ends, ResetProjectionMatrix() restores the normal view.
+Called from: unit spawn landing (Unit.SpawnAnim).
+
+
+------------------------------------------------------------
+AUDIO  (AudioManager.cs)
+------------------------------------------------------------
+
+Pitch variation
+  Before, every sound went through one AudioSource, so changing the pitch for
+  one sound changed it for every sound that was playing.
+  Now Awake creates sfxSourceCount (8) extra AudioSources on the same object.
+  PlaySFX picks a free one (GetFreeSfxSource, round-robin; if all are busy it
+  reuses the next one).
+  - Volume, mute, mixer group, spatial blend and priority are copied from the
+    main audioSource, so the existing volume/mute settings work the same.
+  - pitch argument given (not 0) -> that exact pitch is used
+  - no pitch given -> main pitch * random(1 +- pitchVariation), so repeated
+    sounds don't sound identical
+  - volume is now passed to PlayOneShot as a volume scale instead of
+    permanently changing audioSource.volume
+  MuteSound() also mutes all the extra sources.
+
+
+------------------------------------------------------------
+SMALL FIXES IN Animations.cs
+------------------------------------------------------------
+- ShakeAnim passed its parameters to Shake() in the wrong order (length and
+  intensity were swapped). Fixed, and the public signature is now
+  ShakeAnim(obj, intensity, length).
+  NOTE: PlayerUI and DeathParticle still call ShakeAnim(obj, length,
+  intensity), so in those two scripts the shakeLength and shakeIntensity
+  Inspector fields do each other's job. They behave the same as before the
+  fix, because the old swapped code reversed them too. Only the field names
+  are misleading.
+- Random.Range(-1, 1) used ints, so it only ever returned -1 or 0 and the
+  shake always went left/down. Changed to floats (-1f, 1f).
+
+
+------------------------------------------------------------
+ASSETS
+------------------------------------------------------------
+Assets/VFX/HealthDamageBurst.prefab   UIParticleBurst prefab used by PlayerUI
+Assets/VFX/Textures/                  paper_shard_1-3, spark, ring sprites
+card.prefab                           new DragShadow image child
+player.prefab                         damageBurst reference set
+
+(The DustVFX landing effect was removed afterwards. The star SpawnVFX
+already covers unit spawns.)

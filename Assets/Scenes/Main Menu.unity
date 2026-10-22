@@ -486,8 +486,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
@@ -873,6 +893,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!1 &224124486 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4251914897269075069, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
+  m_PrefabInstance: {fileID: 7895326752087225932}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &281687740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -962,8 +987,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
@@ -1674,17 +1719,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 16.962
       objectReference: {fileID: 0}
+    - target: {fileID: 3182590915980440148, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: isIdleAnim
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: knockOutOnClick
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922181524655028023, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385669588230227646, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173113339156977611, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1815,13 +1904,49 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 2.44
       objectReference: {fileID: 0}
+    - target: {fileID: 3182590915980440148, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: isIdleAnim
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: knockOutOnClick
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922181524655028023, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
@@ -1834,6 +1959,14 @@ PrefabInstance:
     - target: {fileID: 6256712310380481801, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385669588230227646, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173113339156977611, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1968,10 +2101,14 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 688694874143329833, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4251914897269075069, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1974959806}
   m_SourcePrefab: {fileID: 100100000, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
 --- !u!1001 &462963452
 PrefabInstance:
@@ -2166,17 +2303,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -12.829
       objectReference: {fileID: 0}
+    - target: {fileID: 3182590915980440148, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: isIdleAnim
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: knockOutOnClick
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922181524655028023, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385669588230227646, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173113339156977611, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2271,16 +2452,52 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -21.098
       objectReference: {fileID: 0}
+    - target: {fileID: 3182590915980440148, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: isIdleAnim
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: knockOutOnClick
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleRotateLeft
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922181524655028023, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
@@ -2290,6 +2507,14 @@ PrefabInstance:
     - target: {fileID: 6256712310380481801, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385669588230227646, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173113339156977611, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3339,17 +3564,61 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 16.962
       objectReference: {fileID: 0}
+    - target: {fileID: 3182590915980440148, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: isIdleAnim
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: knockOutOnClick
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
+      objectReference: {fileID: 0}
+    - target: {fileID: 4922181524655028023, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
       value: doodle (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6385669588230227646, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173113339156977611, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3512,7 +3781,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: audioClips.Array.size
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: musicClips.Array.size
@@ -3534,6 +3803,14 @@ PrefabInstance:
       propertyPath: 'audioClips.Array.data[3]'
       value: 
       objectReference: {fileID: 8300000, guid: d671e26ef1dd7be4da7b537a94f029e1, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[4]'
+      value: 
+      objectReference: {fileID: 8300000, guid: d84f3c35e55effd4f8d4d83cc90a2283, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[5]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 7c47b20bb9874304a809dc5580d403ba, type: 3}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: 'musicClips.Array.data[0]'
       value: 
@@ -3636,8 +3913,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
@@ -4409,6 +4706,7 @@ GameObject:
   - component: {fileID: 1209145232}
   - component: {fileID: 1209145231}
   - component: {fileID: 1209145230}
+  - component: {fileID: 1209145233}
   m_Layer: 0
   m_Name: ExitButton
   m_TagString: Untagged
@@ -4529,6 +4827,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1209145228}
   m_CullTransparentMesh: 1
+--- !u!114 &1209145233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209145228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf3609ebb2aa30e4ca24052943d85a4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonJuice
+  hoverScale: 1.1
+  hoverTilt: 4
+  easeSpeed: 16
+  hoverSFX: OnHoverSFX
+  pressScale: 0.92
+  releaseSquash: 0.15
+  releaseSquashTime: 0.35
 --- !u!1 &1212174196
 GameObject:
   m_ObjectHideFlags: 0
@@ -4912,6 +5229,14 @@ MonoBehaviour:
   - {fileID: 100995252}
   - {fileID: 537854697}
   loadingFog: {fileID: 172761196}
+  doodleArea: {fileID: 1565614962}
+  doodleKeepClear:
+  - {fileID: 1006888101}
+  - {fileID: 620976431}
+  - {fileID: 1911845181}
+  - {fileID: 1209145229}
+  doodleAreaMargin: 60
+  doodleSpacing: 30
 --- !u!4 &1253801476
 Transform:
   m_ObjectHideFlags: 0
@@ -4941,6 +5266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animations
   skipPause: 0
+  overlayRaycaster: {fileID: 0}
 --- !u!1001 &1261678068
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5343,8 +5669,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
@@ -5915,6 +6261,7 @@ GameObject:
   - component: {fileID: 1679461510}
   - component: {fileID: 1679461509}
   - component: {fileID: 1679461508}
+  - component: {fileID: 1679461511}
   m_Layer: 0
   m_Name: BackButton
   m_TagString: Untagged
@@ -6035,6 +6382,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1679461506}
   m_CullTransparentMesh: 1
+--- !u!114 &1679461511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1679461506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf3609ebb2aa30e4ca24052943d85a4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonJuice
+  hoverScale: 1.1
+  hoverTilt: 4
+  easeSpeed: 16
+  hoverSFX: OnHoverSFX
+  pressScale: 0.92
+  releaseSquash: 0.15
+  releaseSquashTime: 0.35
 --- !u!1 &1714089435
 GameObject:
   m_ObjectHideFlags: 0
@@ -6319,8 +6685,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGrowth
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyXSpeed
+      value: 900
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: doodleData
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyGravity
+      value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyUpSpeed
+      value: 1400
+      objectReference: {fileID: 0}
+    - target: {fileID: 4032568765807228934, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
+      propertyPath: flyRotationSpeed
+      value: 540
       objectReference: {fileID: 0}
     - target: {fileID: 5462010757837182238, guid: 5bd1c8f1b7c7e0648b2955ccce6779b3, type: 3}
       propertyPath: m_Name
@@ -6355,6 +6741,25 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3005598480424118984, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
   m_PrefabInstance: {fileID: 7895326752087225932}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1911845186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 224124486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf3609ebb2aa30e4ca24052943d85a4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonJuice
+  hoverScale: 1.1
+  hoverTilt: 4
+  easeSpeed: 16
+  hoverSFX: OnHoverSFX
+  pressScale: 0.92
+  releaseSquash: 0.15
+  releaseSquashTime: 0.35
 --- !u!1 &1917711327
 GameObject:
   m_ObjectHideFlags: 0
@@ -6403,6 +6808,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efe6e2872a806b04ab0ec13cf7346d67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitSprite
+--- !u!1 &1974959801 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4251914897269075069, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
+  m_PrefabInstance: {fileID: 460046913}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1974959806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974959801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf3609ebb2aa30e4ca24052943d85a4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonJuice
+  hoverScale: 1.1
+  hoverTilt: 4
+  easeSpeed: 16
+  hoverSFX: OnHoverSFX
+  pressScale: 0.92
+  releaseSquash: 0.15
+  releaseSquashTime: 0.35
 --- !u!1 &1985464591
 GameObject:
   m_ObjectHideFlags: 0
@@ -7565,10 +7994,14 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 688694874143329833, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4251914897269075069, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1911845186}
   m_SourcePrefab: {fileID: 100100000, guid: 0ca35e875d49ac0488e7b72d78614467, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

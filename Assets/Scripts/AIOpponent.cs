@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class AIOpponent : MonoBehaviour
@@ -143,15 +144,13 @@ public class AIOpponent : MonoBehaviour
     // =========================================================
     // ===================== DISCARDING=========================
     // ( autodiscard no longer has input)
-    IEnumerator DiscardOpponentUnits()
+    public void DiscardOpponentUnit()
     {
-        // waiting until discard becomes available
-        //while (GameManager.instance.discardManager.discardAvailable == false) yield return new WaitForSeconds(0.2f);
-        yield return new WaitForSeconds(3.5f);
-        Debug.Log("AIOpponent: requesting auto discard");
+        if (playerObj.cardsInDiscard.Count < 1) return;
 
-        // request autodiscard
-        StartCoroutine(GameManager.instance.discardManager.AutoDiscard(GameManager.instance.GetOpponentOfPlayer(playerObj)));
+        int randomDiscardCardID = Random.Range(0, playerObj.cardsInDiscard.Count);
+        Card cardToDiscard = playerObj.cardsInDiscard[randomDiscardCardID];
+        cardToDiscard.DestroyCard();
     }
 
     // =========================================================

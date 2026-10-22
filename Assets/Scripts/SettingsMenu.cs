@@ -69,4 +69,18 @@ public class SettingsMenu : MonoBehaviour
         settingsWindow.SetActive(true);
         exitConfirmWindow.SetActive(false);
     }
+
+    private void Update()
+    {
+        SettingsMenuInput();
+    }
+
+    void SettingsMenuInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (settingsWindow.activeSelf) settingsWindow.SetActive(false);
+            else OpenSettings();
+        }
+    }
 }

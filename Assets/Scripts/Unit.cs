@@ -237,22 +237,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             jumpForce
         );
 
-        float t = 0f;
-        while (t < 3f)
-        {
-            // Apply gravity to our custom vertical velocity
-            velocity.y -= gravity / 2 * Time.deltaTime;
-            velocity.z -= gravity * Time.deltaTime;
-
-            // Move the world canvas element based on the velocity
-            transform.position += velocity * Time.deltaTime;
-
-            // Spin the card on the Z-axis for that classic look
-            transform.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
-
-            t += Time.deltaTime;
-            yield return null;
-        }
+        // gravity pulls down and towards the camera
+        Vector3 gravityForce = new Vector3(0f, gravity / 2, gravity);
+        yield return StartCoroutine(Animations.instance.KnockOutFly(transform, velocity, gravityForce, rotationSpeed, 3f));
 
         GameManager.instance.handManager.AddCardToDiscarded(card, card.player); // moving the card to discarded
 
@@ -332,7 +319,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     // ===============
 
     /// <summary>
-    /// Unit drops onto the field, squashes on landing and kicks up some dust
+    /// Unit drops onto the field and squashes on landing
     /// </summary>
     public void PlaySpawnAnim()
     {
@@ -359,7 +346,6 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         spriteTransform.localPosition = spriteRestPos;
 
         // landing
-        ParticleManager.instance.SpawnVFX(transform.position, "DustVFX");
         GameManager.instance.mainCamera.Shake(spawnCameraShake, 0.15f);
         PlaySquash(spawnSquash, 0.35f);
         spawnRoutine = null;

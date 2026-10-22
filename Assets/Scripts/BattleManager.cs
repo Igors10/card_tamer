@@ -2,6 +2,7 @@ using FishNet.Demo.AdditiveScenes;
 using FishNet.Transporting.Tugboat.Editing;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Design;
 using TMPro;
 using Unity.VisualScripting;
@@ -241,6 +242,8 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false);
         if (GameManager.instance.player.cardsInDiscard.Count > 0) 
             yield return StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
+        // AI opponent discards a card
+        if (GameManager.instance.opponent.isAI) GameManager.instance.opponent.GetComponent<AIOpponent>().DiscardOpponentUnit();
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;

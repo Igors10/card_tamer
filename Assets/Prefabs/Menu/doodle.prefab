@@ -62,6 +62,16 @@ MonoBehaviour:
   angle: 10
   duration: 0.15
   swings: 2
+  knockOutOnClick: 0
+  flyXSpeed: 900
+  flyUpSpeed: 1400
+  flyGravity: 4000
+  flyRotationSpeed: 540
+  flyGrowth: 0.8
+  maxFlyTime: 3
+  respawnDelay: 0.4
+  popTime: 0.3
+  popIntensity: 0.4
   sprite: {fileID: 6009986734639666602}
   doodleData: {fileID: 0}
 --- !u!114 &6256712310380481801

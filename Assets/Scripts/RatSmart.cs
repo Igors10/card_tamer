@@ -77,6 +77,9 @@ public class RatSmart : MonoBehaviour
             // changing the text
             ratText.text = dialogue.line[i];
 
+            // playing squash animation
+            StartCoroutine(Animations.instance.SquashStretch(ratAvatar.transform, new Vector3(1f, 1f, 1f), 0.15f, 0.25f));
+
             // playing random SFX
             if (soundOn)
             {
@@ -111,8 +114,5 @@ public class RatSmart : MonoBehaviour
             clicked = true;
         }
         if (Input.GetButtonUp("Fire1")) clicked = false;
-
-        // test dialogue
-        if (Input.GetKeyDown(KeyCode.D)) StartCoroutine(PlayDialogueObj(defaultDialogue));
     }
 }

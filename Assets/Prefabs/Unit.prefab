@@ -1070,6 +1070,15 @@ MonoBehaviour:
   shakeFrequency: 40
   jumpHeight: 0.9
   jumpTime: 0.25
+  jumpAnticipationTime: 0.08
+  jumpSquash: 0.18
+  landSquash: 0.28
+  spawnDropHeight: 3
+  spawnDropTime: 0.15
+  spawnSquash: 0.3
+  spawnCameraShake: 0
+  slideTime: 0.22
+  slideSquash: 0.15
   jumpForce: 8
   gravity: 20
   moveXSpeed: 8

@@ -49,7 +49,13 @@ public class Workshop : MonoBehaviour
     [SerializeField] Transform[] bgItemPositions;
     Vector3[] bgItemStartingPositions = new Vector3[3];
     Vector3[] bgItemWorkshopPositions = new Vector3[3];
-    [SerializeField] float appearanceTime;
+    [SerializeField] GameObject title;
+    [SerializeField] float slideInTime = 0.45f; // background speeds up while sliding in
+    [SerializeField] float slideOutTime = 0.35f;
+    [SerializeField] float propStagger = 0.07f; // delay between each prop starting to move
+    [SerializeField] float propMoveTime = 0.4f;
+    Vector3 titleRestScale;
+    Vector3 hintRestScale;
 
     [Header("color select")]
     [SerializeField] GameObject pencil;
@@ -71,48 +77,121 @@ public class Workshop : MonoBehaviour
             bgItemStartingPositions[a] = bgItems[a].transform.localPosition;
             bgItemWorkshopPositions[a] = bgItemPositions[a].transform.localPosition;
         }
+        titleRestScale = title.transform.localScale;
+        hintRestScale = workshopHintObj.transform.localScale;
 
         WorkshopColorSelect();
     }
 
+    /// <summary>
+    /// Workshop slides in and then the props appear one after another,
+    /// or the props leave in reverse order and then the workshop slides out
+    /// </summary>
     public IEnumerator WorkshopAnim(bool isAppearing, bool moveBackground = true)
     {
-        // disabling workshop hint
-        workshopHintObj.SetActive(isAppearing);
+        Vector3 bgHiddenPos = new Vector3(0, -Camera.main.pixelHeight - 200f, 0);
 
-        Vector3[] startingPos = (isAppearing) ? bgItemStartingPositions : bgItemWorkshopPositions;
-        Vector3[] targetPos = (isAppearing) ? bgItemWorkshopPositions : bgItemStartingPositions;
-        Vector3 bgTargetPos = (isAppearing) ? Vector3.zero : new Vector3(0, -Camera.main.pixelHeight -200f, 0);
-        Vector3 bgStartingPos = (isAppearing) ? new Vector3(0, -Camera.main.pixelHeight - 200f, 0) : Vector3.zero;
+        if (isAppearing) yield return Appear(moveBackground, bgHiddenPos);
+        else yield return Disappear(moveBackground, bgHiddenPos);
+    }
 
-        float t = 0;
+    IEnumerator Appear(bool moveBackground, Vector3 bgHiddenPos)
+    {
+        // when the background doesn't move (starting sequence) title and hint are already on the screen
+        bool popTitleAndHint = moveBackground;
 
-        while (t < appearanceTime)
+        // hiding props before they come in
+        for (int i = 0; i < bgItems.Length; i++) bgItems[i].transform.localPosition = bgItemStartingPositions[i];
+        workshopHintObj.SetActive(true);
+        if (popTitleAndHint)
         {
-            t += Time.deltaTime;
-            float clampedT = t / appearanceTime;
-            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
-
-            // moving each object
-            for (int i = 0; i < bgItems.Length; i++)
-            {
-                bgItems[i].transform.localPosition = Vector3.Lerp(startingPos[i], targetPos[i], coolT);
-            }
-
-            // moving background
-            if (moveBackground) background.transform.localPosition = Vector3.Lerp(bgStartingPos, bgTargetPos, clampedT); 
-
-            yield return null;
+            title.transform.localScale = Vector3.zero;
+            workshopHintObj.transform.localScale = Vector3.zero;
         }
 
-        // snapping each object to correct position
+        // background slides in, speeding up
+        if (moveBackground) yield return SlideBackground(bgHiddenPos, Vector3.zero, slideInTime);
+
+        // props come in one after another: title, decor, hint
+        int order = 0;
+        if (popTitleAndHint) StartCoroutine(ScaleProp(title.transform, Vector3.zero, titleRestScale, propStagger * order++));
         for (int i = 0; i < bgItems.Length; i++)
         {
-            bgItems[i].transform.localPosition = targetPos[i];
+            StartCoroutine(MoveProp(bgItems[i].transform, bgItemStartingPositions[i], bgItemWorkshopPositions[i], propStagger * order++));
         }
+        if (popTitleAndHint) StartCoroutine(ScaleProp(workshopHintObj.transform, Vector3.zero, hintRestScale, propStagger * order++));
+    }
 
-        // deactivating itself after playing the "fading away animation"
-        if (isAppearing == false) gameObject.SetActive(false);
+    IEnumerator Disappear(bool moveBackground, Vector3 bgHiddenPos)
+    {
+        // props leave in reverse order: hint, decor, title
+        int order = 0;
+        StartCoroutine(ScaleProp(workshopHintObj.transform, hintRestScale, Vector3.zero, propStagger * order++));
+        for (int i = bgItems.Length - 1; i >= 0; i--)
+        {
+            StartCoroutine(MoveProp(bgItems[i].transform, bgItemWorkshopPositions[i], bgItemStartingPositions[i], propStagger * order++));
+        }
+        StartCoroutine(ScaleProp(title.transform, titleRestScale, Vector3.zero, propStagger * order++));
+
+        // waiting until the last prop is gone
+        yield return new WaitForSeconds(propStagger * (order - 1) + propMoveTime);
+
+        // background slides out, speeding up
+        if (moveBackground) yield return SlideBackground(Vector3.zero, bgHiddenPos, slideOutTime);
+
+        // putting title and hint back to normal size for the next time
+        workshopHintObj.SetActive(false);
+        workshopHintObj.transform.localScale = hintRestScale;
+        title.transform.localScale = titleRestScale;
+
+        gameObject.SetActive(false);
+    }
+
+    IEnumerator SlideBackground(Vector3 from, Vector3 to, float time)
+    {
+        float t = 0;
+        while (t < time)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / time);
+            float coolT = clampedT * clampedT;
+            background.transform.localPosition = Vector3.Lerp(from, to, coolT);
+            yield return null;
+        }
+        background.transform.localPosition = to;
+    }
+
+    IEnumerator MoveProp(Transform prop, Vector3 from, Vector3 to, float delay)
+    {
+        prop.localPosition = from;
+        if (delay > 0) yield return new WaitForSeconds(delay);
+
+        float t = 0;
+        while (t < propMoveTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / propMoveTime);
+            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
+            prop.localPosition = Vector3.Lerp(from, to, coolT);
+            yield return null;
+        }
+        prop.localPosition = to;
+    }
+
+    IEnumerator ScaleProp(Transform prop, Vector3 from, Vector3 to, float delay)
+    {
+        if (delay > 0) yield return new WaitForSeconds(delay);
+
+        float t = 0;
+        while (t < propMoveTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / propMoveTime);
+            float coolT = 1 - (1 - clampedT) * (1 - clampedT);
+            prop.localScale = Vector3.Lerp(from, to, coolT);
+            yield return null;
+        }
+        prop.localScale = to;
     }
 
     public void LaunchStartingSequence()
@@ -262,9 +341,6 @@ public class Workshop : MonoBehaviour
 
         // ctrl + z undo
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Z)) drawingCanvas.UndoStroke();
-
-        // enter developers mode (canvas for drawing sprites)
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.D)) drawingCanvas.DevelopersMode();
     }
 
     public void CreateNewCard()

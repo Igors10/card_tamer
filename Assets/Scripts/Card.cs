@@ -56,6 +56,7 @@ public class Card : MonoBehaviour
     float dragLift = 0f; // 0 = resting, 1 = fully lifted
     Vector3 lastDragPosition;
     Vector3 shadowRestPosition;
+    Vector3 visualRestScale; // resting scale of cardVisual, relative to the card root
 
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
@@ -65,6 +66,10 @@ public class Card : MonoBehaviour
 
     private void Awake()
     {
+        // scales are captured in Awake, because opponent cards sit in an inactive hand and only wake up
+        // when played, by then Start would run after RevealCard already scaled the card up
+        SetScales();
+
         if (dragShadow != null)
         {
             shadowRestPosition = dragShadow.rectTransform.localPosition;
@@ -72,16 +77,12 @@ public class Card : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        SetScales();
-    }
-
     void SetScales()
     {
         defaultScale = transform.localScale;
         highlightedScale = defaultScale * 1.2f;
         dragScale = defaultScale * 1.1f;
+        visualRestScale = cardVisual.transform.localScale;
     }
 
     private void Update()
@@ -134,7 +135,8 @@ public class Card : MonoBehaviour
 
         // scale and raise
         bool raised = hovered || isDragged;
-        Vector3 targetScale = (isDragged) ? highlightedScale * dragLiftScale : (hovered) ? highlightedScale : defaultScale;
+        // visual is a child of the card, so its scale is relative to the card root
+        Vector3 targetScale = (isDragged) ? visualRestScale * 1.2f * dragLiftScale : (hovered) ? visualRestScale * 1.2f : visualRestScale;
         Vector3 targetPosition = (raised) ? transform.InverseTransformVector(new Vector3(0f, highlightOffsetY, 0f)) : Vector3.zero;
         visual.localScale = Vector3.Lerp(visual.localScale, targetScale, easeT);
         visual.localPosition = Vector3.Lerp(visual.localPosition, targetPosition, easeT);
@@ -174,7 +176,7 @@ public class Card : MonoBehaviour
         hovered = false;
         dragTilt = 0f;
         dragLift = 0f;
-        cardVisual.transform.localScale = defaultScale;
+        cardVisual.transform.localScale = visualRestScale;
         cardVisual.transform.localPosition = Vector3.zero;
         cardVisual.transform.localRotation = Quaternion.identity;
         if (dragShadow != null)

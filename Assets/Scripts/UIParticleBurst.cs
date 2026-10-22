@@ -8,12 +8,7 @@ using UnityEngine.UI;
 /// </summary>
 public class UIParticleBurst : MonoBehaviour
 {
-    [Header("shards (tinted with the burst color)")]
-    [SerializeField] Sprite[] shardSprites;
-    [SerializeField] int shardCount = 10;
-    [SerializeField] Vector2 shardSizeRange = new Vector2(22f, 44f);
-
-    [Header("sparks (stay white)")]
+    [Header("sparks")]
     [SerializeField] Sprite[] sparkSprites;
     [SerializeField] int sparkCount = 6;
     [SerializeField] Vector2 sparkSizeRange = new Vector2(18f, 34f);
@@ -40,28 +35,25 @@ public class UIParticleBurst : MonoBehaviour
         public float spin;
         public float life;
         public float maxLife;
-        public Color color;
     }
 
     /// <summary>
     /// Spawns a burst at given position. Intensity multiplies the amount of particles
     /// </summary>
-    public static void Spawn(UIParticleBurst prefab, Vector3 position, Transform parent, Color color, float intensity = 1f)
+    public static void Spawn(UIParticleBurst prefab, Vector3 position, Transform parent, float intensity = 1f)
     {
         UIParticleBurst burst = Instantiate(prefab, parent);
         burst.transform.position = position;
         burst.transform.SetAsLastSibling(); // rendering above the rest of the UI
-        burst.StartCoroutine(burst.Burst(color, intensity));
+        burst.StartCoroutine(burst.Burst(intensity));
     }
 
-    IEnumerator Burst(Color color, float intensity)
+    IEnumerator Burst(float intensity)
     {
         // creating particles
         List<Particle> particles = new List<Particle>();
-        int shards = Mathf.RoundToInt(shardCount * intensity);
         int sparks = Mathf.RoundToInt(sparkCount * intensity);
-        for (int i = 0; i < shards; i++) particles.Add(CreateParticle(shardSprites, shardSizeRange, color));
-        for (int i = 0; i < sparks; i++) particles.Add(CreateParticle(sparkSprites, sparkSizeRange, Color.white));
+        for (int i = 0; i < sparks; i++) particles.Add(CreateParticle());
 
         Image ring = (ringSprite != null) ? CreateImage(ringSprite, Color.white, ringStartSize) : null;
 
@@ -88,7 +80,7 @@ public class UIParticleBurst : MonoBehaviour
                 // shrinking and fading out towards the end of life
                 p.rt.localScale = Vector3.one * (1 - lifeT * lifeT);
                 float alpha = 1 - Mathf.Clamp01((lifeT - 0.6f) / 0.4f);
-                p.image.color = new Color(p.color.r, p.color.g, p.color.b, p.color.a * alpha);
+                p.image.color = new Color(1f, 1f, 1f, alpha);
 
                 if (lifeT >= 1) p.image.enabled = false;
             }
@@ -109,10 +101,10 @@ public class UIParticleBurst : MonoBehaviour
         Destroy(gameObject);
     }
 
-    Particle CreateParticle(Sprite[] sprites, Vector2 sizeRange, Color color)
+    Particle CreateParticle()
     {
-        Sprite sprite = (sprites != null && sprites.Length > 0) ? sprites[Random.Range(0, sprites.Length)] : null;
-        Image image = CreateImage(sprite, color, Random.Range(sizeRange.x, sizeRange.y));
+        Sprite sprite = (sparkSprites != null && sparkSprites.Length > 0) ? sparkSprites[Random.Range(0, sparkSprites.Length)] : null;
+        Image image = CreateImage(sprite, Color.white, Random.Range(sparkSizeRange.x, sparkSizeRange.y));
         image.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
 
         float angle = Random.Range(0f, Mathf.PI * 2f);
@@ -125,8 +117,7 @@ public class UIParticleBurst : MonoBehaviour
             image = image,
             velocity = velocity,
             spin = Random.Range(spinRange.x, spinRange.y),
-            maxLife = Random.Range(lifetimeRange.x, lifetimeRange.y),
-            color = color
+            maxLife = Random.Range(lifetimeRange.x, lifetimeRange.y)
         };
     }
 

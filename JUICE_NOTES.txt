@@ -1,0 +1,380 @@
+JUICE - DOCUMENTATION
+=====================
+
+How the game-feel effects work (animations, squash and stretch, screen
+shake, UI particles, sound variation) and how to tune or extend them.
+
+Numbers in [brackets] are the current values. Change them in the Inspector
+on the object or prefab listed for each section. Fields that the prefab or
+scene hasn't saved yet use the default value from the script.
+
+
+CONTENTS
+  1. Where things live
+  2. Shared building blocks
+  3. Units
+  4. Cards in hand
+  5. Power counter
+  6. Healthbar damage burst (UIParticleBurst)
+  7. Camera shake
+  8. Sound effects
+  9. Hardcoded values
+ 10. Recipes: adding juice to something new
+ 11. Things to watch out for
+
+
+------------------------------------------------------------
+1. WHERE THINGS LIVE
+------------------------------------------------------------
+
+Animations.cs       Shared helpers: SetSquash, SquashStretch, PopAnim,
+                    ShakeAnim, SkippablePause. Use through Animations.instance
+Unit.cs             Unit spawn drop, ability jump, sliding, hover pop
+                    (Unit.prefab)
+Card.cs             Card movement and hover/drag visuals in the hand
+                    (card.prefab)
+HandManager.cs      Works out each card's place in the hand fan
+PowerCounter.cs     +1 number pop, rising pitch, lose animation
+UIParticleBurst.cs  Particle bursts made of UI Images, for overlay canvases
+                    (Assets/VFX/HealthDamageBurst.prefab)
+PlayerUI.cs         Plays the healthbar damage burst and shake
+                    (player.prefab)
+Viewpoint.cs        Camera shake (main camera, GameManager.instance.mainCamera)
+AudioManager.cs     Plays sound effects with random pitch
+ParticleManager.cs  Spawns regular ParticleSystem VFX by name, such as the
+                    star "SpawnVFX" when a unit is spawned (Board scene)
+
+VFX textures: Assets/VFX/Textures (spark, ring)
+
+
+------------------------------------------------------------
+2. SHARED BUILDING BLOCKS
+------------------------------------------------------------
+
+2.1 Easing ("coolT")
+  Timed animations count a timer t from 0 to 1 and then reshape it before
+  calling Lerp:
+    t * t                    ease-in: starts slow, ends fast (falling,
+                             jumping up)
+    1 - (1 - t) * (1 - t)    ease-out: starts fast, settles slowly (pops,
+                             deflating)
+    1 - (1 - t)^3            stronger ease-out (sliding)
+  To change how an animation feels, change its coolT line, not its duration.
+
+2.2 Smooth following (Card.cs)
+    easeT = 1 - Mathf.Exp(-speed * Time.deltaTime);
+    value = Lerp(value, target, easeT);      // every frame
+  The value moves toward its target and slows down as it gets close. The Exp
+  form makes it equally fast at any frame rate. A higher speed is snappier;
+  around 8 feels floaty and above 25 is close to instant. Use this for
+  anything whose target can change at any moment, such as hover or drag.
+
+2.3 Squash and stretch (Animations.cs)
+  SetSquash(target, restScale, amount)
+    Sets the scale right away.
+    amount > 0  squashed (wider, shorter)
+    amount < 0  stretched (taller, thinner)
+    x = rest.x * (1 + amount), y = rest.y * (1 - amount)
+    Useful range is about -0.3 to 0.3.
+
+  IEnumerator SquashStretch(target, restScale, amount, time)
+    Starts at "amount" and wobbles back to restScale over "time":
+      squash = amount * cos(t * PI * 2.5) * (1 - t)^2
+    2.5 sets how many bounces there are. (1 - t)^2 sets how fast they fade.
+    Stops on its own if the target is destroyed.
+
+  Always pass a rest scale that you saved earlier (see 2.4). Don't pass
+  transform.localScale, or the next squash will start from a deformed shape.
+
+2.4 Rest values
+  Unit saves spriteRestPos and spriteRestScale in Awake. Every unit sprite
+  animation starts from and returns to these values.
+  ResetSpriteAnims() stops the spawn and squash coroutines and snaps the
+  sprite back to rest. Call it before an animation that has to own the
+  sprite.
+
+2.5 One coroutine handle per effect
+  Effects that can be retriggered keep their Coroutine in a field
+  (squashRoutine, spawnRoutine, slideRoutine, tickPopRoutine) and stop the
+  old one before starting a new one, so two copies never fight over one
+  transform. Follow this pattern for any new effect that can retrigger.
+
+2.6 Skipping
+  Long sequences check Animations.instance.skipPause and end early when the
+  player skips. New sequence animations should check it in their loops too.
+
+
+------------------------------------------------------------
+3. UNITS (Unit.cs, Unit.prefab)
+------------------------------------------------------------
+
+Only the "sprite" child moves or deforms. The unit root stays at its slot,
+so its hitbox and game position don't change while it animates.
+
+3.1 Spawn drop: PlaySpawnAnim() -> SpawnAnim()
+  Called by FieldManager.SpawnUnit right after InitUnit. The sprite starts
+  above its slot and falls with an ease-in, stretched while falling. When it
+  lands: a small camera shake and a squash wobble. FieldManager spawns the
+  star SpawnVFX at the same time.
+    spawnDropHeight   [3]      how far above the slot it starts
+    spawnDropTime     [0.15]   fall duration in seconds
+    spawnSquash       [0.3]    landing squash strength
+    spawnCameraShake  [0.008]  landing shake (see section 7);
+                               0 turns it off
+    Hardcoded: shake duration 0.15s, squash time 0.35s, the stretch while
+    falling uses jumpSquash
+
+3.2 Ability jump: EntranceAnimation()
+  Plays before an ability triggers:
+  squash wind-up, jump up (stretched, back to normal shape at the top),
+  fall, squash wobble on landing, then pause and reset.
+    jumpAnticipationTime [0.08]  wind-up duration
+    jumpSquash           [0.18]  wind-up squash, and the stretch at takeoff
+    landSquash           [0.28]  landing squash
+    jumpHeight / jumpTime        jump height and duration
+    Hardcoded: landing squash time 0.35s
+
+3.3 Sliding: SlideTo(position)
+  Moves the whole unit to a new position with a cubic ease-out, then a
+  small squash. Used when a unit moves to another slot
+  (FieldManager.MoveUnit) and when a dropped unit goes back to its start.
+    slideTime   [0.22]  duration
+    slideSquash [0.15]  squash on arrival (time 0.3s, hardcoded)
+  StopSlide() ends a slide and snaps the unit to its target. It is already
+  called when a new slide starts, when the player starts dragging the unit,
+  and when the unit is knocked out. Call it before any code that reads or
+  sets the unit's position while it may still be sliding.
+  If the unit is inactive, SlideTo places it right away, because inactive
+  objects can't run coroutines.
+
+3.4 Hover pop (OnPointerEnter)
+  Animations.PopAnim on the sprite. It is skipped while a squash or spawn
+  animation is running, because PopAnim saves the current scale as the
+  scale to return to.
+
+
+------------------------------------------------------------
+4. CARDS IN HAND (Card.cs, card.prefab, HandManager.cs)
+------------------------------------------------------------
+
+Every frame Card.Update runs Drag(), then AnimateHandLayout(), then
+AnimateVisual(). Nothing snaps; everything follows a target (see 2.2).
+
+4.1 Place in the hand: SetHandLayout / ExitHandLayout / AnimateHandLayout
+  HandManager.UpdateHandVisuals works out a position and rotation for each
+  card (fan shape) and calls card.SetHandLayout(pos, rot). The card then
+  eases there. Hovered or dragged cards rotate to 0 so they're easy to read.
+  ExitHandLayout() stops this. It is called when the card leaves the hand.
+    layoutEaseSpeed [14]   how fast cards move to their place in the hand
+  The fan shape itself (spread, spacing, arc) is set in HandManager.
+
+4.2 Hover and drag visuals: AnimateVisual()
+  These are applied to cardVisual (child), so the root and its hitbox stay
+  put:
+    scale  default -> highlightedScale (hover) -> highlightedScale *
+           dragLiftScale (drag)
+    raise  up by highlightOffsetY while hovered or dragged
+    tilt   while dragging, leans against the horizontal movement
+    shadow the DragShadow image fades in and moves away while dragging
+  Settings:
+    visualEaseSpeed  [18]        how fast all of the above react
+    dragLiftScale    [1.08]      extra scale while dragging
+    maxDragTilt      [15]        maximum lean in degrees
+    dragTiltPerSpeed [0.012]     degrees of lean per pixel/second of
+                                 movement
+    dragShadowOffset [14, -18]   how far the shadow moves when lifted
+    dragShadowAlpha  [0.35]      shadow opacity when lifted
+    Hardcoded in code: highlightedScale = default * 1.2 (SetScales),
+    highlightOffsetY = 220
+  The hover event only sets the "hovered" flag. To change what hovering
+  looks like, edit AnimateVisual, not the pointer handlers.
+
+4.3 SnapVisual()
+  Resets all hover and drag visuals right away (used when a card is
+  played). Call it whenever a card has to look "clean" immediately.
+
+
+------------------------------------------------------------
+5. POWER COUNTER (PowerCounter.cs)
+------------------------------------------------------------
+
+5.1 Each +1 in AddPower()
+  - PopPowerText(): the number scales up and eases back down. A new pop
+    stops the previous one, so the size can't build up.
+  - GainPowerSFX plays at a pitch that rises with each point:
+      pitch = min(tickBasePitch + tickPitchStep * (currentPower - 1),
+                  tickMaxPitch)
+    When skipping, only the first tick plays a sound.
+    tickPopIntensity [0.35]  how much bigger the number gets (0.35 = +35%)
+    tickPopTime      [0.12]  pop duration
+    tickBasePitch    [0.9]   pitch of the first point
+    tickPitchStep    [0.06]  how much higher each next point is
+    tickMaxPitch     [2]     highest pitch
+
+5.2 Losing a line: LoseAnim() (started by ResolveCounter when won == false)
+  The counter shakes, shrinks with a fading wobble, the font shrinks, the
+  text turns white and the background fades to lostColor. It plays
+  NegativeSFX at pitch 0.8.
+    loseAnimTime       [0.45]  duration
+    loseScaleMod       [0.8]   final size (0.8 = 80%)
+    loseShakeIntensity [6]     shake strength
+    resolveSizeMod             the font is divided by this
+    Hardcoded: wobble strength 0.15 and 3 half-waves (Mathf.Sin(t * PI * 3))
+
+  ResetCounter restores the scale, the font and the text scale.
+
+
+------------------------------------------------------------
+6. HEALTHBAR DAMAGE BURST (UIParticleBurst.cs)
+------------------------------------------------------------
+
+Why it exists: the UI uses a Screen Space - Overlay canvas, and Unity
+ParticleSystems don't show up there. UIParticleBurst makes short-lived
+particles out of UI Images instead.
+
+Usage:
+  UIParticleBurst.Spawn(prefab, worldPosition, canvasTransform, intensity);
+  - Creates the prefab on the canvas, drawn on top of everything else
+  - Creates white star sparks. Their count is multiplied by "intensity".
+  - Each particle flies out at a random angle with an upward push, slows
+    down (drag), falls (gravity), spins, shrinks, and fades out over the
+    last 40% of its life
+  - A ring grows and fades at the center
+  - Destroys itself when it's done
+  - The burst is fire-and-forget: Spawn returns nothing
+
+Settings on Assets/VFX/HealthDamageBurst.prefab:
+  sparkSprites / sparkCount [6]  / sparkSizeRange [18-34 px]
+  speedRange    [300-750]    starting speed (px/s)
+  upwardBias    [150]        extra upward speed
+  lifetimeRange [0.45-0.8]   seconds
+  spinRange     [-720..720]  degrees per second
+  gravity       [1600]       px/s^2
+  drag          [3]          higher = particles stop sooner
+  ringSprite / ringStartSize [40] / ringEndSize [240] / ringTime [0.3]
+  (Leave ringSprite empty for no ring, or leave sparkSprites empty for
+  plain squares.)
+
+Current use: PlayerUI's damage effect spawns it at the healthbar on the
+root canvas.
+  player.prefab -> damageBurst      the prefab to spawn
+  intensity = damage clamped to 1..3, so bigger hits give bigger bursts.
+
+For a different look, duplicate the prefab and change sprites, counts and
+speeds. Don't change the script.
+
+
+------------------------------------------------------------
+7. CAMERA SHAKE (Viewpoint.cs)
+------------------------------------------------------------
+
+  GameManager.instance.mainCamera.Shake(intensity, duration);
+
+  intensity is a fraction of the screen size:
+    0.005 subtle, 0.01 noticeable bump, 0.03+ heavy hit
+  The strength fades to zero over "duration".
+  If a stronger shake is already running, a weaker call is ignored.
+
+  How it works: LateUpdate shifts the camera's projection matrix by a random
+  offset. The camera Transform never moves, so shaking doesn't conflict with
+  Viewpoint's zoom or movement code. When the shake ends,
+  ResetProjectionMatrix() restores the normal view.
+  If you ever set a custom projection matrix somewhere else, it will be
+  reset while shaking.
+
+  Current callers: unit spawn landing.
+
+  This is separate from Animations.ShakeAnim, which shakes one object's
+  position (used for UI elements like the healthbar and power counter).
+
+
+------------------------------------------------------------
+8. SOUND EFFECTS (AudioManager.cs)
+------------------------------------------------------------
+
+  AudioManager.instance.PlaySFX(name, volume = 0, pitch = 0);
+
+  volume  0 = full volume (1); otherwise a multiplier on top of the main
+          volume
+  pitch   0 = random pitch around normal (see pitchVariation); otherwise
+          exactly this pitch
+
+  Each call uses its own AudioSource from a pool, so setting the pitch for
+  one sound doesn't change sounds that are already playing. Volume, mute,
+  mixer group, spatial blend and priority are copied from the main
+  audioSource, so volume and mute settings work normally.
+    pitchVariation [0.07]  random pitch range (+-7%)
+    sfxSourceCount [8]     how many sounds can play at once before the
+                           oldest gets reused
+  Clips are found by name in the audioClips array.
+
+
+------------------------------------------------------------
+9. HARDCODED VALUES
+------------------------------------------------------------
+Unit.cs        spawn shake duration 0.15, spawn squash time 0.35,
+               land squash time 0.35, slide squash time 0.3
+Card.cs        highlightedScale = default * 1.2, dragScale = default * 1.1,
+               highlightOffsetY = 220
+PowerCounter   lose wobble 0.15 and 3 half-waves, NegativeSFX pitch 0.8
+Animations     SquashStretch bounce count (2.5) and fade ((1 - t)^2)
+Unit.cs        hover pop: PopAnim(sprite, 0.15f, -0.15f)
+
+If you change one of these often, turn it into a [SerializeField].
+
+
+------------------------------------------------------------
+10. RECIPES
+------------------------------------------------------------
+
+Squash something when an event happens
+  Save its rest scale once (Awake), then:
+    StartCoroutine(Animations.instance.SquashStretch(t, restScale, 0.25f,
+                                                     0.3f));
+  If it can retrigger, keep the Coroutine handle and stop the old one first
+  (see Unit.PlaySquash).
+
+Squash a unit
+  unit.PlaySquash(amount, time) is private. Make it public, or add a public
+  method in Unit that calls it.
+
+Add impact to a hit
+  Combine: camera shake (0.005-0.01, 0.1-0.2s) + squash + a sound with a
+  set pitch. Keep shakes small. They become tiring if every action shakes.
+
+Particles on the UI
+  On a Screen Space - Overlay canvas, use UIParticleBurst (section 6) with a
+  new prefab. A regular ParticleSystem won't show up there. For world-space
+  effects, use ParticleManager.SpawnVFX(position, "PrefabName"). Add the
+  prefab to the VFXs list on the ParticleManager in the Board scene first.
+
+A smooth value that can change target at any moment
+  Use the Exp smoothing from 2.2 in Update.
+
+A one-off timed animation
+  Use a coroutine with t / duration, a coolT curve from 2.1, and set the end
+  value exactly after the loop so it lands precisely.
+
+Make repeated sounds feel alive
+  Call PlaySFX without a pitch for random variation. For a rising sequence,
+  pass base + step * index (see PowerCounter).
+
+
+------------------------------------------------------------
+11. THINGS TO WATCH OUT FOR
+------------------------------------------------------------
+- Animate child visuals (sprite, cardVisual), not root transforms. Game
+  logic, slots and hitboxes use the roots.
+- PopAnim saves the scale the object has when it starts. Don't start it
+  while the object is squashed.
+- A coroutine stops when its GameObject is disabled. If an object can be
+  disabled during an animation, reset it to rest values when it is used
+  again (see ResetSpriteAnims).
+- Animations.ShakeAnim takes (obj, intensity, length). PlayerUI and
+  DeathParticle pass (obj, shakeLength, shakeIntensity), so in those two
+  scripts the "length" field controls intensity and the "intensity" field
+  controls length. Keep this in mind when tuning them in the Inspector, or
+  swap the arguments in the call and swap the Inspector values.
+- Sequences that wait for each other (abilities, resolving) should use
+  Animations.instance.SkippablePause and check skipPause, so skipping still
+  works.

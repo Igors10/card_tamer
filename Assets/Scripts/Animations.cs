@@ -126,6 +126,32 @@ public class Animations : MonoBehaviour
         if (target != null) target.localScale = restScale;
     }
 
+    public IEnumerator SquashStretch(Transform target, float amount, float time)
+    {
+        return SquashStretch(target, target.localScale, amount, time);
+    }
+
+    /// <summary>
+    /// Launches the object with a velocity, pulls it back with gravity and spins it, like a knocked out unit flying off the board
+    /// </summary>
+    public IEnumerator KnockOutFly(Transform target, Vector3 velocity, Vector3 gravity, float rotationSpeed, float time)
+    {
+        float t = 0f;
+        while (t < time)
+        {
+            // checking if object still exists
+            if (target == null) yield break;
+
+            velocity -= gravity * Time.deltaTime;
+            target.position += velocity * Time.deltaTime;
+
+            // Spin the object on the Z-axis for that classic look
+            target.Rotate(Vector3.forward, rotationSpeed * Time.deltaTime);
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+    }
     /// <summary>
     /// Sets a squashed (amount > 0) or stretched (amount < 0) scale, keeping the volume roughly the same
     /// </summary>

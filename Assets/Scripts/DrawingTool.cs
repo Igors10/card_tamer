@@ -283,6 +283,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         }
     }
 
+    /*
     public void DevelopersMode()
     {
         ClearCanvas();
@@ -291,7 +292,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
         if (developersMode) SetCanvasColors(Color.white, Color.gray);
         else SetCanvasColors(GameManager.instance.player.playerColor, GameManager.instance.managerUI.workshop.chosenSecondColor);
-    }
+    }*/
 
     // === Getting the sprite ===
     // ==========================
