@@ -97,12 +97,13 @@ public class ExecuteManager : MonoBehaviour
         bool playedFirstTime = !playedCardNames.Contains(card.cardData.name);
         // add to the played card list
         if (playedFirstTime) playedCardNames.Add(card.cardData.name);
+        bool showcase = playedFirstTime && card.unit.FirstSpawnShowcase;
 
         // marking that a player played a card
         card.player.cardPlayed = true;
 
         // zooming in on the unit
-        if (playedFirstTime)
+        if (showcase)
         {
             GameManager.instance.mainCamera.ZoomIn(card.unit.gameObject, zoomIntensity, zoomTime);
             yield return StartCoroutine(Animations.instance.SkippablePause(zoomTime));
@@ -118,7 +119,7 @@ public class ExecuteManager : MonoBehaviour
         GameManager.instance.executeManager.StopRevealCard();
 
         // zooming out from the unit
-        if (playedFirstTime)
+        if (showcase)
         {
             GameManager.instance.mainCamera.ZoomOut();
             yield return Animations.instance.SkippablePause(zoomTime);

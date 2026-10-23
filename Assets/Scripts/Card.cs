@@ -377,9 +377,6 @@ public class Card : MonoBehaviour
     {
         Debug.Log("Card: " + cardData.name + "gains " + power + " power.");
 
-        // showing added power as bonus
-        //if (power != 0) unit.powerBonus.StartShowingBonus(power); 
-
         // pop animation to signify that something has changed
         // starting power isn't animated, so only buffs and debuffs get particles
         if (animated)

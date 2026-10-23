@@ -42,6 +42,7 @@ public class Workshop : MonoBehaviour
     [SerializeField] GameObject workshopHintObj;
     [SerializeField] TextMeshProUGUI workshopHintText;
     [SerializeField] GameObject colorSelectUI;
+    CanvasGroup colorSelectGroup;
 
     [Header("workshop animation")]
     [SerializeField] GameObject background;
@@ -223,13 +224,39 @@ public class Workshop : MonoBehaviour
     {
         if (GameData.firstTimePlaying)
         {
-            StartCoroutine(RatSmart.instance.PlayDialogue("WelcomeDial"));
+            StartCoroutine(WelcomeDialogue());
         }
+    }
+
+    IEnumerator WelcomeDialogue()
+    {
+        yield return RatSmart.instance.PlayDialogue("WelcomeDial");
+
+        // color can be picked only after the rat is done talking
+        EnableColorSelect(true);
+    }
+
+    /// <summary>
+    /// Blocks clicking and hovering the pencils
+    /// </summary>
+    void EnableColorSelect(bool enable)
+    {
+        if (colorSelectGroup == null)
+        {
+            colorSelectGroup = colorSelectUI.GetComponent<CanvasGroup>();
+            if (colorSelectGroup == null) colorSelectGroup = colorSelectUI.AddComponent<CanvasGroup>();
+        }
+
+        colorSelectGroup.interactable = enable;
+        colorSelectGroup.blocksRaycasts = enable;
     }
 
     public void WorkshopColorSelect()
     {
         colorSelectUI.SetActive(true);
+
+        // first time players have to listen to the welcome dialogue before picking (unlocked in WelcomeDialogue)
+        EnableColorSelect(!GameData.firstTimePlaying);
         workshopHintText.text = "Pick a color you like!";
     }
 
@@ -289,7 +316,8 @@ public class Workshop : MonoBehaviour
 
         // passing the ability
         abilityReminder.text = chosenAbility.GetAbilityDesc(chosenAbilityColor);
-        abilityReminderPower.text = chosenAbility.power.ToString();
+        abilityReminderPower.text = chosenAbility.GetPowerText();
+        abilityReminder.GetComponentInParent<AbilityNote>().FitPowerToDescription(!string.IsNullOrEmpty(chosenAbility.abilityDescription));
 
         // resetting name input field
         nameInput.text = "";

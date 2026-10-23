@@ -23,6 +23,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public TextMeshProUGUI skillText;
     public GameObject skillTextObj;
     public AutoFade unitPresenter;
+    [SerializeField] bool firstSpawnShowcase = true; // zoom in + presenter the first time each unit is played
+    public bool FirstSpawnShowcase => firstSpawnShowcase;
     [SerializeField] Image unitColorInd;
     [SerializeField] GameObject targetHighlightObj;
 
@@ -32,6 +34,20 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     public TextMeshProUGUI powerValue;
     [SerializeField] Color buffedPowerColor;
     [SerializeField] Color debuffedPowerColor;
+    [SerializeField] Image powerOutline; // shows if the power is buffed or debuffed
+    [SerializeField] Material buffedOutlineMaterial;
+    [SerializeField] Material debuffedOutlineMaterial;
+    [SerializeField] int defaultSizePower = 3; // power at which the counter has its default size
+    [SerializeField] float scalePerPower = 0.08f; // how much the counter grows or shrinks per point of power
+    [SerializeField] Vector2 powerScaleLimits = new Vector2(0.7f, 1.8f);
+    [SerializeField] float powerScaleTime = 0.3f;
+    [SerializeField] float powerFlashHold = 0.1f; // how long the buff/debuff color stays before fading back
+    [SerializeField] float powerFlashTime = 0.4f;
+    Vector3 powerRestScale;
+    Color powerBGRestColor;
+    float targetPowerScale = -1f;
+    Coroutine powerScaleRoutine;
+    Coroutine powerFlashRoutine;
 
     [Header("power rolling")]
     public D6[] dice;
@@ -104,6 +120,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         spriteRestPos = sprite.transform.localPosition;
         spriteRestScale = sprite.transform.localScale;
+        powerRestScale = powerUI.transform.localScale;
+        powerBGRestColor = powerBG.color;
     }
 
     void Start()
@@ -133,6 +151,77 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (powerChange == 0) return;
         string vfxName = (powerChange > 0) ? "BuffVFX" : "DebuffVFX";
         ParticleManager.instance.SpawnVFX(powerValue.transform.position, vfxName);
+
+        // showing the gained or lost power as a number next to the counter
+        powerBonus.StartShowingBonus(powerChange);
+
+        // flashing the counter background green or red
+        if (powerFlashRoutine != null) StopCoroutine(powerFlashRoutine);
+        powerFlashRoutine = StartCoroutine(FlashPowerBG((powerChange > 0) ? buffedPowerColor : debuffedPowerColor));
+    }
+
+    IEnumerator FlashPowerBG(Color flashColor)
+    {
+        powerBG.color = flashColor;
+        yield return new WaitForSeconds(powerFlashHold);
+
+        float t = 0;
+        while (t < powerFlashTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / powerFlashTime);
+            float coolT = clampedT * clampedT;
+
+            powerBG.color = Color.Lerp(flashColor, powerBGRestColor, coolT);
+            yield return null;
+        }
+
+        powerBG.color = powerBGRestColor;
+        powerFlashRoutine = null;
+    }
+
+    /// <summary>
+    /// The more power the unit has, the bigger its power counter gets
+    /// </summary>
+    void RefreshPowerScale()
+    {
+        float newScale = 1 + (card.currentPower - defaultSizePower) * scalePerPower;
+        newScale = Mathf.Clamp(newScale, powerScaleLimits.x, powerScaleLimits.y);
+        if (newScale == targetPowerScale) return;
+
+        bool firstRefresh = targetPowerScale < 0;
+        targetPowerScale = newScale;
+
+        if (powerScaleRoutine != null) StopCoroutine(powerScaleRoutine);
+
+        // starting power and inactive units snap straight to the right size
+        if (firstRefresh || !gameObject.activeInHierarchy)
+        {
+            powerUI.transform.localScale = powerRestScale * targetPowerScale;
+            return;
+        }
+        powerScaleRoutine = StartCoroutine(ScalePowerUI(powerRestScale * targetPowerScale));
+    }
+
+    IEnumerator ScalePowerUI(Vector3 targetScale)
+    {
+        Vector3 startingScale = powerUI.transform.localScale;
+
+        float t = 0;
+        while (t < powerScaleTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / powerScaleTime);
+            // ease out with a small overshoot so the size change pops
+            float c = 1.7f;
+            float coolT = 1 + (c + 1) * Mathf.Pow(clampedT - 1, 3) + c * Mathf.Pow(clampedT - 1, 2);
+
+            powerUI.transform.localScale = Vector3.LerpUnclamped(startingScale, targetScale, coolT);
+            yield return null;
+        }
+
+        powerUI.transform.localScale = targetScale;
+        powerScaleRoutine = null;
     }
 
     public void EnableOrderMarker(bool enable, int orderNumber = 0)
@@ -149,10 +238,15 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         {
             powerUI.SetActive(true);
             powerValue.text = card.currentPower.ToString();
+            RefreshPowerScale();
+
+            // green outline when buffed, red when debuffed
+            powerOutline.enabled = card.currentPower != card.startingPower;
+            powerOutline.material = (card.currentPower > card.startingPower) ? buffedOutlineMaterial : debuffedOutlineMaterial;
 
             // chaning the power indicator colors when buffed or debuffed
-            powerBG.color = (card.currentPower >= card.startingPower) ? buffedPowerColor : debuffedPowerColor;
-            if (card.currentPower == card.startingPower) powerBG.color = Color.white;
+            //powerBG.color = (card.currentPower >= card.startingPower) ? buffedPowerColor : debuffedPowerColor;
+            //if (card.currentPower == card.startingPower) powerBG.color = Color.white;
         }
         else powerUI.SetActive(false);
 

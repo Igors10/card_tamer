@@ -34,7 +34,7 @@ public class Ability : MonoBehaviour
         effectDesc.text = abilityData.GetAbilityDesc(abilityColor);
 
         // Power
-        powerText.text = abilityData.power.ToString();
+        powerText.text = abilityData.GetPowerText();
     }
 
     // =====================

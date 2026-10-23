@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Roll
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: +1-6 power
+  abilityDescription: 
   isSpecial: 0
   effects:
   - rid: 1001
