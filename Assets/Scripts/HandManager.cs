@@ -56,6 +56,23 @@ public class HandManager : MonoBehaviour
         player.cardsInDiscard.Add(card);
     }
 
+    /// <summary>
+    /// Takes a single card off the field back to its owner's hand, its unit is removed and its power is reset
+    /// </summary>
+    public void ReturnCardToHand(Card card)
+    {
+        Player player = card.player;
+        player.cardsOnField.Remove(card);
+
+        card.gameObject.SetActive(true);
+        if (card.unit != null) card.unit.RemoveFromBoard();
+
+        Transform playerHand = (player == GameManager.instance.player) ? hand.transform : opponentHand.transform;
+        card.transform.SetParent(playerHand, false);
+        card.CardEndRound();
+        AddCardToHand(card, player);
+    }
+
     public void ReturnCardsToHand(Player player)
     {
         // moving all cards to cards in hand

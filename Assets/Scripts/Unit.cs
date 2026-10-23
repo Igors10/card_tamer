@@ -353,6 +353,43 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
 
     /// <summary>
+    /// Unit hops, shrinks away and its card goes back to the owner's hand
+    /// </summary>
+    public IEnumerator ReturnToHand()
+    {
+        StopSlide();
+        AudioManager.instance.PlaySFX("UnitMoveSFX");
+
+        Vector3 startScale = transform.localScale;
+        Vector3 startPos = transform.position;
+        float returnTime = 0.3f;
+        float t = 0;
+        while (t < returnTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / returnTime);
+
+            // little hop up, then shrinks to nothing (stretching thin on the way)
+            float hop = Mathf.Sin(clampedT * Mathf.PI) * jumpHeight * 0.5f;
+            transform.position = startPos + new Vector3(0f, hop, 0f);
+            float shrink = 1 - clampedT * clampedT;
+            transform.localScale = new Vector3(startScale.x * shrink, startScale.y * Mathf.Lerp(1f, 1.4f, clampedT) * shrink, startScale.z);
+            yield return null;
+        }
+
+        AudioManager.instance.PlaySFX("CardPlaySFX", 0.6f);
+
+        Field field = currentField;
+        GameManager.instance.handManager.ReturnCardToHand(card);
+
+        // unit left in the back slot moves to the front, so the field doesn't count as full
+        if (field.units[0] == null && field.units[1] != null) GameManager.instance.fieldManager.MoveUnit(field.units[1], field);
+
+        // returned unit stops giving aura power
+        GameManager.instance.fieldManager.Refresh();
+    }
+
+    /// <summary>
     /// Removes the unit off the board
     /// </summary>
     public void RemoveFromBoard()
