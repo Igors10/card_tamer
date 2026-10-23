@@ -7137,6 +7137,8 @@ MonoBehaviour:
   VFXs:
   - {fileID: 9167634517621324014, guid: ee04a3e7e3e200543840fec3643811b9, type: 3}
   - {fileID: 4870619945361379286, guid: 6a7fda63d9505c64c9197548b9f36ec3, type: 3}
+  - {fileID: 1507387390201368155, guid: e4270fbe7a3f38447809f8c1262390a1, type: 3}
+  - {fileID: 3762383332873163770, guid: f83d1160223ca574fa39180e8c43c8d2, type: 3}
   canvasObj: {fileID: 385122619}
 --- !u!114 &603793832 stripped
 MonoBehaviour:
@@ -15957,7 +15959,9 @@ MonoBehaviour:
   ratAvatar: {fileID: 966030069}
   ratText: {fileID: 2092178521}
   fadeTime: 0.2
-  soundOn: 0
+  soundOn: 1
+  rsPitch: {x: 1.1, y: 1.4}
+  ratSFXvolume: 0.3
   winDialogues:
   - {fileID: 11400000, guid: 90be234597a04f447b1e006fb9a88b01, type: 2}
   lostDialogues:
@@ -17677,6 +17681,7 @@ MonoBehaviour:
   slideOutTime: 1
   propStagger: 0.07
   propMoveTime: 1
+  hintHiddenOffset: {x: 0, y: 300, z: 0}
   pencil: {fileID: 2012383221}
 --- !u!1 &1615368896
 GameObject:
@@ -25063,7 +25068,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: audioClips.Array.size
-      value: 28
+      value: 31
       objectReference: {fileID: 0}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: musicClips.Array.size
@@ -25184,7 +25189,7 @@ PrefabInstance:
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: 'audioClips.Array.data[24]'
       value: 
-      objectReference: {fileID: 8300000, guid: fa9485260832b63458a11e3973f39e1a, type: 3}
+      objectReference: {fileID: 8300000, guid: 0ed53495769a933439daf21e63d42b78, type: 3}
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: 'audioClips.Array.data[25]'
       value: 
@@ -25196,7 +25201,19 @@ PrefabInstance:
     - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
       propertyPath: 'audioClips.Array.data[27]'
       value: 
-      objectReference: {fileID: 8300000, guid: 0ed53495769a933439daf21e63d42b78, type: 3}
+      objectReference: {fileID: 8300000, guid: a8777fa24eed4ce45a25849d812e60b5, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[28]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 44f30512e09c17e44a80012d1767bebf, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[29]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 5e50a62987617f34799b31946c2e6a8f, type: 3}
+    - target: {fileID: 9016809172310456148, guid: 758beacc84c4ca847a67b923cac29d77, type: 3}
+      propertyPath: 'audioClips.Array.data[30]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 2d31e8671c8305a44a61dd53442d4aba, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -381,7 +381,16 @@ public class Card : MonoBehaviour
         //if (power != 0) unit.powerBonus.StartShowingBonus(power); 
 
         // pop animation to signify that something has changed
-        if (animated) Animations.instance.PopAnim(unit.powerValue.gameObject, 0.4f, 0.3f);       
+        // starting power isn't animated, so only buffs and debuffs get particles
+        if (animated)
+        {
+            Animations.instance.PopAnim(unit.powerValue.gameObject, 0.4f, 0.3f);
+            unit.PlayPowerChangeVFX(power);
+
+            // Playing buff/debuff sfx
+            string buffSFXname = (power > 0) ? "BuffSFX" : "DebuffSFX";
+            AudioManager.instance.PlaySFX(buffSFXname, 0.5f);
+        }
 
         currentPower += power;
         unit.RefreshUnitVisuals();

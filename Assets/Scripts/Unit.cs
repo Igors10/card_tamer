@@ -125,6 +125,16 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         currentField = field;
     }
 
+    /// <summary>
+    /// Plays buff or debuff particles on the power counter
+    /// </summary>
+    public void PlayPowerChangeVFX(int powerChange)
+    {
+        if (powerChange == 0) return;
+        string vfxName = (powerChange > 0) ? "BuffVFX" : "DebuffVFX";
+        ParticleManager.instance.SpawnVFX(powerValue.transform.position, vfxName);
+    }
+
     public void EnableOrderMarker(bool enable, int orderNumber = 0)
     {
         orderMarker.gameObject.SetActive(enable);

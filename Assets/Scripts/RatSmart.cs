@@ -16,6 +16,8 @@ public class RatSmart : MonoBehaviour
     [Header("dialogue settings")]
     [SerializeField] float fadeTime = 0.5f;
     [SerializeField] bool soundOn = true;
+    [SerializeField] Vector2 rsPitch = new Vector3(1.1f, 1.4f);
+    [SerializeField] float ratSFXvolume = 0.8f;
 
     [Header("dialogue list")]
     [SerializeField] List<RSDialogueObj> winDialogues = new List<RSDialogueObj>();
@@ -83,9 +85,10 @@ public class RatSmart : MonoBehaviour
             // playing random SFX
             if (soundOn)
             {
-                int ratSFXnr = UnityEngine.Random.Range(1, 5);
+                int ratSFXnr = UnityEngine.Random.Range(1, 4);
                 string ratSFXname = "Rat" + ratSFXnr.ToString() + "SFX";
-                AudioManager.instance.PlaySFX(ratSFXname);
+                float ratSFXpitch = UnityEngine.Random.Range(rsPitch.x, rsPitch.y);
+                AudioManager.instance.PlaySFX(ratSFXname, ratSFXvolume, ratSFXpitch);
             }
 
             // pause here until player presses LMB

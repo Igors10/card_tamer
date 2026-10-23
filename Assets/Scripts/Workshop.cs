@@ -54,8 +54,9 @@ public class Workshop : MonoBehaviour
     [SerializeField] float slideOutTime = 0.35f;
     [SerializeField] float propStagger = 0.07f; // delay between each prop starting to move
     [SerializeField] float propMoveTime = 0.4f;
+    [SerializeField] Vector3 hintHiddenOffset = new Vector3(0, 300f, 0); // hint slides in from above the screen
     Vector3 titleRestScale;
-    Vector3 hintRestScale;
+    Vector3 hintRestPos;
 
     [Header("color select")]
     [SerializeField] GameObject pencil;
@@ -78,7 +79,7 @@ public class Workshop : MonoBehaviour
             bgItemWorkshopPositions[a] = bgItemPositions[a].transform.localPosition;
         }
         titleRestScale = title.transform.localScale;
-        hintRestScale = workshopHintObj.transform.localScale;
+        hintRestPos = workshopHintObj.transform.localPosition;
 
         WorkshopColorSelect();
     }
@@ -106,7 +107,7 @@ public class Workshop : MonoBehaviour
         if (popTitleAndHint)
         {
             title.transform.localScale = Vector3.zero;
-            workshopHintObj.transform.localScale = Vector3.zero;
+            workshopHintObj.transform.localPosition = hintRestPos + hintHiddenOffset;
         }
 
         // background slides in, speeding up
@@ -119,14 +120,14 @@ public class Workshop : MonoBehaviour
         {
             StartCoroutine(MoveProp(bgItems[i].transform, bgItemStartingPositions[i], bgItemWorkshopPositions[i], propStagger * order++));
         }
-        if (popTitleAndHint) StartCoroutine(ScaleProp(workshopHintObj.transform, Vector3.zero, hintRestScale, propStagger * order++));
+        if (popTitleAndHint) StartCoroutine(MoveProp(workshopHintObj.transform, hintRestPos + hintHiddenOffset, hintRestPos, propStagger * order++));
     }
 
     IEnumerator Disappear(bool moveBackground, Vector3 bgHiddenPos)
     {
         // props leave in reverse order: hint, decor, title
         int order = 0;
-        StartCoroutine(ScaleProp(workshopHintObj.transform, hintRestScale, Vector3.zero, propStagger * order++));
+        StartCoroutine(MoveProp(workshopHintObj.transform, hintRestPos, hintRestPos + hintHiddenOffset, propStagger * order++));
         for (int i = bgItems.Length - 1; i >= 0; i--)
         {
             StartCoroutine(MoveProp(bgItems[i].transform, bgItemWorkshopPositions[i], bgItemStartingPositions[i], propStagger * order++));
@@ -139,9 +140,9 @@ public class Workshop : MonoBehaviour
         // background slides out, speeding up
         if (moveBackground) yield return SlideBackground(Vector3.zero, bgHiddenPos, slideOutTime);
 
-        // putting title and hint back to normal size for the next time
+        // putting title and hint back in place for the next time
         workshopHintObj.SetActive(false);
-        workshopHintObj.transform.localScale = hintRestScale;
+        workshopHintObj.transform.localPosition = hintRestPos;
         title.transform.localScale = titleRestScale;
 
         gameObject.SetActive(false);
@@ -215,14 +216,19 @@ public class Workshop : MonoBehaviour
         workshopHintText.text = newHintText;
     }
 
-    public void WorkshopColorSelect()
+    /// <summary>
+    /// Welcoming message from Rat Smart, called once the "Workshop" intro text is gone
+    /// </summary>
+    public void PlayWelcomeDialogue()
     {
-        // Welcoming message from Rat Smart
         if (GameData.firstTimePlaying)
         {
             StartCoroutine(RatSmart.instance.PlayDialogue("WelcomeDial"));
         }
+    }
 
+    public void WorkshopColorSelect()
+    {
         colorSelectUI.SetActive(true);
         workshopHintText.text = "Pick a color you like!";
     }
@@ -345,6 +351,8 @@ public class Workshop : MonoBehaviour
 
     public void CreateNewCard()
     {
+        AudioManager.instance.PlaySFX("ButtonSFX");
+
         // if in developers mode save the card
         if (drawingCanvas.developersMode)
         {

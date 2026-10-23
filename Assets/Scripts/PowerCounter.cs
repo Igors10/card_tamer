@@ -214,7 +214,6 @@ public class PowerCounter : MonoBehaviour
     /// </summary>
     IEnumerator LoseAnim()
     {
-        AudioManager.instance.PlaySFX("NegativeSFX", 0, 0.8f);
         Animations.instance.ShakeAnim(gameObject, loseShakeIntensity, loseAnimTime);
 
         Vector3 startingScale = transform.localScale;

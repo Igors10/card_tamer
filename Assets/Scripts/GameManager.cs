@@ -94,6 +94,8 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        managerUI.workshop.PlayWelcomeDialogue();
+
         // starting workshop starting sequence after a short pause
         //managerUI.workshop.LaunchStartingSequence();
 

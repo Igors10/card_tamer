@@ -129,7 +129,7 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         {
             if (unit.card.currentPower > 0 && !unit.stunned)
             {
-                StartCoroutine(opponentPowerUI.AddPower(unit.card.currentPower, unit));
+                yield return StartCoroutine(opponentPowerUI.AddPower(unit.card.currentPower, unit));
                 opponentPower += unit.card.currentPower;
             }
         }
@@ -146,7 +146,7 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         {
             if (unit.card.currentPower > 0 && !unit.stunned)
             {
-                StartCoroutine(playerPowerUI.AddPower(unit.card.currentPower, unit));
+                yield return StartCoroutine(playerPowerUI.AddPower(unit.card.currentPower, unit));
                 playerPower += unit.card.currentPower;
             }
         }

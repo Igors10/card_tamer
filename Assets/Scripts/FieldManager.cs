@@ -194,6 +194,7 @@ public class FieldManager : MonoBehaviour
             target.card.auraPower = auraPower;
             target.card.currentPower = Mathf.Max(0, target.card.currentPower + difference);
             Animations.instance.PopAnim(target.powerValue.gameObject, 0.4f, 0.3f);
+            target.PlayPowerChangeVFX(difference);
             target.RefreshUnitVisuals();
         }
     }
@@ -267,7 +268,7 @@ public class FieldManager : MonoBehaviour
         ParticleManager.instance.SpawnVFX(newUnitObj.transform.position, "SpawnVFX");
 
         // playing soundeffect
-        AudioManager.instance.PlaySFX("CardPlaySFX");
+        AudioManager.instance.PlaySFX("CardPlaySFX", 0.6f);
 
         // Adding the unit to one of the lists
         unitList.Add(newUnit);
