@@ -2,7 +2,9 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 public class PencilButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {

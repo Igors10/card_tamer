@@ -59,6 +59,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     [Header("state")]
     [HideInInspector] public bool stunned = false;
+    [HideInInspector] public bool knockedOut = false; // flying off the board, waiting to be removed
     bool rollingPower = false;
     bool targeted = false;
     [SerializeField] GameObject stunIndicator;
@@ -321,6 +322,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (prevented) yield break;
 
         stunned = true;
+        knockedOut = true;
 
         // knocked out units stop giving aura power
         GameManager.instance.fieldManager.RefreshAuras();
@@ -348,7 +350,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         GameManager.instance.handManager.AddCardToDiscarded(card, card.player); // moving the card to discarded
 
         // removes unit from board when it is off screen
+        Field field = currentField;
         RemoveFromBoard();
+        GameManager.instance.fieldManager.MoveBackUnitForward(field);
     }
 
 
@@ -381,9 +385,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         Field field = currentField;
         GameManager.instance.handManager.ReturnCardToHand(card);
-
-        // unit left in the back slot moves to the front, so the field doesn't count as full
-        if (field.units[0] == null && field.units[1] != null) GameManager.instance.fieldManager.MoveUnit(field.units[1], field);
+        GameManager.instance.fieldManager.MoveBackUnitForward(field);
 
         // returned unit stops giving aura power
         GameManager.instance.fieldManager.Refresh();

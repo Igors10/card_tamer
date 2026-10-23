@@ -1,5 +1,7 @@
 using FishNet.Demo.AdditiveScenes;
+#if UNITY_EDITOR
 using FishNet.Transporting.Tugboat.Editing;
+#endif
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;

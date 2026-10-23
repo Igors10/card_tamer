@@ -328,6 +328,17 @@ public class FieldManager : MonoBehaviour
     /// </summary>
     /// <param name="unit"></param>
     /// <param name="targetField"></param>
+    /// <summary>
+    /// When the front slot gets freed, the unit left in the back slot moves to the front, so the field doesn't count as full
+    /// </summary>
+    public void MoveBackUnitForward(Field field)
+    {
+        Unit backUnit = field.units[1];
+        if (field.units[0] != null || backUnit == null || backUnit.knockedOut) return;
+
+        MoveUnit(backUnit, field);
+    }
+
     public void MoveUnit(Unit unit, Field targetField)
     {
         // finding the first free slot (the unit's own slot counts as free)

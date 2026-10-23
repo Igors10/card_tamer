@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using Unity.VisualScripting;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,7 +33,7 @@ public class Workshop : MonoBehaviour
     CardGenerator generator;
     [SerializeField] TextMeshProUGUI abilityReminder;
     [SerializeField] TextMeshProUGUI abilityReminderPower;
-    [SerializeField] GameObject savePresetButton; // saving presets only works in the editor
+    [SerializeField] GameObject savePresetButton; // editor saves into the project gallery, builds save into the player's save folder
     [SerializeField] GameObject randomPresetButton;
     [SerializeField] UnitPresetList galleryList;
     UnitPreset loadedGalleryPreset;
@@ -322,7 +324,7 @@ public class Workshop : MonoBehaviour
         // resetting name input field
         nameInput.text = "";
 
-        savePresetButton.SetActive(Application.isEditor);
+        savePresetButton.SetActive(true);
 
         // Rat explaining the drawing
         if (RatSmart.instance.drawingExplained == false && GameData.firstTimePlaying)
@@ -467,9 +469,10 @@ public class Workshop : MonoBehaviour
             return;
         }
 
-        UnitPreset savedPreset = SaveCardToProject(GetFreePresetName(nameInput.text), drawingCanvas.GetTextures(), galleryTextureFolderPath, galleryFolderPath, false);
+        Animations.instance.PopAnim(savePresetButton, 0.25f, 0.2f);
 
 #if UNITY_EDITOR
+        UnitPreset savedPreset = SaveCardToProject(GetFreePresetName(nameInput.text, galleryFolderPath, ".asset"), drawingCanvas.GetTextures(), galleryTextureFolderPath, galleryFolderPath, false);
         if (savedPreset != null)
         {
             // file name can have a number added, the preset keeps the typed name
@@ -478,7 +481,82 @@ public class Workshop : MonoBehaviour
             AssetDatabase.SaveAssets();
         }
         SyncGalleryList();
+#else
+        SaveDrawingToSaveFolder(nameInput.text, drawingCanvas.GetTextures());
 #endif
+    }
+
+    // BUILD GALLERY
+    // =============
+    // builds can't create assets, so drawings are saved as png layers + a small json with the name in the player's save folder
+
+    [System.Serializable]
+    class SavedDrawing
+    {
+        public string unitName;
+    }
+
+    string SavedGalleryPath => Path.Combine(Application.persistentDataPath, "Gallery");
+    List<UnitPreset> savedGallery; // drawings from the save folder, loaded once
+
+    void SaveDrawingToSaveFolder(string unitName, Texture2D[] layers)
+    {
+        if (layers == null) return;
+
+        Directory.CreateDirectory(SavedGalleryPath);
+        string fileName = GetFreePresetName(unitName, SavedGalleryPath + "/", ".json");
+
+        for (int i = 0; i < layers.Length; i++)
+        {
+            if (layers[i] != null) File.WriteAllBytes(Path.Combine(SavedGalleryPath, $"{fileName}_{i + 1}.png"), layers[i].EncodeToPNG());
+        }
+        File.WriteAllText(Path.Combine(SavedGalleryPath, fileName + ".json"), JsonUtility.ToJson(new SavedDrawing { unitName = unitName }));
+
+        // adding it to the loaded gallery right away, so the random button can pick it
+        GetSavedGallery().Add(CreateRuntimePreset(unitName, layers));
+        Debug.Log("Workshop: saved drawing " + unitName + " to " + SavedGalleryPath);
+    }
+
+    List<UnitPreset> GetSavedGallery()
+    {
+        if (savedGallery != null) return savedGallery;
+        savedGallery = new List<UnitPreset>();
+        if (!Directory.Exists(SavedGalleryPath)) return savedGallery;
+
+        foreach (string jsonPath in Directory.GetFiles(SavedGalleryPath, "*.json"))
+        {
+            try
+            {
+                SavedDrawing data = JsonUtility.FromJson<SavedDrawing>(File.ReadAllText(jsonPath));
+                string basePath = jsonPath.Substring(0, jsonPath.Length - ".json".Length);
+
+                Texture2D[] layers = new Texture2D[2];
+                for (int i = 0; i < layers.Length; i++)
+                {
+                    string layerPath = $"{basePath}_{i + 1}.png";
+                    if (!File.Exists(layerPath)) continue;
+
+                    layers[i] = new Texture2D(2, 2);
+                    layers[i].LoadImage(File.ReadAllBytes(layerPath));
+                }
+                savedGallery.Add(CreateRuntimePreset(data.unitName, layers));
+            }
+            catch (System.Exception e) { Debug.LogWarning("Workshop: could not load saved drawing " + jsonPath + ": " + e.Message); }
+        }
+        return savedGallery;
+    }
+
+    UnitPreset CreateRuntimePreset(string unitName, Texture2D[] layers)
+    {
+        UnitPreset preset = ScriptableObject.CreateInstance<UnitPreset>();
+        preset.unitName = unitName;
+        for (int i = 0; i < layers.Length && i < preset.sprite.Length; i++)
+        {
+            if (layers[i] == null) continue;
+            layers[i].filterMode = FilterMode.Point;
+            preset.sprite[i] = Sprite.Create(layers[i], new Rect(0, 0, layers[i].width, layers[i].height), new Vector2(0.5f, 0.5f));
+        }
+        return preset;
     }
 
     // drawings saved with the save button (presets in the gallery folder, their layer sprites in a subfolder)
@@ -496,7 +574,9 @@ public class Workshop : MonoBehaviour
         SyncGalleryList();
 #endif
 
-        List<UnitPreset> options = galleryList.presets.FindAll(preset => preset != null && preset != loadedGalleryPreset);
+        List<UnitPreset> gallery = new List<UnitPreset>(galleryList.presets);
+        gallery.AddRange(GetSavedGallery());
+        List<UnitPreset> options = gallery.FindAll(preset => preset != null && preset != loadedGalleryPreset);
         // only one drawing in the gallery and it's already loaded
         if (options.Count == 0 && loadedGalleryPreset != null) options.Add(loadedGalleryPreset);
         if (options.Count == 0) { Animations.instance.ShakeAnim(randomPresetButton, 5f, 1f); return; }
@@ -529,13 +609,14 @@ public class Workshop : MonoBehaviour
     /// <summary>
     /// Removes characters that can't be in a file name and adds a number if a preset with that name already exists
     /// </summary>
-    string GetFreePresetName(string cardName)
+    string GetFreePresetName(string cardName, string folderPath, string extension)
     {
         foreach (char invalidChar in Path.GetInvalidFileNameChars()) cardName = cardName.Replace(invalidChar.ToString(), "");
+        if (cardName.Trim() == "") cardName = "drawing";
 
         string freeName = cardName;
         int number = 2;
-        while (File.Exists($"{galleryFolderPath}{freeName}.asset")) freeName = cardName + " " + number++;
+        while (File.Exists($"{folderPath}{freeName}{extension}")) freeName = cardName + " " + number++;
         return freeName;
     }
 
