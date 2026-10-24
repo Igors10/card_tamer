@@ -15,7 +15,7 @@ public static class EffectPresenter
         Unit unit = ctx.self;
 
         // play soundeffect
-        AudioManager.instance.PlaySFX("Buff2SFX", 0.5f);
+        AudioManager.instance.PlaySFX("EffectSFX", 0.75f);
 
         // making the unit appear in front so that the effect is clearly visible
         unit.AppearAbove(true);

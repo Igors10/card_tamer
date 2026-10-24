@@ -140,7 +140,7 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         {
             yield return null;
         }
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
 
 
         // Player's power
@@ -157,7 +157,7 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         {
             yield return null;
         }
-        yield return Animations.instance.SkippablePause(1.5f);
+        yield return Animations.instance.SkippablePause(0.75f);
 
         // COMPARING POWER
         if (playerPowerUI.currentPower > opponentPowerUI.currentPower) Debug.Log("BattleManager: player has more power");

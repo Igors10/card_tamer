@@ -46,6 +46,14 @@ public class PowerCounter : MonoBehaviour
     [SerializeField] float loseShakeIntensity = 6f;
     List<GameObject> damageParticles = new List<GameObject>();
     [HideInInspector] public float damageParticleOffset = 40f;
+
+    [Header("Damage particle juice")]
+    [SerializeField] float damageWindupTime = 0.12f; // short pull back before the particle flies off
+    [SerializeField] float damageWindupDistance = 35f;
+    [SerializeField] float damageSpin = 900f; // degrees per second while flying
+    [SerializeField] float damageFlightScale = 1.4f; // how much the particle grows in the middle of the flight
+    [SerializeField] float damageTrailInterval = 0.025f;
+    [SerializeField] float damageTrailFadeTime = 0.25f;
     private void Start()
     {
         // passing reference to this to player
@@ -176,7 +184,7 @@ public class PowerCounter : MonoBehaviour
         if (unit != null) unit.transform.localScale = defaultUnitScale;
 
         // pause between units
-        yield return Animations.instance.SkippablePause(0.5f);
+        yield return Animations.instance.SkippablePause(0.1f);
     }
 
     /// <summary>
@@ -343,7 +351,26 @@ public class PowerCounter : MonoBehaviour
         float t = 0;
         Vector3 startingPos = (damagePart.activeSelf) ? damagePart.transform.position : powerText.transform.position;
         damagePart.SetActive(true);
-        damagePart.GetComponent<Image>().color = player.playerColor;
+        Image partImage = damagePart.GetComponent<Image>();
+        partImage.color = player.playerColor;
+        Transform part = damagePart.transform;
+        Vector3 restScale = part.localScale;
+
+        // winding up: pulling back away from the target and squashing before launching
+        Vector3 awayDirection = (startingPos - targetPosition).normalized;
+        Vector3 windupPos = startingPos + awayDirection * damageWindupDistance * part.lossyScale.x / Mathf.Max(restScale.x, 0.0001f);
+        while (t < damageWindupTime)
+        {
+            t += Time.deltaTime;
+            float windupT = Mathf.Clamp01(t / damageWindupTime);
+            float coolWindupT = Mathf.Sin(windupT * Mathf.PI * 0.5f);
+
+            part.position = Vector3.Lerp(startingPos, windupPos, coolWindupT);
+            Animations.instance.SetSquash(part, restScale, 0.25f * coolWindupT);
+            yield return null;
+        }
+        startingPos = part.position;
+        t = 0;
 
         // Generate random curve variables
         Vector3 midPoint = Vector3.Lerp(startingPos, targetPosition, 0.5f);
@@ -351,10 +378,11 @@ public class PowerCounter : MonoBehaviour
         Vector3 randomOffset = Random.insideUnitSphere * curveIntensity;
         Vector3 controlPoint = midPoint + randomOffset;
 
+        float trailTimer = 0;
         while (t < damageAnimTime)
         {
             t += Time.deltaTime;
-            float actualT = t / damageAnimTime;
+            float actualT = Mathf.Clamp01(t / damageAnimTime);
             float coolT = actualT * actualT;
 
             // Bezier Curve movement
@@ -362,10 +390,24 @@ public class PowerCounter : MonoBehaviour
             Vector3 m2 = Vector3.Lerp(controlPoint, targetPosition, coolT);
             damagePart.transform.position = Vector3.Lerp(m1, m2, coolT);
 
+            // spinning and swelling up in the middle of the flight
+            part.Rotate(0f, 0f, -damageSpin * Time.deltaTime);
+            part.localScale = restScale * (1 + (damageFlightScale - 1) * Mathf.Sin(actualT * Mathf.PI));
+
+            // leaving a fading trail behind
+            trailTimer += Time.deltaTime;
+            if (trailTimer >= damageTrailInterval)
+            {
+                trailTimer = 0;
+                SpawnDamageTrail(partImage);
+            }
+
             //damageObj.transform.position = Vector3.Lerp(startingPos, targetPosition, coolT);
             yield return null;
         }
 
+        part.localScale = restScale;
+        part.localRotation = Quaternion.identity;
         damagePart.SetActive(false);
         // playing the damange VFX
         if (damageVFX != null)
@@ -373,6 +415,48 @@ public class PowerCounter : MonoBehaviour
             damageVFX.transform.position = targetPosition;
             damageVFX.Play();
         }
+    }
+
+    /// <summary>
+    /// Leaves a copy of the damage particle behind that shrinks and fades out
+    /// </summary>
+    void SpawnDamageTrail(Image source)
+    {
+        GameObject trailObj = new GameObject("damageTrail", typeof(RectTransform), typeof(Image));
+        RectTransform trail = trailObj.GetComponent<RectTransform>();
+        trail.SetParent(source.transform.parent, false);
+        trail.SetSiblingIndex(source.transform.GetSiblingIndex()); // rendering behind the particle
+        trail.sizeDelta = source.rectTransform.sizeDelta;
+        trail.position = source.transform.position;
+        trail.rotation = source.transform.rotation;
+        trail.localScale = source.transform.localScale * 0.8f;
+
+        Image trailImage = trailObj.GetComponent<Image>();
+        trailImage.sprite = source.sprite;
+        trailImage.raycastTarget = false;
+        trailImage.color = new Color(source.color.r, source.color.g, source.color.b, 0.6f);
+
+        StartCoroutine(FadeDamageTrail(trailImage));
+    }
+
+    IEnumerator FadeDamageTrail(Image trail)
+    {
+        Color startingColor = trail.color;
+        Vector3 startingScale = trail.transform.localScale;
+
+        float t = 0;
+        while (t < damageTrailFadeTime)
+        {
+            if (trail == null) yield break;
+
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / damageTrailFadeTime);
+            trail.transform.localScale = startingScale * (1 - clampedT);
+            trail.color = new Color(startingColor.r, startingColor.g, startingColor.b, startingColor.a * (1 - clampedT));
+            yield return null;
+        }
+
+        if (trail != null) Destroy(trail.gameObject);
     }
 
     /// <summary>

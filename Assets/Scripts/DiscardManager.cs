@@ -11,7 +11,21 @@ public class DiscardManager : MonoBehaviour
     [SerializeField] float beforeDiscardTime;
     [SerializeField] float afterDiscardTime;
     [SerializeField] float unitsMovingTime;
-    [SerializeField] float pointerInterval;
+    [SerializeField] float pointerInterval; // how fast the pointer jumps at the start of the rat's thinking
+
+    [Header("juice")]
+    [SerializeField] float pointerSlowestInterval = 0.45f; // pointer slows down to this like a prize wheel
+    [SerializeField] float pointerStartPitch = 0.9f;
+    [SerializeField] float pointerEndPitch = 1.4f;
+    [SerializeField] float finalTrembleTime = 0.6f; // chosen unit shakes before getting cut
+    [SerializeField] float finalTrembleIntensity = 10f;
+    [SerializeField] float hitStopTime = 0.08f; // everything freezes for a split second when the scissors cut
+    [SerializeField] float afterManualCutTime = 0.7f;
+    [SerializeField] float rewardStarSize = 80f;
+    [SerializeField] float rewardStarHangTime = 0.25f;
+    [SerializeField] float rewardStarFlyTime = 0.6f;
+    [SerializeField] float rewardStarTrailInterval = 0.03f;
+    [SerializeField] float rewardStarTrailFadeTime = 0.25f;
 
     [Header("refs")]
     [SerializeField] DeathAnim death;
@@ -26,11 +40,18 @@ public class DiscardManager : MonoBehaviour
     bool currentDiscardRandom = true;
     [HideInInspector] public bool discardAvailable = false;
     bool discarding = false;
+    bool unitWasCut = false;
 
     private void Start()
     {
         // starting the unit discard
         GameManager.instance.discardManager = this;
+    }
+
+    private void OnDisable()
+    {
+        // never leaving the game frozen if the hit stop gets interrupted
+        Time.timeScale = 1f;
     }
 
     public IEnumerator StartDiscardSequence(Player player, bool randomDiscard)
@@ -40,6 +61,7 @@ public class DiscardManager : MonoBehaviour
 
         discarding = true;
         currentDiscardRandom = randomDiscard;
+        unitWasCut = false;
 
         // Enabling the discard button if the discard is not random
         closeButton.gameObject.SetActive(!randomDiscard);
@@ -111,10 +133,11 @@ public class DiscardManager : MonoBehaviour
     {
         // pause to let all the anims play out and let player understand which card was discarded
         if (currentDiscardRandom) yield return new WaitForSeconds(afterDiscardTime);
+        else if (unitWasCut) yield return new WaitForSeconds(afterManualCutTime);
 
         // Animating the discard UI disappearance
         float fadeOutTime = afterDiscardTime / 3;
-        if (discardUI.activeSelf && currentDiscardRandom)
+        if (discardUI.activeSelf && (currentDiscardRandom || unitWasCut))
         {
             discardUI.GetComponent<AutoFade>().FadeOut(fadeOutTime);
             yield return new WaitForSeconds(fadeOutTime);
@@ -134,9 +157,9 @@ public class DiscardManager : MonoBehaviour
         //GameManager.instance.managerUI.workshop.ChangeHint("Create new cards!");
     }
 
-    public void MovePointer(Vector3 unitPos, bool randomUnitPos = false)
+    public UnitAtDiscard MovePointer(Vector3 unitPos, bool randomUnitPos = false, float pitch = 0f)
     {
-        if (currentUnits.Count < 1) return;
+        if (currentUnits.Count < 1) return null;
 
         // enabling the pointer
         discardPointer.SetActive(true);
@@ -154,7 +177,9 @@ public class DiscardManager : MonoBehaviour
         discardPointer.transform.position = newPointerPosition;
 
         // Playing SFX
-        if (currentUnits.Count > 1) AudioManager.instance.PlaySFX("RerollSFX");
+        if (currentUnits.Count > 1) AudioManager.instance.PlaySFX("RerollSFX", 0, pitch);
+
+        return currentUnits.Find(x => x.transform.position == newPointerPosition);
     }
 
     /// <summary>
@@ -168,9 +193,10 @@ public class DiscardManager : MonoBehaviour
         Debug.Log("DiscardManager: auto discard started");
 
 
-        // Pointer randomly moving around simulating rat choosing a target
+        // Pointer randomly moving around simulating rat choosing a target, slowing down like a prize wheel
         float t = 0;
         float pointerT = 0;
+        float currentInterval = pointerInterval;
 
         while (t < ratThinkingTime)
         {
@@ -178,29 +204,50 @@ public class DiscardManager : MonoBehaviour
             pointerT += Time.deltaTime;
 
             // jumping the pointer to another unit when interval time is reached
-            if (pointerT >= pointerInterval)
+            if (pointerT >= currentInterval)
             {
                 pointerT = 0;
-                MovePointer(Vector3.zero, true);
+                float progress = Mathf.Clamp01(t / ratThinkingTime);
+                currentInterval = Mathf.Lerp(pointerInterval, pointerSlowestInterval, progress * progress);
+
+                // every jump sounds a little higher and the unit flinches
+                UnitAtDiscard pointedUnit = MovePointer(Vector3.zero, true, Mathf.Lerp(pointerStartPitch, pointerEndPitch, progress));
+                if (pointedUnit != null) pointedUnit.Flinch();
             }
             yield return null;
         }
 
 
-        // choosing random unit and discarding it
+        // choosing random unit, letting it tremble for a moment and discarding it
         int randomUnitID = Random.Range(0, currentUnits.Count);
-        MovePointer(currentUnits[randomUnitID].transform.position);
-        DiscardUnit(currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>());
+        UnitAtDiscard chosenUnit = currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>();
+        MovePointer(chosenUnit.transform.position, false, pointerEndPitch);
+        yield return chosenUnit.Tremble(finalTrembleTime, finalTrembleIntensity);
+
+        DiscardUnit(chosenUnit);
     }
 
     public void DiscardUnit(UnitAtDiscard unit)
     {
+        // locking the discard so nothing else can be clicked while the cut plays out
+        discardAvailable = false;
+        closeButton.gameObject.SetActive(false);
+
+        StartCoroutine(DiscardUnitSequence(unit));
+    }
+
+    IEnumerator DiscardUnitSequence(UnitAtDiscard unit)
+    {
         Debug.Log("DiscardManager: unit discarded");
+        unitWasCut = true;
+
+        // cutting the unit in half (before the discard visuals, so the halves keep the unit's colors)
+        unit.CutInHalf();
 
         // dead unit animation
         unit.Discard(true);
 
-        // making death point finger at the unit 
+        // making death point finger at the unit
         StartCoroutine(death.PointAnim(afterDiscardTime / 2));
         // displaying destroyed units name
         string newHintMessage = unit.storedCard.cardData.name + " is destroyed";
@@ -211,6 +258,103 @@ public class DiscardManager : MonoBehaviour
         unit.storedCard.DestroyCard();
 
         GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.player);
+
+        // hit stop: freezing everything for a split second right as the scissors cut
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(hitStopTime);
+        Time.timeScale = 1f;
+
+        // flying the shop star reward into the counter when destroying the card was player's choice
+        if (!currentDiscardRandom)
+        {
+            yield return FlyRewardStar(unit.transform.position);
+            GameManager.instance.shopManager.AddShopStar();
+        }
+
         StartCoroutine(FinishDiscard());
+    }
+
+    /// <summary>
+    /// Shop star pops out of the destroyed unit and flies into the shop star counter
+    /// </summary>
+    IEnumerator FlyRewardStar(Vector3 startingPos)
+    {
+        ShopManager shop = GameManager.instance.shopManager;
+        GameObject starObj = new GameObject("rewardStar", typeof(RectTransform), typeof(Image));
+        RectTransform star = starObj.GetComponent<RectTransform>();
+        star.SetParent(discardUI.transform, false);
+        star.SetAsLastSibling();
+        star.sizeDelta = new Vector2(rewardStarSize, rewardStarSize);
+        star.position = startingPos;
+        Image starImage = starObj.GetComponent<Image>();
+        starImage.sprite = shop.ShopStarSprite;
+        starImage.color = shop.ShopStarColor;
+        starImage.raycastTarget = false;
+
+        // popping out of the unit
+        float t = 0;
+        while (t < rewardStarHangTime)
+        {
+            t += Time.deltaTime;
+            float popT = Mathf.Clamp01(t / rewardStarHangTime);
+            float overshoot = 1 + 0.4f * Mathf.Sin(popT * Mathf.PI);
+            star.localScale = Vector3.one * popT * overshoot;
+            yield return null;
+        }
+        star.localScale = Vector3.one;
+
+        // flying along a curve into the counter, spinning and leaving a trail
+        Vector3 targetPos = shop.ShopStarsPosition;
+        Vector3 controlPoint = Vector3.Lerp(startingPos, targetPos, 0.5f) + (Vector3)(Random.insideUnitCircle * 300f * star.lossyScale.x);
+        float trailTimer = 0;
+        t = 0;
+        while (t < rewardStarFlyTime)
+        {
+            t += Time.deltaTime;
+            float flyT = Mathf.Clamp01(t / rewardStarFlyTime);
+            float coolT = flyT * flyT;
+
+            Vector3 m1 = Vector3.Lerp(startingPos, controlPoint, coolT);
+            Vector3 m2 = Vector3.Lerp(controlPoint, targetPos, coolT);
+            star.position = Vector3.Lerp(m1, m2, coolT);
+            star.Rotate(0f, 0f, -720f * Time.deltaTime);
+
+            trailTimer += Time.deltaTime;
+            if (trailTimer >= rewardStarTrailInterval)
+            {
+                trailTimer = 0;
+                StartCoroutine(FadeStarTrail(starImage));
+            }
+            yield return null;
+        }
+
+        Destroy(starObj);
+    }
+
+    IEnumerator FadeStarTrail(Image source)
+    {
+        GameObject trailObj = new GameObject("rewardStarTrail", typeof(RectTransform), typeof(Image));
+        RectTransform trail = trailObj.GetComponent<RectTransform>();
+        trail.SetParent(source.transform.parent, false);
+        trail.SetSiblingIndex(source.transform.GetSiblingIndex()); // rendering behind the star
+        trail.sizeDelta = source.rectTransform.sizeDelta;
+        trail.position = source.transform.position;
+        trail.rotation = source.transform.rotation;
+        Image trailImage = trailObj.GetComponent<Image>();
+        trailImage.sprite = source.sprite;
+        trailImage.raycastTarget = false;
+        Color color = source.color;
+
+        float t = 0;
+        while (t < rewardStarTrailFadeTime)
+        {
+            t += Time.deltaTime;
+            float fadeT = Mathf.Clamp01(t / rewardStarTrailFadeTime);
+            trail.localScale = Vector3.one * 0.8f * (1 - fadeT);
+            trailImage.color = new Color(color.r, color.g, color.b, 0.6f * (1 - fadeT));
+            yield return null;
+        }
+
+        Destroy(trailObj);
     }
 }

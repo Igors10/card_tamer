@@ -22,6 +22,21 @@ public class D6 : MonoBehaviour
     [SerializeField] float rotationSpeed;
     [HideInInspector] public bool clickable;
 
+    [Header("juice")]
+    [SerializeField] float hopHeight = 22f; // how high the die bounces while rolling
+    [SerializeField] float hopsPerSecond = 3.5f;
+    [SerializeField] float groundSquash = 0.18f; // squash every time the die touches the ground while rolling
+    [SerializeField] float faceChangePunch = 0.15f; // little scale punch every time the face changes
+    [SerializeField] float landSquash = 0.3f;
+    [SerializeField] float landSquashTime = 0.35f;
+    [SerializeField] float sixLandMultiplier = 1.6f; // rolling a 6 lands harder
+    [SerializeField] float oneShakeIntensity = 8f;
+    [SerializeField] float oneShakeTime = 0.35f;
+    Vector3 restScale;
+    Vector2 spriteRestPos;
+    float rollTime;
+    float facePunch;
+
     private void Start()
     {
         sprite.color = unit.card.player.playerColor;
@@ -30,6 +45,10 @@ public class D6 : MonoBehaviour
     {
         Vector3 diceStartingPos = transform.position;
         Vector3 diceTargetPos = new Vector3(diceStartingPos.x, diceStartingPos.y + rollDistance, diceStartingPos.z);
+        restScale = transform.localScale;
+        spriteRestPos = sprite.rectTransform.anchoredPosition;
+        rollTime = 0f;
+        facePunch = 0f;
         rolling = true;
 
         // randomly picking dice values while it is rolling
@@ -77,13 +96,18 @@ public class D6 : MonoBehaviour
         // changing dice value again to prevent player from clicking at the correct value
         diceValue = ChangeDiceValue();
 
-        // snapping to correct position and rotation
+        // snapping to correct position, rotation and scale
         transform.position = diceStartingPos;
         sprite.transform.localRotation = Quaternion.identity;
+        sprite.rectTransform.anchoredPosition = spriteRestPos;
+        sprite.rectTransform.localScale = Vector3.one;
+        transform.localScale = restScale;
 
-        // pop animation at the end
-        float popAnimIntensity = (GetDiceValue() == 6) ? 0.007f : 0.004f;
-        Animations.instance.PopAnim(this.gameObject, 0.3f, popAnimIntensity);
+        // landing thud, harder on a 6, with a shake on a 1
+        float landAmount = (GetDiceValue() == 6) ? landSquash * sixLandMultiplier : landSquash;
+        StartCoroutine(Animations.instance.SquashStretch(transform, restScale, landAmount, landSquashTime));
+
+        if (GetDiceValue() == 1) Animations.instance.ShakeAnim(sprite.gameObject, oneShakeIntensity, oneShakeTime);
 
         // playing sound effect
         string sfxName = "DiceRollSFX";
@@ -106,6 +130,27 @@ public class D6 : MonoBehaviour
     private void Update()
     {
         DiceInput();
+        AnimateRolling();
+    }
+
+    /// <summary>
+    /// Makes the die bounce around while rolling, squashing a little every time it hits the ground
+    /// </summary>
+    void AnimateRolling()
+    {
+        if (!rolling) return;
+
+        rollTime += Time.deltaTime;
+        float hop = Mathf.Abs(Mathf.Sin(rollTime * hopsPerSecond * Mathf.PI));
+        sprite.rectTransform.anchoredPosition = spriteRestPos + new Vector2(0f, hop * hopHeight);
+
+        // squash is strongest right when the die touches the ground
+        float contact = Mathf.Pow(1 - hop, 6);
+        Animations.instance.SetSquash(transform, restScale, contact * groundSquash);
+
+        // face change punch dying down
+        facePunch *= Mathf.Exp(-12f * Time.deltaTime);
+        sprite.rectTransform.localScale = Vector3.one * (1 + facePunch);
     }
 
     // Die stops rolling when player clicks anywhere
@@ -137,6 +182,7 @@ public class D6 : MonoBehaviour
         while (rolling)
         {
             diceValue = ChangeDiceValue();
+            facePunch = faceChangePunch;
             yield return new WaitForSeconds(diceIntervals);
         }
     }
@@ -160,6 +206,9 @@ public class D6 : MonoBehaviour
     public void DisableDie()
     {
         Glow(false);
+
+        // the landing squash might still be playing, so the die has to come back in the resting state
+        if (restScale != Vector3.zero) transform.localScale = restScale;
         gameObject.SetActive(false);
     }
 

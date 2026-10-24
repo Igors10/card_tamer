@@ -221,6 +221,11 @@ public class ShopManager : MonoBehaviour
         Refresh();
     }
 
+    // used by effects that fly a star into the counter before adding it
+    public Sprite ShopStarSprite => shopStarPrefab.GetComponent<Image>().sprite;
+    public Color ShopStarColor => starColor;
+    public Vector3 ShopStarsPosition => starsObj.transform.position;
+
     /// <summary>
     /// Adds one shop star
     /// </summary>
