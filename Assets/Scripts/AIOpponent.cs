@@ -72,8 +72,9 @@ public class AIOpponent : MonoBehaviour
 
     public void AddSpecial()
     {
-        // refills the list if its empty
-        if (specialUnitPresets.Count == 0 || specialUnitPresets == null) specialUnitPresets = new List<UnitPreset>(chosenIdentity.specialUnits);
+        // refills the list if its empty (identities without special units use their basic units)
+        if (specialUnitPresets == null || specialUnitPresets.Count == 0) specialUnitPresets = new List<UnitPreset>(chosenIdentity.specialUnits);
+        if (specialUnitPresets.Count == 0) specialUnitPresets = new List<UnitPreset>(chosenIdentity.basicUnits);
 
         // choosing random ability
         AbilityObj newAbility = generator.PickRandomAbility("special");
@@ -178,16 +179,16 @@ public class AIOpponent : MonoBehaviour
                 playerObj.maxStars = nextStarAmount; 
                 playerObj.shopStars -= nextStarAmount;
                 starsUpgraded = true;
-            } 
+            } */
 
             // if has enough stars and no specials the AI will buy a special card
-            if (CountSpecialCards() < 1 && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
+            if (!playerObj.HasSpecialCard() && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
                 AddSpecial();
                 playerObj.shopStars -= shop.drawSpecialPrice;
-            }*/
+            }
             // otherwise it will buy regular card (if has enough stars)
-            if (playerObj.shopStars >= shop.drawCardPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
+            else if (playerObj.shopStars >= shop.drawCardPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
                 AddBasic();
                 playerObj.shopStars -= shop.drawCardPrice;
@@ -203,18 +204,6 @@ public class AIOpponent : MonoBehaviour
         AIEndTurn();
     }
     
-    // Counts how many special cards opponent has
-    int CountSpecialCards()
-    {
-        int specialCardAmount = 0;
-        foreach (Card card in playerObj.cardsInHand)
-        {
-            if (card.cardData.ability[0].isSpecial) specialCardAmount++;
-        }
-
-        return specialCardAmount;
-    }
-
     // =========================================================
 }
 

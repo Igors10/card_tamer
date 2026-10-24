@@ -19,6 +19,11 @@ public class FieldManager : MonoBehaviour
     [HideInInspector] public List<Unit> unitList = new List<Unit>();
     [HideInInspector] public bool anyUnitHighlighted;
 
+    [Header("lane winner indication")]
+    [SerializeField] float winningFieldBlend = 0.8f; // how much of the player color the winning side gets
+    [SerializeField] float tiedFieldBlend = 0.35f;
+    [SerializeField] Color losingFieldColor = new Color(0.8f, 0.79f, 0.78f); // washed out grey cardboard
+
     Field[] GetCurrentPlayerFields()
     {
         return GameManager.instance.yourTurn ? GameManager.instance.player.fields : GameManager.instance.opponent.fields;
@@ -134,26 +139,28 @@ public class FieldManager : MonoBehaviour
             Field opponentField = opponent.fields[i];
 
             // comparing power
-            bool lineTie = playerField.GetFieldPower() == opponentField.GetFieldPower();
-            bool playerWins = playerField.GetFieldPower() > opponentField.GetFieldPower() && !lineTie;
+            int playerPower = playerField.GetFieldPower();
+            int opponentPower = opponentField.GetFieldPower();
+            bool lineTie = playerPower == opponentPower;
+            bool playerWins = playerPower > opponentPower;
 
-            
-            // player field color
-            Color playerFieldColor = (playerField.GetFieldPower() != 0) ? Colors.instance.BlendColor(player.playerColor, 0.5f) : Color.white;
-            if (!playerWins && !lineTie && playerField.GetFieldPower() != 0) playerFieldColor = Colors.instance.BlendColor(player.playerColor, 0.3f);
-            playerField.defaultColor = playerFieldColor;
-
-            // opponent field color
-            Color opponentFieldColor = (opponentField.GetFieldPower() != 0) ? Colors.instance.BlendColor(opponent.playerColor, 0.5f) : Color.white;
-            if (playerWins && !lineTie && opponentField.GetFieldPower() != 0) opponentFieldColor = Colors.instance.BlendColor(opponent.playerColor, 0.3f);
-            opponentField.defaultColor = opponentFieldColor;
+            // winning side gets a strong player color, losing side is greyed out, ties are lightly tinted, empty fields stay plain
+            playerField.defaultColor = GetLaneFieldColor(player.playerColor, playerPower, lineTie, playerWins);
+            opponentField.defaultColor = GetLaneFieldColor(opponent.playerColor, opponentPower, lineTie, !playerWins);
 
             // applying colors
-            playerField.RefreshFieldVisuals();
-            opponentField.RefreshFieldVisuals();
+            playerField.RefreshFieldVisuals(true);
+            opponentField.RefreshFieldVisuals(true);
         }
 
         RefreshAuras();
+    }
+
+    Color GetLaneFieldColor(Color playerColor, int power, bool tie, bool winning)
+    {
+        if (power == 0 && (tie || !winning)) return Color.white;
+        if (tie) return Colors.instance.BlendColor(playerColor, tiedFieldBlend);
+        return winning ? Colors.instance.BlendColor(playerColor, winningFieldBlend) : losingFieldColor;
     }
 
     // ================
@@ -263,9 +270,9 @@ public class FieldManager : MonoBehaviour
         fieldToSpawnOn.units[nextEmptySlot] = newUnit;
         newUnit.InitUnit(cardToSpawn, fieldToSpawnOn);
         newUnit.PlaySpawnAnim();
-       
-        // Plays spawning "poof" VFX
-        ParticleManager.instance.SpawnVFX(newUnitObj.transform.position, "SpawnVFX");
+
+        // Plays spawning "poof" VFX (special units play their own when they land)
+        if (!newUnit.IsSpecial) ParticleManager.instance.SpawnVFX(newUnitObj.transform.position, "SpawnVFX");
 
         // playing soundeffect
         AudioManager.instance.PlaySFX("CardPlaySFX", 0.6f);

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -26,6 +27,23 @@ public class Field : MonoBehaviour
     Material defaultMaterial;
     [SerializeField] Material selectMaterial;
     bool cardIsOver;
+    [SerializeField] float colorFadeTime = 0.35f;
+    Coroutine colorRoutine;
+
+    IEnumerator FadeToDefaultColor()
+    {
+        Color startingColor = sprite.color;
+        float t = 0;
+        while (t < colorFadeTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / colorFadeTime);
+            sprite.color = Color.Lerp(startingColor, defaultColor, 1 - (1 - clampedT) * (1 - clampedT));
+            yield return null;
+        }
+        sprite.color = defaultColor;
+        colorRoutine = null;
+    }
 
     private void Start()
     {
@@ -68,6 +86,7 @@ public class Field : MonoBehaviour
     /// <param name="isFadeOut"></param>
     public void FadeOut(bool isFadeOut)
     {
+        StopColorFade();
         sprite.color = (isFadeOut) ? fadedColor : defaultColor;
         fieldUI.SetActive(!isFadeOut);
 
@@ -144,9 +163,15 @@ public class Field : MonoBehaviour
         //spawnPoint.color = (highlight) ? highlightSpawnPointColor : defaultSpawnPointColor;
     }
 
-    public void MoveHighlightField(bool highlight) // highlights the field when moving units 
+    public void MoveHighlightField(bool highlight) // highlights the field when moving units
     {
+        StopColorFade();
         sprite.color = (highlight) ? dimHighlightColor : defaultColor;
+    }
+
+    void StopColorFade()
+    {
+        if (colorRoutine != null) { StopCoroutine(colorRoutine); colorRoutine = null; }
     }
 
     /// <summary>
@@ -184,10 +209,12 @@ public class Field : MonoBehaviour
         return true;
     }
 
-    public void RefreshFieldVisuals()
+    public void RefreshFieldVisuals(bool fadeColor = false)
     {
-        // applying color
-        sprite.color = defaultColor;
+        // applying color (lane winner changes ease in instead of snapping)
+        StopColorFade();
+        if (fadeColor && gameObject.activeInHierarchy && sprite.color != defaultColor) colorRoutine = StartCoroutine(FadeToDefaultColor());
+        else sprite.color = defaultColor;
 
         // blocked visuals
         for (int i = 0; i < units.Length; i++)

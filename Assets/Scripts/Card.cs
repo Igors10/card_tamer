@@ -233,8 +233,8 @@ public class Card : MonoBehaviour
         // BACKGROUND
         //cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);
 
-        // SPECIAL OR NOT
-        specialIcon.SetActive(cardData.ability[0].isSpecial);
+        // special cards are shown with a purple power counter now (Ability), not with the star icon
+        specialIcon.SetActive(false);
     }
 
     /// <summary>

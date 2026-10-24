@@ -112,6 +112,9 @@ public class ExecuteManager : MonoBehaviour
             card.unit.unitPresenter.gameObject.SetActive(true);
         }
         
+        // letting the unit land first, otherwise the entrance animation cuts the spawn drop (and its landing juice) short
+        while (card.unit != null && card.unit.IsSpawning) yield return null;
+
         // Playing unit animation
         yield return StartCoroutine(card.unit.EntranceAnimation());
 

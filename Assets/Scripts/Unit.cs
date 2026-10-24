@@ -31,6 +31,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [Header("power")]
     [SerializeField] GameObject powerUI;
     [SerializeField] Image powerBG;
+    [SerializeField] Color specialPowerColor = new Color(0.78f, 0.55f, 0.96f);
     public TextMeshProUGUI powerValue;
     [SerializeField] Color buffedPowerColor;
     [SerializeField] Color debuffedPowerColor;
@@ -99,6 +100,14 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float spawnSquash = 0.3f;
     [SerializeField] float spawnCameraShake = 0.008f;
 
+    [Header("special spawn animation")]
+    [SerializeField] float specialDropHeightMod = 1.5f; // special units fall from a bit higher and slower, with a little twist on the way down
+    [SerializeField] float specialDropTimeMod = 1.5f;
+    [SerializeField] float specialSpins = 0.15f;
+    [SerializeField] float specialSquashMod = 1.4f;
+    [SerializeField] float specialCameraShakeMod = 4f;
+    [SerializeField] float specialCameraShakeTime = 0.3f;
+
     [Header("slide animation")]
     [SerializeField] float slideTime = 0.22f;
     [SerializeField] float slideSquash = 0.15f;
@@ -108,6 +117,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     // sprite resting values, so squash and jump animations always return to the right place
     Vector3 spriteRestPos;
     Vector3 spriteRestScale;
+    Quaternion spriteRestRotation;
     Coroutine spawnRoutine;
     Coroutine squashRoutine;
 
@@ -117,10 +127,14 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float moveXSpeed = 5f;
     [SerializeField] float rotationSpeed = 360f;
 
+    public bool IsSpecial => card != null && card.cardData.ability[0].isSpecial;
+    public bool IsSpawning => spawnRoutine != null; // still dropping onto the field
+
     void Awake()
     {
         spriteRestPos = sprite.transform.localPosition;
         spriteRestScale = sprite.transform.localScale;
+        spriteRestRotation = sprite.transform.localRotation;
         powerRestScale = powerUI.transform.localScale;
         powerBGRestColor = powerBG.color;
     }
@@ -137,6 +151,11 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // Getting card data
         card = cardToInitialize;
         cardToInitialize.unit = this;
+
+        // special units have a purple power counter (buff/debuff flashes fade back to it)
+        if (IsSpecial) powerBGRestColor = specialPowerColor;
+        powerBG.color = powerBGRestColor;
+
         RefreshUnitVisuals();
         sprite.RefreshSpriteMaterial(defaultMaterial);
 
@@ -471,26 +490,45 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     IEnumerator SpawnAnim()
     {
+        // special units drop from higher, slower and spin on the way down
+        bool special = IsSpecial;
+        float dropHeight = (special) ? spawnDropHeight * specialDropHeightMod : spawnDropHeight;
+        float dropTime = (special) ? spawnDropTime * specialDropTimeMod : spawnDropTime;
+
         Transform spriteTransform = sprite.transform;
-        Vector3 dropStartPos = spriteRestPos + new Vector3(0f, spawnDropHeight, 0f);
+        Vector3 dropStartPos = spriteRestPos + new Vector3(0f, dropHeight, 0f);
 
         // falling down
         float t = 0;
-        while (t < spawnDropTime)
+        while (t < dropTime)
         {
             t += Time.deltaTime;
-            float clampedT = Mathf.Clamp01(t / spawnDropTime);
+            float clampedT = Mathf.Clamp01(t / dropTime);
             float coolT = clampedT * clampedT;
 
             spriteTransform.localPosition = Vector3.Lerp(dropStartPos, spriteRestPos, coolT);
             Animations.instance.SetSquash(spriteTransform, spriteRestScale, -jumpSquash * (1 - coolT * 0.5f)); // stretched while falling
+            if (special) spriteTransform.localRotation = spriteRestRotation * Quaternion.Euler(0f, 0f, 360f * specialSpins * (1 - coolT));
             yield return null;
         }
         spriteTransform.localPosition = spriteRestPos;
+        spriteTransform.localRotation = spriteRestRotation;
 
         // landing
-        GameManager.instance.mainCamera.Shake(spawnCameraShake, 0.15f);
-        PlaySquash(spawnSquash, 0.35f);
+        if (special)
+        {
+            GameManager.instance.mainCamera.Shake(spawnCameraShake * specialCameraShakeMod, specialCameraShakeTime);
+            PlaySquash(spawnSquash * specialSquashMod, 0.45f);
+
+            // purple poof and sparkles (sound is the same CardPlaySFX as every unit, played in FieldManager.SpawnUnit)
+            ParticleManager.instance.SpawnVFX(transform.position, "SpawnVFX", false, specialPowerColor);
+            ParticleManager.instance.SpawnVFX(transform.position, "BuffVFX", false, specialPowerColor);
+        }
+        else
+        {
+            GameManager.instance.mainCamera.Shake(spawnCameraShake, 0.15f);
+            PlaySquash(spawnSquash, 0.35f);
+        }
         spawnRoutine = null;
     }
 
@@ -515,6 +553,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (squashRoutine != null) { StopCoroutine(squashRoutine); squashRoutine = null; }
         sprite.transform.localPosition = spriteRestPos;
         sprite.transform.localScale = spriteRestScale;
+        sprite.transform.localRotation = spriteRestRotation;
     }
 
     /// <summary>

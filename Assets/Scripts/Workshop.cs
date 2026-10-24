@@ -278,9 +278,14 @@ public class Workshop : MonoBehaviour
         
         if (drawSpecial) // options for special cards
         {
+            List<AbilityObj> pickedAbilities = new List<AbilityObj>();
             for (int a = 0; a < abilityOption.Length; a++)
             {
+                // trying to give different options (only repeats if there are not enough special abilities)
                 AbilityObj specialAbilityToAssign = generator.PickRandomAbility("special");
+                for (int tries = 0; tries < 20 && pickedAbilities.Contains(specialAbilityToAssign); tries++) specialAbilityToAssign = generator.PickRandomAbility("special");
+                pickedAbilities.Add(specialAbilityToAssign);
+
                 abilityOption[a].abilityNote.InitAbilityNote(specialAbilityToAssign);
             }
         }
@@ -319,7 +324,9 @@ public class Workshop : MonoBehaviour
         // passing the ability
         abilityReminder.text = chosenAbility.GetAbilityDesc(chosenAbilityColor);
         abilityReminderPower.text = chosenAbility.GetPowerText();
-        abilityReminder.GetComponentInParent<AbilityNote>().FitPowerToDescription(!string.IsNullOrEmpty(chosenAbility.abilityDescription));
+        AbilityNote reminderNote = abilityReminder.GetComponentInParent<AbilityNote>();
+        reminderNote.FitPowerToDescription(!string.IsNullOrEmpty(chosenAbility.abilityDescription));
+        reminderNote.RefreshPowerColor(chosenAbility.isSpecial);
 
         // resetting name input field
         nameInput.text = "";
@@ -410,7 +417,7 @@ public class Workshop : MonoBehaviour
         // if the canvas is empty applying a random unit sprite and name instead
         if (drawingCanvas.IsCanvasEmpty())
         {
-            UnitPreset randomUnitPreset = GameManager.instance.cardDatabase.GetRandomBasicPreset();
+            UnitPreset randomUnitPreset = (chosenAbility.isSpecial) ? GameManager.instance.cardDatabase.GetRandomSpecialPreset() : GameManager.instance.cardDatabase.GetRandomBasicPreset();
             // presets are made with the darker second color in mind (same as AI cards)
             newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, Colors.instance.GetDarkenColor(player.playerColor), chosenAbilityColor);
         }

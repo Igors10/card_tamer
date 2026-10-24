@@ -10,6 +10,15 @@ public class Player : MonoBehaviour
     public List<Card> cardsInHand = new List<Card>();
     public List<Card> cardsOnField = new List<Card>();
     public List<Card> cardsInDiscard = new List<Card>();
+
+    /// <summary>
+    /// Each player can only own 1 special card (in hand, on the field or knocked out)
+    /// </summary>
+    public bool HasSpecialCard()
+    {
+        System.Predicate<Card> isSpecial = card => card != null && card.cardData.ability[0].isSpecial;
+        return cardsInHand.Exists(isSpecial) || cardsOnField.Exists(isSpecial) || cardsInDiscard.Exists(isSpecial);
+    }
     public Field[] fields = new Field[4];
     public PowerCounter powerCounter;
 

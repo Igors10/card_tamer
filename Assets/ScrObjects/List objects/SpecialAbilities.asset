@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: SpecialAbilities
   m_EditorClassIdentifier: Assembly-CSharp::AbiltiyList
   abilityList:
-  - {fileID: 11400000, guid: 2f1efa05d61dc4349a0659a061f650be, type: 2}
+  - {fileID: 11400000, guid: 5e9b33407c0f50d4fbde7c30adf75dd2, type: 2}
+  - {fileID: 11400000, guid: 29d9966fa86547643bbf808c61e03b1d, type: 2}

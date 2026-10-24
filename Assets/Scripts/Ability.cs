@@ -12,6 +12,10 @@ public class Ability : MonoBehaviour
     [Header("refs")]
     [SerializeField] TextMeshProUGUI effectDesc;
     [SerializeField] TextMeshProUGUI powerText;
+    [SerializeField] Image powerBG;
+    [SerializeField] Color specialPowerColor = new Color(0.78f, 0.55f, 0.96f);
+    Color defaultPowerColor;
+    bool defaultPowerColorSaved = false;
 
     // ====================
     // Initialization
@@ -35,6 +39,13 @@ public class Ability : MonoBehaviour
 
         // Power
         powerText.text = abilityData.GetPowerText();
+
+        // special cards have a purple power counter (saved lazily, opponent cards can be initialized before Awake)
+        if (powerBG != null)
+        {
+            if (!defaultPowerColorSaved) { defaultPowerColor = powerBG.color; defaultPowerColorSaved = true; }
+            powerBG.color = (abilityData.isSpecial) ? specialPowerColor : defaultPowerColor;
+        }
     }
 
     // =====================

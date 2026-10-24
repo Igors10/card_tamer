@@ -33,7 +33,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] float fallSpin = 160f;
 
     [Header("flinching")]
-    [SerializeField] float flinchSquash = 0.2f;
+    [SerializeField] float flinchSquash = 0.04f;
     [SerializeField] float flinchTime = 0.25f;
 
     [HideInInspector] public Card storedCard;

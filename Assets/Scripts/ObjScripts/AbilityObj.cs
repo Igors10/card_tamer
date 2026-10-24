@@ -7,7 +7,8 @@ public class AbilityObj : ScriptableObject
 {
     public int power;
     public string abilityDescription;
-    [HideInInspector] public bool isSpecial; // maybe I'll use it for later
+    [Tooltip("Special abilities make the card special: purple power counter, standout entrance, 2 dice when rolling, 1 per player")]
+    public bool isSpecial;
 
     [SerializeReference, EffectPicker] public List<AbilityEffect> effects = new List<AbilityEffect>();
 

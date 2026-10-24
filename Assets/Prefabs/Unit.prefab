@@ -1121,6 +1121,7 @@ MonoBehaviour:
   targetHighlightObj: {fileID: 1334354953278067764}
   powerUI: {fileID: 3795751108397365226}
   powerBG: {fileID: 4982152648981304929}
+  specialPowerColor: {r: 0.78, g: 0.55, b: 0.96, a: 1}
   powerValue: {fileID: 532405815697476448}
   buffedPowerColor: {r: 0.37011746, g: 0.86415094, b: 0.43945548, a: 1}
   debuffedPowerColor: {r: 0.93962264, g: 0.38825914, b: 0.38825914, a: 1}
@@ -1128,8 +1129,8 @@ MonoBehaviour:
   buffedOutlineMaterial: {fileID: 2100000, guid: 1971e54581b0a2840b408de8d1e3d948, type: 2}
   debuffedOutlineMaterial: {fileID: 2100000, guid: 36e61dd17a8ee9240bbd2b39c8fed356, type: 2}
   defaultSizePower: 3
-  scalePerPower: 0.16
-  powerScaleLimits: {x: 0.7, y: 1.8}
+  scalePerPower: 0.1
+  powerScaleLimits: {x: 0.7, y: 1.4}
   powerScaleTime: 0.3
   powerFlashHold: 0.1
   powerFlashTime: 0.4
@@ -1143,6 +1144,7 @@ MonoBehaviour:
   bonusPowerObj: {fileID: 7962674609946288711}
   bonusPowerValue: {fileID: 2451345806949978867}
   stunned: 0
+  knockedOut: 0
   stunIndicator: {fileID: 1468256185062105835}
   healthBar: {fileID: 0}
   readyToMove: 0
@@ -1163,6 +1165,12 @@ MonoBehaviour:
   spawnDropTime: 0.15
   spawnSquash: 0.3
   spawnCameraShake: 0
+  specialDropHeightMod: 1.5
+  specialDropTimeMod: 1.5
+  specialSpins: 0.15
+  specialSquashMod: 1.4
+  specialCameraShakeMod: 4
+  specialCameraShakeTime: 0.3
   slideTime: 0.22
   slideSquash: 0.15
   jumpForce: 8

@@ -12,7 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 public class ShopManager : MonoBehaviour
 {
     [Header("refs")]
-    [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- draw special
+    [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- discard card; 3- draw special
     [SerializeField] TextMeshProUGUI[] prices;
     [SerializeField] TextMeshProUGUI nextStarAmountText;
     [SerializeField] Player player;
@@ -20,6 +20,7 @@ public class ShopManager : MonoBehaviour
 
     [Header("prices")]
     public int drawCardPrice;
+    public int drawSpecialPrice = 4;
     public int discardReward;
     // upgrade price is current max star amount + 1
 
@@ -44,6 +45,7 @@ public class ShopManager : MonoBehaviour
         buttons[0].onClick.AddListener(() => UpgradeStars(player));
         buttons[1].onClick.AddListener(() => DrawCard(player));
         buttons[2].onClick.AddListener(() => DiscardCard(player));
+        buttons[3].onClick.AddListener(() => DrawSpecial(player));
     }
 
     private void OnEnable()
@@ -85,6 +87,11 @@ public class ShopManager : MonoBehaviour
         // refreshing draw card button
         prices[1].text = drawCardPrice.ToString();
         CheckButtonAvailability(1, drawCardPrice);
+
+        // refreshing draw special button (only one special card per player)
+        prices[3].text = drawSpecialPrice.ToString();
+        CheckButtonAvailability(3, drawSpecialPrice);
+        if (player.HasSpecialCard()) buttons[3].interactable = false;
 
         // refreshing discard button
         buttons[2].interactable = player.cardsInHand.Count > 1;
@@ -143,15 +150,15 @@ public class ShopManager : MonoBehaviour
         Pay(playerToGetCard, cardPrice);
     }
 
-    /*
     void DrawSpecial(Player playerToGetSpecial)
     {
+        if (playerToGetSpecial.HasSpecialCard()) return;
+
         GameManager.instance.managerUI.workshop.AbilityOptions(true);
-       
-        // Paying 
-        int specialPrice = Convert.ToInt32(prices[2].text);
-        Pay(playerToGetSpecial, specialPrice);
-    }*/
+
+        // Paying
+        Pay(playerToGetSpecial, drawSpecialPrice);
+    }
 
     void DiscardCard(Player playerToDiscard)
     {
