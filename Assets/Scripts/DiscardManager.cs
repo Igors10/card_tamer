@@ -150,6 +150,8 @@ public class DiscardManager : MonoBehaviour
 
         discardPointer.SetActive(false);
         discardUI.SetActive(false);
+        // hiding the unit preview, units don't get the pointer exit event when the window closes under the cursor
+        GameManager.instance.managerUI.PreviewCard(false, null, null, Vector3.zero);
         GameManager.instance.shopManager.cardDisarded = true;
 
         // refreshin the shop (to see if the discard button still available)
@@ -210,9 +212,8 @@ public class DiscardManager : MonoBehaviour
                 float progress = Mathf.Clamp01(t / ratThinkingTime);
                 currentInterval = Mathf.Lerp(pointerInterval, pointerSlowestInterval, progress * progress);
 
-                // every jump sounds a little higher and the unit flinches
-                UnitAtDiscard pointedUnit = MovePointer(Vector3.zero, true, Mathf.Lerp(pointerStartPitch, pointerEndPitch, progress));
-                if (pointedUnit != null) pointedUnit.Flinch();
+                // every jump sounds a little higher
+                MovePointer(Vector3.zero, true, Mathf.Lerp(pointerStartPitch, pointerEndPitch, progress));
             }
             yield return null;
         }

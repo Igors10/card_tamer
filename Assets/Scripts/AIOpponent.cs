@@ -133,6 +133,8 @@ public class AIOpponent : MonoBehaviour
         // chosing card to place
         int randomCard = Random.Range(0, playerObj.cardsInHand.Count);
         Card cardToPlay = playerObj.cardsInHand[randomCard];
+        // forced to play the special card
+        if (!playerObj.CanPlayCard(cardToPlay)) cardToPlay = playerObj.GetSpecialInHand();
 
         // choosing random field
         int randomField = Random.Range(0, availableFields.Count);

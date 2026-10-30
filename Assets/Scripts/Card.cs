@@ -299,7 +299,7 @@ public class Card : MonoBehaviour
     public void StartDrag()
     {
         if (GameManager.instance.executeManager.currentCard != null || GameManager.instance.currentState != GameState.PLACING
-            || !GameManager.instance.yourTurn || player.cardPlayed) return;
+            || !GameManager.instance.yourTurn || player.cardPlayed || !player.CanPlayCard(this)) return;
 
         isDragged = true;
         lastDragPosition = transform.position;

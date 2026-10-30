@@ -15,3 +15,8 @@ MonoBehaviour:
   abilityList:
   - {fileID: 11400000, guid: 5e9b33407c0f50d4fbde7c30adf75dd2, type: 2}
   - {fileID: 11400000, guid: 29d9966fa86547643bbf808c61e03b1d, type: 2}
+  - {fileID: 11400000, guid: 839907e6973d4d2c91c884e13fcec0d1, type: 2}
+  - {fileID: 11400000, guid: 9e2bb20d8df546c3b9f394c5c16e3ed8, type: 2}
+  - {fileID: 11400000, guid: e7d3b8eebf7a49c6ba612dbb7231a377, type: 2}
+  - {fileID: 11400000, guid: 46040c96094c4623a2766d8ee2795eb4, type: 2}
+  - {fileID: 11400000, guid: 73da2c6383b94a7ca6e12a5a7d238ccf, type: 2}

@@ -1,141 +1,161 @@
-using FishNet;
-using FishNet.Managing.Scened;
+using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
-using TMPro;
 using UnityEngine;
 
-public class LobbyClient : NetworkBehaviour   // Look into registering the client correctly
+/// <summary>
+/// One of these gets spawned for every connected player (by the PlayerSpawner on the NetworkManager).
+/// It holds that player's lobby info. The server owns the values, clients ask the server to change them through ServerRpcs.
+/// </summary>
+public class LobbyClient : NetworkBehaviour
 {
-    //[HideInInspector] public int lobby_id;
-    //[HideInInspector] public bool ready = false;
-    [HideInInspector] public bool isHost = false;
-    public LobbyPanel clientPanel;
-    
+    public const int maxNicknameLength = GameData.maxNicknameLength;
 
-    public readonly SyncVar<string> nickname = new SyncVar<string>();
+    // every LobbyClient that exists on this machine (host sees both, guest sees both too once they're spawned)
+    public static readonly List<LobbyClient> all = new List<LobbyClient>();
+
+    public readonly SyncVar<string> nickname = new SyncVar<string>("");
     public readonly SyncVar<bool> ready = new SyncVar<bool>();
-    public readonly SyncVar<int> lobbyID = new SyncVar<int>();
-    public readonly SyncVar<int> characterSelected = new SyncVar<int>(); // 0- robber 1- ghost
-
-    public override void OnStartServer()
-    {
-        base.OnStartServer();
-
-        SetLobbyID(this);
-    }
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-
-        if (IsOwner && IsServer)
-        {
-            isHost = true; // marking this client as server
-        }
-
-        // Deciding which character selected by default
-        SetCharacter(this, lobbyID.Value);
-
-        // passing it to LobbyManager
-        LobbyManager.instance.RegisterClient(this, IsOwner);
-
-        // Assigning a lobby panel to this client
-        clientPanel = LobbyManager.instance.lobbyPanel[lobbyID.Value];
-
-        // Checking if client panel is null
-        if (clientPanel == null) Debug.Log("LobbyClient: client panel of client " + 0 + " is equal to null");
-
-        // Getting the nickname
-        if (IsOwner) SetNickname(GameData.nickname);
-        //else SetNickname(nickname.Value);
-    }
+    public readonly SyncVar<int> seat = new SyncVar<int>(-1); // 0 = host, 1 = guest
 
     public override void OnStartNetwork()
     {
         base.OnStartNetwork();
 
-        // subscribe a method group
-        nickname.OnChange += OnNicknameChanged;
-        ready.OnChange += OnReadyChange;
-        characterSelected.OnChange += OnCharacterChanged;
+        all.Add(this);
+
+        nickname.OnChange += OnValueChanged;
+        ready.OnChange += OnValueChanged;
+        seat.OnChange += OnValueChanged;
+    }
+
+    public override void OnStopNetwork()
+    {
+        base.OnStopNetwork();
+
+        all.Remove(this);
+
+        nickname.OnChange -= OnValueChanged;
+        ready.OnChange -= OnValueChanged;
+        seat.OnChange -= OnValueChanged;
+
+        RefreshLobby();
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        // the host's own connection is always seat 0, others get the first free seat
+        // (on a dedicated server nobody is local, so whoever joins first gets seat 0 and can start the match)
+        seat.Value = Owner.IsLocalClient ? 0 : FindFreeSeat();
+        nickname.Value = DefaultNickname();
+    }
+
+    int FindFreeSeat()
+    {
+        for (int s = 0; s < ConnectionScript.maxPlayers; s++)
+        {
+            LobbyClient taken = GetBySeat(s);
+            if (taken == null || taken == this) return s;
+        }
+        return -1;
+    }
+
+    public override void OnStopServer()
+    {
+        base.OnStopServer();
+
+        // someone left the lobby, the remaining player has to confirm again once a new player joins
+        if (LobbyManager.instance == null || LobbyManager.instance.matchStarting) return;
+        foreach (LobbyClient other in all)
+        {
+            if (other != this) other.ready.Value = false;
+        }
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        // sending our nickname to the server, which then syncs it to everyone
+        if (IsOwner) SetNickname(GameData.nickname);
+
+        RefreshLobby();
+    }
+
+    void OnValueChanged<T>(T previous, T next, bool asServer)
+    {
+        // host gets every change twice (as server and as client), the client one is enough for the UI
+        if (asServer) return;
+        RefreshLobby();
+    }
+
+    void RefreshLobby()
+    {
+        if (LobbyManager.instance != null) LobbyManager.instance.Refresh();
+    }
+
+    string DefaultNickname() => "Player " + (seat.Value + 1);
+
+    /// <summary>
+    /// Returns this machine's own LobbyClient, null if it isn't spawned yet
+    /// </summary>
+    public static LobbyClient GetLocal()
+    {
+        foreach (LobbyClient client in all) if (client.IsOwner) return client;
+        return null;
     }
 
     /// <summary>
-    /// Assigns id to the client in the lobby
+    /// Returns LobbyClient sitting in given seat, null if the seat is empty
     /// </summary>
-    /// <param name="client"> </param>
-    void SetLobbyID(LobbyClient client)
+    public static LobbyClient GetBySeat(int seatID)
     {
-        if (!IsServer) return;
-
-        int id = ConnectionScript.connectionManager.nextID;
-        Debug.Log("LobbyClient: client with id " + id + " joined the lobby");
-
-        ConnectionScript.connectionManager.nextID++;
-        client.lobbyID.Value = id;
-    }
-    private void OnNicknameChanged(string previous, string next, bool asServer)
-    {
-        LobbyManager.instance.Refresh(lobbyID.Value);
+        foreach (LobbyClient client in all) if (client.seat.Value == seatID) return client;
+        return null;
     }
 
-    private void OnCharacterChanged(int previous, int next, bool asServer)
-    {
-        LobbyManager.instance.Refresh(lobbyID.Value);
-    }
+    // ===============
+    // CLIENT -> SERVER
+    // ===============
 
-    void OnReadyChange(bool previous, bool next, bool asServer)
-    {
-        LobbyManager.instance.Refresh(lobbyID.Value);
-    }
-
-
-    [ServerRpc(RequireOwnership = false)]
-    public void SetCharacter(LobbyClient client, int character_id)
-    {
-        client.characterSelected.Value = character_id;
-
-        Debug.Log("LobbyClient: " + nickname.Value + " has selected character "+ character_id);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
     public void SetNickname(string value)
     {
-        //if (!IsServer) return;
-        nickname.Value = value; // sync owner to all observers
-
-        Debug.Log("LobbyClient: Nickname of panel " + lobbyID.Value + " was set to " + nickname.Value);
+        value = (value ?? "").Trim();
+        if (value.Length > maxNicknameLength) value = value.Substring(0, maxNicknameLength);
+        nickname.Value = (value == "") ? DefaultNickname() : value;
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
     public void SetReady(bool value)
     {
-        //if (!IsServer) return;
-        ready.Value = value; // sync owner to all observers
+        if (LobbyManager.instance != null && LobbyManager.instance.matchStarting) return;
 
-        Debug.Log("LobbyClient: " + nickname.Value + (ready.Value ? "ready" : "not ready"));
+        // can't get ready alone, the other player has to be in the lobby
+        if (value && (GetBySeat(0) == null || GetBySeat(1) == null)) return;
+        ready.Value = value;
     }
+
+    [ServerRpc]
+    public void RequestStartMatch()
+    {
+        // only the host can start, the server checks everything again in case the client was out of date
+        if (seat.Value != 0 || LobbyManager.instance == null) return;
+        LobbyManager.instance.TryStartMatchServer(this);
+    }
+
+    // ===============
+    // SERVER -> CLIENTS
+    // ===============
 
     /// <summary>
-    /// Launches the gameplay scene and puts both clients in it
+    /// Tells every client the match is about to start, so they save the lobby info and cover the screen
     /// </summary>
-    [Server]
-    public void StartMatch()
+    [ObserversRpc]
+    public void MatchStartingRpc()
     {
-        if (!IsServerInitialized) return;
-
-        // Replace current (lobby) with gameplay for ALL connected clients
-        var sld = new SceneLoadData("Board")
-        {
-            ReplaceScenes = ReplaceOption.All
-        };
-
-        InstanceFinder.SceneManager.LoadGlobalScenes(sld);
+        if (LobbyManager.instance != null) LobbyManager.instance.OnMatchStarting();
     }
-    private void OnDestroy()
-    {
-        // unsubscribe
-        nickname.OnChange -= OnNicknameChanged;
-    }
-
 }

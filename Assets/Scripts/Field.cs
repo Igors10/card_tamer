@@ -24,6 +24,8 @@ public class Field : MonoBehaviour
     [SerializeField] Color dimHighlightColor; // used for highlighting tiles that are available for moving
     [SerializeField] Color highlightSpawnPointColor;
     [SerializeField] Color fadedColor;
+    bool faded; // faded fields keep their faded color when visuals get refreshed (like when a unit moves forward mid battle)
+    Color TargetColor => (faded) ? fadedColor : defaultColor;
     Material defaultMaterial;
     [SerializeField] Material selectMaterial;
     bool cardIsOver;
@@ -38,10 +40,10 @@ public class Field : MonoBehaviour
         {
             t += Time.deltaTime;
             float clampedT = Mathf.Clamp01(t / colorFadeTime);
-            sprite.color = Color.Lerp(startingColor, defaultColor, 1 - (1 - clampedT) * (1 - clampedT));
+            sprite.color = Color.Lerp(startingColor, TargetColor, 1 - (1 - clampedT) * (1 - clampedT));
             yield return null;
         }
-        sprite.color = defaultColor;
+        sprite.color = TargetColor;
         colorRoutine = null;
     }
 
@@ -87,7 +89,8 @@ public class Field : MonoBehaviour
     public void FadeOut(bool isFadeOut)
     {
         StopColorFade();
-        sprite.color = (isFadeOut) ? fadedColor : defaultColor;
+        faded = isFadeOut;
+        sprite.color = TargetColor;
         fieldUI.SetActive(!isFadeOut);
 
         // fading units
@@ -185,6 +188,14 @@ public class Field : MonoBehaviour
 
         //if (!cardPlayed.SpecialCost()) return false; // star mechanic was removed
 
+        // must play special effect only lasts for one card
+        if (!player.CanPlayCard(cardPlayed)) return false;
+        if (player.mustPlaySpecial)
+        {
+            player.mustPlaySpecial = false;
+            player.playerUI.Refresh();
+        }
+
         // under a random lane effect the card goes to a random free lane instead
         Field fieldToSpawnOn = this;
         if (player.playsOnRandomLane)
@@ -213,8 +224,8 @@ public class Field : MonoBehaviour
     {
         // applying color (lane winner changes ease in instead of snapping)
         StopColorFade();
-        if (fadeColor && gameObject.activeInHierarchy && sprite.color != defaultColor) colorRoutine = StartCoroutine(FadeToDefaultColor());
-        else sprite.color = defaultColor;
+        if (fadeColor && gameObject.activeInHierarchy && sprite.color != TargetColor) colorRoutine = StartCoroutine(FadeToDefaultColor());
+        else sprite.color = TargetColor;
 
         // blocked visuals
         for (int i = 0; i < units.Length; i++)

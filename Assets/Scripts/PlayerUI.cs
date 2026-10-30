@@ -52,6 +52,7 @@ public class PlayerUI : MonoBehaviour
 
     [Header("Status effects")]
     [SerializeField] GameObject randomLaneIndicator;
+    [SerializeField] GameObject mustPlaySpecialIndicator; // sits below the turn hint, so it hides together with it
 
 
     private void Start()
@@ -107,6 +108,7 @@ public class PlayerUI : MonoBehaviour
 
         // REFRESHING STATUS EFFECTS
         if (randomLaneIndicator != null) randomLaneIndicator.SetActive(player.playsOnRandomLane);
+        if (mustPlaySpecialIndicator != null) mustPlaySpecialIndicator.SetActive(player.mustPlaySpecial && player.GetSpecialInHand() != null);
 
 
         // REFRESHING STARS

@@ -19,6 +19,21 @@ public class Player : MonoBehaviour
         System.Predicate<Card> isSpecial = card => card != null && card.cardData.ability[0].isSpecial;
         return cardsInHand.Exists(isSpecial) || cardsOnField.Exists(isSpecial) || cardsInDiscard.Exists(isSpecial);
     }
+
+    /// <summary>
+    /// Returns the special card in hand, or null if there is none
+    /// </summary>
+    public Card GetSpecialInHand() => cardsInHand.Find(card => card != null && card.cardData.ability[0].isSpecial);
+
+    /// <summary>
+    /// Returns false if the card can't be played right now because a must play special effect forces another card
+    /// </summary>
+    public bool CanPlayCard(Card card)
+    {
+        if (!mustPlaySpecial) return true;
+        Card special = GetSpecialInHand();
+        return special == null || special == card;
+    }
     public Field[] fields = new Field[4];
     public PowerCounter powerCounter;
 
@@ -31,6 +46,7 @@ public class Player : MonoBehaviour
     public bool cardPlayed = false;
     [HideInInspector] public bool dead;
     [HideInInspector] public bool playsOnRandomLane; // next card goes to a random free lane
+    [HideInInspector] public bool mustPlaySpecial; // next card has to be the special card (if it's in hand)
 
 
     [Header("config")]
@@ -75,6 +91,13 @@ public class Player : MonoBehaviour
 
         // player color
         if (!isAI) playerColor = config.playerColor;
+
+        // nickname chosen in the main menu (bots set their own name in AIOpponent)
+        if (!isAI && !isOpponent)
+        {
+            playerName = GameData.GetDisplayNickname();
+            playerUI.playerName.text = playerName;
+        }
 
         RefreshCardVisuals();
     }

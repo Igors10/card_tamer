@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
+using TMPro;
 
 public class TitleScreen : MonoBehaviour
 {
@@ -21,6 +22,21 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] LoadingFog loadingFog;
     Coroutine currentTransition = null;
 
+    [Header("play mode screen")]
+    [SerializeField] RectTransform menuPan; // holds the title screen and the play mode screen below it, moving it up looks like the camera moving down
+    [SerializeField] float panTime = 0.9f;
+    [SerializeField] TMP_InputField nicknameField; // used for both bot and online matches
+    Coroutine panRoutine;
+
+    [Header("join lobby code")]
+    [SerializeField] GameObject joinLobbyButton; // swapped for the code row when pressed
+    [SerializeField] GameObject joinCodeRow;
+    [SerializeField] TMP_InputField joinCodeField;
+    [SerializeField] Button joinCodeGoButton;
+    [SerializeField] Button joinCodeCancelButton;
+    [SerializeField] TMP_Text joinCodeMessage; // errors, like a wrong code
+    [SerializeField] float joinRowPopTime = 0.25f;
+
     [Header("doodle respawn")]
     [SerializeField] RectTransform doodleArea; // knocked out doodles respawn inside this area
     [SerializeField] RectTransform[] doodleKeepClear; // and not on top of these (logo, buttons)
@@ -36,6 +52,33 @@ public class TitleScreen : MonoBehaviour
 
     private void Start()
     {
+        // coming back from an online match, closing the connection and removing the NetworkManager
+        if (ConnectionScript.connectionManager != null) ConnectionScript.connectionManager.Shutdown();
+
+        // nickname from last time
+        GameData.nickname = PlayerPrefs.GetString(GameData.nicknamePrefKey, "");
+        nicknameField.characterLimit = GameData.maxNicknameLength;
+        nicknameField.text = GameData.nickname;
+        nicknameField.onValueChanged.AddListener(OnNicknameChanged);
+
+        // join code row: letters and numbers only, typed letters become capitals, Enter joins
+        joinCodeField.characterLimit = 10;
+        joinCodeField.onValidateInput = (text, index, c) => char.IsLetterOrDigit(c) ? char.ToUpperInvariant(c) : '\0';
+        joinCodeField.onSubmit.AddListener(_ => JoinWithCodeButton());
+        joinCodeGoButton.onClick.AddListener(JoinWithCodeButton);
+        joinCodeCancelButton.onClick.AddListener(() => CloseJoinCodeRow(true));
+        CloseJoinCodeRow(false);
+
+        // the lobby sent us back with a problem (wrong code, host left...), showing it next to the code row
+        if (GameData.menuMessage != "")
+        {
+            float screenHeight = ((RectTransform)menuPan.parent).rect.height;
+            menuPan.anchoredPosition = new Vector2(0f, screenHeight);
+            joinCodeField.text = GameData.joinCode; // keeping the typed code, in case it only had a typo
+            OpenJoinCodeRow(GameData.menuMessage);
+            GameData.menuMessage = "";
+        }
+
         // loading fog fade away effect at the beginning
 
         loadingFog.gameObject.SetActive(true);
@@ -66,6 +109,141 @@ public class TitleScreen : MonoBehaviour
         yield return StartCoroutine(loadingFog.ApplyLoadingFog(false));
 
         currentTransition = null;
+    }
+
+    // ===============
+    // PLAY MODE SCREEN
+    // ===============
+
+    /// <summary>
+    /// Moves the view down to the play mode screen (bot, join lobby, create match)
+    /// </summary>
+    public void OpenPlayModeScreen() => PanMenu(true);
+
+    /// <summary>
+    /// Moves the view back up to the title screen
+    /// </summary>
+    public void ClosePlayModeScreen()
+    {
+        if (panRoutine != null || currentTransition != null) return;
+        CloseJoinCodeRow(false);
+        PanMenu(false);
+    }
+
+    /// <summary>
+    /// Saving the nickname as it's typed, so it's there for the match and next time the game starts
+    /// </summary>
+    void OnNicknameChanged(string text)
+    {
+        GameData.nickname = text.Trim();
+        PlayerPrefs.SetString(GameData.nicknamePrefKey, GameData.nickname);
+    }
+
+    void PanMenu(bool down)
+    {
+        if (panRoutine != null || currentTransition != null) return;
+
+        AudioManager.instance.PlaySFX("ButtonSFX");
+        panRoutine = StartCoroutine(PanMenuAnim(down));
+    }
+
+    IEnumerator PanMenuAnim(bool down)
+    {
+        // play mode screen sits exactly one screen height below the title screen
+        float screenHeight = ((RectTransform)menuPan.parent).rect.height;
+        Vector2 startPos = menuPan.anchoredPosition;
+        Vector2 targetPos = new Vector2(0f, down ? screenHeight : 0f);
+
+        float t = 0;
+        while (t < panTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / panTime);
+            float coolT = clampedT * clampedT * (3f - 2f * clampedT); // ease in and out, like a camera starting and stopping
+            menuPan.anchoredPosition = Vector2.LerpUnclamped(startPos, targetPos, coolT);
+            yield return null;
+        }
+        menuPan.anchoredPosition = targetPos;
+
+        panRoutine = null;
+    }
+
+    /// <summary>
+    /// Swaps the "Join Lobby" button for a small field to type the host's lobby code in
+    /// </summary>
+    public void JoinOnlineLobbyButton()
+    {
+        if (currentTransition != null || panRoutine != null) return;
+        AudioManager.instance.PlaySFX("ButtonSFX");
+        OpenJoinCodeRow("");
+    }
+
+    void OpenJoinCodeRow(string message)
+    {
+        joinLobbyButton.SetActive(false);
+        joinCodeRow.SetActive(true);
+        joinCodeMessage.text = message;
+
+        joinCodeField.ActivateInputField();
+        StartCoroutine(PopAnim(joinCodeRow.transform));
+    }
+
+    void CloseJoinCodeRow(bool playSound)
+    {
+        if (playSound) AudioManager.instance.PlaySFX("ButtonSFX");
+        joinCodeRow.SetActive(false);
+        joinLobbyButton.SetActive(true);
+    }
+
+    void JoinWithCodeButton()
+    {
+        if (currentTransition != null || panRoutine != null) return;
+
+        string code = ConnectionScript.NormalizeCode(joinCodeField.text);
+        if (code == "")
+        {
+            joinCodeMessage.text = "Type in the lobby code from the host";
+            joinCodeField.ActivateInputField();
+            return;
+        }
+
+        // the lobby scene joins with this code as soon as it loads
+        GameData.joinCode = code;
+        OpenLobby(false);
+    }
+
+    IEnumerator PopAnim(Transform target)
+    {
+        float t = 0;
+        while (t < joinRowPopTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / joinRowPopTime);
+            float overshoot = 1f + 0.12f * Mathf.Sin(clampedT * Mathf.PI); // grows past full size and settles
+            target.localScale = Vector3.one * Mathf.Lerp(0.6f, 1f, 1 - (1 - clampedT) * (1 - clampedT)) * overshoot;
+            yield return null;
+        }
+        target.localScale = Vector3.one;
+    }
+
+    /// <summary>
+    /// Goes to the lobby scene to host a match
+    /// </summary>
+    public void CreateOnlineMatchButton() => OpenLobby(true);
+
+    void OpenLobby(bool host)
+    {
+        if (currentTransition != null || panRoutine != null) return;
+
+        GameData.hostingLobby = host;
+        currentTransition = StartCoroutine(GoToLobby());
+    }
+
+    IEnumerator GoToLobby()
+    {
+        AudioManager.instance.PlaySFX("ButtonSFX");
+        yield return StartCoroutine(loadingFog.ApplyLoadingFog(true));
+        SceneManager.LoadScene("Lobby");
     }
 
     /// <summary>

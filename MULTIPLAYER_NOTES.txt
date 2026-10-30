@@ -1,0 +1,363 @@
+CARDBOARDED - MULTIPLAYER NOTES
+===============================
+How online play is built, why it's built that way, and where to change things.
+Updated every time multiplayer is worked on (see CHANGELOG at the bottom).
+
+Networking library: FishNet (Assets/FishNet)
+Transport: Unity Transport through Unity Relay, with lobby codes.
+  - Adapter: "FishyUnityTransport" package (component is called UnityTransport,
+    namespace FishNet.Transporting.UTP), from
+    https://github.com/ooonush/FishyUnityTransport
+  - Unity packages: com.unity.transport, com.unity.services.multiplayer
+    (contains Relay + Authentication)
+  - Unity Cloud project "Card game" is linked (Project Settings > Services),
+    Relay is enabled on cloud.unity.com. Environment: production.
+  - Works over the internet with no port forwarding, needs an internet
+    connection.
+
+
+-------------------------------------------------------------------------------
+1. THE BIG PICTURE
+-------------------------------------------------------------------------------
+
+Two players: one HOSTS (their game is the server AND a client at the same time),
+the other JOINS by typing the host's lobby code (6 letters/numbers, e.g. K7Q2XB).
+
+Planned model for the match itself (not built yet) - the "command model":
+  - Clients never change the game directly. They send intents ("play card 7 in
+    lane 2") to the server.
+  - The server checks them, numbers them and sends them to BOTH clients.
+  - Both clients run the same existing game code with the same inputs and the
+    same random seed, so both reach the same result and play their own
+    animations.
+  - Nothing like HP or unit power is sent over the network, only player
+    decisions + one random seed at the start.
+
+Done so far: main menu -> lobby -> both players land in the Board scene.
+
+
+-------------------------------------------------------------------------------
+2. FISHNET IN 2 MINUTES (concepts used in this project)
+-------------------------------------------------------------------------------
+
+NetworkManager
+  The object that runs networking. Lives in the Lobby scene, then carries
+  itself over to the next scenes (DontDestroyOnLoad). It's an instance of
+  FishNet's demo prefab (Assets/FishNet/Demos/Prefabs/NetworkManager.prefab)
+  with our ConnectionScript added on top.
+
+Server / Client / Host
+  Server = the authority, holds the "real" values.
+  Client = a player's game connected to the server.
+  Host   = server + client in one game (what "Host Match" does).
+
+NetworkObject + NetworkBehaviour
+  A GameObject with a NetworkObject component exists on the server and on every
+  client at the same time ("spawned"). Scripts on it inherit NetworkBehaviour
+  instead of MonoBehaviour, which gives them SyncVars and RPCs.
+  Useful callbacks (in order): OnStartNetwork, OnStartServer, OnStartClient ...
+  OnStopClient, OnStopServer, OnStopNetwork.
+
+Owner
+  Each NetworkObject has an owner connection. IsOwner is true on the machine
+  that owns it. Your own LobbyClient = the one where IsOwner is true.
+
+SyncVar
+  A value the server sets and FishNet copies to every client automatically.
+      public readonly SyncVar<bool> ready = new SyncVar<bool>();
+      ready.Value = true;          // only works on the server
+      ready.OnChange += MyMethod;  // runs on clients when it changes
+  OnChange gives (previous, next, asServer). On the host it fires twice (once
+  as server, once as client) - we skip the asServer one for UI refreshes.
+
+ServerRpc  (client -> server)
+  A method marked [ServerRpc] is called on a client but RUNS ON THE SERVER.
+  This is how a client asks for a change: SetReady(true) runs on the server,
+  which then sets the SyncVar. By default only the owner of the object can call
+  it (RequireOwnership = true), so players can't change each other's values.
+
+ObserversRpc  (server -> all clients)
+  A method marked [ObserversRpc] is called on the server and runs on every
+  client. Used for one-off events ("the match is starting").
+
+PlayerSpawner
+  Component on the NetworkManager. Spawns one copy of a prefab for every player
+  that connects (ours: Assets/Prefabs/Lobby/LobbyClient.prefab).
+
+Transport
+  The part of FishNet that actually sends bytes. FishNet doesn't care which one
+  is used, so swapping transports (Tugboat -> Unity Transport) didn't change
+  any lobby/game code. Only ConnectionScript knows about it.
+
+Scene loading
+  Network scene changes go through FishNet's SceneManager, not Unity's:
+      InstanceFinder.SceneManager.LoadGlobalScenes(new SceneLoadData("Board")
+          { ReplaceScenes = ReplaceOption.All });
+  "Global" = everyone connected loads it. Only the server can call this.
+  Normal SceneManager.LoadScene is still used for offline scene changes
+  (main menu <-> lobby).
+
+
+-------------------------------------------------------------------------------
+2b. UNITY RELAY + LOBBY CODES - HOW IT WORKS
+-------------------------------------------------------------------------------
+
+Why a relay: home routers block incoming connections, so a guest normally
+can't reach the host's computer (that's why IP joining needed port
+forwarding). With Relay, BOTH players connect out to a Unity relay server,
+which passes messages between them.
+
+Where the code comes from: Relay itself makes it. All of this is in
+ConnectionScript:
+
+  Sign in (SignInAsync)
+    Relay only talks to signed-in players. We sign in ANONYMOUSLY, players
+    never see it. Each launch uses a random profile name, so two copies of
+    the game on one PC (Multiplayer Play Mode, two builds) count as different
+    players.
+      UnityServices.InitializeAsync(options)
+      AuthenticationService.Instance.SignInAnonymouslyAsync()
+
+  Host (HostAsync)
+    1. RelayService.Instance.CreateAllocationAsync(1)
+         reserves a spot on a relay server for 1 guest
+    2. RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId)
+         gets the short code pointing at that reservation
+    3. unityTransport.SetRelayServerData(allocation.ToRelayServerData("dtls"))
+         tells the transport to go through that relay ("dtls" = encrypted)
+    4. start server + client like before. The host's own client talks to the
+       server locally, only the guest goes through the relay.
+
+  Join (JoinAsync)
+    1. RelayService.Instance.JoinAllocationAsync(code)  -> finds the host's spot
+    2. unityTransport.SetRelayServerData(joinAllocation.ToRelayServerData("dtls"))
+    3. start client.
+
+async / await
+  Talking to Unity's servers takes a moment. "async" methods let the game keep
+  running while waiting; "await" continues the method once the answer comes.
+  Failures come back as exceptions, so LobbyManager.ConnectButton wraps the
+  calls in try/catch and shows ConnectionScript.GetErrorMessage(...).
+  After an await the scene might be gone (player pressed back), so the code
+  checks "if (this == null) return;".
+
+Codes
+  Typed codes are cleaned up by ConnectionScript.NormalizeCode (no spaces,
+  capitals). The code field only accepts letters/numbers and capitalises
+  them. A code stops working once the host leaves.
+
+
+-------------------------------------------------------------------------------
+3. THE LOBBY - HOW IT WORKS
+-------------------------------------------------------------------------------
+
+Flow
+  Main Menu, play mode screen
+    Nickname field at the top (TitleScreen.nicknameField). Saved as it's typed
+    into GameData.nickname + PlayerPrefs "nickname". Used for bot matches too.
+    "Host Match" -> TitleScreen.CreateOnlineMatchButton -> loads "Lobby" scene.
+    "Join Lobby" -> TitleScreen.JoinOnlineLobbyButton -> the button is swapped
+    for a small row: code field + Join button + cross to cancel (Enter also
+    joins). Join -> GameData.joinCode = typed code -> loads "Lobby" scene.
+    If joining fails the lobby sends the player back here: the row opens again
+    with the code still in it and the error above it (GameData.menuMessage).
+
+  Lobby scene, CONNECTING
+    Nothing to type. LobbyManager.Start -> ConnectNextFrame -> Connect():
+      host  -> HostAsync
+      guest -> JoinAsync(GameData.joinCode)
+    A loading screen covers this. Our LobbyClient spawns -> lobby screen.
+    Host error  -> CONNECT SCREEN with the error + "Open lobby" retry button.
+    Guest error -> back to the main menu code row with the message
+                   (LobbyManager.ReturnToMainMenu(message)).
+    Back arrow -> main menu.
+
+  Lobby scene, LOBBY SCREEN (appears once your own LobbyClient is spawned)
+    Two player cards: left = host (seat 0), right = guest (seat 1).
+    Empty seat shows "Waiting for player..." with a spinner.
+    Ready button switches between ready / not ready. Faded and not clickable
+    until the other player has joined (the server also refuses SetReady(true)
+    with only one player).
+    Start button: host only, clickable only when both players are ready.
+    Back arrow = leave -> main menu. If the host leaves, the lobby closes and
+    the guest is sent to the main menu with "The host closed the lobby".
+    Host sees the lobby code on a sticky note, with a Copy button (puts it on
+    the clipboard, ready to paste into Discord).
+
+  Start pressed
+    host client --RequestStartMatch (ServerRpc)--> server
+    server re-checks both players are in and ready, stops accepting players,
+    sends MatchStartingRpc (ObserversRpc) to everyone
+    every client saves seat + nicknames into GameData, resets PlayerConfig
+    server waits matchStartDelay (1.2s), then loads Board for everyone.
+
+Files
+  Assets/Scripts/LobbyScripts/ConnectionScript.cs   (on the NetworkManager)
+    - HostAsync() -> returns the lobby code, JoinAsync(code), Leave(),
+      Shutdown(). joinCode = code of the lobby we host.
+    - SignInAsync, NormalizeCode, GetErrorMessage (see 2b)
+    - Turns away a 3rd player and anyone joining after the match started
+      (OnRemoteConnectionState -> conn.Disconnect)
+    - Events for the UI: OnLocalConnectionStarted, OnLocalConnectionStopped
+    - maxPlayers = 2
+
+  Assets/Scripts/LobbyScripts/LobbyClient.cs        (on LobbyClient.prefab)
+    - One per connected player. Networked.
+    - SyncVars: nickname, ready, seat (0 host, 1 guest)
+    - Server assigns the seat in OnStartServer (host's own connection = 0,
+      otherwise first free seat)
+    - ServerRpcs: SetNickname, SetReady, RequestStartMatch
+    - ObserversRpc: MatchStartingRpc
+    - LobbyClient.all = every LobbyClient on this machine,
+      GetLocal() = yours, GetBySeat(i)
+    - When a player leaves, the server un-readies the remaining player.
+
+  Assets/Scripts/LobbyScripts/LobbyManager.cs       (Lobby scene, Managers)
+    - Plain MonoBehaviour, NOT networked. Draws the UI from LobbyClient values.
+    - Refresh() is called whenever a SyncVar changes or a player joins/leaves.
+    - Server side: TryStartMatchServer() + loading the Board scene.
+    - Error messages before connecting (ConnectionScript.GetErrorMessage):
+        "No lobby with that code"                    - Relay doesn't know the code
+        "Couldn't reach the online service..."       - no internet / Unity down
+        "Too many tries, wait a moment..."           - Relay rate limit
+    - Error messages after a disconnect (OnLocalConnectionStopped):
+        "The host closed the lobby"            - we were in, connection dropped
+        "Couldn't join, the lobby is full..."  - connected, got kicked at once
+        "Couldn't connect to the lobby..."     - Relay found it, connecting failed
+
+  Assets/Scripts/LobbyScripts/LobbyPanel.cs         (each player card)
+    - Show(client, isLocal): nickname/status/"You" tag, empty seat look,
+      pop animation when a player joins or gets ready.
+
+  Assets/Scripts/GameData.cs
+    - nickname, nicknamePrefKey, maxNicknameLength (16)
+    - GetDisplayNickname(): nickname -> saved nickname -> "Player"
+    - hostingLobby, joinCode, menuMessage (main menu <-> lobby)
+    - localSeat, seatNicknames (read these in the Board later)
+
+  Assets/Scripts/Main Menu Scripts/TitleScreen.cs
+    - Nickname field (loads/saves PlayerPrefs)
+    - Join code row: JoinOnlineLobbyButton, OpenJoinCodeRow, CloseJoinCodeRow,
+      JoinWithCodeButton. On Start, if GameData.menuMessage is set, jumps
+      straight to the play mode screen with the row open and the message.
+    - Lobby buttons; Start() shuts down a leftover NetworkManager when you come
+      back to the menu after an online match.
+
+  Assets/Scripts/Player.cs (Board)
+    - InitPlayer sets playerName + the name on the player UI from
+      GameData.GetDisplayNickname() for the local player. Bots name
+      themselves in AIOpponent. (Online opponent name will come from
+      GameData.seatNicknames in the match step.)
+
+Lifetime of the NetworkManager
+  Created with the Lobby scene. Survives into Board. Destroyed by
+  ConnectionScript.Shutdown() when going back to the main menu (lobby back
+  arrow, or TitleScreen.Start). That way entering the lobby again always gives a
+  fresh one and there are never two.
+
+
+-------------------------------------------------------------------------------
+4. WHERE TO CHANGE THINGS
+-------------------------------------------------------------------------------
+
+  Lobby texts (hints, errors)     LobbyManager.Refresh / OnLocalConnectionStopped
+  Max nickname length             GameData.maxNicknameLength
+  When Ready is allowed           LobbyManager.Refresh (button) +
+                                    LobbyClient.SetReady (server check)
+  Default nickname ("Player 1")   LobbyClient.DefaultNickname
+  Who may press start             LobbyClient.RequestStartMatch (seat check)
+  Start conditions                LobbyManager.TryStartMatchServer
+  Delay before Board loads        LobbyManager.matchStartDelay (inspector)
+  Which scene the match uses      LobbyManager.LoadBoardAfterDelay ("Board")
+  Max players / kicking           ConnectionScript.maxPlayers, OnRemoteConnectionState
+  Relay connection type           ConnectionScript.relayConnectionType ("dtls")
+  Error texts for codes           ConnectionScript.GetErrorMessage
+  Code note / copy button         LobbyManager.Refresh, CopyCodeButton
+  Transport settings              UnityTransport component on the NetworkManager
+
+Adding a new synced lobby value (example: chosen color)
+  1. LobbyClient: public readonly SyncVar<int> color = new SyncVar<int>();
+  2. Subscribe it in OnStartNetwork / unsubscribe in OnStopNetwork
+     (color.OnChange += OnValueChanged;) so the UI refreshes.
+  3. Add a [ServerRpc] SetColor(int value) { color.Value = value; }
+  4. Call LobbyClient.GetLocal().SetColor(x) from the UI.
+  5. Show it in LobbyPanel.Show.
+  6. If the board needs it, copy it into GameData in LobbyManager.OnMatchStarting.
+
+
+-------------------------------------------------------------------------------
+5. TESTING
+-------------------------------------------------------------------------------
+
+Needs an internet connection (Relay is online even when testing on one PC).
+
+Two players on one computer: Multiplayer Play Mode (already in the project)
+  Window > Multiplayer > Multiplayer Play Mode, tick Player 2. Open the Main
+  Menu scene and press Play. In one window press Host Match, press Copy on
+  the code note, in the other Join Lobby -> paste the code -> Join.
+
+Don't pause the editor while in a lobby for long: Relay drops players that
+go quiet ("player timed out due to inactivity"). With "Error Pause" turned on
+in the Console, that error pauses the editor again and again.
+
+Two computers anywhere: host sends the code (Copy -> paste in Discord), the
+other player types it in. No port forwarding needed.
+
+
+-------------------------------------------------------------------------------
+6. KNOWN LIMITS / TODO
+-------------------------------------------------------------------------------
+
+  - The Board is NOT networked yet. After Start, both players load Board and
+    each plays their own bot match (PlayerConfigObj.offlineMatch is still set
+    to true in LobbyManager.OnMatchStarting - flip it in the match step).
+  - LobbyClient objects are destroyed when Board loads. Seat and nicknames
+    survive in GameData.
+  - If a player disconnects during the 1.2s before Board loads, Board still
+    loads for whoever is left.
+  - No LAN/offline fallback: without internet you can't host. (FishNet's
+    Multipass could run Tugboat next to Unity Transport if this is ever needed.)
+  - Relay free tier has usage limits, check the Unity dashboard if the game
+    gets lots of players.
+  - FishyUnityTransport was last updated April 2025 (made for FishNet 4.5);
+    works with our FishNet 4.6.12 as tested. If a FishNet update breaks it,
+    look there first.
+
+
+-------------------------------------------------------------------------------
+CHANGELOG
+-------------------------------------------------------------------------------
+
+2026-10-30  Lobby
+  - Rebuilt the Lobby scene and added it to Build Settings.
+  - Wired Main Menu "Host Match" / "Join Lobby" to the lobby.
+  - Rewrote LobbyClient, LobbyManager, LobbyPanel, ConnectionScript.
+    Removed the old character-select toggles. Old MainMenu.cs (connect screen
+    of the old lobby) deleted, its job moved into LobbyManager.
+  - Seats are given from free slots (old version counted up forever and broke
+    when someone rejoined). 3rd player / late joiners get turned away.
+  - Start loads Board for both players through FishNet.
+
+2026-10-30  Lobby codes (Unity Relay)
+  - Swapped Tugboat for Unity Transport (FishyUnityTransport adapter) on the
+    NetworkManager. Hosting/joining now goes through Unity Relay.
+  - ConnectionScript: HostAsync/JoinAsync with anonymous sign-in, error
+    messages. IP code removed.
+  - Connect screen: IP field -> lobby code field. Host's sticky note shows the
+    code + Copy button.
+  - Tested: hosting gets a code from Relay, Copy works, a wrong code shows
+    "No lobby with that code".
+
+2026-10-30  Nickname moved to the main menu
+  - Nickname field moved from the lobby connect screen to the main menu play
+    mode screen (above Vs Bot / Join Lobby / Host Match).
+  - Host Match now opens the lobby right away (nothing left to type).
+  - Board: the local player's name plate shows the nickname (bot and online).
+
+2026-10-30  Join code in the main menu, ready rules
+  - Join Lobby now opens a small code row in the main menu (code field, Join,
+    cross). The lobby connect screen has no inputs any more, it's only a
+    waiting screen; guests who fail to join go back to the code row with the
+    error and their code.
+  - Leaving the lobby goes to the main menu for both players.
+  - Ready can't be pressed while alone in the lobby (button + server check).

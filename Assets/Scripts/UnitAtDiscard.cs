@@ -32,17 +32,12 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] float fallGravity = 2200f;
     [SerializeField] float fallSpin = 160f;
 
-    [Header("flinching")]
-    [SerializeField] float flinchSquash = 0.04f;
-    [SerializeField] float flinchTime = 0.25f;
-
     [HideInInspector] public Card storedCard;
     bool discarded = false;
     [HideInInspector] public bool lockInteraction = false;
     Vector3 defaultScale;
     Vector3 spriteRestScale;
     Vector3 spriteRestPos;
-    Coroutine flinchRoutine;
     List<GameObject> cutHalves = new List<GameObject>();
 
     private void Awake()
@@ -76,6 +71,8 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     void OnHover(bool isHover)
     {
         if (discarded || lockInteraction) return; // only during player's turn
+        // no new previews while a cut is playing out, the window closes under the cursor and the preview would get stuck
+        if (isHover && !GameManager.instance.discardManager.discardAvailable) return;
 
         // moving discard pointer over it 
         GameManager.instance.discardManager.discardPointer.SetActive(isHover);
@@ -150,15 +147,6 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     // ===============
     // JUICE ANIMATIONS
     // ===============
-
-    /// <summary>
-    /// Quick squash when the scissor rat's pointer lands on the unit
-    /// </summary>
-    public void Flinch()
-    {
-        if (flinchRoutine != null) StopCoroutine(flinchRoutine);
-        flinchRoutine = StartCoroutine(Animations.instance.SquashStretch(sprite.transform, spriteRestScale, flinchSquash, flinchTime));
-    }
 
     /// <summary>
     /// Unit shakes harder and harder right before getting cut
