@@ -67,7 +67,6 @@ MonoBehaviour:
   flyUpSpeed: 1400
   flyGravity: 4000
   flyRotationSpeed: 540
-  flyGrowth: 0.8
   maxFlyTime: 3
   respawnDelay: 0.4
   popTime: 0.3
@@ -100,6 +99,18 @@ PrefabInstance:
     - target: {fileID: 896052788308803070, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3816037528428192265, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3816037528428192265, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3816037528428192265, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6285550666014230733, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
       propertyPath: m_IsActive
@@ -188,6 +199,18 @@ PrefabInstance:
     - target: {fileID: 7669909242915234565, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
       propertyPath: m_Name
       value: unitSprite
+      objectReference: {fileID: 0}
+    - target: {fileID: 8886614617400461206, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8886614617400461206, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8886614617400461206, guid: db0ba6f92950ba6468981f79d37dbf26, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

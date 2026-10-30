@@ -114,7 +114,7 @@ public class MenuDoodle : MonoBehaviour, IPointerClickHandler
         CartoonShakeEffect[] idleShakes = GetComponents<CartoonShakeEffect>();
         foreach (CartoonShakeEffect idleShake in idleShakes) idleShake.StopAnim(true);
 
-        //AudioManager.instance.PlaySFX("HitSFX");
+        AudioManager.instance.PlaySFX("GainPowerSFX", 0.7f);
 
         // flying off the screen (speeds are in canvas pixels, so they are converted to world space for the shared animation)
         float canvasScale = rect.parent.lossyScale.x;

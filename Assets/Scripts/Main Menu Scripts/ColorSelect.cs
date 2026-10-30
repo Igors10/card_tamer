@@ -31,7 +31,7 @@ public class ColorSelect : MonoBehaviour
 
         // making the pencil reflect player color
         pencil.color = TitleScreen.instance.playerConfigObj.playerColor;
-        ColorMenuDoodles();
+        //ColorMenuDoodles();
     }
     void InitColorWindow()
     {
@@ -84,7 +84,7 @@ public class ColorSelect : MonoBehaviour
         AudioManager.instance.PlaySFX("ColorPickSFX");
 
         // coloring doodles
-        ColorMenuDoodles();
+        //ColorMenuDoodles();
 
         // closing the window
         colorWindow.SetActive(false);
