@@ -70,6 +70,16 @@ public class PowerCounter : MonoBehaviour
     }
 
     /// <summary>
+    /// Applies the player's color again (online opponent picks it after the counter is set up)
+    /// </summary>
+    public void RefreshColor()
+    {
+        powerTextColor = Colors.instance.BlendColor(player.playerColor, 0.25f);
+        powerText.color = powerTextColor;
+        counterBG.color = player.playerColor;
+    }
+
+    /// <summary>
     /// Resetting values to default
     /// </summary>
     public void ResetCounter()

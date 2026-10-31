@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
 using Unity.Multiplayer.Playmode;
 
@@ -22,7 +23,13 @@ public class GameManager : MonoBehaviour
     public List<GameStateData> gameStates = new List<GameStateData>();
     public List<GameObject> gameStateUI = new List<GameObject>();
     public bool yourTurn;
+    [HideInInspector] public Player firstPlayer; // starts every placing phase. Offline always the player, online chosen by the server
+    bool matchStarted; // online matches wait for MatchNetwork to start them
+    [HideInInspector] public int stateNr; // counts state transitions, online commands wait until both games are in the same state
+    [HideInInspector] public bool waitingForRemote; // online: the other player's turn, their next move can be applied
     [HideInInspector] public bool gameOver;
+    [HideInInspector] public bool opponentLeft;
+    [SerializeField] float opponentLeftMenuDelay = 2f; // online: how long "left the match" stays on the fog before going to the main menu
     public int roundNr = 1;
 
     [Header("Managers")]
@@ -78,14 +85,85 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // in offline matches player always goes first
-        if (playerConfig.offlineMatch) StartTurn();
+        if (playerConfig.offlineMatch)
+        {
+            firstPlayer = player;
+            matchStarted = true;
+            StartTurn();
+        }
         StartCoroutine(StartGame());
+    }
+
+    private void OnEnable()
+    {
+        // host hears it from the server, the guest from its own connection stopping (host left or connection lost)
+        ConnectionScript.OnRemotePlayerLeft += OnOpponentLeft;
+        ConnectionScript.OnLocalConnectionStopped += OnLocalConnectionStopped;
+    }
+
+    private void OnDisable()
+    {
+        ConnectionScript.OnRemotePlayerLeft -= OnOpponentLeft;
+        ConnectionScript.OnLocalConnectionStopped -= OnLocalConnectionStopped;
+    }
+
+    void OnLocalConnectionStopped(bool wasConnected) => OnOpponentLeft();
+
+    /// <summary>
+    /// Online: the other player is gone. Before the match starts back to the main menu, during it the game ends
+    /// </summary>
+    void OnOpponentLeft()
+    {
+        if (playerConfig.offlineMatch || opponentLeft) return;
+        opponentLeft = true;
+
+        // left after the game ended, nobody to restart with
+        if (gameOver) { managerUI.EnableRematch(false); return; }
+
+        string message = opponent.playerName + " left the match";
+        Debug.Log("GameManager: " + message);
+
+        if (!matchStarted) StartCoroutine(OpponentLeftBeforeStart(message));
+        else
+        {
+            gameOver = true;
+            managerUI.GameOverScreen(opponent, message);
+        }
+    }
+
+    IEnumerator OpponentLeftBeforeStart(string message)
+    {
+        loadingFog.StartLoading(message);
+        yield return new WaitForSeconds(opponentLeftMenuDelay);
+        SceneManager.LoadScene("Main Menu");
+    }
+
+    /// <summary>
+    /// Online: called on both players by MatchNetwork once both have loaded the Board
+    /// </summary>
+    public void StartOnlineMatch(int seed, int firstSeat)
+    {
+        GameRandom.Init(seed);
+        firstPlayer = (firstSeat == GameData.localSeat) ? player : opponent;
+        Debug.Log("GameManager: online match started, seat " + firstSeat + " goes first, you are seat " + GameData.localSeat);
+
+        matchStarted = true;
+        StartTurn();
     }
 
     IEnumerator StartGame()
     {
-        // Loading fog fading away effect
         loadingFog.gameObject.SetActive(true);
+
+        // online, the fog stays until the other player has loaded too
+        if (!matchStarted)
+        {
+            loadingFog.StartLoading("Waiting for opponent...");
+            while (!matchStarted) yield return null;
+            loadingFog.StopLoading();
+        }
+
+        // Loading fog fading away effect
         yield return StartCoroutine(loadingFog.LoadingAnimation(loadingTime));
 
         // "workshop" text
@@ -113,6 +191,10 @@ public class GameManager : MonoBehaviour
 
         // Changing the state
         currentState = newState;
+        stateNr++;
+
+        // online both games should be exactly the same here, the server compares them
+        if (!playerConfig.offlineMatch) MatchNetwork.instance.CheckSync();
 
         // Enabling new UI 
         managerUI.EnableUI(true);
@@ -180,8 +262,9 @@ public class GameManager : MonoBehaviour
         // trigger the event
         OnStateTransition?.Invoke();
 
-        // player always begins first
-        player.StartTurn();
+        // placing starts with the first player, in the other states the player acts right away
+        Player startingPlayer = (currentState == GameState.PLACING) ? firstPlayer : player;
+        startingPlayer.StartTurn();
     }
 
     void RoundEnd()
@@ -227,6 +310,45 @@ public class GameManager : MonoBehaviour
         CheckEndState();
     }
    
+    /// <summary>
+    /// Online: the other player's turn. Waits until their moves arrive over the network
+    /// </summary>
+    public void StartRemoteTurn()
+    {
+        Debug.Log("GameManager: [" + opponent.playerName + "] (online) starting the turn.");
+
+        yourTurn = false;
+        waitingForRemote = true;
+
+        // updating UI
+        readyButton.gameObject.SetActive(false);
+        managerUI.NewHint("It's your opponents turn");
+        managerUI.UpdateTurnMessage();
+    }
+
+    /// <summary>
+    /// Online: the other player's turn ended (their move arrived over the network)
+    /// </summary>
+    public void EndRemoteTurn()
+    {
+        // we're done with this state, so the opponent goes again or the state ends
+        if (player.endStateReady) CheckEndState();
+
+        // in the workshop both act at the same time, so it can already be our turn
+        else if (!yourTurn) player.StartTurn();
+    }
+
+    /// <summary>
+    /// Player is finished with the current state (ready button). Online it arrives as a command for both players
+    /// </summary>
+    public void PlayerReady(Player p)
+    {
+        p.endStateReady = true;
+
+        if (p.isRemote) EndRemoteTurn();
+        else EndTurn();
+    }
+
     public void StartTurn()
     {
         Debug.Log("GameManager: [" + player.playerName + "] starting the turn.");
@@ -248,8 +370,14 @@ public class GameManager : MonoBehaviour
                 if (player.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
 
                 // automatically pressing "Finish placing" when no more cards in hand
-                else if (player.cardsInHand.Count <= 0) 
-                { 
+                // online it's sent like a button press, the other game has to know too (and checks its own hand itself)
+                else if (player.cardsInHand.Count <= 0 && !playerConfig.offlineMatch)
+                {
+                    readyButton.gameObject.SetActive(false);
+                    MatchNetwork.instance.SendReady();
+                }
+                else if (player.cardsInHand.Count <= 0)
+                {
                     player.endStateReady = true;
 
                     // checking if opponent has any cards left, ending their turn right away if has no cards

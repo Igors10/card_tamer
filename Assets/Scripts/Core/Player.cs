@@ -55,6 +55,7 @@ public class Player : MonoBehaviour
     public bool isAI;
     public Color playerColor = Color.green;
     [HideInInspector] public bool isOpponent;
+    [HideInInspector] public bool isRemote; // online opponent, controlled by the other player's game
 
     [Header("resources")]
     [HideInInspector] public int[] food = new int[3];
@@ -75,8 +76,9 @@ public class Player : MonoBehaviour
 
         // checking if its AI
         AIplayer = GetComponent<AIOpponent>();
-        if (AIplayer != null ) isAI = true;
+        if (AIplayer != null && config.offlineMatch) isAI = true; // online the AIOpponent removes itself
         if (GameManager.instance.opponent == this) isOpponent = true;
+        if (isOpponent && !config.offlineMatch) isRemote = true;
 
         // heatlh
         health = GameManager.instance.startingMaxHealth;
@@ -90,12 +92,20 @@ public class Player : MonoBehaviour
         }
 
         // player color
-        if (!isAI) playerColor = config.playerColor;
+        if (!isAI && !isRemote) playerColor = config.playerColor;
 
         // nickname chosen in the main menu (bots set their own name in AIOpponent)
         if (!isAI && !isOpponent)
         {
             playerName = GameData.GetDisplayNickname();
+            playerUI.playerName.text = playerName;
+        }
+
+        // online opponent's nickname from the lobby (seats are 0 and 1, so the other seat is 1 - ours)
+        if (isRemote)
+        {
+            playerName = GameData.seatNicknames[1 - GameData.localSeat];
+            if (string.IsNullOrEmpty(playerName)) playerName = "Player";
             playerUI.playerName.text = playerName;
         }
 
@@ -123,6 +133,7 @@ public class Player : MonoBehaviour
         }
 
         if (isAI) AIplayer.AIEndTurn();
+        else if (isRemote) GameManager.instance.EndRemoteTurn();
         else GameManager.instance.EndTurn();
     }
 
@@ -137,6 +148,7 @@ public class Player : MonoBehaviour
         StartTurnEvents();
 
         if (isAI) AIplayer.AIStartTurn();
+        else if (isRemote) GameManager.instance.StartRemoteTurn();
         else GameManager.instance.StartTurn();
     }
 

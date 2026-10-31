@@ -23,7 +23,7 @@ Transport: Unity Transport through Unity Relay, with lobby codes.
 Two players: one HOSTS (their game is the server AND a client at the same time),
 the other JOINS by typing the host's lobby code (6 letters/numbers, e.g. K7Q2XB).
 
-Planned model for the match itself (not built yet) - the "command model":
+Model for the match itself - the "command model" (details in 3c):
   - Clients never change the game directly. They send intents ("play card 7 in
     lane 2") to the server.
   - The server checks them, numbers them and sends them to BOTH clients.
@@ -33,8 +33,10 @@ Planned model for the match itself (not built yet) - the "command model":
   - Nothing like HP or unit power is sent over the network, only player
     decisions + one random seed at the start.
 
-Done so far: main menu -> lobby -> both players land in the Board scene.
-Gameplay randomness is ready for the shared seed (GameRandom, see 2c).
+Done so far: main menu -> lobby -> both players land in the same Board match
+with the same seed, the opponent's nickname and a random starting player
+(section 3b). Commands work: Ready, workshop results, play card, targets
+(3c).
 
 
 -------------------------------------------------------------------------------
@@ -259,7 +261,7 @@ Files
     - nickname, nicknamePrefKey, maxNicknameLength (16)
     - GetDisplayNickname(): nickname -> saved nickname -> "Player"
     - hostingLobby, joinCode, menuMessage (main menu <-> lobby)
-    - localSeat, seatNicknames (read these in the Board later)
+    - localSeat, seatNicknames (read in the Board)
 
   Assets/Scripts/MainMenu/TitleScreen.cs
     - Nickname field (loads/saves PlayerPrefs)
@@ -269,17 +271,199 @@ Files
     - Lobby buttons; Start() shuts down a leftover NetworkManager when you come
       back to the menu after an online match.
 
-  Assets/Scripts/Core/Player.cs (Board)
-    - InitPlayer sets playerName + the name on the player UI from
-      GameData.GetDisplayNickname() for the local player. Bots name
-      themselves in AIOpponent. (Online opponent name will come from
-      GameData.seatNicknames in the match step.)
-
 Lifetime of the NetworkManager
   Created with the Lobby scene. Survives into Board. Destroyed by
   ConnectionScript.Shutdown() when going back to the main menu (lobby back
   arrow, or TitleScreen.Start). That way entering the lobby again always gives a
   fresh one and there are never two.
+
+
+-------------------------------------------------------------------------------
+3b. THE MATCH START (Board)
+-------------------------------------------------------------------------------
+
+Flow
+  LobbyManager.OnMatchStarting sets PlayerConfigObj.offlineMatch = false.
+  Board loads. Each player's fog shows "Waiting for opponent...".
+  Each client: MatchNetwork.OnStartClient -> ClientLoaded (ServerRpc)
+  Server: once both clients have loaded, picks a seed (GameRandom.NewSeed)
+    and a random starting seat, sends StartMatchRpc (ObserversRpc).
+  Each client: GameManager.StartOnlineMatch(seed, firstSeat)
+    -> GameRandom.Init(seed), firstPlayer = player or opponent, fog lifts.
+
+Sides
+  Each machine sees itself as GameManager.player and the other seat as
+  GameManager.opponent. Seat -> side: firstSeat == GameData.localSeat means
+  "player goes first". Opponent nickname = GameData.seatNicknames[1 - localSeat].
+
+Turns
+  GameManager.firstPlayer starts every placing phase (offline: always the
+  player). Workshop/battle start with the local player as before.
+  Online opponent: Player.isRemote = true (isAI is false, AIOpponent removes
+  itself). Player.StartTurn on a remote player calls
+  GameManager.StartRemoteTurn: "opponent's turn", waitingForRemote = true,
+  the game waits for their command. Player.EndTurn on a remote player calls
+  GameManager.EndRemoteTurn (works like AIOpponent.AIEndTurn).
+
+Files
+  Assets/Scripts/Network/MatchNetwork.cs  (scene object "MatchNetwork" in
+    Board, has a NetworkObject). Does nothing in bot matches, since no
+    network is running there.
+  Assets/Scripts/Core/GameManager.cs  StartOnlineMatch, StartRemoteTurn,
+    firstPlayer, waits in StartGame until the match starts.
+  Assets/Scripts/Core/Player.cs  isRemote, opponent nickname in InitPlayer.
+
+
+-------------------------------------------------------------------------------
+3c. COMMANDS (MatchNetwork)
+-------------------------------------------------------------------------------
+
+Flow
+  Local decision (e.g. ReadyButton.ButtonClick, online)
+    -> MatchNetwork.SendReady() -> CommandServer (ServerRpc)
+  Server: sets the sender's seat (remembered from ClientLoaded), gives the
+    next number, sends CommandRpc (ObserversRpc) to both.
+  Each client: puts it in commandQueue. MatchNetwork.Update applies them in
+    order, once CanApply says the game is at the right point.
+  The sender doesn't apply its own move before it comes back, so both games
+  apply everything in the same order through the same code.
+
+MatchCommand (struct, FishNet sends it as is)
+  number   order from the server. Clients log an error if one is skipped.
+  seat     who made it (set by the server, not trusted from the client).
+  stateNr  GameManager.stateNr when it was made (+1 on every state change).
+  type     CommandType enum. Add new commands here.
+  index, cardName, abilityName, color, abilityColor, layer1, layer2
+           values, which ones are used depends on the type (see the struct).
+           Unused ones stay empty and cost almost nothing.
+
+CanApply (when a command waits in the queue)
+  - stateNr is ahead of ours: the other player got to the next state first
+    (skipped animations), wait until we're there.
+  - ChooseTarget: only while this game is asking for a target
+    (ExecuteManager.targetOptions != null), whoever sent it.
+  - own commands: apply right away.
+  - other player's StopDice: once their dice are rolling here.
+  - other player's: only in the workshop (both act at once) or while
+    waitingForRemote (their turn here too). Apply clears waitingForRemote,
+    so nothing else of theirs runs while their move is still animating.
+
+Ready (CommandType.Ready)
+  GameManager.PlayerReady(p): endStateReady = true, then EndTurn (local) or
+  EndRemoteTurn (remote). Offline the ReadyButton calls PlayerReady directly.
+  Placing with an empty hand: GameManager.StartTurn auto-sends Ready online
+  (offline it also readies an opponent with an empty hand, online each game
+  does that for its own player).
+
+Play card (CommandType.PlayCard: index = card in hand, lane = Player.fields)
+  Field.PlayCard checks the rules (mouse over the field, free slot,
+  CanPlayCard). Online it then only sends the command: sets
+  player.cardPlayed (no second drag while waiting), hides Ready, returns
+  true. The card is hidden (SetActive false) until the command returns,
+  PlayCardNow shows it again.
+  Field.PlayCardNow does the actual play (must play special, random lane
+  with GameRandom, spawn, ability). Offline and bot cards go straight there;
+  online MatchNetwork.ApplyPlayCard calls it on both games.
+  The play ends in ExecuteManager -> card.player.EndTurn(), which for the
+  remote player goes to GameManager.EndRemoteTurn.
+
+Dice (CommandType.StopDice: index = how many dice)
+  Rolling dice wait in D6.rollingDice (oldest first). The bot's stop by
+  themselves. A click stops all of the local player's rolling dice
+  (D6.StopDice) and online sends StopDice with the count. The other game
+  keeps the remote player's dice rolling until the command comes (CanApply
+  waits until that many of their dice are rolling there), then stops the
+  oldest ones. Value comes from GameRandom when a die stops, so both games
+  get the same numbers.
+
+Targets (CommandType.ChooseTarget: index = unit in targetOptions)
+  EffectContext.ChooseTarget -> ExecuteManager.ShowTargets(options, hint,
+  Owner). The effect's owner chooses (targetChooser): bot picks at random,
+  local player clicks (Unit.TargetOnClick, allowed while
+  ExecuteManager.LocalPlayerChooses), remote player's pick arrives as a
+  command. Online the click goes through ExecuteManager.PickTarget -> sends
+  the index, both games set effectTarget when it comes back.
+  Index works because the options list is built from FieldManager.unitList
+  in the same order on both games.
+
+Discard after battle (no command, it's random)
+  BattleManager end: online both picks are rolled up front with
+  DiscardManager.RollAutoDiscard, in seat order (host first), so both games
+  use GameRandom the same way. Own pick goes into
+  StartDiscardSequence(player, true, pick) -> AutoDiscard shows it, the
+  opponent's card is destroyed directly (like the bot's). Offline the pick
+  is still rolled at the end of the animation.
+
+Desync check (MatchNetwork.CheckSync)
+  At every state change (GameManager.TransitionGameState, before the new
+  state does anything) both games should be identical. Each sends a text
+  snapshot (GetSnapshot) to the server: state, round, GameRandom.CallCount,
+  and per seat (seat 0 first): hp, stars, random lane / must play special,
+  hand + knocked out card names, every lane's blocked count + units + power.
+  Server keeps the first one per stateNr and compares with the second.
+  Different -> DesyncRpc -> red error on both games with both snapshots.
+  Not after every command: commands land at different moments on the two
+  games (animations), only state changes are a common point.
+  Finding the cause: compare the two snapshots, then look for gameplay
+  code that ran on one game only or used UnityEngine.Random.
+
+Disconnects (GameManager.OnOpponentLeft)
+  How each side finds out:
+    host   ConnectionScript.OnRemotePlayerLeft (server saw the guest's
+           connection stop; turned away joiners are ignored via turnedAway)
+    guest  ConnectionScript.OnLocalConnectionStopped (host left, or this
+           player's own connection dropped - can't tell which)
+  What happens:
+    before the match started (fog) -> "<name> left the match" on the fog,
+      main menu after opponentLeftMenuDelay (2s)
+    during the match -> game over screen with that text (ManagerUI.
+      GameOverScreen customText), nothing else gets processed
+    after a normal game over -> the host's Restart button is hidden
+  Leaving yourself (settings exit, game over menu button) loads the main
+  menu, TitleScreen.Start shuts the network down, the other side gets the
+  event above.
+
+Restart (ManagerUI.Rematch)
+  Online only the host sees the Restart button (ManagerUI.GameOverScreen ->
+  EnableRematch), and only while the opponent is still there.
+  Click -> ConnectionScript.RestartMatch: the server loads the empty
+  "Rematch" scene for everyone, then Board again (FishNet can't reload a
+  scene that's already open on clients). The new Board starts like the first
+  one: MatchNetwork waits for both, new seed and new starting seat.
+  Offline it just reloads Board.
+
+Workshop results (PickColor, CreateCard, DiscardFromHand)
+  Exception to "nothing before it comes back": the workshop only changes
+  your own hand and both players work at the same time, so the sender's game
+  applies it right away (existing workshop code) and sends the command.
+  MatchNetwork.Apply only runs these for the remote player.
+  Order still holds: they're sent before your Ready, so the other game gets
+  your cards before it hears you're done.
+  - PickColor: WorkshopColorSelect.LockPencilChoice. Other game sets the
+    opponent's playerColor (+ PowerCounter.RefreshColor).
+  - CreateCard: Workshop.CreateNewCard, sent before CardGenerator.CreateCard.
+      ability  sent by asset name -> CardGenerator.GetAbilityByName
+      art      drawing: both layers as PNG bytes (256x256, a few KB;
+               FishNet splits big reliable messages itself)
+               empty canvas: index of the preset in
+               CardDatabase.GetAllPresets() (sets in order, basic then special)
+      colors   second color + ability color as they are.
+    Other game builds the same CreatureObj and calls CreateCard for the
+    opponent (hand full check is the same on both).
+  - DiscardFromHand: DiscardManager.DiscardUnitSequence (only the workshop
+    "destroy for a coin", not the random discard after battle). Sends the
+    card's index in cardsInHand, other game calls DestroyCard on it (counts
+    as a dead unit there too).
+  Hand order matters: indexes only work because both games add/remove the
+  same cards in the same order.
+  Not sent: shop stars (the opponent's stars don't affect this game).
+
+Adding a command (example: play card)
+  1. Add to CommandType, add fields to MatchCommand if it needs values.
+  2. MatchNetwork: public SendX(...) that fills a MatchCommand + SendCommand.
+  3. MatchNetwork.Apply: case CommandType.X -> call the existing game code
+     for the right Player (p).
+  4. Online, the UI calls SendX instead of the game code.
 
 
 -------------------------------------------------------------------------------
@@ -300,7 +484,12 @@ Lifetime of the NetworkManager
   Error texts for codes           ConnectionScript.GetErrorMessage
   Code note / copy button         LobbyManager.Refresh, CopyCodeButton
   Transport settings              UnityTransport component on the NetworkManager
-  Gameplay random numbers         GameRandom (seeded in GameManager.Awake)
+  Gameplay random numbers         GameRandom (seeded in GameManager.Awake,
+                                    online in StartOnlineMatch)
+  Who starts placing              MatchNetwork.ClientLoaded (firstSeat)
+  New command types               CommandType / MatchNetwork.Apply (see 3c)
+  When a command may run          MatchNetwork.CanApply
+  Online restart                  ConnectionScript.RestartMatch (+ "Rematch" scene)
 
 Adding a new synced lobby value (example: chosen color)
   1. LobbyClient: public readonly SyncVar<int> color = new SyncVar<int>();
@@ -335,13 +524,17 @@ other player types it in. No port forwarding needed.
 6. KNOWN LIMITS / TODO
 -------------------------------------------------------------------------------
 
-  - The Board is NOT networked yet. After Start, both players load Board and
-    each plays their own bot match (PlayerConfigObj.offlineMatch is still set
-    to true in LobbyManager.OnMatchStarting - flip it in the match step).
+  - All player decisions of a round are synced, desync check and
+    disconnects are in. No reconnecting: a dropped player can't come back.
+  - A desync is only reported, the match keeps going.
+  - Both players can pick the same color.
+  - Between pressing Ready and the command coming back, the player can
+    still act (short window, button is disabled).
   - LobbyClient objects are destroyed when Board loads. Seat and nicknames
     survive in GameData.
   - If a player disconnects during the 1.2s before Board loads, Board still
-    loads for whoever is left.
+    loads for whoever is left. The leave happened before the Board existed,
+    so the host can still end up waiting in the fog (rare).
   - No LAN/offline fallback: without internet you can't host. (FishNet's
     Multipass could run Tugboat next to Unity Transport if this is ever needed.)
   - Relay free tier has usage limits, check the Unity dashboard if the game

@@ -6836,6 +6836,106 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6773031840635954642, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
   m_PrefabInstance: {fileID: 259275793114704191}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &482754169
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 482754172}
+  - component: {fileID: 482754171}
+  - component: {fileID: 482754170}
+  m_Layer: 0
+  m_Name: MatchNetwork
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &482754170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 482754169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 309a4399abb5b884db871aa0fd20ca47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MatchNetwork
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 482754171}
+  _networkObjectCache: {fileID: 0}
+--- !u!114 &482754171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 482754169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: FishNet.Runtime::FishNet.Object.NetworkObject
+  <IsNested>k__BackingField: 0
+  WasActiveDuringEdit: 1
+  WasActiveDuringEdit_Set1: 1
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours: []
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 65535
+  <SpawnableCollectionId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 0
+  <SceneId>k__BackingField: 3621714359
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
+--- !u!4 &482754172
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 482754169}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &485405392 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5117308535725399448, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
@@ -7376,7 +7476,12 @@ MonoBehaviour:
   - {fileID: 1205934170}
   - {fileID: 1178084109}
   yourTurn: 0
+  firstPlayer: {fileID: 0}
+  stateNr: 0
+  waitingForRemote: 0
   gameOver: 0
+  opponentLeft: 0
+  opponentLeftMenuDelay: 2
   roundNr: 1
   handManager: {fileID: 1715698343}
   cardGenerator: {fileID: 925892070}
@@ -7397,7 +7502,7 @@ MonoBehaviour:
   loadingTime: 5
   player: {fileID: 1425032168}
   opponent: {fileID: 1541516079}
-  startingMaxHealth: 12
+  startingMaxHealth: 3
   startingStars: 0
   startingResourceAmount: 3
   startingCardAmount: 4
@@ -14149,6 +14254,11 @@ PrefabInstance:
 --- !u!224 &1117281625 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7423255778726383183, guid: aae08212a53ab094793d05053c85ba4c, type: 3}
+  m_PrefabInstance: {fileID: 1117281624}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1117281626 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8639052861695258448, guid: aae08212a53ab094793d05053c85ba4c, type: 3}
   m_PrefabInstance: {fileID: 1117281624}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1122556826
@@ -22108,6 +22218,7 @@ MonoBehaviour:
   zoomIntensity: 0.45
   zoomTime: 1.75
   effectTarget: {fileID: 0}
+  targetOptions: []
 --- !u!1 &1869680609
 GameObject:
   m_ObjectHideFlags: 0
@@ -23244,8 +23355,8 @@ MonoBehaviour:
   fadeInTime: 2
   gameOverBG: {fileID: 510724990}
   gameOverText: {fileID: 514733097}
-  wonText: You won!
-  lostText: You lost :(
+  lostText: Game over
+  rematchButton: {fileID: 1117281626}
 --- !u!1 &1992214180 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4456329943502181235, guid: 77a7f08427eda37498cc18cb0d94ec37, type: 3}
@@ -27261,3 +27372,4 @@ SceneRoots:
   - {fileID: 1490732176}
   - {fileID: 3479834730825725008}
   - {fileID: 1113416502}
+  - {fileID: 482754172}

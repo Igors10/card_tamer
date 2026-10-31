@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Turbo
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 2
-  abilityDescription: +1 power when a unit with 2 power enters play
+  abilityDescription: +1 power when a card with 2 or less power is played
   isSpecial: 0
   effects:
   - rid: 1006
@@ -24,10 +24,11 @@ MonoBehaviour:
       type: {class: SpawnedWithPowerEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 4
-        customText: '<color=red>+1</color> power'
+        customText: <color=red>+1</color> power
         showPresentation: 1
         oncePerRound: 0
         neededPower: 2
+        check: 1
         spawnedBy: 2
         receiver: 1
         amount: 1

@@ -38,3 +38,57 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
 
 2026-10-31  Shared randomness (match step 1)
   - Added GameRandom for gameplay rolls. Not networked yet.
+
+2026-10-31  Match start (match step 2)
+  - MatchNetwork in Board: waits for both players, sends the seed + a random
+    starting seat. Online opponent is a remote player with their nickname.
+  - offlineMatch is now false for online matches.
+
+2026-10-31  Commands + Ready (match step 3)
+  - MatchNetwork: command queue (MatchCommand, CommandType). Server sets
+    seat + number, both clients apply in order, gated by stateNr and turn.
+  - Ready button goes through the server online (GameManager.PlayerReady).
+    Empty-hand auto-ready in placing is sent as Ready too.
+  - GameManager.EndRemoteTurn, stateNr, waitingForRemote. Remote players'
+    Player.EndTurn hands the turn back properly.
+
+2026-10-31  Workshop results (match step 4)
+  - New commands PickColor, CreateCard, DiscardFromHand. Sender applies
+    them right away, only the other game applies the command.
+  - Cards are sent as name + ability name + colors + drawing PNGs (or a
+    preset index). CardGenerator.GetAbilityByName, CardDatabase.GetAllPresets.
+  - Opponent's color now comes from their pencil pick.
+
+2026-10-31  Play card (match step 5)
+  - PlayCard command (hand index + lane). Field.PlayCard split into the
+    rule check (sends online) and Field.PlayCardNow (the play itself).
+  - Remote player's die stops on its own like the bot's.
+
+2026-10-31  Targets (match step 6)
+  - ChooseTarget command (index in the target options). The effect's owner
+    now chooses the target (was: whoever's turn it is).
+  - ExecuteManager.targetOptions / PickTarget / LocalPlayerChooses.
+
+2026-10-31  Discard after battle (match step 7)
+  - Both players' random discards are rolled in seat order at battle end
+    (DiscardManager.RollAutoDiscard), the opponent's card is destroyed
+    on this game too. No command needed.
+
+2026-10-31  Desync check (match step 8)
+  - Both games send a text snapshot at every state change, the server
+    compares them and logs both on a mismatch (MatchNetwork.CheckSync).
+
+2026-10-31  Disconnects (match step 9)
+  - ConnectionScript.OnRemotePlayerLeft (server side, ignores turned away
+    joiners). GameManager handles it + the guest's connection stopping:
+    fog -> main menu, mid match -> game over "<name> left the match".
+  - Online Rematch goes to the main menu.
+
+2026-10-31  Fixes after first test
+  - Restart online: host only, reloads Board for both through the new empty
+    Rematch scene (ConnectionScript.RestartMatch). Hidden for the guest and
+    once the opponent has left.
+  - Dice: new StopDice command. The opponent's dice keep rolling on your
+    screen until they click (was: stopped on a timer, result showed early).
+  - Played card is hidden while its PlayCard command is on the way (was:
+    jumped back to the hand for a moment).

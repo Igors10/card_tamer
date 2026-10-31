@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Nurture
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 3
+  power: 4
   abilityDescription: Units that enter play with 2 or less power get +2 power
   isSpecial: 0
   effects:
@@ -24,7 +24,7 @@ MonoBehaviour:
       type: {class: SpawnedWithPowerEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 4
-        customText: '<color=red>+2</color> power'
+        customText: <color=red>+2</color> power
         showPresentation: 1
         oncePerRound: 0
         neededPower: 2

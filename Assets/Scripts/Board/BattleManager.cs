@@ -240,12 +240,24 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
             RatSmart.instance.discardingExplained = true;
         }
 
+        // online both discards are rolled now in seat order (host first), so both games get the same numbers and destroy the same cards
+        DiscardManager discardManager = GameManager.instance.discardManager;
+        int playerPick = -1;
+        int opponentPick = -1;
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            if (GameData.localSeat == 0) { playerPick = discardManager.RollAutoDiscard(GameManager.instance.player); opponentPick = discardManager.RollAutoDiscard(GameManager.instance.opponent); }
+            else { opponentPick = discardManager.RollAutoDiscard(GameManager.instance.opponent); playerPick = discardManager.RollAutoDiscard(GameManager.instance.player); }
+        }
+
         // Discarding a card
         GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false);
-        if (GameManager.instance.player.cardsInDiscard.Count > 0) 
-            yield return StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(GameManager.instance.player, true));
+        if (GameManager.instance.player.cardsInDiscard.Count > 0)
+            yield return StartCoroutine(discardManager.StartDiscardSequence(GameManager.instance.player, true, playerPick));
         // AI opponent discards a card
         if (GameManager.instance.opponent.isAI) GameManager.instance.opponent.GetComponent<AIOpponent>().DiscardOpponentUnit();
+        // online opponent's discard (rolled above, shown on their own screen)
+        else if (opponentPick >= 0) GameManager.instance.opponent.cardsInDiscard[opponentPick].DestroyCard();
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;

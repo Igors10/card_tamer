@@ -400,8 +400,7 @@ public class LobbyManager : MonoBehaviour
 
         // fresh card config like in offline matches
         playerConfig.ResetCardConfig();
-        // TODO (online match step): set to false once the board is networked. For now each player plays their own bot match
-        playerConfig.offlineMatch = true;
+        playerConfig.offlineMatch = false;
 
         AudioManager.instance.PlaySFX("StartGameSFX");
         StartCoroutine(CoverScreen(null));

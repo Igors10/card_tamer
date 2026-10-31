@@ -54,7 +54,19 @@ public class DiscardManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public IEnumerator StartDiscardSequence(Player player, bool randomDiscard)
+    /// <summary>
+    /// Picks which knocked out card gets destroyed (index in cardsInDiscard), -1 if there are none
+    /// </summary>
+    public int RollAutoDiscard(Player player)
+    {
+        if (player.cardsInDiscard.Count == 0) return -1;
+        return GameRandom.Range(0, player.cardsInDiscard.Count);
+    }
+
+    /// <summary>
+    /// presetPick: card already rolled with RollAutoDiscard (online), -1 rolls it at the end of the animation
+    /// </summary>
+    public IEnumerator StartDiscardSequence(Player player, bool randomDiscard, int presetPick = -1)
     {
         // little pause before enabling the discards
         if (randomDiscard) yield return new WaitForSeconds(beforeDiscardTime);
@@ -75,7 +87,7 @@ public class DiscardManager : MonoBehaviour
         discardText.text = hintMessage;
 
         if (randomDiscard && GameManager.instance.player.cardsInDiscard.Count == 0) StartCoroutine(FinishDiscard());
-        else if (randomDiscard) StartCoroutine(AutoDiscard(player));
+        else if (randomDiscard) StartCoroutine(AutoDiscard(player, presetPick));
 
         // not finishing the coroutine before the discard is finished so that the battle phase doesnt change for the shop
         while (discarding) { yield return null; }
@@ -189,7 +201,7 @@ public class DiscardManager : MonoBehaviour
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-    public IEnumerator AutoDiscard(Player player)
+    public IEnumerator AutoDiscard(Player player, int presetPick = -1)
     {
         yield return Animations.instance.SkippablePause(beforeDiscardTime);
         Debug.Log("DiscardManager: auto discard started");
@@ -220,7 +232,7 @@ public class DiscardManager : MonoBehaviour
 
 
         // choosing random unit, letting it tremble for a moment and discarding it
-        int randomUnitID = GameRandom.Range(0, currentUnits.Count);
+        int randomUnitID = (presetPick >= 0) ? presetPick : GameRandom.Range(0, currentUnits.Count);
         UnitAtDiscard chosenUnit = currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>();
         MovePointer(chosenUnit.transform.position, false, pointerEndPitch);
         yield return chosenUnit.Tremble(finalTrembleTime, finalTrembleIntensity);
@@ -254,6 +266,10 @@ public class DiscardManager : MonoBehaviour
         string newHintMessage = unit.storedCard.cardData.name + " is destroyed";
         if (!currentDiscardRandom) newHintMessage += " for +1 coin";
         discardText.text = newHintMessage;
+
+        // online the other game destroys the same card (workshop discard only, the knocked out discard isn't sent yet)
+        if (!currentDiscardRandom && !GameManager.instance.playerConfig.offlineMatch)
+            MatchNetwork.instance.SendDiscardFromHand(unit.storedCard.player.cardsInHand.IndexOf(unit.storedCard));
 
         // removing the card from game
         unit.storedCard.DestroyCard();

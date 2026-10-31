@@ -1,5 +1,6 @@
 using GameKit.Dependencies.Utilities;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -21,6 +22,7 @@ public class D6 : MonoBehaviour
     [SerializeField] float rollDistance;
     [SerializeField] float rotationSpeed;
     [HideInInspector] public bool clickable;
+    static readonly List<D6> rollingDice = new List<D6>(); // dice waiting for a click (or the online opponent's StopDice), oldest first
 
     [Header("juice")]
     [SerializeField] float hopHeight = 22f; // how high the die bounces while rolling
@@ -41,6 +43,13 @@ public class D6 : MonoBehaviour
     {
         sprite.color = unit.card.player.playerColor;
     }
+
+    private void OnDisable()
+    {
+        // disabled or destroyed mid roll (also the Board being reloaded)
+        rollingDice.Remove(this);
+        rolling = false;
+    }
     public IEnumerator RollAnimation()
     {
         Vector3 diceStartingPos = transform.position;
@@ -54,18 +63,19 @@ public class D6 : MonoBehaviour
         // randomly picking dice values while it is rolling
         StartCoroutine(RandomizeDiceValue());
 
-        // automatically stop the die after some time if its AI
+        // automatically stop the die after some time if its AI (only the final roll counts, so timing doesn't matter)
         if (unit.card.player.isAI)
         {
             yield return new WaitForSeconds(rollingTime);
             rolling = false;
         }
-        // way for input if it is player
+        // wait for input if it is player (online opponent: until their StopDice command comes)
         else
         {
+            rollingDice.Add(this);
             while (rolling)
             {
-                yield return null;   
+                yield return null;
             }
         }
 
@@ -154,10 +164,39 @@ public class D6 : MonoBehaviour
         sprite.rectTransform.localScale = Vector3.one * (1 + facePunch);
     }
 
-    // Die stops rolling when player clicks anywhere
+    // Dice stop rolling when player clicks anywhere
     void DiceInput()
     {
-        if (Input.GetButtonDown("Fire1") && unit.card.player == GameManager.instance.player) { rolling = false; Debug.Log("ShopManager: star appearance anim skipped"); }
+        Player owner = unit.card.player;
+        if (!Input.GetButtonDown("Fire1") || owner != GameManager.instance.player) return;
+
+        // the oldest rolling die handles the click for all of the player's dice
+        int count = CountRolling(owner);
+        if (count == 0 || rollingDice.Find(die => die.unit.card.player == owner) != this) return;
+
+        StopDice(owner, count);
+        if (!GameManager.instance.playerConfig.offlineMatch) MatchNetwork.instance.SendStopDice(count);
+    }
+
+    /// <summary>
+    /// Player's dice that are rolling and waiting to be stopped
+    /// </summary>
+    public static int CountRolling(Player owner)
+    {
+        return rollingDice.FindAll(die => die.unit.card.player == owner).Count;
+    }
+
+    /// <summary>
+    /// Stops the player's oldest rolling dice (online the opponent's dice stop when their command comes)
+    /// </summary>
+    public static void StopDice(Player owner, int count)
+    {
+        foreach (D6 die in rollingDice.FindAll(die => die.unit.card.player == owner))
+        {
+            if (count-- <= 0) break;
+            die.rolling = false;
+            rollingDice.Remove(die);
+        }
     }
 
     void RotateDice()

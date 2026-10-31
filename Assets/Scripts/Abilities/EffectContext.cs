@@ -61,7 +61,7 @@ public class EffectContext
         if (options.Count == 0) yield break;
 
         ExecuteManager executeManager = GameManager.instance.executeManager;
-        yield return executeManager.ShowTargets(options, hint);
+        yield return executeManager.ShowTargets(options, hint, Owner);
         chosenTarget = executeManager.GetTarget();
     }
 }

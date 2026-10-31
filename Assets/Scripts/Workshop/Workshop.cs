@@ -415,9 +415,10 @@ public class Workshop : MonoBehaviour
         newCardData = newCardData = generator.ConstructNewCard(nameInput.text, newCardSprites, chosenAbility, chosenSecondColor, chosenAbilityColor);
 
         // if the canvas is empty applying a random unit sprite and name instead
+        UnitPreset randomUnitPreset = null;
         if (drawingCanvas.IsCanvasEmpty())
         {
-            UnitPreset randomUnitPreset = (chosenAbility.isSpecial) ? GameManager.instance.cardDatabase.GetRandomSpecialPreset() : GameManager.instance.cardDatabase.GetRandomBasicPreset();
+            randomUnitPreset = (chosenAbility.isSpecial) ? GameManager.instance.cardDatabase.GetRandomSpecialPreset() : GameManager.instance.cardDatabase.GetRandomBasicPreset();
             // presets are made with the darker second color in mind (same as AI cards)
             newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, Colors.instance.GetDarkenColor(player.playerColor), chosenAbilityColor);
         }
@@ -430,6 +431,9 @@ public class Workshop : MonoBehaviour
 
             return;
         }
+
+        // online the other game creates the same card in this player's hand
+        if (!GameManager.instance.playerConfig.offlineMatch) MatchNetwork.instance.SendCreateCard(newCardData, randomUnitPreset, canvasTextures);
 
         generator.CreateCard(newCardData, GameManager.instance.player);
 

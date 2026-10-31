@@ -190,6 +190,29 @@ public class Field : MonoBehaviour
 
         // must play special effect only lasts for one card
         if (!player.CanPlayCard(cardPlayed)) return false;
+
+        // online the move goes to the server first, both games play it when it comes back (MatchNetwork -> PlayCardNow)
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            player.cardPlayed = true; // no second card while waiting
+            GameManager.instance.readyButton.gameObject.SetActive(false);
+            HighlightField(false);
+            MatchNetwork.instance.SendPlayCard(player.cardsInHand.IndexOf(cardPlayed), System.Array.IndexOf(player.fields, this));
+            cardPlayed.gameObject.SetActive(false); // hidden until it comes back, so it doesn't jump back to the hand
+            return true;
+        }
+
+        PlayCardNow(cardPlayed, player);
+        return true;
+    }
+
+    /// <summary>
+    /// Plays the card on this field, the rules are already checked
+    /// </summary>
+    public void PlayCardNow(Card cardPlayed, Player player)
+    {
+        cardPlayed.gameObject.SetActive(true); // online it was hidden while waiting for the server
+
         if (player.mustPlaySpecial)
         {
             player.mustPlaySpecial = false;
@@ -215,9 +238,6 @@ public class Field : MonoBehaviour
 
         Debug.Log("Field: a " + cardPlayed.cardData.name + " has been spawned");
         HighlightField(false);
-
-        // Returns true if the unit was spawned
-        return true;
     }
 
     public void RefreshFieldVisuals(bool fadeColor = false)

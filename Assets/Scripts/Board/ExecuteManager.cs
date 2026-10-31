@@ -28,7 +28,15 @@ public class ExecuteManager : MonoBehaviour
     public List<IEnumerator> rollEffectStack = new List<IEnumerator>();
     public List<IEnumerator> battleOverEffectStack = new List<IEnumerator>();
     public Unit effectTarget;
+    [HideInInspector] public List<Unit> targetOptions; // units that can be chosen right now, null when nothing is being targeted
+    Player targetChooser; // owner of the effect, picks the target
+    bool targetSent; // online: the click is on its way to the server
     public AbilityRunner abilityRunner { get; private set; }
+
+    /// <summary>
+    /// True while the local player has to pick a target
+    /// </summary>
+    public bool LocalPlayerChooses => targetOptions != null && targetChooser == GameManager.instance.player;
 
     private void OnEnable()
     {
@@ -157,9 +165,15 @@ public class ExecuteManager : MonoBehaviour
     /// </summary>
     /// <param name="units"></param>
     /// <returns></returns>
-    public IEnumerator ShowTargets(List<Unit> units, string targetingDesc)
+    public IEnumerator ShowTargets(List<Unit> units, string targetingDesc, Player chooser = null)
     {
         Debug.Log("ExecuteManager: potential targets: " + units.Count);
+
+        // the effect's owner chooses (without one, whoever's turn it is)
+        if (chooser == null) chooser = GameManager.instance.GetCurrentPlayer();
+        targetOptions = units;
+        targetChooser = chooser;
+        targetSent = false;
 
         // chaning hint text
         string savedHintText = GameManager.instance.managerUI.hintMessage.text;
@@ -171,11 +185,11 @@ public class ExecuteManager : MonoBehaviour
             units[i].EnableTarget(true);
         }
 
-        // wait until player chooses a target
+        // wait until player chooses a target (online opponent's choice arrives through MatchNetwork)
         while (effectTarget == null && units.Count > 0)
         {
             // immediately choose a target if it's an AI opponent
-            if (GameManager.instance.yourTurn == false && GameManager.instance.opponent.isAI)
+            if (chooser.isAI)
             {
                 Debug.Log("ExecuteManager: AI chose a card");
                 effectTarget = units[Random.Range(0, units.Count)];
@@ -185,6 +199,8 @@ public class ExecuteManager : MonoBehaviour
         }
 
         if (effectTarget != null) Debug.Log("ExecuteManager: target chosen: " + effectTarget.card.cardName);
+        targetOptions = null;
+        targetChooser = null;
 
         // returning hint to what it was
         GameManager.instance.managerUI.NewHint(savedHintText);
@@ -208,6 +224,22 @@ public class ExecuteManager : MonoBehaviour
         {
             Unit throwawayUnit = GetTarget();
         }
+    }
+
+    /// <summary>
+    /// Local player clicked a target. Online the click goes to the server first, both games set the target when it comes back
+    /// </summary>
+    public void PickTarget(Unit unit)
+    {
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            if (targetSent) return;
+            targetSent = true;
+            MatchNetwork.instance.SendChooseTarget(targetOptions.IndexOf(unit));
+            return;
+        }
+
+        effectTarget = unit;
     }
 
     public Unit GetTarget(bool removeReferenceToTarget = true)

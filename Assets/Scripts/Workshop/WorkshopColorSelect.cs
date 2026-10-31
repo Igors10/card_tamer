@@ -101,6 +101,7 @@ public class WorkshopColorSelect : MonoBehaviour
         // locking the color
         GameManager.instance.player.playerColor = selectedPencil.pencilColorImage.color;
         GameManager.instance.player.config.playerColor = selectedPencil.pencilColorImage.color;
+        if (!GameManager.instance.playerConfig.offlineMatch) MatchNetwork.instance.SendPickColor(selectedPencil.pencilColorImage.color);
 
         // after locking the color game can create 3 secondary colors
         //Colors.instance.GenerateRandomSecondaryColors();

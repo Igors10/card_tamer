@@ -30,8 +30,8 @@ public class ManagerUI : MonoBehaviour
     [SerializeField] float fadeInTime;
     [SerializeField] Image gameOverBG;
     [SerializeField] TextMeshProUGUI gameOverText;
-    [SerializeField] string wonText;
     [SerializeField] string lostText;
+    [SerializeField] GameObject rematchButton;
 
     /// <summary>
     /// Makes a readOnly card version above specific unit
@@ -104,20 +104,24 @@ public class ManagerUI : MonoBehaviour
         turnMessageObj.SetActive(true);
     }
 
-    public void GameOverScreen(Player lostPlayer)
+    public void GameOverScreen(Player lostPlayer, string customText = null)
     {
-        Player winner = (lostPlayer == GameManager.instance.player) ? GameManager.instance.opponent : GameManager.instance.player;
+        // everything is shown from the local player's side
+        Player localPlayer = GameManager.instance.player;
 
         // creating game over text
         gameOverScreen.SetActive(true);
-        gameOverText.text = winner.playerName + " won!";
-        gameOverText.color = winner.playerColor;
+        gameOverText.text = customText ?? ((lostPlayer == localPlayer) ? lostText : localPlayer.playerName + " won!");
+        gameOverText.color = localPlayer.playerColor;
 
-        for (int i = 0; i < gameOverDoodles.Length && i < winner.cardsOnField.Count; i++)
+        // online only the host restarts (for both players), and only while the opponent is still there
+        if (!GameManager.instance.playerConfig.offlineMatch) EnableRematch(ConnectionScript.connectionManager.networkManager.IsServerStarted && !GameManager.instance.opponentLeft);
+
+        for (int i = 0; i < gameOverDoodles.Length && i < localPlayer.cardsOnField.Count; i++)
         {
             // copying sprites of units to doodles
             gameOverDoodles[i].gameObject.SetActive(true);
-            gameOverDoodles[i].RefreshSprite(winner.cardsOnField[i].cardData.unitSprite, winner.playerColor, winner.cardsOnField[i].cardData.secondaryColor);
+            gameOverDoodles[i].RefreshSprite(localPlayer.cardsOnField[i].cardData.unitSprite, localPlayer.playerColor, localPlayer.cardsOnField[i].cardData.secondaryColor);
         }
     }
 
@@ -128,7 +132,20 @@ public class ManagerUI : MonoBehaviour
 
     public void Rematch()
     {
+        // online the host's server loads a new Board for both players
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            EnableRematch(false); // no second click
+            ConnectionScript.connectionManager.RestartMatch();
+            return;
+        }
+
         SceneManager.LoadScene("Board");
+    }
+
+    public void EnableRematch(bool enable)
+    {
+        rematchButton.SetActive(enable);
     }
 
     public void EnableWorkshop(bool isEnable, bool moveWorkshopBG = true)

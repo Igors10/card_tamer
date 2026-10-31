@@ -78,6 +78,18 @@ public class CardGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// Finds an ability by its asset name (online, cards are sent with the ability's name)
+    /// </summary>
+    public AbilityObj GetAbilityByName(string abilityName)
+    {
+        if (defaultAbility.name == abilityName) return defaultAbility;
+
+        AbilityObj ability = basicAbilityList.abilityList.Find(a => a != null && a.name == abilityName);
+        if (ability == null) ability = specialAbilityList.abilityList.Find(a => a != null && a.name == abilityName);
+        return ability;
+    }
+
+    /// <summary>
     /// Looks up a specific card from the pool
     /// </summary>
     /// <param name="cardName"></param>

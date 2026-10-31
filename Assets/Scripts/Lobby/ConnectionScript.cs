@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using FishNet.Connection;
 using FishNet.Managing;
+using FishNet.Managing.Scened;
 using FishNet.Transporting;
 using FishNet.Transporting.UTP;
 using Unity.Services.Authentication;
@@ -19,6 +21,7 @@ public class ConnectionScript : MonoBehaviour
     public static ConnectionScript connectionManager;
     public const int maxPlayers = 2;
     const string relayConnectionType = "dtls"; // encrypted UDP through the relay
+    const string rematchScene = "Rematch";
 
     [HideInInspector] public bool acceptingPlayers = true; // switched off once the match starts, so nobody can join mid game
 
@@ -41,6 +44,12 @@ public class ConnectionScript : MonoBehaviour
     /// </summary>
     public static event Action<bool> OnLocalConnectionStopped;
 
+    /// <summary>
+    /// Server side: the other player disconnected (not someone who was turned away)
+    /// </summary>
+    public static event Action OnRemotePlayerLeft;
+    readonly HashSet<int> turnedAway = new HashSet<int>(); // ClientIds that got kicked, their disconnect isn't a player leaving
+
     private void Awake()
     {
         connectionManager = this;
@@ -62,6 +71,7 @@ public class ConnectionScript : MonoBehaviour
 
         if (networkManager.ServerManager != null) networkManager.ServerManager.OnRemoteConnectionState -= OnRemoteConnectionState;
         if (networkManager.ClientManager != null) networkManager.ClientManager.OnClientConnectionState -= OnClientConnectionState;
+        if (networkManager.SceneManager != null) networkManager.SceneManager.OnLoadEnd -= LoadBoardAfterRematchScene;
     }
 
     // ===============
@@ -119,6 +129,26 @@ public class ConnectionScript : MonoBehaviour
     {
         Leave();
         Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// Host only: loads a fresh Board for both players. FishNet can't reload a scene that is open on clients,
+    /// so it goes through the empty "Rematch" scene first
+    /// </summary>
+    public void RestartMatch()
+    {
+        if (!networkManager.IsServerStarted) return;
+
+        networkManager.SceneManager.OnLoadEnd += LoadBoardAfterRematchScene;
+        networkManager.SceneManager.LoadGlobalScenes(new SceneLoadData(rematchScene) { ReplaceScenes = ReplaceOption.All });
+    }
+
+    void LoadBoardAfterRematchScene(SceneLoadEndEventArgs args)
+    {
+        if (!args.QueueData.AsServer || args.LoadedScenes.Length == 0 || args.LoadedScenes[0].name != rematchScene) return;
+
+        networkManager.SceneManager.OnLoadEnd -= LoadBoardAfterRematchScene;
+        networkManager.SceneManager.LoadGlobalScenes(new SceneLoadData("Board") { ReplaceScenes = ReplaceOption.All });
     }
 
     // ===============
@@ -182,12 +212,19 @@ public class ConnectionScript : MonoBehaviour
     /// </summary>
     void OnRemoteConnectionState(NetworkConnection conn, RemoteConnectionStateArgs args)
     {
+        if (args.ConnectionState == RemoteConnectionState.Stopped)
+        {
+            if (!turnedAway.Remove(conn.ClientId)) OnRemotePlayerLeft?.Invoke();
+            return;
+        }
+
         if (args.ConnectionState != RemoteConnectionState.Started) return;
 
         // turning away a third player, or anyone joining after the match started
         if (!acceptingPlayers || networkManager.ServerManager.Clients.Count > maxPlayers)
         {
             Debug.Log("ConnectionScript: turning away connection " + conn.ClientId + ", lobby is full or the match has started");
+            turnedAway.Add(conn.ClientId);
             conn.Disconnect(true);
         }
     }

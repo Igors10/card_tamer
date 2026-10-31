@@ -20,14 +20,20 @@ public class AIOpponent : MonoBehaviour
     void Awake()
     {
         // Checking if match is offline
-        if (GameManager.instance.playerConfig.offlineMatch == false) Destroy(this);
-        else playerObj = GetComponent<Player>();
+        if (GameManager.instance.playerConfig.offlineMatch == false)
+        {
+            Destroy(this);
+            return;
+        }
+        playerObj = GetComponent<Player>();
 
         InitAIOpponent();
     }
 
     private void Start()
     {
+        if (playerObj == null) return; // removed itself in Awake (online match)
+
         // picking random color
         playerObj.playerColor = GameManager.instance.cardDatabase.allPlayerColors[Random.Range(0, GameManager.instance.cardDatabase.allPlayerColors.Count)];
     }

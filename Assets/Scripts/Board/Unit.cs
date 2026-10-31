@@ -720,15 +720,15 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     void TargetOnClick()
     {
-        if (!targeted || !GameManager.instance.yourTurn) return;
+        if (!targeted || !GameManager.instance.executeManager.LocalPlayerChooses) return;
 
-        GameManager.instance.executeManager.effectTarget = this;
+        GameManager.instance.executeManager.PickTarget(this);
         TargetOnHover(false);
     }
 
     void TargetOnHover(bool hoverOver)
     {
-        if (!targeted || !GameManager.instance.yourTurn) return;
+        if (!targeted || !GameManager.instance.executeManager.LocalPlayerChooses) return;
 
         transform.localScale = (hoverOver) ? hoveredScale : defaultScale;
         HighlightUnit(hoverOver);

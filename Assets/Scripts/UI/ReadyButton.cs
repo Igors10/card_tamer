@@ -27,24 +27,22 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         // playing soundeffect
         AudioManager.instance.PlaySFX("ButtonSFX");
 
-        // game state specific button click effects
-        switch (GameManager.instance.currentState)
-        {
-            case GameState.PLACING:
-                GameManager.instance.player.endStateReady = true;
-                break;
-
-            case GameState.BUYING:
-                GameManager.instance.player.endStateReady = true;
-                if (GameManager.instance.opponent.isAI) GameManager.instance.opponent.endStateReady = true;
-                break;
-        }
-
         // general buttom clicks effects
         buttonGlow.SetActive(false);
 
+        // online the press goes to the server first, both games apply it when it comes back (MatchNetwork)
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            button.interactable = false;
+            MatchNetwork.instance.SendReady();
+            return;
+        }
+
+        // bot finishes the workshop together with the player
+        if (GameManager.instance.currentState == GameState.BUYING && GameManager.instance.opponent.isAI) GameManager.instance.opponent.endStateReady = true;
+
         // ending the turn
-        GameManager.instance.EndTurn();
+        GameManager.instance.PlayerReady(GameManager.instance.player);
     }
 
     /// <summary>

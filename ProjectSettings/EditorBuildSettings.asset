@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Board.unity
     guid: db9ec0c423ef96e459e2ce8f07b05889
+  - enabled: 1
+    path: Assets/Scenes/Rematch.unity
+    guid: ea8b1ec4cb19cc34fbffe35a279f15f4
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
