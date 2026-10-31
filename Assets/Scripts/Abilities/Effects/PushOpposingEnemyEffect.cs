@@ -23,7 +23,7 @@ public class PushOpposingEnemyEffect : AbilityEffect
 
         // choosing which side to push to: left -1, right +1
         int side;
-        if (leftSlot >= 0 && rightSlot >= 0) side = (Random.value > 0.5f) ? -1 : 1;
+        if (leftSlot >= 0 && rightSlot >= 0) side = (GameRandom.Value() > 0.5f) ? -1 : 1;
         else side = (leftSlot >= 0) ? -1 : 1;
 
         // moving the enemy, and the unit behind it to the front

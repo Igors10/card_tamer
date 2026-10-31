@@ -220,7 +220,7 @@ public class DiscardManager : MonoBehaviour
 
 
         // choosing random unit, letting it tremble for a moment and discarding it
-        int randomUnitID = Random.Range(0, currentUnits.Count);
+        int randomUnitID = GameRandom.Range(0, currentUnits.Count);
         UnitAtDiscard chosenUnit = currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>();
         MovePointer(chosenUnit.transform.position, false, pointerEndPitch);
         yield return chosenUnit.Tremble(finalTrembleTime, finalTrembleIntensity);

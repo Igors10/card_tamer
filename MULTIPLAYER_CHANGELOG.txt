@@ -1,0 +1,40 @@
+CARDBOARDED - MULTIPLAYER CHANGELOG
+===================================
+What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
+
+2026-10-30  Lobby
+  - Rebuilt the Lobby scene and added it to Build Settings.
+  - Wired Main Menu "Host Match" / "Join Lobby" to the lobby.
+  - Rewrote LobbyClient, LobbyManager, LobbyPanel, ConnectionScript.
+    Removed the old character-select toggles. Old MainMenu.cs (connect screen
+    of the old lobby) deleted, its job moved into LobbyManager.
+  - Seats are given from free slots (old version counted up forever and broke
+    when someone rejoined). 3rd player / late joiners get turned away.
+  - Start loads Board for both players through FishNet.
+
+2026-10-30  Lobby codes (Unity Relay)
+  - Swapped Tugboat for Unity Transport (FishyUnityTransport adapter) on the
+    NetworkManager. Hosting/joining now goes through Unity Relay.
+  - ConnectionScript: HostAsync/JoinAsync with anonymous sign-in, error
+    messages. IP code removed.
+  - Connect screen: IP field -> lobby code field. Host's sticky note shows the
+    code + Copy button.
+  - Tested: hosting gets a code from Relay, Copy works, a wrong code shows
+    "No lobby with that code".
+
+2026-10-30  Nickname moved to the main menu
+  - Nickname field moved from the lobby connect screen to the main menu play
+    mode screen (above Vs Bot / Join Lobby / Host Match).
+  - Host Match now opens the lobby right away (nothing left to type).
+  - Board: the local player's name plate shows the nickname (bot and online).
+
+2026-10-30  Join code in the main menu, ready rules
+  - Join Lobby now opens a small code row in the main menu (code field, Join,
+    cross). The lobby connect screen has no inputs any more, it's only a
+    waiting screen; guests who fail to join go back to the code row with the
+    error and their code.
+  - Leaving the lobby goes to the main menu for both players.
+  - Ready can't be pressed while alone in the lobby (button + server check).
+
+2026-10-31  Shared randomness (match step 1)
+  - Added GameRandom for gameplay rolls. Not networked yet.

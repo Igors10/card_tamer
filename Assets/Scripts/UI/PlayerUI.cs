@@ -149,7 +149,7 @@ public class PlayerUI : MonoBehaviour
         // playing soundeffect
         AudioManager.instance.PlaySFX("GainResourceSFX");
 
-        FoodType type = (FoodType)UnityEngine.Random.Range(0, Enum.GetNames(typeof(FoodType)).Length);
+        FoodType type = (FoodType)GameRandom.Range(0, Enum.GetNames(typeof(FoodType)).Length);
         player.food[(int)type]++;
         StartCoroutine(TokenUpdateAnim(type, showing));
     }

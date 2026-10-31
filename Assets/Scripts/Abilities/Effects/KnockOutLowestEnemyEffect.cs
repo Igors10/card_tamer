@@ -33,6 +33,6 @@ public class KnockOutLowestEnemyEffect : AbilityEffect
         foreach (Unit unit in options) minPower = Mathf.Min(minPower, unit.card.currentPower);
 
         List<Unit> lowestUnits = options.FindAll(unit => unit.card.currentPower == minPower);
-        return lowestUnits[Random.Range(0, lowestUnits.Count)];
+        return lowestUnits[GameRandom.Range(0, lowestUnits.Count)];
     }
 }

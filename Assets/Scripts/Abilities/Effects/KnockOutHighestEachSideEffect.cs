@@ -36,6 +36,6 @@ public class KnockOutHighestEachSideEffect : AbilityEffect
         foreach (Unit unit in options) maxPower = Mathf.Max(maxPower, unit.card.currentPower);
 
         List<Unit> highestUnits = options.FindAll(unit => unit.card.currentPower == maxPower);
-        return highestUnits[Random.Range(0, highestUnits.Count)];
+        return highestUnits[GameRandom.Range(0, highestUnits.Count)];
     }
 }

@@ -1,7 +1,7 @@
 CARDBOARDED - MULTIPLAYER NOTES
 ===============================
 How online play is built, why it's built that way, and where to change things.
-Updated every time multiplayer is worked on (see CHANGELOG at the bottom).
+Updated every time multiplayer is worked on. History of changes: MULTIPLAYER_CHANGELOG.txt
 
 Networking library: FishNet (Assets/FishNet)
 Transport: Unity Transport through Unity Relay, with lobby codes.
@@ -34,6 +34,7 @@ Planned model for the match itself (not built yet) - the "command model":
     decisions + one random seed at the start.
 
 Done so far: main menu -> lobby -> both players land in the Board scene.
+Gameplay randomness is ready for the shared seed (GameRandom, see 2c).
 
 
 -------------------------------------------------------------------------------
@@ -148,6 +149,31 @@ Codes
 
 
 -------------------------------------------------------------------------------
+2c. SHARED RANDOMNESS (GameRandom)
+-------------------------------------------------------------------------------
+
+Both games must make the same random choices. UnityEngine.Random can't
+guarantee that: visual effects also use it, and how often they run depends on
+frame timing. So:
+  GameRandom          - changes the game AND runs on both machines
+  UnityEngine.Random  - visuals, or code only one machine runs (local
+                        Workshop, AI). Online, Workshop results are sent
+                        as commands.
+
+GameRandom (Assets/Scripts/Core/GameRandom.cs) wraps System.Random.
+  Init(seed)   same seed = same numbers. Called in GameManager.Awake with a
+               new seed; online it will get the host's seed.
+  Range(a, b)  int, b excluded.   Value()  float 0..1.   NewSeed()
+  Seed / CallCount  same seed but different CallCount = something rolled on
+                    only one machine.
+
+Uses it: D6 final roll, random lane (Field), random discard
+(DiscardManager.AutoDiscard), PlayerUI.AddRandomFoodToken, tie-breaks in
+KnockOutHighestEachSide, KnockOutLowestEnemy, SetLowestAllyPower,
+SwapHighestLowestPower, PushOpposingEnemy.
+
+
+-------------------------------------------------------------------------------
 3. THE LOBBY - HOW IT WORKS
 -------------------------------------------------------------------------------
 
@@ -192,7 +218,7 @@ Flow
     server waits matchStartDelay (1.2s), then loads Board for everyone.
 
 Files
-  Assets/Scripts/LobbyScripts/ConnectionScript.cs   (on the NetworkManager)
+  Assets/Scripts/Lobby/ConnectionScript.cs  (on the NetworkManager)
     - HostAsync() -> returns the lobby code, JoinAsync(code), Leave(),
       Shutdown(). joinCode = code of the lobby we host.
     - SignInAsync, NormalizeCode, GetErrorMessage (see 2b)
@@ -201,7 +227,7 @@ Files
     - Events for the UI: OnLocalConnectionStarted, OnLocalConnectionStopped
     - maxPlayers = 2
 
-  Assets/Scripts/LobbyScripts/LobbyClient.cs        (on LobbyClient.prefab)
+  Assets/Scripts/Lobby/LobbyClient.cs       (on LobbyClient.prefab)
     - One per connected player. Networked.
     - SyncVars: nickname, ready, seat (0 host, 1 guest)
     - Server assigns the seat in OnStartServer (host's own connection = 0,
@@ -212,7 +238,7 @@ Files
       GetLocal() = yours, GetBySeat(i)
     - When a player leaves, the server un-readies the remaining player.
 
-  Assets/Scripts/LobbyScripts/LobbyManager.cs       (Lobby scene, Managers)
+  Assets/Scripts/Lobby/LobbyManager.cs      (Lobby scene, Managers)
     - Plain MonoBehaviour, NOT networked. Draws the UI from LobbyClient values.
     - Refresh() is called whenever a SyncVar changes or a player joins/leaves.
     - Server side: TryStartMatchServer() + loading the Board scene.
@@ -225,17 +251,17 @@ Files
         "Couldn't join, the lobby is full..."  - connected, got kicked at once
         "Couldn't connect to the lobby..."     - Relay found it, connecting failed
 
-  Assets/Scripts/LobbyScripts/LobbyPanel.cs         (each player card)
+  Assets/Scripts/Lobby/LobbyPanel.cs        (each player card)
     - Show(client, isLocal): nickname/status/"You" tag, empty seat look,
       pop animation when a player joins or gets ready.
 
-  Assets/Scripts/GameData.cs
+  Assets/Scripts/Core/GameData.cs
     - nickname, nicknamePrefKey, maxNicknameLength (16)
     - GetDisplayNickname(): nickname -> saved nickname -> "Player"
     - hostingLobby, joinCode, menuMessage (main menu <-> lobby)
     - localSeat, seatNicknames (read these in the Board later)
 
-  Assets/Scripts/Main Menu Scripts/TitleScreen.cs
+  Assets/Scripts/MainMenu/TitleScreen.cs
     - Nickname field (loads/saves PlayerPrefs)
     - Join code row: JoinOnlineLobbyButton, OpenJoinCodeRow, CloseJoinCodeRow,
       JoinWithCodeButton. On Start, if GameData.menuMessage is set, jumps
@@ -243,7 +269,7 @@ Files
     - Lobby buttons; Start() shuts down a leftover NetworkManager when you come
       back to the menu after an online match.
 
-  Assets/Scripts/Player.cs (Board)
+  Assets/Scripts/Core/Player.cs (Board)
     - InitPlayer sets playerName + the name on the player UI from
       GameData.GetDisplayNickname() for the local player. Bots name
       themselves in AIOpponent. (Online opponent name will come from
@@ -274,6 +300,7 @@ Lifetime of the NetworkManager
   Error texts for codes           ConnectionScript.GetErrorMessage
   Code note / copy button         LobbyManager.Refresh, CopyCodeButton
   Transport settings              UnityTransport component on the NetworkManager
+  Gameplay random numbers         GameRandom (seeded in GameManager.Awake)
 
 Adding a new synced lobby value (example: chosen color)
   1. LobbyClient: public readonly SyncVar<int> color = new SyncVar<int>();
@@ -322,42 +349,3 @@ other player types it in. No port forwarding needed.
   - FishyUnityTransport was last updated April 2025 (made for FishNet 4.5);
     works with our FishNet 4.6.12 as tested. If a FishNet update breaks it,
     look there first.
-
-
--------------------------------------------------------------------------------
-CHANGELOG
--------------------------------------------------------------------------------
-
-2026-10-30  Lobby
-  - Rebuilt the Lobby scene and added it to Build Settings.
-  - Wired Main Menu "Host Match" / "Join Lobby" to the lobby.
-  - Rewrote LobbyClient, LobbyManager, LobbyPanel, ConnectionScript.
-    Removed the old character-select toggles. Old MainMenu.cs (connect screen
-    of the old lobby) deleted, its job moved into LobbyManager.
-  - Seats are given from free slots (old version counted up forever and broke
-    when someone rejoined). 3rd player / late joiners get turned away.
-  - Start loads Board for both players through FishNet.
-
-2026-10-30  Lobby codes (Unity Relay)
-  - Swapped Tugboat for Unity Transport (FishyUnityTransport adapter) on the
-    NetworkManager. Hosting/joining now goes through Unity Relay.
-  - ConnectionScript: HostAsync/JoinAsync with anonymous sign-in, error
-    messages. IP code removed.
-  - Connect screen: IP field -> lobby code field. Host's sticky note shows the
-    code + Copy button.
-  - Tested: hosting gets a code from Relay, Copy works, a wrong code shows
-    "No lobby with that code".
-
-2026-10-30  Nickname moved to the main menu
-  - Nickname field moved from the lobby connect screen to the main menu play
-    mode screen (above Vs Bot / Join Lobby / Host Match).
-  - Host Match now opens the lobby right away (nothing left to type).
-  - Board: the local player's name plate shows the nickname (bot and online).
-
-2026-10-30  Join code in the main menu, ready rules
-  - Join Lobby now opens a small code row in the main menu (code field, Join,
-    cross). The lobby connect screen has no inputs any more, it's only a
-    waiting screen; guests who fail to join go back to the code row with the
-    error and their code.
-  - Leaving the lobby goes to the main menu for both players.
-  - Ready can't be pressed while alone in the lobby (button + server check).

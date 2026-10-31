@@ -45,8 +45,8 @@ public class SwapHighestLowestPowerEffect : AbilityEffect
 
         List<Unit> highestUnits = options.FindAll(unit => unit.card.currentPower == maxPower);
         List<Unit> lowestUnits = options.FindAll(unit => unit.card.currentPower == minPower);
-        highest = highestUnits[Random.Range(0, highestUnits.Count)];
-        lowest = lowestUnits[Random.Range(0, lowestUnits.Count)];
+        highest = highestUnits[GameRandom.Range(0, highestUnits.Count)];
+        lowest = lowestUnits[GameRandom.Range(0, lowestUnits.Count)];
         return true;
     }
 }

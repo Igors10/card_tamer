@@ -204,7 +204,7 @@ public class Field : MonoBehaviour
             player.playerUI.Refresh();
 
             List<Field> freeFields = GameManager.instance.fieldManager.FindEmptyFields(player.fields);
-            if (freeFields.Count > 0) fieldToSpawnOn = freeFields[Random.Range(0, freeFields.Count)];
+            if (freeFields.Count > 0) fieldToSpawnOn = freeFields[GameRandom.Range(0, freeFields.Count)];
         }
 
         // spawn a creature

@@ -70,6 +70,9 @@ public class GameManager : MonoBehaviour
         // Making GameManager accessible from anywhere
         instance = this;
 
+        // fresh gameplay random numbers for every match (online, the host's seed will replace this)
+        GameRandom.Init(GameRandom.NewSeed());
+
         mainCamera = Camera.main.GetComponent<Viewpoint>();
     }
     void Start()

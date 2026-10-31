@@ -33,6 +33,6 @@ public class SetLowestAllyPowerEffect : AbilityEffect
         if (minPower >= newPower) return null;
 
         List<Unit> lowestUnits = options.FindAll(unit => unit.card.currentPower == minPower);
-        return lowestUnits[Random.Range(0, lowestUnits.Count)];
+        return lowestUnits[GameRandom.Range(0, lowestUnits.Count)];
     }
 }

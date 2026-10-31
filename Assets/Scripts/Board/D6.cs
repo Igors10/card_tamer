@@ -94,7 +94,8 @@ public class D6 : MonoBehaviour
         }*/
 
         // changing dice value again to prevent player from clicking at the correct value
-        diceValue = ChangeDiceValue();
+        // this is the only roll that counts, so it comes from GameRandom (same result for both players online)
+        diceValue = ChangeDiceValue(GameRandom.Range(1, 7));
 
         // snapping to correct position, rotation and scale
         transform.position = diceStartingPos;
@@ -181,15 +182,15 @@ public class D6 : MonoBehaviour
     {
         while (rolling)
         {
-            diceValue = ChangeDiceValue();
+            // just for show, how many faces flash by depends on timing
+            diceValue = ChangeDiceValue(Random.Range(1, 7));
             facePunch = faceChangePunch;
             yield return new WaitForSeconds(diceIntervals);
         }
     }
 
-    int ChangeDiceValue()
+    int ChangeDiceValue(int newDiceValue)
     {
-        int newDiceValue = Random.Range(1, 7);
         sprite.sprite = diceFaces[newDiceValue - 1];
 
         return newDiceValue;
