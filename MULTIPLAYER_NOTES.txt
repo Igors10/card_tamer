@@ -284,6 +284,9 @@ Lifetime of the NetworkManager
 
 Flow
   LobbyManager.OnMatchStarting sets PlayerConfigObj.offlineMatch = false.
+  (GameManager.Awake sets it back to true when no client connection is
+  running, so pressing Play in the Board scene is always a bot match.
+  GameManager runs at execution order -100, before Player/AIOpponent.)
   Board loads. Each player's fog shows "Waiting for opponent...".
   Each client: MatchNetwork.OnStartClient -> ClientLoaded (ServerRpc)
   Server: once both clients have loaded, picks a seed (GameRandom.NewSeed)

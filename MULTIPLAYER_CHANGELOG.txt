@@ -92,3 +92,5 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
     screen until they click (was: stopped on a timer, result showed early).
   - Played card is hidden while its PlayCard command is on the way (was:
     jumped back to the hand for a moment).
+  - Board started straight from the editor is a bot match again
+    (offlineMatch stayed false in the config asset after an online test).

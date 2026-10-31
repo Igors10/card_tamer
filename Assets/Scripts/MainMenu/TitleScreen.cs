@@ -28,6 +28,10 @@ public class TitleScreen : MonoBehaviour
     [SerializeField] TMP_InputField nicknameField; // used for both bot and online matches
     Coroutine panRoutine;
 
+    [Header("gallery screen")]
+    [SerializeField] GameObject galleryButton; // hidden until the player has saved a drawing
+    [SerializeField] GalleryMenu galleryMenu; // sits one screen width to the right of the title screen
+
     [Header("join lobby code")]
     [SerializeField] GameObject joinLobbyButton; // swapped for the code row when pressed
     [SerializeField] GameObject joinCodeRow;
@@ -68,6 +72,8 @@ public class TitleScreen : MonoBehaviour
         joinCodeGoButton.onClick.AddListener(JoinWithCodeButton);
         joinCodeCancelButton.onClick.AddListener(() => CloseJoinCodeRow(true));
         CloseJoinCodeRow(false);
+
+        galleryButton.SetActive(Gallery.HasPlayerDrawings());
 
         // the lobby sent us back with a problem (wrong code, host left...), showing it next to the code row
         if (GameData.menuMessage != "")
@@ -118,7 +124,7 @@ public class TitleScreen : MonoBehaviour
     /// <summary>
     /// Moves the view down to the play mode screen (bot, join lobby, create match)
     /// </summary>
-    public void OpenPlayModeScreen() => PanMenu(true);
+    public void OpenPlayModeScreen() => PanMenu(new Vector2(0f, ScreenSize.y));
 
     /// <summary>
     /// Moves the view back up to the title screen
@@ -127,8 +133,34 @@ public class TitleScreen : MonoBehaviour
     {
         if (panRoutine != null || currentTransition != null) return;
         CloseJoinCodeRow(false);
-        PanMenu(false);
+        PanMenu(Vector2.zero);
     }
+
+    // ===============
+    // GALLERY SCREEN
+    // ===============
+
+    /// <summary>
+    /// Moves the view right to the gallery
+    /// </summary>
+    public void OpenGalleryScreen()
+    {
+        if (panRoutine != null || currentTransition != null) return;
+        galleryMenu.Open();
+        PanMenu(new Vector2(-ScreenSize.x, 0f));
+    }
+
+    /// <summary>
+    /// Moves the view back to the title screen (the button hides if every drawing got deleted)
+    /// </summary>
+    public void CloseGalleryScreen()
+    {
+        if (panRoutine != null || currentTransition != null) return;
+        galleryButton.SetActive(galleryMenu.HasDrawings);
+        PanMenu(Vector2.zero);
+    }
+
+    Vector2 ScreenSize => ((RectTransform)menuPan.parent).rect.size;
 
     /// <summary>
     /// Saving the nickname as it's typed, so it's there for the match and next time the game starts
@@ -139,20 +171,20 @@ public class TitleScreen : MonoBehaviour
         PlayerPrefs.SetString(GameData.nicknamePrefKey, GameData.nickname);
     }
 
-    void PanMenu(bool down)
+    /// <summary>
+    /// Moves the pan so another screen is in view. Play mode screen sits one screen height below the title screen, the gallery one screen width to the right
+    /// </summary>
+    void PanMenu(Vector2 targetPos)
     {
         if (panRoutine != null || currentTransition != null) return;
 
         AudioManager.instance.PlaySFX("ButtonSFX");
-        panRoutine = StartCoroutine(PanMenuAnim(down));
+        panRoutine = StartCoroutine(PanMenuAnim(targetPos));
     }
 
-    IEnumerator PanMenuAnim(bool down)
+    IEnumerator PanMenuAnim(Vector2 targetPos)
     {
-        // play mode screen sits exactly one screen height below the title screen
-        float screenHeight = ((RectTransform)menuPan.parent).rect.height;
         Vector2 startPos = menuPan.anchoredPosition;
-        Vector2 targetPos = new Vector2(0f, down ? screenHeight : 0f);
 
         float t = 0;
         while (t < panTime)

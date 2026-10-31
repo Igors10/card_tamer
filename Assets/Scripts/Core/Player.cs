@@ -64,6 +64,12 @@ public class Player : MonoBehaviour
 
     [HideInInspector] public int damageTakenThisRound = 0;
 
+    private void Awake()
+    {
+        // health is set before any Start: PlayerUI.Start refreshes the healthbar, and 0 hp there looked like taking damage
+        health = GameManager.instance.startingMaxHealth;
+    }
+
     private void Start()
     {
         InitPlayer();
@@ -80,8 +86,6 @@ public class Player : MonoBehaviour
         if (GameManager.instance.opponent == this) isOpponent = true;
         if (isOpponent && !config.offlineMatch) isRemote = true;
 
-        // heatlh
-        health = GameManager.instance.startingMaxHealth;
         maxStars = GameManager.instance.startingStars;
         currentStars = maxStars;
 

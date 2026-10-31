@@ -19,8 +19,7 @@ public class AutoFade : MonoBehaviour
     public float fadeInTime;
     [SerializeField] float stayTime;
     [SerializeField] float fadeOutTime;
-    [SerializeField] bool allowSkipToFadeOut;
-    
+    [SerializeField] bool allowSkipToFadeOut;    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {

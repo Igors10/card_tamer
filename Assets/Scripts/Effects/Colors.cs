@@ -7,8 +7,8 @@ public class Colors : MonoBehaviour
     public List<Color> secondaryColorList = new List<Color>();
     public int secondaryColorAmount = 3;
     public List<Color> allColorList = new List<Color>();
-    float secDarkColorCoof = 0.65f;
-    float secLightColorCoof = 0.55f;
+    const float secDarkColorCoof = 0.65f;
+    const float secLightColorCoof = 0.55f;
 
     void Awake()
     {
@@ -31,7 +31,12 @@ public class Colors : MonoBehaviour
     }
 
     public Color GetDarkenColor(Color color) => BlendColor(color, secDarkColorCoof, false);
-    public Color GetLightenColor(Color color) => BlendColor(color, secLightColorCoof, true);
+    public Color GetLightenColor(Color color) => Lighten(color);
+
+    /// <summary>
+    /// Marker (second) color made from a player color, usable without a Colors object (main menu)
+    /// </summary>
+    public static Color Lighten(Color color) => Color.Lerp(Color.white, color, secLightColorCoof);
     
 
     /// <summary>

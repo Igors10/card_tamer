@@ -77,6 +77,10 @@ public class GameManager : MonoBehaviour
         // Making GameManager accessible from anywhere
         instance = this;
 
+        // not connected to anyone (Board started straight from the editor, the config asset can still say online from an earlier test): bot match
+        ConnectionScript connection = ConnectionScript.connectionManager;
+        if (connection == null || !connection.networkManager.ClientManager.Started) playerConfig.offlineMatch = true;
+
         // fresh gameplay random numbers for every match (online, the host's seed will replace this)
         GameRandom.Init(GameRandom.NewSeed());
 
