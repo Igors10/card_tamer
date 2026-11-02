@@ -105,3 +105,22 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
 2026-11-02  Stickers (branch experimental-rules)
   - CreateCard sends the base sticker (abilityName) + its side (new
     MatchCommand.onRight). Cards now hold stickers (CreatureObj.stickers).
+
+2026-11-02  Round discard shows both players (branch experimental-rules)
+  - Both discard picks are rolled up front in seat order, offline too.
+    DiscardManager.StartRoundDiscard shows and cuts both picks (the
+    opponent's card isn't destroyed off screen anymore).
+
+2026-11-02  AddSticker command (branch experimental-rules)
+  - New workshop command AddSticker (hand index, sticker name, side), applied
+    by the other game like the other workshop results.
+
+2026-11-02  New battle rules online (branch experimental-rules)
+  - New commands: Arrange (field order, sent before Ready), Attack
+    (attacker + target index), Choice (Phantom pick, Seer guess, Sneaky /
+    Joker swap, -1 = skipped).
+  - Arranging is simultaneous like the workshop (CanApply allows the other
+    player's commands while PLACING).
+  - Desync snapshot now lists hand / field / knocked out cards with stickers,
+    face down and phantom marks instead of lanes.
+  - Not tested with two players yet.

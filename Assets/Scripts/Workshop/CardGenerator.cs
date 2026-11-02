@@ -161,6 +161,16 @@ public class CardGenerator : MonoBehaviour
         Debug.Log("CardGenerator: card " + cardData.name + " has been added to " + player.playerName + "'s hand");
     }
 
+    /// <summary>
+    /// Card object that isn't in anyone's hand (phantom copies, Seer guess options)
+    /// </summary>
+    public Card CreateLooseCard(CreatureObj cardData, Player owner, Transform parent)
+    {
+        Card newCard = Instantiate(cardPrefab, parent).GetComponent<Card>();
+        newCard.AssignCardData(cardData, owner);
+        return newCard;
+    }
+
     private void Update()
     {
         // temp solution for adding cards to hand

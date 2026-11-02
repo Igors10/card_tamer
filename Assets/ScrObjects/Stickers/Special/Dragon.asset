@@ -17,7 +17,15 @@ MonoBehaviour:
   isSpecial: 1
   stickerColor: {r: 0.83137256, g: 0.41568628, b: 0.7058824, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248247
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248247
+      type: {class: KnockOutSamePositionEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 9
+        customText: 
+        showPresentation: 0
+        oncePerRound: 0

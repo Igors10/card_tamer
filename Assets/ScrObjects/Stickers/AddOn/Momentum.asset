@@ -17,7 +17,16 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.7058824, g: 0.60784316, b: 0.91764706, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248237
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248237
+      type: {class: NextCardPowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 8
+        customText: Next card gets a power-up!
+        showPresentation: 1
+        oncePerRound: 0
+        amount: 1

@@ -74,7 +74,6 @@ public class GameManager : MonoBehaviour
     public static event Action<Card> OnCardPlayResolved;
     public static event Action OnLineResolved;
     public static event Action<Card> OnCardHovered;
-    public static event Action OnFightStart;
 
     private void Awake()
     {
@@ -268,19 +267,24 @@ public class GameManager : MonoBehaviour
         // trigger the event
         OnStateTransition?.Invoke();
 
-        // battle: players take turns attacking, the first attacker changes every round
-        if (currentState == GameState.BATTLING)
-        {
-            if (firstPlayer != player)
-            {
-                yourTurn = false;
-                managerUI.NewHint("It's your opponents turn");
-                managerUI.UpdateTurnMessage();
-            }
-            firstPlayer.StartTurn();
-        }
+        // battle: round start stickers (Phantom, Dragon) first, then the first attacker's turn
+        if (currentState == GameState.BATTLING) FightManager.instance.StartBattle();
         // arranging and the workshop: both act at the same time, the player starts right away
         else player.StartTurn();
+    }
+
+    /// <summary>
+    /// Battle: players take turns attacking, the first attacker changes every round
+    /// </summary>
+    public void StartFirstAttack()
+    {
+        if (firstPlayer != player)
+        {
+            yourTurn = false;
+            managerUI.NewHint("It's your opponents turn");
+            managerUI.UpdateTurnMessage();
+        }
+        firstPlayer.StartTurn();
     }
 
     void RoundEnd()
@@ -492,10 +496,4 @@ public class GameManager : MonoBehaviour
     public void BroadcastOnCardHovered(Card card)
     {
         OnCardHovered?.Invoke(card);
-    }
-
-    public void BroadcastOnFightStart()
-    {
-        OnFightStart?.Invoke();
-    }
-}
+    }}

@@ -18,11 +18,11 @@ MonoBehaviour:
   stickerColor: {r: 0.5411765, g: 0.6901961, b: 0.9098039, a: 1}
   hasSide: 0
   effects:
-  - rid: 8466844326851248216
+  - rid: 8466844326851248225
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248216
+    - rid: 8466844326851248225
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6

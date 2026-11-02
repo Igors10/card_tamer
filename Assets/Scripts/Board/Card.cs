@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Card : MonoBehaviour
 {
@@ -29,6 +30,7 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject specialIcon;
     [SerializeField] Image cardBack; // opponent's face down cards show only the back
     [SerializeField] GameObject hiddenIcon; // your own face down cards show this, so you know the opponent can't see them
+    [SerializeField] GameObject phantomLabel; // only the owner sees which card is the phantom
     [HideInInspector] public Unit unit;
     [HideInInspector] public Player player;
     [SerializeField] DeathParticle deathParticle; 
@@ -71,6 +73,9 @@ public class Card : MonoBehaviour
     [HideInInspector] public int startingPower = 0;
     [HideInInspector] public int auraPower = 0; // part of currentPower that comes from auras, managed by FieldManager.RefreshAuras
     [HideInInspector] public bool faceDown; // on the field, hidden from the opponent until it fights
+    [HideInInspector] public bool isPhantom; // Phantom's copy: looks the same, only its owner knows which one it is
+    [HideInInspector] public Card twin; // Phantom card and its copy point at each other
+    [HideInInspector] public bool destroyedCardThisRound; // Beast: already destroyed a card this round
     bool specialCostPaid = false;
 
     private void Awake()
@@ -261,6 +266,50 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
+    /// Workshop: puts an add-on sticker on the card (up to CreatureObj.maxStickers)
+    /// </summary>
+    public void AddSticker(Sticker sticker)
+    {
+        if (!cardData.CanAddSticker) return;
+
+        cardData.stickers.Add(sticker);
+        Refresh();
+    }
+
+    /// <summary>
+    /// Takes a sticker off the card (Lucky gets used up instead of the card)
+    /// </summary>
+    public void RemoveSticker(Sticker sticker)
+    {
+        cardData.stickers.Remove(sticker);
+        Refresh();
+    }
+
+    /// <summary>
+    /// Effects of type T on the card's stickers, with the strip they are on (the strip knows the sticker's side)
+    /// </summary>
+    public List<(Ability strip, T effect)> GetEffects<T>() where T : AbilityEffect
+    {
+        List<(Ability, T)> found = new List<(Ability, T)>();
+        foreach (Ability strip in abilities)
+        {
+            if (strip == null || strip.abilityData == null) continue;
+            foreach (AbilityEffect effect in strip.abilityData.effects)
+            {
+                if (effect is T typed) found.Add((strip, typed));
+            }
+        }
+        return found;
+    }
+
+    public bool HasEffect<T>() where T : AbilityEffect => GetEffects<T>().Count > 0;
+
+    /// <summary>
+    /// Sticker that holds an effect of type T, or null
+    /// </summary>
+    public Sticker GetStickerWith<T>() where T : AbilityEffect => cardData.stickers.Find(sticker => sticker.ability.effects.Exists(effect => effect is T));
+
+    /// <summary>
     /// Turns the card face down (hidden from the opponent) or face up
     /// </summary>
     public void SetFaceDown(bool isFaceDown)
@@ -276,6 +325,10 @@ public class Card : MonoBehaviour
         cardBack.gameObject.SetActive(showBack);
         cardBack.color = player.playerColor;
         hiddenIcon.SetActive(faceDown && !showBack);
+
+        // sticker strips are hidden under the back (the special star would stick out and give the card away)
+        foreach (Ability strip in abilities) strip.gameObject.SetActive(strip.abilityData != null && !showBack);
+        phantomLabel.SetActive(isPhantom && player == GameManager.instance.player);
     }
 
     /// <summary>
@@ -346,7 +399,7 @@ public class Card : MonoBehaviour
         // only your own field cards: arranging until you press ready, attacking on your turn
         GameState state = GameManager.instance.currentState;
         if (player != GameManager.instance.player || !player.cardsOnField.Contains(this)) return;
-        if (state == GameState.PLACING && player.endStateReady) return;
+        if (state == GameState.PLACING && (player.endStateReady || !GameManager.instance.readyButton.button.interactable)) return; // online Ready is on its way
         if (state == GameState.BATTLING && !FightManager.instance.CanAttack(player)) return;
         if (state == GameState.BUYING) return;
 
@@ -382,7 +435,9 @@ public class Card : MonoBehaviour
     /// </summary>
     public void OnClick()
     {
-        FightManager.instance.TryPickTarget(this);
+        // battle: attack target, workshop: card to put the new sticker on
+        if (FightManager.instance.TryPickTarget(this)) return;
+        GameManager.instance.managerUI.workshop.TryPutSticker(this);
     }
 
     /// <summary>
@@ -452,6 +507,13 @@ public class Card : MonoBehaviour
     public void GetStartingPower()
     {
         int powerToGain = cardData.BaseSticker.power;
+
+        // phantom copy has its own base power
+        if (isPhantom)
+        {
+            List<(Ability strip, PhantomCopyEffect effect)> phantom = GetEffects<PhantomCopyEffect>();
+            if (phantom.Count > 0) powerToGain = phantom[0].effect.phantomPower;
+        }
         startingPower = powerToGain;
         GainPower(powerToGain, false);
     }
@@ -532,6 +594,7 @@ public class Card : MonoBehaviour
         currentPower = 0;
         auraPower = 0;
         specialCostPaid = false;
+        destroyedCardThisRound = false;
         SetFaceDown(false);
 
         //unit.RefreshUnitVisuals();

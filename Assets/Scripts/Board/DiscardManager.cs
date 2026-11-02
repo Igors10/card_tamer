@@ -27,6 +27,15 @@ public class DiscardManager : MonoBehaviour
     [SerializeField] float rewardStarTrailInterval = 0.03f;
     [SerializeField] float rewardStarTrailFadeTime = 0.25f;
 
+    [Header("rows")]
+    [SerializeField] int rowSize = 6; // units[0..5] = your row, units[6..11] = opponent's row
+    [SerializeField] float topRowY = 170f;
+    [SerializeField] float bottomRowY = -170f;
+    [SerializeField] float rowWidth = 1000f;
+    [SerializeField] float maxDoodleSpacing = 325f; // with few cards they are this far apart
+    [SerializeField] float maxDoodleScale = 1.3f; // and this big
+    [SerializeField] float betweenCutsTime = 0.35f; // pause between cutting your card and the opponent's
+
     [Header("refs")]
     [SerializeField] DeathAnim death;
     [SerializeField] UnitAtDiscard[] units;
@@ -64,73 +73,85 @@ public class DiscardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// presetPick: card already rolled with RollAutoDiscard (online), -1 rolls it at the end of the animation
+    /// After the round: both players' knocked out cards are shown (yours on top, opponent's below),
+    /// Scissor Rat destroys one from each row. Picks are rolled before (RollAutoDiscard), -1 = that player lost no cards
     /// </summary>
-    public IEnumerator StartDiscardSequence(Player player, bool randomDiscard, int presetPick = -1)
+    public IEnumerator StartRoundDiscard(int playerPick, int opponentPick)
     {
+        Player player = GameManager.instance.player;
+        Player opponent = GameManager.instance.opponent;
+
+        // nobody lost a card, nothing to destroy
+        if (playerPick < 0 && opponentPick < 0) yield break;
+
         // little pause before enabling the discards
-        if (randomDiscard) yield return new WaitForSeconds(beforeDiscardTime);
+        yield return new WaitForSeconds(beforeDiscardTime);
 
-        discarding = true;
-        currentDiscardRandom = randomDiscard;
-        unitWasCut = false;
+        StartDiscard(true);
+        int longestRow = Mathf.Max(player.cardsInDiscard.Count, opponent.cardsInDiscard.Count); // both rows use the same size
+        List<UnitAtDiscard> playerRow = AssignRow(player.cardsInDiscard, player, 0, topRowY, longestRow);
+        List<UnitAtDiscard> opponentRow = AssignRow(opponent.cardsInDiscard, opponent, rowSize, bottomRowY, longestRow);
+        discardText.text = "Scissor Rat destroys one knocked out card from each side";
 
-        // Enabling the discard button if the discard is not random
-        closeButton.gameObject.SetActive(!randomDiscard);
-
-        // discard player units
-        List<Card> listOfCardsForDiscard = (randomDiscard) ? player.cardsInDiscard : player.cardsInHand;
-        AssignDiscardedUnits(listOfCardsForDiscard, player, randomDiscard);
-
-        // Changing workshop hint
-        string hintMessage = (randomDiscard) ? "Scissor Rat destroys one knocked card" : "Choose a card to destroy for 1 coin";
-        discardText.text = hintMessage;
-
-        if (randomDiscard && GameManager.instance.player.cardsInDiscard.Count == 0) StartCoroutine(FinishDiscard());
-        else if (randomDiscard) StartCoroutine(AutoDiscard(player, presetPick));
+        StartCoroutine(AutoDiscard(playerPick >= 0 ? playerRow[playerPick] : null, opponentPick >= 0 ? opponentRow[opponentPick] : null));
 
         // not finishing the coroutine before the discard is finished so that the battle phase doesnt change for the shop
         while (discarding) { yield return null; }
     }
 
     /// <summary>
-    /// Makes discarded units of chosen player appear on the discard UI
+    /// Workshop: the player picks a card from hand to destroy for a coin
     /// </summary>
-    /// <param name="units"></param>
-    /// <returns></returns>
-    void AssignDiscardedUnits(List<Card> listOfCards, Player player, bool lockHoveringOver)
+    public IEnumerator StartDiscardSequence(Player player)
     {
-        // deactivating units 
+        StartDiscard(false);
+        AssignRow(player.cardsInHand, player, 0, 0f, player.cardsInHand.Count);
+        discardText.text = "Choose a card to destroy for 1 coin";
+
+        // not finishing the coroutine before the discard is finished so that the workshop waits for it
+        while (discarding) { yield return null; }
+    }
+
+    void StartDiscard(bool randomDiscard)
+    {
+        discarding = true;
+        currentDiscardRandom = randomDiscard;
+        unitWasCut = false;
+        currentUnits.Clear();
+
+        // the close button only when the player picks
+        closeButton.gameObject.SetActive(!randomDiscard);
+
         foreach (UnitAtDiscard unit in units) unit.gameObject.SetActive(false);
-
-        // if no units lost then skip discard for this player
-        if (listOfCards.Count < 1)
-        {
-            StartCoroutine(FinishDiscard());
-            return;
-        }
-
-        // enabling the discard available
         discardUI.SetActive(true);
         discardAvailable = true;
+    }
 
-        // INITIALYZING UNITS
-        List<Vector3> unitDiscardPos = new List<Vector3>();        
+    /// <summary>
+    /// Shows the cards as a row of doodles, using the doodles from firstUnit on. Returns the doodles in card order
+    /// </summary>
+    List<UnitAtDiscard> AssignRow(List<Card> cards, Player player, int firstUnit, float rowY, int layoutCount)
+    {
+        List<UnitAtDiscard> row = new List<UnitAtDiscard>();
 
-        for (int i = 0; i < listOfCards.Count; i++)
+        // the more cards, the closer together and smaller they are
+        float spacing = (layoutCount > 0) ? Mathf.Min(maxDoodleSpacing, rowWidth / layoutCount) : maxDoodleSpacing;
+        float scale = maxDoodleScale * spacing / maxDoodleSpacing;
+
+        for (int i = 0; i < cards.Count && i < rowSize; i++)
         {
-            // activating units
-            units[i].gameObject.SetActive(true);
-            units[i].sprite.RefreshSprite(listOfCards[i].cardData.unitSprite, player.playerColor, listOfCards[i].cardData.secondaryColor);
-            units[i].storedCard = listOfCards[i];
-            units[i].Discard(false);
-            units[i].lockInteraction = lockHoveringOver;
-            currentUnits.Add(units[i]);
-
-            // assigning units to a position
-            Vector3 newUnitPosition = units[i].transform.position + new Vector3(Random.Range(-40, 40), Random.Range(-40, 40), 0f);
-            unitDiscardPos.Add(newUnitPosition);
+            UnitAtDiscard unit = units[firstUnit + i];
+            unit.gameObject.SetActive(true);
+            ((RectTransform)unit.transform).anchoredPosition = new Vector2(spacing * (i - (cards.Count - 1) / 2f), rowY);
+            unit.sprite.RefreshSprite(cards[i].cardData.unitSprite, player.playerColor, cards[i].cardData.secondaryColor);
+            unit.storedCard = cards[i];
+            unit.SetRestScale(Vector3.one * scale);
+            unit.Discard(false);
+            unit.lockInteraction = currentDiscardRandom;
+            currentUnits.Add(unit);
+            row.Add(unit);
         }
+        return row;
     }
 
     /// <summary>
@@ -197,11 +218,9 @@ public class DiscardManager : MonoBehaviour
     }
 
     /// <summary>
-        /// Lets the game choose discarded units for the player;
-        /// </summary>
-        /// <param name="player"></param>
-        /// <returns></returns>
-    public IEnumerator AutoDiscard(Player player, int presetPick = -1)
+    /// Scissor Rat thinks for a moment, then cuts the picked unit of each row (null = that row has none), one right after the other
+    /// </summary>
+    IEnumerator AutoDiscard(UnitAtDiscard playerPick, UnitAtDiscard opponentPick)
     {
         yield return Animations.instance.SkippablePause(beforeDiscardTime);
         Debug.Log("DiscardManager: auto discard started");
@@ -231,24 +250,67 @@ public class DiscardManager : MonoBehaviour
         }
 
 
-        // choosing random unit, letting it tremble for a moment and discarding it
-        int randomUnitID = (presetPick >= 0) ? presetPick : GameRandom.Range(0, currentUnits.Count);
-        UnitAtDiscard chosenUnit = currentUnits[randomUnitID].GetComponentInParent<UnitAtDiscard>();
-        MovePointer(chosenUnit.transform.position, false, pointerEndPitch);
-        yield return chosenUnit.Tremble(finalTrembleTime, finalTrembleIntensity);
+        // the picked units tremble for a moment and get cut, a short interval between the two
+        discardAvailable = false;
+        List<string> messages = new List<string>();
+        foreach (UnitAtDiscard chosenUnit in new UnitAtDiscard[] { playerPick, opponentPick })
+        {
+            if (chosenUnit == null) continue;
 
-        DiscardUnit(chosenUnit);
+            MovePointer(chosenUnit.transform.position, false, pointerEndPitch);
+            yield return chosenUnit.Tremble(finalTrembleTime, finalTrembleIntensity);
+
+            // Lucky: the card stays, its Lucky sticker is used up instead
+            Card card = chosenUnit.storedCard;
+            Sticker lucky = card.GetStickerWith<ProtectFromDiscardEffect>();
+            if (lucky != null)
+            {
+                card.RemoveSticker(lucky);
+                Animations.instance.PopAnim(chosenUnit.gameObject, 0.4f, 0.3f);
+                AudioManager.instance.PlaySFX("ShopStarSFX");
+                messages.Add(card.cardData.name + " is lucky and loses its Lucky sticker instead");
+                discardText.text = string.Join(". ", messages);
+                yield return new WaitForSeconds(afterDiscardTime / 2);
+                continue;
+            }
+
+            messages.Add(card.cardData.name + " is destroyed");
+            yield return DiscardUnitSequence(chosenUnit);
+            discardText.text = string.Join(". ", messages);
+            yield return new WaitForSeconds(betweenCutsTime);
+        }
+
+        StartCoroutine(FinishDiscard());
     }
 
+    /// <summary>
+    /// Workshop: the player clicked a card to destroy for a coin
+    /// </summary>
     public void DiscardUnit(UnitAtDiscard unit)
     {
         // locking the discard so nothing else can be clicked while the cut plays out
         discardAvailable = false;
         closeButton.gameObject.SetActive(false);
 
-        StartCoroutine(DiscardUnitSequence(unit));
+        StartCoroutine(ManualDiscardSequence(unit));
     }
 
+    IEnumerator ManualDiscardSequence(UnitAtDiscard unit)
+    {
+        string cardName = unit.storedCard.cardData.name;
+        yield return DiscardUnitSequence(unit);
+        discardText.text = cardName + " is destroyed for +1 coin";
+
+        // flying the shop star reward into the counter
+        yield return FlyRewardStar(unit.transform.position);
+        GameManager.instance.shopManager.AddShopStar();
+
+        StartCoroutine(FinishDiscard());
+    }
+
+    /// <summary>
+    /// Cuts the unit in half and destroys its card
+    /// </summary>
     IEnumerator DiscardUnitSequence(UnitAtDiscard unit)
     {
         Debug.Log("DiscardManager: unit discarded");
@@ -262,12 +324,8 @@ public class DiscardManager : MonoBehaviour
 
         // making death point finger at the unit
         StartCoroutine(death.PointAnim(afterDiscardTime / 2));
-        // displaying destroyed units name
-        string newHintMessage = unit.storedCard.cardData.name + " is destroyed";
-        if (!currentDiscardRandom) newHintMessage += " for +1 coin";
-        discardText.text = newHintMessage;
 
-        // online the other game destroys the same card (workshop discard only, the knocked out discard isn't sent yet)
+        // online the other game destroys the same card (workshop discard only, the knocked out discard is rolled on both games)
         if (!currentDiscardRandom && !GameManager.instance.playerConfig.offlineMatch)
             MatchNetwork.instance.SendDiscardFromHand(unit.storedCard.player.cardsInHand.IndexOf(unit.storedCard));
 
@@ -280,15 +338,6 @@ public class DiscardManager : MonoBehaviour
         Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(hitStopTime);
         Time.timeScale = 1f;
-
-        // flying the shop star reward into the counter when destroying the card was player's choice
-        if (!currentDiscardRandom)
-        {
-            yield return FlyRewardStar(unit.transform.position);
-            GameManager.instance.shopManager.AddShopStar();
-        }
-
-        StartCoroutine(FinishDiscard());
     }
 
     /// <summary>

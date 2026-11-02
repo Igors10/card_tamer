@@ -13,7 +13,6 @@ public class KnockSelfOutEffect : AbilityEffect
 
     protected override IEnumerator Execute(EffectContext ctx)
     {
-        ctx.self.StartCoroutine(ctx.self.KnockOut());
-        yield break;
+        yield return ctx.self.StartCoroutine(ctx.self.KnockOut());
     }
 }

@@ -12,7 +12,11 @@ public enum CommandType : byte
     DiscardFromHand, // workshop: card destroyed for a coin
     PlayCard,       // placing: card from hand to a lane
     ChooseTarget,   // ability target
-    StopDice        // clicked to stop rolling dice
+    StopDice,       // clicked to stop rolling dice
+    AddSticker,     // workshop: sticker put on a card in hand
+    Arrange,        // arranging: final order of the field (sent right before Ready)
+    Attack,         // battle: attacking card + target
+    Choice          // battle: card picked when a sticker asks (Phantom, Seer guess, hide and swap), -1 = skipped
 }
 
 /// <summary>
@@ -26,12 +30,14 @@ public struct MatchCommand
     public CommandType type;
 
     // values, which ones are used depends on the type
-    public int index;           // DiscardFromHand, PlayCard: card in hand. CreateCard: unit preset (CardDatabase.GetAllPresets), -1 = drawing
+    public int index;           // DiscardFromHand, PlayCard, AddSticker: card in hand. CreateCard: unit preset (CardDatabase.GetAllPresets), -1 = drawing
                                 // ChooseTarget: unit in ExecuteManager.targetOptions. StopDice: how many dice
-    public int lane;            // PlayCard: field in Player.fields
+                                // Attack: attacking card in the sender's cardsOnField. Choice: option, -1 = skipped
+    public int lane;            // PlayCard: field in Player.fields. Attack: target in the other player's cardsOnField
+    public int[] order;         // Arrange: for every field position, the card's place in the round start order
     public string cardName;     // CreateCard
-    public string abilityName;  // CreateCard: base sticker (AbilityObj asset name)
-    public bool onRight;        // CreateCard: base sticker side
+    public string abilityName;  // CreateCard: base sticker, AddSticker: the sticker (AbilityObj asset name)
+    public bool onRight;        // CreateCard, AddSticker: sticker side
     public Color color;         // PickColor: player color. CreateCard: second color
     public Color abilityColor;  // CreateCard
     public byte[] layer1;       // CreateCard: drawing layers as PNG
@@ -155,6 +161,30 @@ public class MatchNetwork : NetworkBehaviour
         SendCommand(new MatchCommand { type = CommandType.DiscardFromHand, index = handIndex });
     }
 
+    public void SendAddSticker(int handIndex, Sticker sticker)
+    {
+        SendCommand(new MatchCommand { type = CommandType.AddSticker, index = handIndex, abilityName = sticker.ability.name, onRight = sticker.onRight });
+    }
+
+    /// <summary>
+    /// Arranging is local until Ready, then the order goes to the other game (the sender's game already has it)
+    /// </summary>
+    public void SendArrange(Player p)
+    {
+        int[] order = p.cardsOnField.ConvertAll(card => p.roundStartOrder.IndexOf(card)).ToArray();
+        SendCommand(new MatchCommand { type = CommandType.Arrange, order = order });
+    }
+
+    public void SendAttack(int attackerIndex, int targetIndex)
+    {
+        SendCommand(new MatchCommand { type = CommandType.Attack, index = attackerIndex, lane = targetIndex });
+    }
+
+    public void SendChoice(int optionIndex)
+    {
+        SendCommand(new MatchCommand { type = CommandType.Choice, index = optionIndex });
+    }
+
     void SendCommand(MatchCommand command)
     {
         command.stateNr = GameManager.instance.stateNr;
@@ -194,8 +224,9 @@ public class MatchNetwork : NetworkBehaviour
         // the other player is already in the next state (skipped animations), waiting until we get there too
         if (command.stateNr > gm.stateNr) return false;
 
-        // targets wait until this game is asking for one too (the other game might still be animating)
+        // targets and choices wait until this game is asking for one too (the other game might still be animating)
         if (command.type == CommandType.ChooseTarget) return gm.executeManager.targetOptions != null;
+        if (command.type == CommandType.Choice) return FightManager.instance.WaitingForChoice;
 
         // own commands were made on our turn, so they fit right away
         if (command.seat == GameData.localSeat) return true;
@@ -203,8 +234,8 @@ public class MatchNetwork : NetworkBehaviour
         // the other player's dice have to be rolling here too
         if (command.type == CommandType.StopDice) return D6.CountRolling(gm.opponent) >= command.index;
 
-        // the other player's moves wait until it's their turn here too (in the workshop both act at the same time)
-        return gm.currentState == GameState.BUYING || gm.waitingForRemote;
+        // the other player's moves wait until it's their turn here too (in the workshop and while arranging both act at the same time)
+        return gm.currentState == GameState.BUYING || gm.currentState == GameState.PLACING || gm.waitingForRemote;
     }
 
     void Apply(MatchCommand command)
@@ -250,7 +281,51 @@ public class MatchNetwork : NetworkBehaviour
             case CommandType.DiscardFromHand:
                 if (p.isRemote) ApplyDiscardFromHand(command, p);
                 break;
+
+            case CommandType.AddSticker:
+                if (p.isRemote) ApplyAddSticker(command, p);
+                break;
+
+            case CommandType.Arrange:
+                if (p.isRemote) ApplyArrange(command, p);
+                break;
+
+            case CommandType.Attack:
+                ApplyAttack(command, p);
+                break;
+
+            case CommandType.Choice:
+                FightManager.instance.AnswerChoice(command.index);
+                break;
         }
+    }
+
+    void ApplyArrange(MatchCommand command, Player p)
+    {
+        if (command.order == null || command.order.Length != p.roundStartOrder.Count) { Debug.LogError("MatchNetwork: arrange order doesn't fit [" + p.playerName + "]'s field"); return; }
+
+        p.cardsOnField.Clear();
+        foreach (int startIndex in command.order) p.cardsOnField.Add(p.roundStartOrder[startIndex]);
+        GameManager.instance.handManager.UpdateHandVisuals(p);
+    }
+
+    void ApplyAttack(MatchCommand command, Player p)
+    {
+        Player target = GameManager.instance.GetOpponentOfPlayer(p);
+        if (command.index < 0 || command.index >= p.cardsOnField.Count) { Debug.LogError("MatchNetwork: no attacker " + command.index + " on [" + p.playerName + "]'s field"); return; }
+        if (command.lane < 0 || command.lane >= target.cardsOnField.Count) { Debug.LogError("MatchNetwork: no target " + command.lane + " on [" + target.playerName + "]'s field"); return; }
+
+        FightManager.instance.ApplyAttack(p.cardsOnField[command.index], target.cardsOnField[command.lane]);
+    }
+
+    void ApplyAddSticker(MatchCommand command, Player p)
+    {
+        if (command.index < 0 || command.index >= p.cardsInHand.Count) { Debug.LogError("MatchNetwork: no card " + command.index + " in [" + p.playerName + "]'s hand"); return; }
+
+        AbilityObj ability = GameManager.instance.cardGenerator.GetAbilityByName(command.abilityName);
+        if (ability == null) { Debug.LogError("MatchNetwork: no sticker called " + command.abilityName); return; }
+
+        p.cardsInHand[command.index].AddSticker(new Sticker(ability, command.onRight));
     }
 
     void ApplyPlayCard(MatchCommand command, Player p)
@@ -344,25 +419,28 @@ public class MatchNetwork : NetworkBehaviour
 
     static void AppendPlayer(StringBuilder snapshot, string label, Player p)
     {
-        snapshot.Append('\n').Append(label).Append(": hp ").Append(p.health).Append(", stars ").Append(p.maxStars)
-            .Append(", random lane ").Append(p.playsOnRandomLane).Append(", must play special ").Append(p.mustPlaySpecial);
+        snapshot.Append('\n').Append(label).Append(": hp ").Append(p.health)
+            .Append(", lost last fight ").Append(p.lostLastFight).Append(", saved power-ups ").Append(p.nextFightPowerUps)
+            .Append(", compensation stars ").Append(p.compensationStars);
 
         snapshot.Append("\n  hand:");
-        foreach (Card card in p.cardsInHand) snapshot.Append(" [").Append(card.cardData.name).Append(']');
+        foreach (Card card in p.cardsInHand) AppendCard(snapshot, card);
+
+        // field in order, face down cards marked with v, phantoms with *
+        snapshot.Append("\n  field:");
+        foreach (Card card in p.cardsOnField) AppendCard(snapshot, card);
 
         snapshot.Append("\n  knocked out:");
-        foreach (Card card in p.cardsInDiscard) snapshot.Append(" [").Append(card.cardData.name).Append(']');
+        foreach (Card card in p.cardsInDiscard) AppendCard(snapshot, card);
+    }
 
-        for (int i = 0; i < p.fields.Length; i++)
-        {
-            Field field = p.fields[i];
-            snapshot.Append("\n  lane ").Append(i).Append(" (blocked ").Append(field.roundsBlocked).Append("):");
-            foreach (Unit unit in field.units)
-            {
-                if (unit == null) snapshot.Append(" [-]");
-                else snapshot.Append(" [").Append(unit.card.cardData.name).Append(' ').Append(unit.card.currentPower).Append(']');
-            }
-        }
+    static void AppendCard(StringBuilder snapshot, Card card)
+    {
+        snapshot.Append(" [").Append(card.cardData.name);
+        foreach (Sticker sticker in card.cardData.stickers) snapshot.Append(' ').Append(sticker.ability.name).Append(sticker.onRight ? ">" : "<");
+        if (card.faceDown) snapshot.Append(" v");
+        if (card.isPhantom) snapshot.Append(" *");
+        snapshot.Append(']');
     }
 
     static Sprite PngToSprite(byte[] png)

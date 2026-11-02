@@ -14,6 +14,8 @@ public class FightManager : MonoBehaviour
     [SerializeField] Transform playerSpot; // where the local player's fighting unit stands
     [SerializeField] Transform opponentSpot;
     [SerializeField] TargetArrow targetArrow;
+    [SerializeField] GameObject guessPanel; // Seer: known opponent cards are shown here to pick from
+    [SerializeField] Transform guessRow;
 
     [Header("input")]
     [SerializeField] float attackDropHeight = 0.35f; // card has to be dropped above this part of the screen to attack
@@ -25,12 +27,16 @@ public class FightManager : MonoBehaviour
     [SerializeField] float dashTime = 0.18f;
     [SerializeField] float dashReturnTime = 0.3f;
     [SerializeField] float afterFightPause = 0.8f;
+    [SerializeField] float stickerMessagePause = 1.2f; // guard, mix up and similar messages stay this long
 
     // current fight
     [HideInInspector] public Unit attacker;
     [HideInInspector] public Unit defender;
     readonly Dictionary<Unit, int> powerUps = new Dictionary<Unit, int>();
+    readonly Dictionary<Unit, int> countedPowerUps = new Dictionary<Unit, int>(); // power-ups before OnPowerUpsCounted stickers
     Card choosingFor; // local player's card waiting for a target
+    List<Card> choiceOptions; // cards the local player can click right now (ChooseCard), null when nothing is asked
+    Card chosenCard; // result of ChooseCard
     bool fighting;
 
     void Awake()
@@ -48,7 +54,7 @@ public class FightManager : MonoBehaviour
     public bool CanAttack(Player p)
     {
         GameManager gm = GameManager.instance;
-        return gm.currentState == GameState.BATTLING && !fighting && choosingFor == null
+        return gm.currentState == GameState.BATTLING && !fighting && choosingFor == null && !attackSent
             && (p == gm.player) == gm.yourTurn && !gm.gameOver;
     }
 
@@ -69,10 +75,18 @@ public class FightManager : MonoBehaviour
     public bool IsTarget(Card card) => choosingFor != null && card.player != choosingFor.player && card.player.cardsOnField.Contains(card);
 
     /// <summary>
-    /// Local player clicked a card while choosing a target
+    /// Local player clicked a card while choosing a target (or a card to swap places with). Returns true if it was used
     /// </summary>
     public bool TryPickTarget(Card card)
     {
+        // answering a ChooseCard question
+        if (choiceOptions != null)
+        {
+            if (!choiceOptions.Contains(card)) return false;
+            PickChoice(choiceOptions.IndexOf(card));
+            return true;
+        }
+
         if (!IsTarget(card)) return false;
 
         card.HighlightCard(false);
@@ -80,9 +94,32 @@ public class FightManager : MonoBehaviour
         choosingFor = null;
         targetArrow.Hide();
 
+        // online the attack goes to the server first, both games start the fight when it comes back (ApplyAttack)
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            attackSent = true;
+            MatchNetwork.instance.SendAttack(attackingCard.player.cardsOnField.IndexOf(attackingCard), card.player.cardsOnField.IndexOf(card));
+            return true;
+        }
+
         StartCoroutine(Fight(attackingCard, card));
         return true;
     }
+
+    /// <summary>
+    /// Online: an attack command arrived. The sender's own attacker is already out (spawned for the arrow)
+    /// </summary>
+    public void ApplyAttack(Card attackingCard, Card target)
+    {
+        if (attackSent && attacker != null && attacker.card == attackingCard)
+        {
+            attackSent = false;
+            StartCoroutine(Fight(attackingCard, target));
+        }
+        else Attack(attackingCard, target);
+    }
+
+    bool attackSent; // online: local attack is on its way to the server
 
     void Update()
     {
@@ -132,22 +169,60 @@ public class FightManager : MonoBehaviour
     {
         fighting = true;
         GameManager gm = GameManager.instance;
+        ExecuteManager executeManager = gm.executeManager;
         gm.managerUI.NewHint("");
 
+        // a guard next to the target takes the attack instead
+        Card guard = FindGuard(target);
+        if (guard != null)
+        {
+            yield return ShowMessage(guard.cardName + " guards " + target.cardName + "!");
+            target = guard;
+        }
+
+        // Joker swaps the attacker for another random card of the attacking player (the old one stays hidden)
+        List<Card> otherAttackers = attackingCard.player.cardsOnField.FindAll(card => card != attackingCard);
+        if (target.HasEffect<SwapAttackerEffect>() && otherAttackers.Count > 0)
+        {
+            yield return Reveal(target);
+            yield return ShowMessage(target.cardName + " swaps the attacker!");
+            attacker.RemoveFromBoard();
+            attackingCard.currentPower = 0;
+            attackingCard.gameObject.SetActive(true);
+            attackingCard = otherAttackers[GameRandom.Range(0, otherAttackers.Count)];
+            attacker = SpawnFighter(attackingCard);
+            gm.handManager.UpdateHandVisuals(attackingCard.player);
+        }
+
+        // Seer: a right guess of a face down target gives the attacker a power-up
+        int guessPowerUps = 0;
+        if (target.faceDown) yield return GuessTarget(attackingCard.player, target, amount => guessPowerUps = amount);
+
         // both cards are revealed, the defender comes out
-        attackingCard.SetFaceDown(false);
-        target.SetFaceDown(false);
+        yield return Reveal(attackingCard);
+        yield return Reveal(target);
         defender = SpawnFighter(target);
         AudioManager.instance.PlaySFX("NextCardSFX");
         yield return Animations.instance.SkippablePause(afterSpawnPause);
 
         // stickers decide how many power-ups each one gets
         powerUps.Clear();
-        powerUps[attacker] = 0;
+        powerUps[attacker] = guessPowerUps;
         powerUps[defender] = 0;
-        gm.BroadcastOnFightStart();
-        yield return gm.executeManager.TriggerEffects();
+        QueueNeighbourPowerUps(attacker);
+        QueueNeighbourPowerUps(defender);
+        executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnFightStart);
+        yield return executeManager.TriggerEffects();
+        yield return UseSavedPowerUps(attacker);
+        yield return UseSavedPowerUps(defender);
 
+        // stickers that compare power-ups see the counts from before any of them trigger
+        countedPowerUps.Clear();
+        foreach (KeyValuePair<Unit, int> count in powerUps) countedPowerUps[count.Key] = count.Value;
+        executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnPowerUpsCounted);
+        yield return executeManager.TriggerEffects();
+
+        Debug.Log("FightManager: " + attacker.card.cardName + " attacks " + defender.card.cardName + " with " + powerUps[attacker] + " vs " + powerUps[defender] + " power-ups");
         attacker.ShowPowerUpDice(powerUps[attacker]);
         defender.ShowPowerUpDice(powerUps[defender]);
         yield return Animations.instance.SkippablePause(beforeRollPause);
@@ -164,6 +239,8 @@ public class FightManager : MonoBehaviour
         int attackerPower = attacker.card.currentPower;
         int defenderPower = defender.card.currentPower;
         Unit winner = (attackerPower > defenderPower) ? attacker : (defenderPower > attackerPower) ? defender : null;
+        Card attackerCard = attacker.card;
+        Card defenderCard = defender.card;
 
         if (winner == null)
         {
@@ -171,17 +248,39 @@ public class FightManager : MonoBehaviour
             yield return Dash(defender, attacker);
             StartCoroutine(attacker.KnockOut());
             yield return defender.KnockOut();
+            attackerCard.player.lostLastFight = true;
+            defenderCard.player.lostLastFight = true;
         }
         else
         {
             Unit loser = (winner == attacker) ? defender : attacker;
             yield return Dash(winner, loser);
+            Card loserCard = loser.card;
             yield return loser.KnockOut();
+            winner.card.player.lostLastFight = false;
+            loserCard.player.lostLastFight = true;
 
-            // winner's side cheers, winner goes back to the field face up
+            // Beast destroys the card it beat for good
+            yield return DestroyBeatenCard(winner.card, loserCard);
+
+            // winner's side cheers
             foreach (Card card in winner.card.player.cardsOnField) card.Cheer();
-            ReturnToField(winner);
         }
+
+        // after fight stickers of the units still standing (knock itself out, hide, power-up for the next card)
+        executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnFightEnd);
+        yield return executeManager.TriggerEffects();
+
+        // cards that destroy themselves after a fight
+        DiscardSelfIfSticker(attackerCard);
+        DiscardSelfIfSticker(defenderCard);
+
+        // whoever is still standing goes back to its place on the field (not if it knocked itself out or was destroyed)
+        if (winner != null && !winner.knockedOut && winner.card.player.cardsOnField.Contains(winner.card)) ReturnToField(winner);
+
+        // Phantom: copies of knocked out cards go away, the owner picks again which one is the phantom
+        yield return UpdatePhantom(attackerCard);
+        yield return UpdatePhantom(defenderCard);
 
         yield return Animations.instance.SkippablePause(afterFightPause);
 
@@ -207,6 +306,459 @@ public class FightManager : MonoBehaviour
         if (!powerUps.ContainsKey(unit)) return;
         powerUps[unit] += amount;
     }
+
+    /// <summary>
+    /// Power-ups the unit had before the OnPowerUpsCounted stickers
+    /// </summary>
+    public int CountedPowerUps(Unit unit) => countedPowerUps.TryGetValue(unit, out int count) ? count : 0;
+
+    /// <summary>
+    /// The unit fighting against this one
+    /// </summary>
+    public Unit GetOpposing(Unit unit) => (unit == attacker) ? defender : attacker;
+
+    // ===============
+    // FIELD POSITIONS
+    // ===============
+
+    /// <summary>
+    /// Card next to this one on its field, side -1 = left, 1 = right. Null if there is none
+    /// </summary>
+    public Card GetNeighbour(Card card, int side)
+    {
+        List<Card> field = card.player.cardsOnField;
+        int index = field.IndexOf(card) + side;
+        return (index >= 0 && index < field.Count && field.IndexOf(card) >= 0) ? field[index] : null;
+    }
+
+    /// <summary>
+    /// Leftmost or rightmost card of its field
+    /// </summary>
+    public bool IsSideCard(Card card)
+    {
+        List<Card> field = card.player.cardsOnField;
+        int index = field.IndexOf(card);
+        return index == 0 || index == field.Count - 1;
+    }
+
+    /// <summary>
+    /// Sticker side as a direction: right = 1, left = -1
+    /// </summary>
+    int SideOf(Ability strip) => strip.onRight ? 1 : -1;
+
+    /// <summary>
+    /// Guard next to the target that protects it (its sticker points at the target), or null
+    /// </summary>
+    Card FindGuard(Card target)
+    {
+        foreach (int side in new int[] { -1, 1 })
+        {
+            Card neighbour = GetNeighbour(target, side);
+            if (neighbour == null) continue;
+
+            // the guard points back at the target
+            foreach ((Ability strip, GuardNeighbourEffect effect) in neighbour.GetEffects<GuardNeighbourEffect>())
+            {
+                if (SideOf(strip) == -side) return neighbour;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Neighbours whose stickers point at the fighting card give it power-ups (Cheerer)
+    /// </summary>
+    void QueueNeighbourPowerUps(Unit unit)
+    {
+        foreach (int side in new int[] { -1, 1 })
+        {
+            Card neighbour = GetNeighbour(unit.card, side);
+            if (neighbour == null) continue;
+
+            foreach ((Ability strip, NeighbourPowerUpEffect effect) in neighbour.GetEffects<NeighbourPowerUpEffect>())
+            {
+                if (SideOf(strip) == -side) GameManager.instance.executeManager.abilityRunner.QueueOnUnit(unit, strip, effect);
+            }
+        }
+    }
+
+    // ===============
+    // STICKER ACTIONS
+    // ===============
+
+    /// <summary>
+    /// Turns the card face up. Mixer stickers mix up the opponent's field when they get revealed
+    /// </summary>
+    public IEnumerator Reveal(Card card)
+    {
+        // the opponent knows this card from now on (Seer guesses)
+        GameManager.instance.GetOpponentOfPlayer(card.player).seenCards.Add(card.cardData);
+
+        if (!card.faceDown) yield break;
+        card.SetFaceDown(false);
+
+        if (!card.HasEffect<ShuffleOpponentOnRevealEffect>()) yield break;
+
+        // shuffled with GameRandom, so online both games get the same order
+        List<Card> field = GameManager.instance.GetOpponentOfPlayer(card.player).cardsOnField;
+        for (int i = field.Count - 1; i > 0; i--)
+        {
+            int j = GameRandom.Range(0, i + 1);
+            (field[i], field[j]) = (field[j], field[i]);
+        }
+        GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.GetOpponentOfPlayer(card.player));
+        AudioManager.instance.PlaySFX("RerollSFX");
+        yield return ShowMessage(card.cardName + " mixes up the cards!");
+    }
+
+    /// <summary>
+    /// Scout: cards next to the target are revealed
+    /// </summary>
+    public IEnumerator RevealNeighbours(Card target)
+    {
+        foreach (int side in new int[] { -1, 1 })
+        {
+            Card neighbour = GetNeighbour(target, side);
+            if (neighbour == null) continue;
+
+            Animations.instance.PopAnim(neighbour.gameObject, 0.3f, 0.3f);
+            yield return Reveal(neighbour);
+        }
+    }
+
+    /// <summary>
+    /// Momentum: power-ups saved for this player's next fighting card
+    /// </summary>
+    IEnumerator UseSavedPowerUps(Unit unit)
+    {
+        Player owner = unit.card.player;
+        if (owner.nextFightPowerUps <= 0) yield break;
+
+        AddPowerUps(unit, owner.nextFightPowerUps);
+        owner.nextFightPowerUps = 0;
+        EffectContext ctx = new EffectContext { self = unit };
+        yield return EffectPresenter.Show(ctx, "Momentum power-up!");
+        yield return EffectPresenter.Hide(ctx);
+    }
+
+    /// <summary>
+    /// Sneaky: the card turns face down and can swap places with another face down card of its owner
+    /// </summary>
+    public IEnumerator HideAndSwap(Card card)
+    {
+        card.SetFaceDown(true);
+
+        List<Card> hidden = card.player.cardsOnField.FindAll(other => other != card && other.faceDown);
+        if (hidden.Count == 0) yield break;
+
+        // the bot swaps half of the time
+        yield return ChooseCard(card.player, hidden, "Click a face down card to swap places with (right click to stay)", true);
+        if (chosenCard == null) yield break;
+
+        List<Card> field = card.player.cardsOnField;
+        int a = field.IndexOf(card), b = field.IndexOf(chosenCard);
+        (field[a], field[b]) = (field[b], field[a]);
+        GameManager.instance.handManager.UpdateHandVisuals(card.player);
+        AudioManager.instance.PlaySFX("UnitMoveSFX");
+    }
+
+    /// <summary>
+    /// The player picks one of the cards, the result is in chosenCard (null = skipped).
+    /// Local player clicks (right click skips if allowed), the bot picks at random (skips half of the time if allowed)
+    /// </summary>
+    IEnumerator ChooseCard(Player chooser, List<Card> options, string hint, bool canSkip)
+    {
+        chosenCard = null;
+        if (options.Count == 0) yield break;
+
+        // bot picks at random (skips half of the time if it can)
+        if (chooser.isAI)
+        {
+            if (!canSkip || Random.value < 0.5f) chosenCard = options[Random.Range(0, options.Count)];
+            yield break;
+        }
+
+        // local player clicks, online the pick comes back as a Choice command (also the other player's pick)
+        pendingOptions = options;
+        choiceAnswered = false;
+        choiceSent = false;
+        bool local = chooser == GameManager.instance.player;
+        if (local)
+        {
+            choiceOptions = options;
+            foreach (Card option in options) option.HighlightCard(true);
+        }
+        GameManager.instance.managerUI.NewHint(local ? hint : chooser.playerName + " is choosing...");
+
+        while (!choiceAnswered)
+        {
+            if (local && canSkip && Input.GetMouseButtonDown(1)) PickChoice(-1);
+            yield return null;
+        }
+
+        foreach (Card option in options) if (option != null) option.HighlightCard(false);
+        choiceOptions = null;
+        pendingOptions = null;
+        GameManager.instance.managerUI.NewHint("");
+    }
+
+    List<Card> pendingOptions; // options of the current question (local or the other player's)
+    bool choiceAnswered;
+    bool choiceSent;
+
+    /// <summary>
+    /// Online: a Choice command can only be used while this game is asking the question too
+    /// </summary>
+    public bool WaitingForChoice => pendingOptions != null && !choiceAnswered;
+
+    /// <summary>
+    /// Local player picked an option (-1 = skipped). Online it goes to the server first
+    /// </summary>
+    void PickChoice(int index)
+    {
+        if (choiceSent) return;
+
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            choiceSent = true;
+            MatchNetwork.instance.SendChoice(index);
+            return;
+        }
+        AnswerChoice(index);
+    }
+
+    /// <summary>
+    /// The pick is in (offline right away, online when the Choice command comes)
+    /// </summary>
+    public void AnswerChoice(int index)
+    {
+        if (pendingOptions == null) return;
+        chosenCard = (index >= 0 && index < pendingOptions.Count) ? pendingOptions[index] : null;
+        choiceAnswered = true;
+    }
+
+    // ===============
+    // SPECIALS
+    // ===============
+
+    /// <summary>
+    /// Start of the battle: Phantoms get their copies, then Dragons knock out the cards in their position, then the first attack
+    /// </summary>
+    public void StartBattle()
+    {
+        StartCoroutine(StartBattleSequence());
+    }
+
+    IEnumerator StartBattleSequence()
+    {
+        GameManager gm = GameManager.instance;
+        Player first = gm.firstPlayer;
+        Player second = gm.GetOpponentOfPlayer(first);
+
+        // Phantom copies appear in a random spot (GameRandom, same on both games online)
+        foreach (Player p in new Player[] { first, second })
+        {
+            foreach (Card card in new List<Card>(p.cardsOnField))
+            {
+                if (card.HasEffect<PhantomCopyEffect>() && !card.isPhantom) yield return CreatePhantom(card);
+            }
+        }
+
+        // Dragons: targets are picked first, then knocked out one after another (two Dragons can knock each other out)
+        List<(Card dragon, Card target)> dragonHits = new List<(Card, Card)>();
+        foreach (Player p in new Player[] { first, second })
+        {
+            List<Card> enemyField = gm.GetOpponentOfPlayer(p).cardsOnField;
+            foreach (Card card in p.cardsOnField)
+            {
+                if (!card.HasEffect<KnockOutSamePositionEffect>() || enemyField.Count == 0) continue;
+
+                // same position, or the closest one (the rightmost) if the opponent has fewer cards
+                int position = Mathf.Min(p.cardsOnField.IndexOf(card), enemyField.Count - 1);
+                dragonHits.Add((card, enemyField[position]));
+            }
+        }
+        foreach ((Card dragon, Card target) in dragonHits)
+        {
+            yield return Reveal(dragon);
+            yield return ShowMessage(dragon.cardName + " breathes fire on " + target.cardName + "!");
+            if (target.player.cardsOnField.Contains(target)) yield return KnockOutCard(target);
+        }
+
+        // a Dragon can end the round before it starts
+        if (gm.player.cardsOnField.Count == 0 || gm.opponent.cardsOnField.Count == 0) gm.battleManager.EndBattle();
+        else gm.StartFirstAttack();
+    }
+
+    /// <summary>
+    /// Phantom: a copy of the card appears in a random spot on its field. It starts as the phantom
+    /// </summary>
+    IEnumerator CreatePhantom(Card card)
+    {
+        Player owner = card.player;
+        Card copy = GameManager.instance.cardGenerator.CreateLooseCard(card.cardData, owner, card.transform.parent);
+        copy.isPhantom = true;
+        copy.twin = card;
+        card.twin = copy;
+        copy.SetFaceDown(card.faceDown);
+
+        owner.cardsOnField.Insert(GameRandom.Range(0, owner.cardsOnField.Count + 1), copy);
+        GameManager.instance.handManager.UpdateHandVisuals(owner);
+        Animations.instance.PopAnim(copy.gameObject, 0.4f, 0.3f);
+        AudioManager.instance.PlaySFX("CardPlaySFX");
+        yield return ShowMessage(owner.playerName + "'s Phantom appears!");
+    }
+
+    /// <summary>
+    /// After a fight: a knocked out phantom just disappears, a knocked out main card takes its phantom with it.
+    /// If both are still on the field they are revealed and the owner picks again which one is the phantom
+    /// </summary>
+    IEnumerator UpdatePhantom(Card card)
+    {
+        if (card == null || card.twin == null) yield break;
+
+        Card twin = card.twin;
+        bool onField = card.player.cardsOnField.Contains(card);
+        if (!onField)
+        {
+            RemovePhantom(card.isPhantom ? card : twin);
+            yield break;
+        }
+        if (!twin.player.cardsOnField.Contains(twin)) yield break;
+
+        yield return Reveal(twin);
+        yield return ChooseCard(card.player, new List<Card> { card, twin }, "Click the card that should be the phantom", false);
+
+        Card phantom = (chosenCard != null) ? chosenCard : card;
+        Card main = phantom.twin;
+        phantom.isPhantom = true;
+        main.isPhantom = false;
+        phantom.Refresh();
+        main.Refresh();
+    }
+
+    /// <summary>
+    /// Phantom copy leaves the game (it never goes to the discard)
+    /// </summary>
+    void RemovePhantom(Card phantom)
+    {
+        if (phantom == null) return;
+
+        Player owner = phantom.player;
+        owner.cardsOnField.Remove(phantom);
+        owner.cardsInDiscard.Remove(phantom);
+        if (phantom.twin != null) phantom.twin.twin = null;
+        phantom.twin = null;
+        Destroy(phantom.gameObject);
+        GameManager.instance.handManager.UpdateHandVisuals(owner);
+    }
+
+    /// <summary>
+    /// End of the round: phantoms disappear before damage is counted
+    /// </summary>
+    public void RemoveAllPhantoms()
+    {
+        foreach (Player p in new Player[] { GameManager.instance.player, GameManager.instance.opponent })
+        {
+            foreach (Card card in new List<Card>(p.cardsOnField)) if (card.isPhantom) RemovePhantom(card);
+            foreach (Card card in new List<Card>(p.cardsInDiscard)) if (card.isPhantom) RemovePhantom(card);
+        }
+    }
+
+    /// <summary>
+    /// Knocks a field card out without a fight (Dragon)
+    /// </summary>
+    IEnumerator KnockOutCard(Card card)
+    {
+        Animations.instance.ShakeAnim(card.gameObject, 12f, 0.4f);
+        AudioManager.instance.PlaySFX("HitSFX");
+        yield return Animations.instance.SkippablePause(0.4f);
+
+        if (card.isPhantom) { RemovePhantom(card); yield break; }
+        if (card.twin != null) RemovePhantom(card.twin);
+        GameManager.instance.handManager.AddCardToDiscarded(card, card.player);
+    }
+
+    /// <summary>
+    /// Beast: the card it beat is destroyed for good (Lucky loses its sticker instead), its owner gets a star in the workshop
+    /// </summary>
+    IEnumerator DestroyBeatenCard(Card winner, Card loser)
+    {
+        if (!winner.HasEffect<DestroyOnWinEffect>() || loser.isPhantom) yield break;
+
+        Sticker lucky = loser.GetStickerWith<ProtectFromDiscardEffect>();
+        if (lucky != null)
+        {
+            loser.RemoveSticker(lucky);
+            yield return ShowMessage(loser.cardName + " is lucky and loses its Lucky sticker instead!");
+            yield break;
+        }
+
+        yield return ShowMessage(winner.cardName + " destroys " + loser.cardName + "!");
+        winner.destroyedCardThisRound = true;
+        loser.player.compensationStars++;
+        if (loser.twin != null) RemovePhantom(loser.twin);
+        loser.DestroyCard();
+    }
+
+    /// <summary>
+    /// Seer: if the attacking player has a Seer on the field, they guess the face down target from the opponent cards they have seen
+    /// </summary>
+    IEnumerator GuessTarget(Player guesser, Card target, System.Action<int> setPowerUps)
+    {
+        List<(Ability strip, GuessTargetEffect effect)> seers = new List<(Ability, GuessTargetEffect)>();
+        foreach (Card card in guesser.cardsOnField) seers.AddRange(card.GetEffects<GuessTargetEffect>());
+        if (seers.Count == 0) yield break;
+
+        // every known card once (a phantom and its card are the same card)
+        List<CreatureObj> known = new List<CreatureObj>();
+        foreach (Card card in target.player.cardsOnField) if (guesser.seenCards.Contains(card.cardData) && !known.Contains(card.cardData)) known.Add(card.cardData);
+        foreach (Card card in target.player.cardsInDiscard) if (guesser.seenCards.Contains(card.cardData) && !known.Contains(card.cardData)) known.Add(card.cardData);
+        if (known.Count == 0) yield break;
+
+        // the options are shown as cards (only to the guessing player, online the other game waits for the pick)
+        guessPanel.SetActive(guesser == GameManager.instance.player);
+        List<Card> options = new List<Card>();
+        foreach (CreatureObj cardData in known) options.Add(GameManager.instance.cardGenerator.CreateLooseCard(cardData, target.player, guessRow));
+        yield return ChooseCard(guesser, options, "Seer: guess which card it is!", false);
+        CreatureObj guess = (chosenCard != null) ? chosenCard.cardData : null;
+        foreach (Card option in options) Destroy(option.gameObject);
+        guessPanel.SetActive(false);
+
+        if (guess == target.cardData)
+        {
+            setPowerUps(seers[0].effect.amount);
+            yield return ShowMessage("Right guess! Power-up!");
+        }
+        else yield return ShowMessage("Wrong guess!");
+    }
+
+    /// <summary>
+    /// Bomb: the card is destroyed for good after its fight
+    /// </summary>
+    void DiscardSelfIfSticker(Card card)
+    {
+        if (card == null || !card.HasEffect<DiscardSelfAfterFightEffect>()) return;
+
+        if (card.unit != null && !card.unit.knockedOut) card.unit.RemoveFromBoard();
+        Player owner = card.player;
+        card.DestroyCard();
+        GameManager.instance.handManager.UpdateHandVisuals(owner);
+    }
+
+    /// <summary>
+    /// Text on the hint line for a moment
+    /// </summary>
+    IEnumerator ShowMessage(string message)
+    {
+        GameManager.instance.managerUI.NewHint(message);
+        yield return Animations.instance.SkippablePause(stickerMessagePause);
+        GameManager.instance.managerUI.NewHint("");
+    }
+
+    // ===============
+    // ANIMATION
+    // ===============
 
     /// <summary>
     /// Unit rushes at the other one and comes back
@@ -242,7 +794,7 @@ public class FightManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Fighting unit leaves, its card goes back to its place on the field (face up)
+    /// Fighting unit leaves, its card goes back to its place on the field
     /// </summary>
     void ReturnToField(Unit unit)
     {

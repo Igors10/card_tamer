@@ -91,6 +91,7 @@ public class HandManager : MonoBehaviour
             player.cardsOnField.Add(card);
         }
         player.cardsInHand.Clear();
+        player.roundStartOrder = new List<Card>(player.cardsOnField);
 
         UpdateHandVisuals(player);
     }
@@ -192,7 +193,8 @@ public class HandManager : MonoBehaviour
     void HandHidingCheck()
     {
         // during the round the hand is the field, so it's always shown. In the workshop it hides
-        bool inRound = GameManager.instance.currentState != GameState.BUYING;
+        // (also shown while picking a card for a new sticker)
+        bool inRound = GameManager.instance.currentState != GameState.BUYING || GameManager.instance.managerUI.workshop.ChoosingStickerCard;
         bool forceHide = !inRound && (activeCard != null || GameManager.instance.managerUI.workshop.drawingCanvas.isDrawing);
         RectTransform handRT = hand.GetComponent<RectTransform>();
         float hideSpeed = 0;

@@ -9,7 +9,10 @@ public enum EffectTrigger
     OnOwnLineResolved,  // after the battle on this unit's line is resolved
     AfterAnyCardPlayed, // after any card is played and its own OnPlay effects are resolved, so its starting power is final (base or rolled)
     OnWouldBeKnockedOut, // right before this unit gets knocked out
-    OnFightStart        // both fighting units are on the board, before power-ups are rolled
+    OnFightStart,       // both fighting units are on the board, before power-ups are rolled
+    OnPowerUpsCounted,  // all OnFightStart power-ups are in, before rolling (for stickers that compare power-ups)
+    OnFightEnd,         // the fight is decided, runs for the fighting units that weren't knocked out
+    Manual              // not queued by events, FightManager / DiscardManager look for the effect themselves
 }
 
 /// <summary>

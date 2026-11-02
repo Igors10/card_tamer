@@ -17,7 +17,16 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.95686275, g: 0.8901961, b: 0.6392157, a: 1}
   hasSide: 1
-  effects: []
+  effects:
+  - rid: 8466844326851248233
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248233
+      type: {class: NeighbourPowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 9
+        customText: Cheered on! Power-up!
+        showPresentation: 1
+        oncePerRound: 0
+        amount: 1

@@ -23,7 +23,6 @@ public class AbilityRunner
         GameManager.OnDiceRolled += HandleDiceRolled;
         GameManager.OnLineResolved += HandleLineResolved;
         GameManager.OnRoundEnd += HandleRoundEnd;
-        GameManager.OnFightStart += HandleFightStart;
     }
 
     public void Unsubscribe()
@@ -33,7 +32,6 @@ public class AbilityRunner
         GameManager.OnDiceRolled -= HandleDiceRolled;
         GameManager.OnLineResolved -= HandleLineResolved;
         GameManager.OnRoundEnd -= HandleRoundEnd;
-        GameManager.OnFightStart -= HandleFightStart;
     }
 
     // ===============
@@ -62,12 +60,24 @@ public class AbilityRunner
         foreach (Unit unit in GetBoardUnits()) Queue(unit, EffectTrigger.OnOwnLineResolved, executeManager.battleOverEffectStack);
     }
 
-    void HandleFightStart()
+    /// <summary>
+    /// Called by FightManager at the fight moments (OnFightStart, OnPowerUpsCounted, OnFightEnd).
+    /// Attacker's stickers first, then the defender's. Knocked out fighters are skipped
+    /// </summary>
+    public void QueueFightTrigger(EffectTrigger trigger)
     {
-        // attacker's stickers first, then the defender's
         FightManager fight = FightManager.instance;
-        Queue(fight.attacker, EffectTrigger.OnFightStart, executeManager.effectStack);
-        Queue(fight.defender, EffectTrigger.OnFightStart, executeManager.effectStack);
+        Queue(fight.attacker, trigger, executeManager.effectStack);
+        Queue(fight.defender, trigger, executeManager.effectStack);
+    }
+
+    /// <summary>
+    /// Runs an effect of a card that isn't fighting itself (like a neighbour's sticker) on a fighting unit
+    /// </summary>
+    public void QueueOnUnit(Unit unit, Ability ability, AbilityEffect effect)
+    {
+        EffectContext ctx = new EffectContext { self = unit, ability = ability, memory = new Dictionary<string, int>() };
+        executeManager.effectStack.Add(effect.Run(ctx));
     }
 
     void HandleRoundEnd()

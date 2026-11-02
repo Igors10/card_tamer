@@ -17,7 +17,25 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.9411765, g: 0.65882355, b: 0.40784314, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248219
+  - rid: 8466844326851248220
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248219
+      type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 6
+        customText: 2 power-ups!
+        showPresentation: 1
+        oncePerRound: 0
+        condition: 0
+        amount: 2
+    - rid: 8466844326851248220
+      type: {class: DiscardSelfAfterFightEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 9
+        customText: 
+        showPresentation: 0
+        oncePerRound: 0

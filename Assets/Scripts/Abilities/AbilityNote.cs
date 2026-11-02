@@ -22,8 +22,13 @@ public class AbilityNote : MonoBehaviour
     Vector3 powerRestScale;
     bool restSaved;
 
-    public void InitAbilityNote(Sticker sticker)
+    /// <summary>
+    /// showPower: base stickers show their power, add-on stickers have none
+    /// </summary>
+    public void InitAbilityNote(Sticker sticker, bool showPower = true)
     {
+        powerObj.gameObject.SetActive(showPower);
+
         // ability color
         //storedAbilityColor = Colors.instance.GetRandomSecondaryColor();
 

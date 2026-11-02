@@ -34,6 +34,9 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         if (!GameManager.instance.playerConfig.offlineMatch)
         {
             button.interactable = false;
+
+            // the field order was only changed here, the other game gets it before the Ready
+            if (GameManager.instance.currentState == GameState.PLACING) MatchNetwork.instance.SendArrange(GameManager.instance.player);
             MatchNetwork.instance.SendReady();
             return;
         }

@@ -18,7 +18,33 @@ MonoBehaviour:
   isSpecial: 1
   stickerColor: {r: 0.41568628, g: 0.83137256, b: 0.5411765, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248244
+  - rid: 8466844326851248245
+  - rid: 8466844326851248246
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248244
+      type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 6
+        customText: Power-up!
+        showPresentation: 1
+        oncePerRound: 0
+        condition: 1
+        amount: 1
+    - rid: 8466844326851248245
+      type: {class: SwapAttackerEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 9
+        customText: 
+        showPresentation: 0
+        oncePerRound: 0
+    - rid: 8466844326851248246
+      type: {class: HideSelfEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 8
+        customText: Hides!
+        showPresentation: 1
+        oncePerRound: 0

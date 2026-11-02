@@ -20,7 +20,8 @@ public static class EffectPresenter
         // making the unit appear in front so that the effect is clearly visible
         unit.AppearAbove(true);
 
-        // showing text
+        // showing text (turning it off first stops a fade out left from the previous effect on this unit)
+        unit.skillTextObj.SetActive(false);
         unit.skillTextObj.SetActive(true);
         unit.skillText.text = string.IsNullOrEmpty(customText) ? ctx.ability.GetDescription() : customText;
 
@@ -41,7 +42,8 @@ public static class EffectPresenter
         if (unit == null) yield break;
 
         unit.cardEffectVFX.gameObject.SetActive(false);
-        unit.skillTextObj.GetComponent<AutoFade>().FadeOut(textFadeOutTime);
+        // the text can already be faded out (several effects on the same unit, or a long effect)
+        if (unit.skillTextObj.activeInHierarchy) unit.skillTextObj.GetComponent<AutoFade>().FadeOut(textFadeOutTime);
         unit.AppearAbove(false);
     }
 }

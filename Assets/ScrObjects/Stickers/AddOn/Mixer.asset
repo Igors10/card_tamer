@@ -17,7 +17,15 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.9098039, g: 0.627451, b: 0.8117647, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248227
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248227
+      type: {class: ShuffleOpponentOnRevealEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 9
+        customText: 
+        showPresentation: 0
+        oncePerRound: 0

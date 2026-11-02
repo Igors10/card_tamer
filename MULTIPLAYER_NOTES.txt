@@ -35,8 +35,8 @@ Model for the match itself - the "command model" (details in 3c):
 
 Done so far: main menu -> lobby -> both players land in the same Board match
 with the same seed, the opponent's nickname and a random starting player
-(section 3b). Commands work: Ready, workshop results, play card, targets
-(3c).
+(section 3b). Commands work: Ready, workshop results (incl. stickers),
+arranging, attacks, dice, sticker choices (3c).
 
 
 -------------------------------------------------------------------------------
@@ -300,8 +300,12 @@ Sides
   "player goes first". Opponent nickname = GameData.seatNicknames[1 - localSeat].
 
 Turns
-  GameManager.firstPlayer starts every placing phase (offline: always the
-  player). Workshop/battle start with the local player as before.
+  Workshop and arranging: both players act at the same time.
+  Battle: GameManager.firstPlayer attacks first (offline: the player in round
+  1), it switches to the other player every round (GameManager.RoundEnd).
+  FightManager.StartBattle runs the round start stickers (Phantom, Dragon),
+  then GameManager.StartFirstAttack. After every fight the attacker's
+  Player.EndTurn passes the turn.
   Online opponent: Player.isRemote = true (isAI is false, AIOpponent removes
   itself). Player.StartTurn on a remote player calls
   GameManager.StartRemoteTurn: "opponent's turn", waitingForRemote = true,
@@ -336,39 +340,54 @@ MatchCommand (struct, FishNet sends it as is)
   seat     who made it (set by the server, not trusted from the client).
   stateNr  GameManager.stateNr when it was made (+1 on every state change).
   type     CommandType enum. Add new commands here.
-  index, cardName, abilityName, onRight, color, abilityColor, layer1, layer2
+  index, lane, order, cardName, abilityName, onRight, color, abilityColor,
+  layer1, layer2
            values, which ones are used depends on the type (see the struct).
            Unused ones stay empty and cost almost nothing.
 
 CanApply (when a command waits in the queue)
   - stateNr is ahead of ours: the other player got to the next state first
     (skipped animations), wait until we're there.
-  - ChooseTarget: only while this game is asking for a target
-    (ExecuteManager.targetOptions != null), whoever sent it.
+  - ChooseTarget / Choice: only while this game is asking the same question
+    (ExecuteManager.targetOptions / FightManager.WaitingForChoice), whoever
+    sent it.
   - own commands: apply right away.
   - other player's StopDice: once their dice are rolling here.
-  - other player's: only in the workshop (both act at once) or while
-    waitingForRemote (their turn here too). Apply clears waitingForRemote,
-    so nothing else of theirs runs while their move is still animating.
+  - other player's: in the workshop and while arranging (both act at once)
+    or while waitingForRemote (their turn here too). Apply clears
+    waitingForRemote, so nothing else of theirs runs while their move is
+    still animating.
 
 Ready (CommandType.Ready)
   GameManager.PlayerReady(p): endStateReady = true, then EndTurn (local) or
   EndRemoteTurn (remote). Offline the ReadyButton calls PlayerReady directly.
-  Placing with an empty hand: GameManager.StartTurn auto-sends Ready online
-  (offline it also readies an opponent with an empty hand, online each game
-  does that for its own player).
 
-Play card (CommandType.PlayCard: index = card in hand, lane = Player.fields)
-  Field.PlayCard checks the rules (mouse over the field, free slot,
-  CanPlayCard). Online it then only sends the command: sets
-  player.cardPlayed (no second drag while waiting), hides Ready, returns
-  true. The card is hidden (SetActive false) until the command returns,
-  PlayCardNow shows it again.
-  Field.PlayCardNow does the actual play (must play special, random lane
-  with GameRandom, spawn, ability). Offline and bot cards go straight there;
-  online MatchNetwork.ApplyPlayCard calls it on both games.
-  The play ends in ExecuteManager -> card.player.EndTurn(), which for the
-  remote player goes to GameManager.EndRemoteTurn.
+Arrange (CommandType.Arrange: order)
+  Dragging cards around only changes the local field. ReadyButton sends
+  Arrange right before Ready: for every field position, the card's index in
+  Player.roundStartOrder (the field order when the round started, same on
+  both games). Only the other game applies it (the sender already has it).
+  Dragging stops once Ready is pressed.
+
+Attack (CommandType.Attack: index = attacker in the sender's cardsOnField,
+        lane = target in the other player's cardsOnField)
+  FightManager.TryPickTarget (local click on a target) sends it, the local
+  attacker unit is already out for the arrow (attackSent blocks a second
+  attack). Both games run FightManager.ApplyAttack -> Fight when it comes
+  back. The bot and the remote player's attacks spawn the attacker there.
+  Everything inside a fight runs the same on both games: dice through
+  StopDice, Joker / Mixer / Phantom spot use GameRandom.
+
+Choice (CommandType.Choice: index = option, -1 = skipped)
+  FightManager.ChooseCard asks a player to pick a card: Phantom (which copy
+  is the phantom), Seer guess (options built from seenCards in field order),
+  Sneaky / Joker hide and swap. Both games ask the same question with the
+  same options list. The chooser's click (or right click skip) goes through
+  PickChoice -> SendChoice, both games answer with AnswerChoice when it
+  comes back. The other game shows "<name> is choosing...".
+
+Old commands (PlayCard, ChooseTarget) belong to the old lane rules and
+  aren't sent anymore.
 
 Dice (CommandType.StopDice: index = how many dice)
   Rolling dice wait in D6.rollingDice (oldest first). The bot's stop by
@@ -390,19 +409,19 @@ Targets (CommandType.ChooseTarget: index = unit in targetOptions)
   in the same order on both games.
 
 Discard after battle (no command, it's random)
-  BattleManager end: online both picks are rolled up front with
-  DiscardManager.RollAutoDiscard, in seat order (host first), so both games
-  use GameRandom the same way. Own pick goes into
-  StartDiscardSequence(player, true, pick) -> AutoDiscard shows it, the
-  opponent's card is destroyed directly (like the bot's). Offline the pick
-  is still rolled at the end of the animation.
+  BattleManager end: both picks are rolled up front with
+  DiscardManager.RollAutoDiscard, in seat order (host first, offline the
+  player first), so both games use GameRandom the same way. Then
+  StartRoundDiscard(playerPick, opponentPick) shows both rows and cuts both
+  picked cards on both games.
 
 Desync check (MatchNetwork.CheckSync)
   At every state change (GameManager.TransitionGameState, before the new
   state does anything) both games should be identical. Each sends a text
   snapshot (GetSnapshot) to the server: state, round, GameRandom.CallCount,
-  and per seat (seat 0 first): hp, stars, random lane / must play special,
-  hand + knocked out card names, every lane's blocked count + units + power.
+  and per seat (seat 0 first): hp, lost last fight, saved power-ups,
+  compensation stars, hand / field (in order) / knocked out cards with
+  their stickers + sides, face down (v) and phantom (*).
   Server keeps the first one per stateNr and compares with the second.
   Different -> DesyncRpc -> red error on both games with both snapshots.
   Not after every command: commands land at different moments on the two
@@ -441,7 +460,7 @@ Restart (ManagerUI.Rematch)
   one: MatchNetwork waits for both, new seed and new starting seat.
   Offline it just reloads Board.
 
-Workshop results (PickColor, CreateCard, DiscardFromHand)
+Workshop results (PickColor, CreateCard, DiscardFromHand, AddSticker)
   Exception to "nothing before it comes back": the workshop only changes
   your own hand and both players work at the same time, so the sender's game
   applies it right away (existing workshop code) and sends the command.
@@ -464,6 +483,9 @@ Workshop results (PickColor, CreateCard, DiscardFromHand)
     "destroy for a coin", not the random discard after battle). Sends the
     card's index in cardsInHand, other game calls DestroyCard on it (counts
     as a dead unit there too).
+  - AddSticker: Workshop.TryPutSticker (shop "Add sticker", then a card in
+    hand is clicked). Sends the card's index in cardsInHand + sticker asset
+    name + side, other game calls Card.AddSticker on it.
   Hand order matters: indexes only work because both games add/remove the
   same cards in the same order.
   Not sent: shop stars (the opponent's stars don't affect this game).
@@ -537,6 +559,9 @@ other player types it in. No port forwarding needed.
   - All player decisions of a round are synced, desync check and
     disconnects are in. No reconnecting: a dropped player can't come back.
   - A desync is only reported, the match keeps going.
+  - Face down cards and which copy is the phantom are hidden only on screen:
+    both games hold all card data (command model). Fine between friends,
+    a modified game could read them.
   - Both players can pick the same color.
   - Between pressing Ready and the command coming back, the player can
     still act (short window, button is disabled).

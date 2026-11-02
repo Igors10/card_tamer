@@ -10,6 +10,7 @@ public class Player : MonoBehaviour
     public List<Card> cardsInHand = new List<Card>();
     public List<Card> cardsOnField = new List<Card>();
     public List<Card> cardsInDiscard = new List<Card>();
+    [HideInInspector] public List<Card> roundStartOrder = new List<Card>(); // field order before arranging (online the arranged order is sent relative to it)
 
     /// <summary>
     /// Each player can only own 1 special card (in hand, on the field or knocked out)
@@ -63,6 +64,12 @@ public class Player : MonoBehaviour
     [HideInInspector] public int shopStars = 0;
 
     [HideInInspector] public int damageTakenThisRound = 0;
+
+    [Header("fights")]
+    [HideInInspector] public bool lostLastFight; // this side lost its previous fight this round (a tie counts as lost)
+    [HideInInspector] public int nextFightPowerUps; // power-ups waiting for the next card of this player to fight
+    [HideInInspector] public int compensationStars; // Beast destroyed this player's cards, paid out in the next workshop
+    public HashSet<CreatureObj> seenCards = new HashSet<CreatureObj>(); // opponent cards this player has seen revealed (Seer guesses)
 
     private void Awake()
     {
@@ -168,6 +175,8 @@ public class Player : MonoBehaviour
         deadUnitsThisRound = 0;
         damageTakenThisRound = 0;
         cardsInDiscard.Clear();
+        lostLastFight = false;
+        nextFightPowerUps = 0;
 
         // all cards go to the field face down
         GameManager.instance.handManager.MoveHandToField(this);

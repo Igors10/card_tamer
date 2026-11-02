@@ -17,7 +17,17 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.96862745, g: 0.77254903, b: 0.62352943, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248236
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248236
+      type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 6
+        customText: Power-up!
+        showPresentation: 1
+        oncePerRound: 0
+        condition: 6
+        amount: 1

@@ -17,7 +17,15 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.65882355, g: 0.9019608, b: 0.8784314, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248238
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248238
+      type: {class: RevealTargetNeighboursEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 6
+        customText: Scouting!
+        showPresentation: 1
+        oncePerRound: 0

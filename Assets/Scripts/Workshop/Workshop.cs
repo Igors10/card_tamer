@@ -23,6 +23,9 @@ public class Workshop : MonoBehaviour
     [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
     [SerializeField] TMP_InputField nameInput;
     [HideInInspector] public Sticker chosenAbility; // base sticker of the new card
+    bool pickingSticker; // the options show add-on stickers instead of base stickers
+    Sticker chosenSticker; // add-on sticker waiting for a card
+    public bool ChoosingStickerCard { get; private set; } // player has to click a card in hand
     [HideInInspector] public Color chosenAbilityColor;
     [HideInInspector] public Color chosenSecondColor;
     public DrawingTool drawingCanvas;
@@ -288,13 +291,78 @@ public class Workshop : MonoBehaviour
 
             abilityOption[a].abilityNote.InitAbilityNote(stickerToAssign);
         }
+    }
 
-        // Rat explaining the abilites
-        if (RatSmart.instance.abilitiesExplained == false && GameData.firstTimePlaying)
+    // ====================
+    // Stickers
+    // ====================
+
+    /// <summary>
+    /// Shop "Add sticker": offers add-on stickers, then the player clicks a card in hand to put it on
+    /// </summary>
+    public void StickerOptions()
+    {
+        // disabling shop UI
+        GameManager.instance.gameStateUI[(int)GameState.BUYING].SetActive(false);
+        GameManager.instance.readyButton.gameObject.SetActive(false);
+
+        cardCreationUI.SetActive(true);
+        EnableAbilityOptions(true);
+        workshopHintText.text = "Choose a sticker";
+        pickingSticker = true;
+
+        List<AbilityObj> pickedStickers = new List<AbilityObj>();
+        for (int a = 0; a < abilityOption.Length; a++)
         {
-            StartCoroutine(RatSmart.instance.PlayDialogue("AbilityExplainDial"));
-            RatSmart.instance.abilitiesExplained = true;
+            // trying to give different options (only repeats if there are not enough stickers)
+            Sticker stickerToAssign = generator.PickRandomSticker("addon");
+            for (int tries = 0; tries < 20 && pickedStickers.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker("addon");
+            pickedStickers.Add(stickerToAssign.ability);
+
+            abilityOption[a].abilityNote.InitAbilityNote(stickerToAssign, false);
         }
+    }
+
+    void PickStickerOption(Sticker pickedSticker)
+    {
+        chosenSticker = pickedSticker;
+        pickingSticker = false;
+        AudioManager.instance.PlaySFX("ShopStarSFX");
+
+        // the hand comes up, cards that still have room for a sticker glow
+        abilitySelectUI.SetActive(false);
+        cardCreationUI.SetActive(false);
+        ChoosingStickerCard = true;
+        workshopHintText.text = "Click a card to put the sticker on";
+        foreach (Card card in player.cardsInHand) card.HighlightCard(card.cardData.CanAddSticker);
+    }
+
+    /// <summary>
+    /// Card in hand was clicked: gets the chosen sticker if one is waiting
+    /// </summary>
+    public void TryPutSticker(Card card)
+    {
+        if (!ChoosingStickerCard || card.player != player || !player.cardsInHand.Contains(card) || !card.cardData.CanAddSticker) return;
+
+        ChoosingStickerCard = false;
+        foreach (Card handCard in player.cardsInHand) handCard.HighlightCard(false);
+
+        // online the other game puts the same sticker on the same card
+        if (!GameManager.instance.playerConfig.offlineMatch) MatchNetwork.instance.SendAddSticker(player.cardsInHand.IndexOf(card), chosenSticker);
+        card.AddSticker(chosenSticker);
+        AudioManager.instance.PlaySFX("CardPlaySFX");
+
+        // showing the card with its new sticker, then back to the shop
+        PresentNewCard(card.cardData);
+        ReturnToShop();
+    }
+
+    void ReturnToShop()
+    {
+        GameManager.instance.readyButton.gameObject.SetActive(true);
+        GameManager.instance.readyButton.buttonText.text = "Ready";
+        GameManager.instance.gameStateUI[(int)GameState.BUYING].SetActive(true);
+        workshopHintText.text = "Create new cards!";
     }
 
     void EnableAbilityOptions(bool isEnable)
@@ -335,6 +403,9 @@ public class Workshop : MonoBehaviour
 
     public void PickAbilityOption(Sticker pickedAbility, Color abilityColor)
     {
+        // the options were add-on stickers for a card in hand
+        if (pickingSticker) { PickStickerOption(pickedAbility); return; }
+
         // save the ability and color
         chosenAbility = pickedAbility;
         chosenAbilityColor = abilityColor;
@@ -450,9 +521,7 @@ public class Workshop : MonoBehaviour
         {
             // go back to shop if it is not a starting sequence
             cardCreationUI.SetActive(false);
-            GameManager.instance.readyButton.gameObject.SetActive(true);
-            GameManager.instance.readyButton.buttonText.text = "Ready";
-            GameManager.instance.gameStateUI[(int)GameState.BUYING].SetActive(true);
+            ReturnToShop();
         }
     }
 

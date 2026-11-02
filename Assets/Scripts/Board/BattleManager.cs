@@ -55,6 +55,9 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         // no more turns this round
         GameManager.instance.managerUI.turnHint.gameObject.SetActive(false);
 
+        // phantoms disappear before damage is counted
+        FightManager.instance.RemoveAllPhantoms();
+
         // the player with cards left deals 1 damage for each of them
         Player player = GameManager.instance.player;
         Player opponent = GameManager.instance.opponent;
@@ -148,24 +151,15 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
             RatSmart.instance.discardingExplained = true;
         }
 
-        // online both discards are rolled now in seat order (host first), so both games get the same numbers and destroy the same cards
+        // both discards are rolled now in seat order (host first, offline the player is seat 0), so online both games destroy the same cards
         DiscardManager discardManager = GameManager.instance.discardManager;
-        int playerPick = -1;
-        int opponentPick = -1;
-        if (!GameManager.instance.playerConfig.offlineMatch)
-        {
-            if (GameData.localSeat == 0) { playerPick = discardManager.RollAutoDiscard(GameManager.instance.player); opponentPick = discardManager.RollAutoDiscard(GameManager.instance.opponent); }
-            else { opponentPick = discardManager.RollAutoDiscard(GameManager.instance.opponent); playerPick = discardManager.RollAutoDiscard(GameManager.instance.player); }
-        }
+        int playerPick, opponentPick;
+        if (GameData.localSeat == 0 || GameManager.instance.playerConfig.offlineMatch) { playerPick = discardManager.RollAutoDiscard(GameManager.instance.player); opponentPick = discardManager.RollAutoDiscard(GameManager.instance.opponent); }
+        else { opponentPick = discardManager.RollAutoDiscard(GameManager.instance.opponent); playerPick = discardManager.RollAutoDiscard(GameManager.instance.player); }
 
-        // Discarding a card
+        // Scissor Rat destroys one knocked out card from each side (both rows shown together)
         GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false);
-        if (GameManager.instance.player.cardsInDiscard.Count > 0)
-            yield return StartCoroutine(discardManager.StartDiscardSequence(GameManager.instance.player, true, playerPick));
-        // AI opponent discards a card
-        if (GameManager.instance.opponent.isAI) GameManager.instance.opponent.GetComponent<AIOpponent>().DiscardOpponentUnit();
-        // online opponent's discard (rolled above, shown on their own screen)
-        else if (opponentPick >= 0) GameManager.instance.opponent.cardsInDiscard[opponentPick].DestroyCard();
+        yield return StartCoroutine(discardManager.StartRoundDiscard(playerPick, opponentPick));
 
         // Ending the phase
         GameManager.instance.player.endStateReady = true;

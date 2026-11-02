@@ -53,6 +53,15 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         RemoveCutHalves();
     }
 
+    /// <summary>
+    /// Size the unit has when it's not discarded (rows with many cards use smaller units)
+    /// </summary>
+    public void SetRestScale(Vector3 scale)
+    {
+        defaultScale = scale;
+        transform.localScale = scale;
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         TryDiscard();

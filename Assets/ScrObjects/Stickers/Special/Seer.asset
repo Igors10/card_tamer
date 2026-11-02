@@ -17,7 +17,16 @@ MonoBehaviour:
   isSpecial: 1
   stickerColor: {r: 0.83137256, g: 0.65882355, b: 0.41568628, a: 1}
   hasSide: 0
-  effects: []
+  effects:
+  - rid: 8466844326851248243
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248243
+      type: {class: GuessTargetEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 9
+        customText: 
+        showPresentation: 0
+        oncePerRound: 0
+        amount: 1

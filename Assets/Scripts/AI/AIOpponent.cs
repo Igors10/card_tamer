@@ -209,7 +209,8 @@ public class AIOpponent : MonoBehaviour
         if (playerObj.endStateReady) { Debug.Log("AIOpponent: AI already bought all the cards"); yield break; }
 
         ShopManager shop = GameManager.instance.shopManager;
-        int starAmount = playerObj.shopStars + shop.shopStarsAfterBattle + playerObj.deadUnitsThisRound;
+        int starAmount = playerObj.shopStars + shop.shopStarsAfterBattle + playerObj.deadUnitsThisRound + playerObj.compensationStars;
+        playerObj.compensationStars = 0;
         Debug.Log("AIOpponent: AI opponent has " + starAmount + " stars");
         playerObj.shopStars = starAmount;
         int nextStarAmount = playerObj.maxStars + 1;
@@ -238,6 +239,13 @@ public class AIOpponent : MonoBehaviour
             {
                 AddBasic();
                 playerObj.shopStars -= shop.drawCardPrice;
+            }
+            // leftover stars go to stickers on random cards
+            else if (playerObj.shopStars >= shop.stickerPrice && playerObj.cardsInHand.Exists(card => card.cardData.CanAddSticker))
+            {
+                List<Card> cardsWithRoom = playerObj.cardsInHand.FindAll(card => card.cardData.CanAddSticker);
+                cardsWithRoom[Random.Range(0, cardsWithRoom.Count)].AddSticker(generator.PickRandomSticker("addon"));
+                playerObj.shopStars -= shop.stickerPrice;
             }
             // stops shopping only if it can't afford anything
             else nothingToBuy = true;

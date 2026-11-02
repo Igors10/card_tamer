@@ -17,7 +17,25 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.6392157, g: 0.76862746, b: 0.95686275, a: 1}
   hasSide: 1
-  effects: []
+  effects:
+  - rid: 8466844326851248229
+  - rid: 8466844326851248230
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8466844326851248229
+      type: {class: GuardNeighbourEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 9
+        customText: 
+        showPresentation: 0
+        oncePerRound: 0
+    - rid: 8466844326851248230
+      type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 6
+        customText: Power-up!
+        showPresentation: 1
+        oncePerRound: 0
+        condition: 2
+        amount: 1

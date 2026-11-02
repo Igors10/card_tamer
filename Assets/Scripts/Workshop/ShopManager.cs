@@ -12,7 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 public class ShopManager : MonoBehaviour
 {
     [Header("refs")]
-    [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- discard card; 3- draw special
+    [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- discard card; 3- draw special; 4- add sticker
     [SerializeField] TextMeshProUGUI[] prices;
     [SerializeField] TextMeshProUGUI nextStarAmountText;
     [SerializeField] Player player;
@@ -21,6 +21,7 @@ public class ShopManager : MonoBehaviour
     [Header("prices")]
     public int drawCardPrice;
     public int drawSpecialPrice = 4;
+    public int stickerPrice = 2; // placeholder until the sticker cost is decided
     public int discardReward;
     // upgrade price is current max star amount + 1
 
@@ -46,6 +47,7 @@ public class ShopManager : MonoBehaviour
         buttons[1].onClick.AddListener(() => DrawCard(player));
         buttons[2].onClick.AddListener(() => DiscardCard(player));
         buttons[3].onClick.AddListener(() => DrawSpecial(player));
+        buttons[4].onClick.AddListener(() => BuySticker(player));
     }
 
     private void OnEnable()
@@ -92,6 +94,11 @@ public class ShopManager : MonoBehaviour
         prices[3].text = drawSpecialPrice.ToString();
         CheckButtonAvailability(3, drawSpecialPrice);
         if (player.HasSpecialCard()) buttons[3].interactable = false;
+
+        // refreshing add sticker button (needs a card with room for another sticker)
+        prices[4].text = stickerPrice.ToString();
+        CheckButtonAvailability(4, stickerPrice);
+        if (!player.cardsInHand.Exists(card => card.cardData.CanAddSticker)) buttons[4].interactable = false;
 
         // refreshing discard button
         buttons[2].interactable = player.cardsInHand.Count > 1;
@@ -160,9 +167,15 @@ public class ShopManager : MonoBehaviour
         Pay(playerToGetSpecial, drawSpecialPrice);
     }
 
+    void BuySticker(Player playerToGetSticker)
+    {
+        GameManager.instance.managerUI.workshop.StickerOptions();
+        Pay(playerToGetSticker, stickerPrice);
+    }
+
     void DiscardCard(Player playerToDiscard)
     {
-        StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(playerToDiscard, false));
+        StartCoroutine(GameManager.instance.discardManager.StartDiscardSequence(playerToDiscard));
     }
 
     // SHOP STARS (MONEY)
@@ -223,6 +236,13 @@ public class ShopManager : MonoBehaviour
         {
             yield return RatSmart.instance.PlayDialogue("PlusStarDial");
             AddShopStar();
+        }
+
+        // a star for every card the opponent's Beast destroyed
+        for (; player.compensationStars > 0; player.compensationStars--)
+        {
+            AddShopStar();
+            yield return new WaitForSeconds(starAppearIntervals);
         }
 
         Refresh();
