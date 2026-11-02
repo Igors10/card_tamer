@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
+  m_Name: Attacker
+  m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
+  power: 4
+  abilityDescription: Power-up when attacking
+  isSpecial: 0
+  stickerColor: {r: 0.95686275, g: 0.6392157, b: 0.6392157, a: 1}
+  hasSide: 0
+  effects:
+  - rid: 8466844326851248217
+  references:
+    version: 2
+    RefIds:
+    - rid: 8466844326851248217
+      type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 6
+        customText: Power-up!
+        showPresentation: 1
+        oncePerRound: 0
+        condition: 1
+        amount: 1

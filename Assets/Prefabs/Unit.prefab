@@ -808,7 +808,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.41, y: 2.17}
+  m_AnchoredPosition: {x: -3.4, y: 0.6}
   m_SizeDelta: {x: 1.5, y: 1.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8589008067954515711
@@ -1141,6 +1141,9 @@ MonoBehaviour:
   diceDistance: 3
   dieOffsetY: 3
   afterDiePause: 2
+  powerUpDiceStart: {x: 3.6, y: 1, z: 0}
+  powerUpDicePerRow: 3
+  powerUpDiceSpacing: 1.8
   bonusPowerObj: {fileID: 7962674609946288711}
   bonusPowerValue: {fileID: 2451345806949978867}
   stunned: 0
@@ -1211,7 +1214,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.4100001, y: 2.17}
+  m_AnchoredPosition: {x: -3.4, y: 0.6}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2141513534196826067

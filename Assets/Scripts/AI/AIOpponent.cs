@@ -64,7 +64,7 @@ public class AIOpponent : MonoBehaviour
         if (basicUnitPresets == null || basicUnitPresets.Count == 0) basicUnitPresets = new List<UnitPreset>(chosenIdentity.basicUnits);
    
         // choosing random ability
-        AbilityObj newAbility = (Random.value > 0.5f) ? generator.PickRandomAbility("default") : generator.PickRandomAbility("basic");
+        Sticker newAbility = generator.PickRandomSticker("basic");
         // choosing random unit preset
         UnitPreset newUnitPreset = basicUnitPresets[Random.Range(0, basicUnitPresets.Count)];
         basicUnitPresets.Remove(newUnitPreset);
@@ -83,7 +83,7 @@ public class AIOpponent : MonoBehaviour
         if (specialUnitPresets.Count == 0) specialUnitPresets = new List<UnitPreset>(chosenIdentity.basicUnits);
 
         // choosing random ability
-        AbilityObj newAbility = generator.PickRandomAbility("special");
+        Sticker newAbility = generator.PickRandomSticker("special");
         // choosing random unit preset
         UnitPreset newUnitPreset = specialUnitPresets[Random.Range(0, specialUnitPresets.Count)];
         specialUnitPresets.Remove(newUnitPreset);
@@ -100,15 +100,35 @@ public class AIOpponent : MonoBehaviour
         switch (GameManager.instance.currentState)
         {
             case GameState.PLACING:
-                currentAction = StartCoroutine(PlaceRandomCard());
+                ArrangeField();
+                AIEndTurn();
+                break;
+
+            case GameState.BATTLING:
+                currentAction = StartCoroutine(AttackRandomCard());
                 break;
         }
+    }
+
+    // ==================== ATTACKING ============================
+
+    /// <summary>
+    /// Attacks a random player card with a random card of its own
+    /// </summary>
+    IEnumerator AttackRandomCard()
+    {
+        yield return new WaitForSeconds(1.5f);
+
+        Player target = GameManager.instance.player;
+        Card attackingCard = playerObj.cardsOnField[Random.Range(0, playerObj.cardsOnField.Count)];
+        Card targetCard = target.cardsOnField[Random.Range(0, target.cardsOnField.Count)];
+        FightManager.instance.Attack(attackingCard, targetCard);
     }
 
     public void AIEndTurn()
     {
         // stop any current action
-        StopCoroutine(currentAction);
+        if (currentAction != null) StopCoroutine(currentAction);
 
         if (GameManager.instance.player.endStateReady) GameManager.instance.CheckEndState();
         else GameManager.instance.StartTurn();
@@ -118,6 +138,24 @@ public class AIOpponent : MonoBehaviour
     {
         GameManager.instance.opponent.endStateReady = true;
         AIEndTurn();
+    }
+
+    // ==================== ARRANGING ============================
+
+    /// <summary>
+    /// Puts the field cards in a random order and is ready
+    /// </summary>
+    public void ArrangeField()
+    {
+        List<Card> field = playerObj.cardsOnField;
+        for (int i = field.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (field[i], field[j]) = (field[j], field[i]);
+        }
+        GameManager.instance.handManager.UpdateHandVisuals(playerObj);
+
+        playerObj.endStateReady = true;
     }
 
     // ==================== PLACING ============================

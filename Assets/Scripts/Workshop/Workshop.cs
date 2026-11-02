@@ -22,7 +22,7 @@ public class Workshop : MonoBehaviour
     [SerializeField] GameObject canvasUI;
     [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
     [SerializeField] TMP_InputField nameInput;
-    [HideInInspector] public AbilityObj chosenAbility;
+    [HideInInspector] public Sticker chosenAbility; // base sticker of the new card
     [HideInInspector] public Color chosenAbilityColor;
     [HideInInspector] public Color chosenSecondColor;
     public DrawingTool drawingCanvas;
@@ -276,27 +276,17 @@ public class Workshop : MonoBehaviour
         workshopHintText.text = "Choose an ability for a new card";
 
         
-        if (drawSpecial) // options for special cards
+        // base sticker options, special or basic
+        string listName = (drawSpecial) ? "special" : "basic";
+        List<AbilityObj> pickedAbilities = new List<AbilityObj>();
+        for (int a = 0; a < abilityOption.Length; a++)
         {
-            List<AbilityObj> pickedAbilities = new List<AbilityObj>();
-            for (int a = 0; a < abilityOption.Length; a++)
-            {
-                // trying to give different options (only repeats if there are not enough special abilities)
-                AbilityObj specialAbilityToAssign = generator.PickRandomAbility("special");
-                for (int tries = 0; tries < 20 && pickedAbilities.Contains(specialAbilityToAssign); tries++) specialAbilityToAssign = generator.PickRandomAbility("special");
-                pickedAbilities.Add(specialAbilityToAssign);
+            // trying to give different options (only repeats if there are not enough stickers)
+            Sticker stickerToAssign = generator.PickRandomSticker(listName);
+            for (int tries = 0; tries < 20 && pickedAbilities.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker(listName);
+            pickedAbilities.Add(stickerToAssign.ability);
 
-                abilityOption[a].abilityNote.InitAbilityNote(specialAbilityToAssign);
-            }
-        }
-        else // options for basic cards
-        {
-            // first option is always a standart +1 power card
-            abilityOption[0].abilityNote.InitAbilityNote(generator.PickRandomAbility("attack"));
-
-            // second is a random card
-            AbilityObj abilityToAssign = generator.PickRandomAbility("basic");
-            abilityOption[1].abilityNote.InitAbilityNote(abilityToAssign);
+            abilityOption[a].abilityNote.InitAbilityNote(stickerToAssign);
         }
 
         // Rat explaining the abilites
@@ -322,17 +312,18 @@ public class Workshop : MonoBehaviour
         workshopHintText.text = "Draw and name the card";
 
         // passing the ability
-        abilityReminder.text = chosenAbility.GetAbilityDesc(chosenAbilityColor);
-        abilityReminderPower.text = chosenAbility.GetPowerText();
         AbilityNote reminderNote = abilityReminder.GetComponentInParent<AbilityNote>();
-        reminderNote.FitPowerToDescription(!string.IsNullOrEmpty(chosenAbility.abilityDescription));
-        reminderNote.RefreshPowerColor(chosenAbility.isSpecial);
+        reminderNote.storedAbilityColor = chosenAbilityColor;
+        reminderNote.InitAbilityNote(chosenAbility);
 
         // resetting name input field
         nameInput.text = "";
 
         // new drawings are saved by default
         saveToGalleryToggle.isOn = true;
+
+        // random preset button only when there's something in the gallery
+        randomPresetButton.SetActive(GetGalleryDrawings().Exists(preset => preset != null));
 
         // Rat explaining the drawing
         if (RatSmart.instance.drawingExplained == false && GameData.firstTimePlaying)
@@ -342,7 +333,7 @@ public class Workshop : MonoBehaviour
         }
     }
 
-    public void PickAbilityOption(AbilityObj pickedAbility, Color abilityColor)
+    public void PickAbilityOption(Sticker pickedAbility, Color abilityColor)
     {
         // save the ability and color
         chosenAbility = pickedAbility;
@@ -419,7 +410,7 @@ public class Workshop : MonoBehaviour
         UnitPreset randomUnitPreset = null;
         if (drawingCanvas.IsCanvasEmpty())
         {
-            randomUnitPreset = (chosenAbility.isSpecial) ? GameManager.instance.cardDatabase.GetRandomSpecialPreset() : GameManager.instance.cardDatabase.GetRandomBasicPreset();
+            randomUnitPreset = (chosenAbility.ability.isSpecial) ? GameManager.instance.cardDatabase.GetRandomSpecialPreset() : GameManager.instance.cardDatabase.GetRandomBasicPreset();
             // presets are made with the darker second color in mind (same as AI cards)
             newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, Colors.instance.GetDarkenColor(player.playerColor), chosenAbilityColor);
         }
@@ -492,13 +483,7 @@ public class Workshop : MonoBehaviour
     {
         AudioManager.instance.PlaySFX("ButtonSFX");
 
-#if UNITY_EDITOR
-        SyncGalleryList();
-#endif
-
-        List<UnitPreset> gallery = new List<UnitPreset>(galleryList.presets);
-        gallery.AddRange(Gallery.GetSavedDrawings());
-        List<UnitPreset> options = gallery.FindAll(preset => preset != null && preset != loadedGalleryPreset);
+        List<UnitPreset> options = GetGalleryDrawings().FindAll(preset => preset != null && preset != loadedGalleryPreset);
         // only one drawing in the gallery and it's already loaded
         if (options.Count == 0 && loadedGalleryPreset != null) options.Add(loadedGalleryPreset);
         if (options.Count == 0) { Animations.instance.ShakeAnim(randomPresetButton, 5f, 1f); return; }
@@ -511,6 +496,20 @@ public class Workshop : MonoBehaviour
 
         // it's already in the gallery
         saveToGalleryToggle.isOn = false;
+    }
+
+    /// <summary>
+    /// Drawings the random preset button picks from. Builds start with an empty gallery, only the player's own saved drawings
+    /// </summary>
+    List<UnitPreset> GetGalleryDrawings()
+    {
+        List<UnitPreset> gallery = new List<UnitPreset>();
+#if UNITY_EDITOR
+        SyncGalleryList();
+        gallery.AddRange(galleryList.presets);
+#endif
+        gallery.AddRange(Gallery.GetSavedDrawings());
+        return gallery;
     }
 
 #if UNITY_EDITOR

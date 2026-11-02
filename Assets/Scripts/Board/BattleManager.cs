@@ -36,164 +36,72 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
     {
         currentLine = -1;
         lostCurrentRound = false;
-        Debug.Log("BattleManager: resetting battle values, currentLine is now " + currentLine);
 
-        ResetLineVals();
-    }
-
-    void ResetLineVals()
-    {
-        playerPowerUI.ResetCounter();
-        opponentPowerUI.ResetCounter();
-
+        // the old lane power counters aren't used in fights
         playerPowerUI.gameObject.SetActive(false);
         opponentPowerUI.gameObject.SetActive(false);
     }
 
     /// <summary>
-    /// Switches to next battle line
+    /// Called by FightManager when a player has no cards left on the field
     /// </summary>
-    public void NextLine()
+    public void EndBattle()
     {
-        currentLine++;
-        Debug.Log("BattleManager: proceeding to next battle line. Current battle line is " + currentLine);
-        
-        if (currentLine < GameManager.instance.player.fields.Length && GameManager.instance.gameOver != true)
-        {
-            // Getting all the units battling on currentLine and initialize battle
-            List<Unit> playerUnits = GameManager.instance.player.fields[currentLine].GetFieldUnits();
-            List<Unit> opponentUnits = GameManager.instance.opponent.fields[currentLine].GetFieldUnits();
-            if (playerUnits.Count > 0 || opponentUnits.Count > 0) StartCoroutine(InitBattleLine(playerUnits, opponentUnits));
+        StartCoroutine(EndBattleSequence());
+    }
 
-            // If line is empty go to next line instead
-            else { NextLine(); return; }
-        }
-        // Ending the battle phase after finished with last line
-        else
-        {
-            StartCoroutine(WrapUpBattle());
-        }
+    IEnumerator EndBattleSequence()
+    {
+        // no more turns this round
+        GameManager.instance.managerUI.turnHint.gameObject.SetActive(false);
+
+        // the player with cards left deals 1 damage for each of them
+        Player player = GameManager.instance.player;
+        Player opponent = GameManager.instance.opponent;
+        if (player.cardsOnField.Count > 0) yield return DealRoundDamage(player, opponent);
+        else if (opponent.cardsOnField.Count > 0) yield return DealRoundDamage(opponent, player);
+
+        yield return WrapUpBattle();
     }
 
     /// <summary>
-    /// Focuses camera and visuals on current battle line
+    /// A damage particle flies from every card the winner has left to the loser's health
     /// </summary>
-    public IEnumerator InitBattleLine(List<Unit> playerUnits, List<Unit> opponentUnits)
+    IEnumerator DealRoundDamage(Player winner, Player loser)
     {
-        Debug.Log("BattleManager: inititalizing " + currentLine + " battle line.");
+        PowerCounter counter = winner.powerCounter;
+        Vector3 healthbarPos = loser.playerUI.healthbar.transform.position;
 
-        // RESETTING VARIABLES
-        ResetLineVals();
-
-        Player player = GameManager.instance.player;
-        Player opponent = GameManager.instance.opponent;
-        Field field = player.fields[currentLine];
-        Field oppField = opponent.fields[currentLine];
-
-        // PREPARING THE LINE
-
-        // Moving the camera
-        Vector3 posBetweenFields = Vector3.Lerp(field.transform.position, oppField.transform.position, 0.5f);
-        Vector3 targetPos = new Vector3(posBetweenFields.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
-        yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(targetPos, 0.6f));
-
-        // Enabling power UI
-        playerPowerUI.gameObject.SetActive(true);
-        opponentPowerUI.gameObject.SetActive(true);
-
-        // Fading all lines, except current line fields
-        for (int i = 0; i < player.fields.Length; i++)
+        List<GameObject> particles = new List<GameObject>();
+        foreach (Card card in winner.cardsOnField)
         {
-            player.fields[i].FadeOut(i != currentLine);
-            opponent.fields[i].FadeOut(i != currentLine);
+            GameObject particle = Instantiate(dmgParticlePrefab, card.transform.position, Quaternion.identity, damageObj.transform);
+            particle.GetComponent<UnityEngine.UI.Image>().color = winner.playerColor;
+            particles.Add(particle);
+            AudioManager.instance.PlaySFX("MoreDamageSFX");
+            Animations.instance.PopAnim(particle, 0.3f, 0.45f);
+            card.Cheer();
+            yield return new WaitForSeconds(0.2f);
         }
 
-        // Coloring lines in respective player colors
-        field.sprite.color = player.playerColor;
-        oppField.sprite.color = opponent.playerColor;
-
-        yield return Animations.instance.SkippablePause(1f);
-        yield return new WaitForSeconds(0.1f); // prevents from skipping power increase animation right after skipping movement
-
-        // Rat tutorial
-        if (GameData.firstTimePlaying && RatSmart.instance.battleExplained == false)
+        foreach (GameObject particle in particles)
         {
-            yield return RatSmart.instance.PlayDialogue("BattleExplainDial");
-            RatSmart.instance.battleExplained = true;
+            yield return counter.Damage(healthbarPos, particle);
+            loser.TakeDamage(1);
+            Destroy(particle);
+            if (GameManager.instance.gameOver) yield break;
+            yield return new WaitForSeconds(0.2f);
         }
 
-        // ADDING UNIT POWER
-
-        int playerPower = 0;
-        int opponentPower = 0;
-        // Opponent's power
-        foreach (Unit unit in opponentUnits)
-        {
-            if (unit.card.currentPower > 0 && !unit.stunned)
-            {
-                yield return StartCoroutine(opponentPowerUI.AddPower(unit.card.currentPower, unit));
-                opponentPower += unit.card.currentPower;
-            }
-        }
-        // Wait for power to get calculated
-        while (opponentPowerUI.currentPower < opponentPower)
-        {
-            yield return null;
-        }
-        yield return new WaitForSeconds(0.1f);
-
-
-        // Player's power
-        foreach (Unit unit in playerUnits)
-        {
-            if (unit.card.currentPower > 0 && !unit.stunned)
-            {
-                yield return StartCoroutine(playerPowerUI.AddPower(unit.card.currentPower, unit));
-                playerPower += unit.card.currentPower;
-            }
-        }
-        // Wait for power to get calculated
-        while (playerPowerUI.currentPower < playerPower)
-        {
-            yield return null;
-        }
-        yield return Animations.instance.SkippablePause(0.75f);
-
-        // COMPARING POWER
-        if (playerPowerUI.currentPower > opponentPowerUI.currentPower) Debug.Log("BattleManager: player has more power");
-        if (playerPowerUI.currentPower < opponentPowerUI.currentPower) Debug.Log("BattleManager: opponent has more power");
-        if (playerPowerUI.currentPower == opponentPowerUI.currentPower) Debug.Log("BattleManager: it is tied for the power");
-        playerPowerUI.ResolveCounter(playerPowerUI.currentPower >= opponentPowerUI.currentPower, new Field[] { field, oppField });
-        opponentPowerUI.ResolveCounter(opponentPowerUI.currentPower >= playerPowerUI.currentPower, new Field[] { oppField, field });
-
-        // Waiting for both power counters to get resolved
-        while (!playerPowerUI.resolved || !opponentPowerUI.resolved) yield return null;
-        Debug.Log("BattleManager: counters got resolved");
-
-        // trigger any end of line effects
-        GameManager.instance.BroadcastOnLineResolved();
-        yield return GameManager.instance.executeManager.TriggerEffects("onBattleEnd");
-
-        // Switching to next line
-        NextLine();
+        yield return new WaitForSeconds(0.5f);
     }
 
     IEnumerator WrapUpBattle()
     {
         Debug.Log("BattleManager: ending battle phase");
 
-        // resetting battle visuals
-        ResetLineVals();
-
         // stop here if one of the players has lost
         if (GameManager.instance.gameOver) yield break;
-
-        // Putting the camera where it was before battling phase
-        Vector3 playerCentralFieldPos = GameManager.instance.player.fields[1].transform.position;
-        Vector3 opponentCentralFieldPos = GameManager.instance.opponent.fields[1].transform.position;
-        Vector3 posBetweenFields = Vector3.Lerp(playerCentralFieldPos, opponentCentralFieldPos, 0.5f);
-        Vector3 targetPos = new Vector3(posBetweenFields.x, Camera.main.transform.position.y, Camera.main.transform.position.z);
-        yield return StartCoroutine(Camera.main.GetComponent<Viewpoint>().MoveCamera(targetPos, 0.6f));
 
         // Message that units are knocked out
         //GameManager.instance.managerUI.hintMessage.gameObject.SetActive(false); // removing it so that the message about doodle collector could be seen

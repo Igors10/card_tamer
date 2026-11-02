@@ -5,6 +5,8 @@ public class AbilityNote : MonoBehaviour
 {
     public AbilityObj storedAbility;
     public Color storedAbilityColor;
+    [HideInInspector] public bool storedOnRight; // side of the offered sticker
+    [SerializeField] Image stickerBG; // tinted with the sticker's color
     [SerializeField] TextMeshProUGUI noteText;
     [SerializeField] TextMeshProUGUI powerValue;
     [SerializeField] Transform powerObj;
@@ -20,14 +22,17 @@ public class AbilityNote : MonoBehaviour
     Vector3 powerRestScale;
     bool restSaved;
 
-    public void InitAbilityNote(AbilityObj ability)
+    public void InitAbilityNote(Sticker sticker)
     {
         // ability color
         //storedAbilityColor = Colors.instance.GetRandomSecondaryColor();
 
         // ability and desc
+        AbilityObj ability = sticker.ability;
         storedAbility = ability;
-        noteText.text = ability.GetAbilityDesc(storedAbilityColor);
+        storedOnRight = sticker.onRight;
+        noteText.text = ability.GetAbilityDesc(storedAbilityColor, storedOnRight);
+        if (stickerBG != null) stickerBG.color = ability.stickerColor;
 
         powerValue.text = ability.GetPowerText();
         FitPowerToDescription(!string.IsNullOrEmpty(ability.abilityDescription));

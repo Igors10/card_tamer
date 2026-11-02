@@ -1,8 +1,13 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CardInput : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
+public class CardInput : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerClickHandler
 {
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        thisCard.OnClick();
+    }
+
     Card thisCard;
 
     void Start()

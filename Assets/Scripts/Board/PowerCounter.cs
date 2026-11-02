@@ -446,7 +446,8 @@ public class PowerCounter : MonoBehaviour
         trailImage.raycastTarget = false;
         trailImage.color = new Color(source.color.r, source.color.g, source.color.b, 0.6f);
 
-        StartCoroutine(FadeDamageTrail(trailImage));
+        // runs on Animations, the counter itself is hidden when round end damage uses it
+        Animations.instance.StartCoroutine(FadeDamageTrail(trailImage));
     }
 
     IEnumerator FadeDamageTrail(Image trail)

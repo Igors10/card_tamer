@@ -7,6 +7,7 @@ public static class GameData
     public static bool firstTimePlaying = true;
 
     public const string nicknamePrefKey = "nickname";
+    public const string defaultNickname = "Player"; // nickname field on the first launch
     public const int maxNicknameLength = 16;
 
     // online play
@@ -23,6 +24,6 @@ public static class GameData
     {
         string name = nickname;
         if (string.IsNullOrWhiteSpace(name)) name = PlayerPrefs.GetString(nicknamePrefKey, "");
-        return string.IsNullOrWhiteSpace(name) ? "Player" : name.Trim();
+        return string.IsNullOrWhiteSpace(name) ? defaultNickname : name.Trim();
     }
 }

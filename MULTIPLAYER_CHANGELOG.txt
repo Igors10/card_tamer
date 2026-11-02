@@ -94,3 +94,14 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
     jumped back to the hand for a moment).
   - Board started straight from the editor is a bot match again
     (offlineMatch stayed false in the config asset after an online test).
+
+2026-11-01  Fix after first build test (two PCs)
+  - Debug keys (O, A, K, E, Backspace) worked in builds and online. Typing an
+    "o" in a card name set the opponent ready (O key), so the host left the
+    workshop alone. Its queue then got stuck on the guest's next workshop
+    command, so the host's own played card never came back. Now only in
+    editor bot matches (GameManager.DebugKeysEnabled).
+
+2026-11-02  Stickers (branch experimental-rules)
+  - CreateCard sends the base sticker (abilityName) + its side (new
+    MatchCommand.onRight). Cards now hold stickers (CreatureObj.stickers).

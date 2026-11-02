@@ -31,6 +31,10 @@ public class EffectContext
     public Field OpposingField => Opponent.fields[FieldID];
     public bool IsOnCurrentBattleLine => FieldID == GameManager.instance.battleManager.currentLine;
 
+    // fight
+    public bool IsAttacking => FightManager.instance.attacker == self;
+    public bool IsDefending => FightManager.instance.defender == self;
+
     // units
     public List<Unit> EnemyUnits => Fields.GetAllUnits(false, Opponent);
     public List<Unit> AllyUnits => Fields.GetAllUnits(false, Owner);

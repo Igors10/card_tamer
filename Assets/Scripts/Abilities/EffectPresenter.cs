@@ -22,7 +22,7 @@ public static class EffectPresenter
 
         // showing text
         unit.skillTextObj.SetActive(true);
-        unit.skillText.text = string.IsNullOrEmpty(customText) ? ctx.ability.abilityData.GetAbilityDesc(ctx.ability.abilityColor) : customText;
+        unit.skillText.text = string.IsNullOrEmpty(customText) ? ctx.ability.GetDescription() : customText;
 
         // playing particle effect
         Animations.instance.PopAnim(unit.sprite.gameObject, 0.35f, 0.15f);

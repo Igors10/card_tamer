@@ -55,6 +55,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float diceDistance;
     [SerializeField] float dieOffsetY;
     [SerializeField] float afterDiePause;
+    [SerializeField] Vector3 powerUpDiceStart = new Vector3(3.6f, 1f, 0f); // first power-up die, right of the unit
+    [SerializeField] int powerUpDicePerRow = 3;
+    [SerializeField] float powerUpDiceSpacing = 1.8f;
     [SerializeField] GameObject bonusPowerObj;
     [SerializeField] TextMeshProUGUI bonusPowerValue;
 
@@ -127,7 +130,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float moveXSpeed = 5f;
     [SerializeField] float rotationSpeed = 360f;
 
-    public bool IsSpecial => card != null && card.cardData.ability[0].isSpecial;
+    public bool IsSpecial => card != null && card.cardData.IsSpecial;
     public bool IsSpawning => spawnRoutine != null; // still dropping onto the field
 
     void Awake()
@@ -329,7 +332,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     void Update()
     {
         // temp debug to test unit knockout
-        if (Input.GetKeyDown(KeyCode.K)) StartCoroutine(KnockOut());
+        if (GameManager.instance.DebugKeysEnabled && Input.GetKeyDown(KeyCode.K)) StartCoroutine(KnockOut());
     }
 
     public IEnumerator KnockOut()
@@ -371,7 +374,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // removes unit from board when it is off screen
         Field field = currentField;
         RemoveFromBoard();
-        GameManager.instance.fieldManager.MoveBackUnitForward(field);
+        if (field != null) GameManager.instance.fieldManager.MoveBackUnitForward(field);
     }
 
 
@@ -415,9 +418,12 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// </summary>
     public void RemoveFromBoard()
     {
-        // removes unit reference from field
-        int unitSlot = (currentField.units[0] == this) ? 0 : 1;
-        currentField.units[unitSlot] = null;
+        // removes unit reference from field (fighting units aren't on a field)
+        if (currentField != null)
+        {
+            int unitSlot = (currentField.units[0] == this) ? 0 : 1;
+            currentField.units[unitSlot] = null;
+        }
         Debug.Log("Removed unit gameObject from board");
 
         // removes unit reference from all units list
@@ -429,7 +435,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public IEnumerator RollPower()
     {
-        int numberOfDice = (card.cardData.ability[0].isSpecial) ? 2 : 1;
+        int numberOfDice = (card.cardData.IsSpecial) ? 2 : 1;
         rollingPower = true;
 
         powerUI.SetActive(true);
@@ -461,6 +467,45 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         DisableRollingUI();
 
         //yield return new WaitForSeconds(0.1f);
+        rollingPower = false;
+    }
+
+    /// <summary>
+    /// Shows one die for every power-up, in a row to the right of the unit
+    /// </summary>
+    public void ShowPowerUpDice(int count)
+    {
+        // more power-ups than dice: copying the first die
+        List<D6> allDice = new List<D6>(dice);
+        while (allDice.Count < count) allDice.Add(Instantiate(dice[0], dice[0].transform.parent));
+        dice = allDice.ToArray();
+
+        for (int i = 0; i < dice.Length; i++)
+        {
+            bool shown = i < count;
+            if (!shown) { dice[i].DisableDie(); continue; }
+
+            dice[i].gameObject.SetActive(true);
+            int column = i % powerUpDicePerRow;
+            int row = i / powerUpDicePerRow;
+            dice[i].transform.localPosition = powerUpDiceStart + new Vector3(column * powerUpDiceSpacing, -row * powerUpDiceSpacing, 0f);
+            Animations.instance.PopAnim(dice[i].gameObject, 0.3f, 0.3f);
+        }
+    }
+
+    /// <summary>
+    /// Rolls all shown power-up dice at once, every result is added to the unit's power
+    /// </summary>
+    public IEnumerator RollPowerUps(int count)
+    {
+        if (count <= 0) yield break;
+        rollingPower = true;
+
+        List<Coroutine> rolls = new List<Coroutine>();
+        for (int i = 0; i < count; i++) rolls.Add(StartCoroutine(dice[i].RollAnimation()));
+        foreach (Coroutine roll in rolls) yield return roll;
+
+        for (int i = 0; i < count; i++) dice[i].Glow(true);
         rollingPower = false;
     }
 

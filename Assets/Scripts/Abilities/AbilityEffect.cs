@@ -8,7 +8,8 @@ public enum EffectTrigger
     OnDiceRolled,       // whenever any unit finishes rolling a die
     OnOwnLineResolved,  // after the battle on this unit's line is resolved
     AfterAnyCardPlayed, // after any card is played and its own OnPlay effects are resolved, so its starting power is final (base or rolled)
-    OnWouldBeKnockedOut // right before this unit gets knocked out
+    OnWouldBeKnockedOut, // right before this unit gets knocked out
+    OnFightStart        // both fighting units are on the board, before power-ups are rolled
 }
 
 /// <summary>

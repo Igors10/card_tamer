@@ -23,6 +23,7 @@ public class AbilityRunner
         GameManager.OnDiceRolled += HandleDiceRolled;
         GameManager.OnLineResolved += HandleLineResolved;
         GameManager.OnRoundEnd += HandleRoundEnd;
+        GameManager.OnFightStart += HandleFightStart;
     }
 
     public void Unsubscribe()
@@ -32,6 +33,7 @@ public class AbilityRunner
         GameManager.OnDiceRolled -= HandleDiceRolled;
         GameManager.OnLineResolved -= HandleLineResolved;
         GameManager.OnRoundEnd -= HandleRoundEnd;
+        GameManager.OnFightStart -= HandleFightStart;
     }
 
     // ===============
@@ -58,6 +60,14 @@ public class AbilityRunner
     void HandleLineResolved()
     {
         foreach (Unit unit in GetBoardUnits()) Queue(unit, EffectTrigger.OnOwnLineResolved, executeManager.battleOverEffectStack);
+    }
+
+    void HandleFightStart()
+    {
+        // attacker's stickers first, then the defender's
+        FightManager fight = FightManager.instance;
+        Queue(fight.attacker, EffectTrigger.OnFightStart, executeManager.effectStack);
+        Queue(fight.defender, EffectTrigger.OnFightStart, executeManager.effectStack);
     }
 
     void HandleRoundEnd()

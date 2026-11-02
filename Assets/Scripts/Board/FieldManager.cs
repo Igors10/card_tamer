@@ -281,6 +281,24 @@ public class FieldManager : MonoBehaviour
         unitList.Add(newUnit);
     }
 
+    /// <summary>
+    /// Spawns a fighting unit at a spot in the middle of the table (not on a field)
+    /// </summary>
+    public Unit SpawnFightUnit(Card cardToSpawn, Vector3 position)
+    {
+        GameObject newUnitObj = Instantiate(unitPrefab, position, Quaternion.Euler(60f, 0f, 0f), this.gameObject.transform);
+        Unit newUnit = newUnitObj.GetComponent<Unit>();
+        newUnit.InitUnit(cardToSpawn, null);
+        newUnit.PlaySpawnAnim();
+
+        // Plays spawning "poof" VFX (special units play their own when they land)
+        if (!newUnit.IsSpecial) ParticleManager.instance.SpawnVFX(newUnitObj.transform.position, "SpawnVFX");
+        AudioManager.instance.PlaySFX("CardPlaySFX", 0.6f);
+
+        unitList.Add(newUnit);
+        return newUnit;
+    }
+
     public int GetUnitSlot(Unit unit)
     {
         return (unit.currentField.units[0] == unit) ? 0 : 1;

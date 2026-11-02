@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7dbd085fde9a27449bcb4cc422cfaf5d, type: 3}
+  m_Name: AddOnStickers
+  m_EditorClassIdentifier: Assembly-CSharp::AbiltiyList
+  abilityList:
+  - {fileID: 11400000, guid: c3a8fa0326568224293e4fcfe1a24779, type: 2}
+  - {fileID: 11400000, guid: c4d0c8a0f141a7948aef407ad7d9a8ba, type: 2}
+  - {fileID: 11400000, guid: 8ffdda9f1e84bc046ba1047391077546, type: 2}
+  - {fileID: 11400000, guid: b3d62f8a6522307408396a6c3730b7bb, type: 2}
+  - {fileID: 11400000, guid: 81af36695f304e34598c8f3920b33d1a, type: 2}
+  - {fileID: 11400000, guid: b1876f3c7946b4044baa897589643b2f, type: 2}
+  - {fileID: 11400000, guid: 9ea87c0de5d67154b9798755a80cf858, type: 2}
+  - {fileID: 11400000, guid: 500864cf03e390745a6b8e1da55b6740, type: 2}
+  - {fileID: 11400000, guid: d1ba9f115192eca47bc5b008f60c1841, type: 2}

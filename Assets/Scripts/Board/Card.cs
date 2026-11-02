@@ -14,7 +14,12 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject heart;
 
     [Header("refs")]
-    public Ability[] abilities = new Ability[1];
+    public Ability[] abilities = new Ability[CreatureObj.maxStickers]; // sticker strips, first one is the base sticker
+    [SerializeField] TextMeshProUGUI powerText; // base power on the star
+    [SerializeField] Image powerBG;
+    [SerializeField] Color specialPowerColor = new Color(0.78f, 0.55f, 0.96f);
+    Color defaultPowerColor;
+    bool defaultPowerColorSaved = false;
     [SerializeField] RectTransform rt;
     [SerializeField] UnitSprite cardSprite;
     [SerializeField] TextMeshProUGUI nameText;
@@ -22,6 +27,8 @@ public class Card : MonoBehaviour
     [SerializeField] Image cardBackground;
     public OrderMarker orderMarker;
     [SerializeField] GameObject specialIcon;
+    [SerializeField] Image cardBack; // opponent's face down cards show only the back
+    [SerializeField] GameObject hiddenIcon; // your own face down cards show this, so you know the opponent can't see them
     [HideInInspector] public Unit unit;
     [HideInInspector] public Player player;
     [SerializeField] DeathParticle deathParticle; 
@@ -50,6 +57,7 @@ public class Card : MonoBehaviour
     [SerializeField] float dragTiltPerSpeed = 0.012f; // degrees of tilt per pixel/second of movement
     [SerializeField] Vector2 dragShadowOffset = new Vector2(14f, -18f);
     [SerializeField] float dragShadowAlpha = 0.35f;
+    [SerializeField] float cheerHeight = 25f; // how high the drawing hops when its side wins a fight
     Vector3 handTargetPosition;
     bool inHandLayout = false; // when true the card eases to its place in the hand fan
     float dragTilt = 0f;
@@ -62,6 +70,7 @@ public class Card : MonoBehaviour
     [HideInInspector] public int currentPower = 0;
     [HideInInspector] public int startingPower = 0;
     [HideInInspector] public int auraPower = 0; // part of currentPower that comes from auras, managed by FieldManager.RefreshAuras
+    [HideInInspector] public bool faceDown; // on the field, hidden from the opponent until it fights
     bool specialCostPaid = false;
 
     private void Awake()
@@ -201,18 +210,26 @@ public class Card : MonoBehaviour
     // ===============
 
     /// <summary>
-    /// Assign abilities from cardData
+    /// Shows the card's stickers on the strips and the base power on the star
     /// </summary>
     public void AssignAbilies()
     {
-        abilities[0].InitAbility(cardData.ability[0], this); 
+        for (int i = 0; i < abilities.Length; i++)
+        {
+            Sticker sticker = (i < cardData.stickers.Count) ? cardData.stickers[i] : null;
+            abilities[i].InitAbility(sticker, this);
+        }
+
+        // base power, special cards have a purple star (saved lazily, opponent cards can be initialized before Awake)
+        AbilityObj baseSticker = cardData.BaseSticker;
+        powerText.text = baseSticker.GetPowerText();
+        if (!defaultPowerColorSaved) { defaultPowerColor = powerBG.color; defaultPowerColorSaved = true; }
+        powerBG.color = (baseSticker.isSpecial) ? specialPowerColor : defaultPowerColor;
     }
 
     public void AssignCardData(CreatureObj newCardData, Player owner)
     {
         cardData = newCardData;
-        AssignAbilies();
-        
         player = owner;
         cardName = newCardData.name;
 
@@ -230,11 +247,35 @@ public class Card : MonoBehaviour
         // SPRITE
         cardSprite.RefreshSprite(cardData.unitSprite, player.playerColor, cardData.secondaryColor);
 
+        // STICKERS (cards can get new stickers in the workshop)
+        AssignAbilies();
+
         // BACKGROUND
         //cardBackground.color = GameManager.instance.fieldManager.DesaturateColor(player.playerColor, 0.4f);
 
         // special cards are shown with a purple power counter now (Ability), not with the star icon
         specialIcon.SetActive(false);
+
+        // FACE DOWN
+        RefreshFace();
+    }
+
+    /// <summary>
+    /// Turns the card face down (hidden from the opponent) or face up
+    /// </summary>
+    public void SetFaceDown(bool isFaceDown)
+    {
+        faceDown = isFaceDown;
+        RefreshFace();
+    }
+
+    void RefreshFace()
+    {
+        // the opponent's face down cards only show the back, your own get a "hidden" icon
+        bool showBack = faceDown && player != GameManager.instance.player;
+        cardBack.gameObject.SetActive(showBack);
+        cardBack.color = player.playerColor;
+        hiddenIcon.SetActive(faceDown && !showBack);
     }
 
     /// <summary>
@@ -265,7 +306,11 @@ public class Card : MonoBehaviour
     /// <param name="mouseOver"></param>
     public void OnHover(bool mouseOver)
     {
-        if (GameManager.instance.player.cardsInHand.Contains(this))
+        // highlighting cards that can be attacked
+        if (FightManager.instance != null && FightManager.instance.IsTarget(this)) HighlightCard(mouseOver);
+
+        Player localPlayer = GameManager.instance.player;
+        if (localPlayer.cardsInHand.Contains(this) || localPlayer.cardsOnField.Contains(this))
         {
             if (GameManager.instance.executeManager.currentCard == this || isDragged) return;
 
@@ -298,29 +343,72 @@ public class Card : MonoBehaviour
 
     public void StartDrag()
     {
-        if (GameManager.instance.executeManager.currentCard != null || GameManager.instance.currentState != GameState.PLACING
-            || !GameManager.instance.yourTurn || player.cardPlayed || !player.CanPlayCard(this)) return;
+        // only your own field cards: arranging until you press ready, attacking on your turn
+        GameState state = GameManager.instance.currentState;
+        if (player != GameManager.instance.player || !player.cardsOnField.Contains(this)) return;
+        if (state == GameState.PLACING && player.endStateReady) return;
+        if (state == GameState.BATTLING && !FightManager.instance.CanAttack(player)) return;
+        if (state == GameState.BUYING) return;
 
         isDragged = true;
         lastDragPosition = transform.position;
         GameManager.instance.handManager.activeCard = this;
-        //transform.SetParent(GameManager.instance.handManager.activeCard.transform, false);
-
-        if (GameManager.instance.currentState == GameState.PLACING && GameManager.instance.yourTurn)
-            GameManager.instance.fieldManager.EnableSpawnSlots(0);
     }
 
     public void EndDrag()
     {
+        if (!isDragged) return;
+
         isDragged = false;
         OnHover(false);
-        //transform.SetParent(GameManager.instance.handManager.hand.transform, false);
+        GameManager.instance.handManager.activeCard = null;
 
-        if (GameManager.instance.currentState == GameState.PLACING && player.cardPlayed == false)
+        switch (GameManager.instance.currentState)
         {
-            GameManager.instance.fieldManager.PlayCard(this, GameManager.instance.player);
-            GameManager.instance.handManager.activeCard = null;
+            // the card takes the place where it was dropped
+            case GameState.PLACING:
+                GameManager.instance.handManager.ReorderField(player);
+                break;
+
+            // dragged up out of the field: attacks, otherwise goes back to its place
+            case GameState.BATTLING:
+                if (!FightManager.instance.TryStartAttack(this)) GameManager.instance.handManager.UpdateHandVisuals(player);
+                break;
         }
+    }
+
+    /// <summary>
+    /// Clicked: picks this card as the attack target if one is being chosen
+    /// </summary>
+    public void OnClick()
+    {
+        FightManager.instance.TryPickTarget(this);
+    }
+
+    /// <summary>
+    /// Drawing on the card hops up and down
+    /// </summary>
+    public void Cheer()
+    {
+        if (gameObject.activeInHierarchy) StartCoroutine(CheerAnim());
+    }
+
+    IEnumerator CheerAnim()
+    {
+        Transform art = cardSprite.transform;
+        Vector3 restPos = art.localPosition;
+        float hopTime = 0.22f;
+        for (int hop = 0; hop < 2; hop++)
+        {
+            float t = 0;
+            while (t < hopTime)
+            {
+                t += Time.deltaTime;
+                art.localPosition = restPos + new Vector3(0f, Mathf.Sin(Mathf.Clamp01(t / hopTime) * Mathf.PI) * cheerHeight, 0f);
+                yield return null;
+            }
+        }
+        art.localPosition = restPos;
     }
 
     /// <summary>
@@ -363,7 +451,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void GetStartingPower()
     {
-        int powerToGain = abilities[0].abilityData.power;
+        int powerToGain = cardData.BaseSticker.power;
         startingPower = powerToGain;
         GainPower(powerToGain, false);
     }
@@ -444,6 +532,7 @@ public class Card : MonoBehaviour
         currentPower = 0;
         auraPower = 0;
         specialCostPaid = false;
+        SetFaceDown(false);
 
         //unit.RefreshUnitVisuals();
     }

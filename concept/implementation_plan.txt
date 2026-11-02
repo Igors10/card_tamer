@@ -1,0 +1,85 @@
+EXPERIMENTAL RULES - IMPLEMENTATION PLAN
+Branch: experimental-rules (main keeps the old rules)
+
+Approach: convert the Board scene in place on this branch. Lobby, Rematch and MatchNetwork
+load "Board" by name, and shared scripts (Card, Player, GameManager, Workshop) would otherwise
+have to support both rule sets. If the experiment is dropped, the branch is deleted.
+
+
+-------------------------------------------------------------------------------
+REUSE MAP
+-------------------------------------------------------------------------------
+
+Kept as is / small changes
+  Workshop, DrawingTool, Gallery, color select   card creation stays the same
+  ShopManager                                    draw card, special, discard for star, loser +1 star
+                                                 (already there: lostCurrentRound + PlusStarDial)
+  CardGenerator, CardDatabase                    card creation, presets
+  Unit                                           spawn drop, knockout fly, entrance jump (cheer), dice slots
+  D6                                             rolling, click to stop, StopDice command, GameRandom result
+  PlayerUI, heart/HP, TakeDamage                 HP 12
+  DiscardManager + UnitAtDiscard                 rat with scissors, cut animation, pool = cardsInDiscard
+                                                 (already = cards knocked out this round, skip if empty)
+  RatSmart (no new texts, outdated dialogue calls removed), AudioManager, ParticleManager, Animations, Viewpoint, LoadingFog
+  MatchNetwork command model, GameRandom, desync check
+
+Reused with new meaning
+  AbilityObj        -> a sticker. power = base power (0 for add-on stickers), description,
+                       isSpecial, effects list. New fields: sticker kind (base / add-on / special),
+                       sticker color, hasSide (left/right version).
+  Ability (card UI) -> one sticker strip on the card. Card prefab gets 3 strips + star with base power
+                       (sticker_visual_concept.jpg).
+  CreatureObj       -> ability[1] becomes up to 3 stickers + side per sticker.
+  AbilityEffect / AbilityRunner / EffectContext / EffectPresenter
+                    -> sticker effects, with new triggers (below).
+  HandManager fan   -> your field (bottom). Card order in the fan = field position.
+  PowerCounter      -> damage particle flight at round end.
+
+New
+  Card back (face down) look on Card, opponent row at the top (field_concept.jpg).
+  Arrange phase: drag cards in your row to reorder.
+  Fight flow (FightManager, replaces BattleManager lane loop + placing):
+    drag card -> unit spawns -> target arrow -> pick opponent card -> reveal -> defender unit spawns
+    -> power-up dice appear right of each unit -> attacker rolls -> defender rolls
+    -> winner dashes into loser, loser knocked out, winner's art cheers
+    -> winner returns to row face up -> next player's turn
+  Round end: loser takes damage = winner's cards left on field (phantom gone first).
+  First attacker alternates each round.
+  Discard screen with two rows (yours top, opponent bottom), both cut with a short interval.
+  Workshop "add sticker" button: pick a card in hand -> pick from sticker options -> applied.
+  Bot: random arrangement, simple target choice.
+
+Effect triggers to add
+  OnFightStart (count power-ups), OnTargeted (redirect / joker swap), OnReveal, OnWin,
+  OnAfterFight, OnRoundStart (phantom, dragon).
+
+Sticker effects (few generic classes instead of one per sticker)
+  PowerUpEffect with a condition: attacking, defending/targeted, fewer cards, less HP,
+    face down ally, previous fight lost, against side card, opponent has more power-ups, always.
+  NeighbourPowerUp (side), Guard neighbour (side), RevealTargetNeighbours, KnockSelfOut (exists),
+  ProtectFromDiscard, ShuffleOpponentOnReveal, NextCardPowerUp, DiscardSelfAfterFight,
+  HideAfterFight, then specials: Beast, Joker, Phantom, Seer, Dragon.
+
+Old abilities: left in the project unused (new sticker assets go to their own folder).
+
+
+-------------------------------------------------------------------------------
+MILESTONES (each one playable offline vs the bot)
+-------------------------------------------------------------------------------
+
+1. Stickers as data: AbilityObj fields, CreatureObj up to 3 stickers, card prefab with sticker
+   strips + base power star. Base sticker list assets. Card creation picks a base sticker.
+2. Board layout: your row (bottom), opponent row (top), card backs, arrange phase + Ready.
+3. Fight loop with base power + "power-up when attacking": attack, arrow, reveal, dice,
+   resolve, knockout, face up return, turns, round end damage, alternating first attacker.
+4. Discard screen with both rows.
+5. Workshop: add sticker button, add-on sticker list, max 3 stickers.
+6. All base + add-on stickers.
+7. Specials (Beast, Joker, Phantom, Seer, Dragon).
+8. Online: new commands (Arrange order, Attack attacker+target, AddSticker, Phantom pick,
+   Seer guess, Hide swap). MULTIPLAYER_NOTES + CHANGELOG updated.
+9. Bot logic. Rat Smart: no new texts, only remove the dialogue calls that no longer apply
+   (placing, lane battle explanations etc.).
+
+Known limit (same as now): both games hold all card data, so face down cards and the phantom
+are hidden only on screen. Fine for friends, not cheat proof.

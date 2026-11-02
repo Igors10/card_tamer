@@ -2,51 +2,59 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// One sticker strip on a card. Card has a strip for each sticker slot, empty slots are hidden
+/// </summary>
 public class Ability : MonoBehaviour
 {
     [Header("AbilityData")]
     public AbilityObj abilityData;
     [HideInInspector] public Card card;
     public Color abilityColor;
+    [HideInInspector] public bool onRight; // left or right version of the sticker
 
     [Header("refs")]
     [SerializeField] TextMeshProUGUI effectDesc;
-    [SerializeField] TextMeshProUGUI powerText;
-    [SerializeField] Image powerBG;
-    [SerializeField] Color specialPowerColor = new Color(0.78f, 0.55f, 0.96f);
-    Color defaultPowerColor;
-    bool defaultPowerColorSaved = false;
+    [SerializeField] Image stickerBG; // tinted with the sticker's color
+    [SerializeField] GameObject specialStar; // special stickers have a star behind them
+    [SerializeField] float specialScale = 1.1f; // special stickers are a bit bigger
+    Vector3 restScale;
+    bool restScaleSaved;
 
     // ====================
     // Initialization
     // ====================
 
     /// <summary>
-    /// Applying data from ability scriptable object to this ability instance
+    /// Applying sticker data to this strip, null hides the strip
     /// </summary>
-    public void InitAbility(AbilityObj ability, Card cardAssignTo)
+    public void InitAbility(Sticker sticker, Card cardAssignTo)
     {
-        abilityData = ability;
-
-        // Getting reference to the card
         card = cardAssignTo;
+        abilityData = sticker?.ability;
+        gameObject.SetActive(abilityData != null);
+        if (abilityData == null) return;
+
+        onRight = sticker.onRight;
 
         // Ability color
         abilityColor = card.cardData.abilityColor;
 
         // EFFECT DESCRIPTION
-        effectDesc.text = abilityData.GetAbilityDesc(abilityColor);
+        effectDesc.text = abilityData.GetAbilityDesc(abilityColor, onRight);
 
-        // Power
-        powerText.text = abilityData.GetPowerText();
+        // sticker look
+        if (stickerBG != null) stickerBG.color = abilityData.stickerColor;
+        if (specialStar != null) specialStar.SetActive(abilityData.isSpecial);
 
-        // special cards have a purple power counter (saved lazily, opponent cards can be initialized before Awake)
-        if (powerBG != null)
-        {
-            if (!defaultPowerColorSaved) { defaultPowerColor = powerBG.color; defaultPowerColorSaved = true; }
-            powerBG.color = (abilityData.isSpecial) ? specialPowerColor : defaultPowerColor;
-        }
+        if (!restScaleSaved) { restScale = transform.localScale; restScaleSaved = true; }
+        transform.localScale = (abilityData.isSpecial) ? restScale * specialScale : restScale;
     }
+
+    /// <summary>
+    /// Description with the right side filled in
+    /// </summary>
+    public string GetDescription() => abilityData.GetAbilityDesc(abilityColor, onRight);
 
     // =====================
     // Effect

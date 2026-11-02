@@ -16,14 +16,14 @@ public class Player : MonoBehaviour
     /// </summary>
     public bool HasSpecialCard()
     {
-        System.Predicate<Card> isSpecial = card => card != null && card.cardData.ability[0].isSpecial;
+        System.Predicate<Card> isSpecial = card => card != null && card.cardData.IsSpecial;
         return cardsInHand.Exists(isSpecial) || cardsOnField.Exists(isSpecial) || cardsInDiscard.Exists(isSpecial);
     }
 
     /// <summary>
     /// Returns the special card in hand, or null if there is none
     /// </summary>
-    public Card GetSpecialInHand() => cardsInHand.Find(card => card != null && card.cardData.ability[0].isSpecial);
+    public Card GetSpecialInHand() => cardsInHand.Find(card => card != null && card.cardData.IsSpecial);
 
     /// <summary>
     /// Returns false if the card can't be played right now because a must play special effect forces another card
@@ -168,6 +168,9 @@ public class Player : MonoBehaviour
         deadUnitsThisRound = 0;
         damageTakenThisRound = 0;
         cardsInDiscard.Clear();
+
+        // all cards go to the field face down
+        GameManager.instance.handManager.MoveHandToField(this);
 
         playerUI.Refresh();
     }

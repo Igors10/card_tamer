@@ -264,9 +264,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityNote
   storedAbility: {fileID: 0}
   storedAbilityColor: {r: 0, g: 0, b: 0, a: 0}
+  storedOnRight: 0
+  stickerBG: {fileID: 8879822725203348732}
   noteText: {fileID: 6262169340443917193}
   powerValue: {fileID: 7376687533544702098}
   powerObj: {fileID: 3436869848694737309}
+  powerBG: {fileID: 0}
+  specialPowerColor: {r: 0.78, g: 0.55, b: 0.96, a: 1}
   centeredPowerPos: {x: 0, y: 0, z: 0}
   centeredPowerScaleMod: 1.6
 --- !u!1 &5083713311211908698

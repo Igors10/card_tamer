@@ -1,0 +1,98 @@
+Both players start with 4 cards. Cards have custom art, name (optionally also custom entrance text and sound). Card creation identical to the one in the current version, aside from different abilities. 
+Before start of the round player decides on the order of cards on the field. All cards start on the field face down for the opponent (shown to local player).
+
+During their turn player chooses their card and attacks any card from opponents field with it. Attacking face up cards is safer, attacking face down cards is risky, but also one of the options. Each card has a base power score (usually 2-4) and an ability that desides when a card gets power up. Power up are additional 1d6 power for one fight. (ex. "powers up when attacks", "powers up when defends", "powers up if you have less cards" etc). One card can get multiple power ups. Positioning also matters for some abilities (ex "neighbours get power up in battle", "when card on the left is chosen for attack, this card gets attacked instead and gets a power-up") After attacking and defending cards are chosen their power is calculated- base power + bonus power from all triggered power-ups. Card with more power knocks out the card with less power and stays face up on the field. Then another player chooses one of their cards and attacks any card of their opponent. Round goes on until one player runs out of cards. At the end of round player with no cards left takes damage equal to cards left in opponents hand. 
+
+After battle phase players discard one random card and go to workshop to get new cards (same as in current version).
+
+Additionally, to make cards mechanically more customizable, more stickers can be equipped on them in the workshop. Each sticker is its own ability, first sticker is chosen on card creation and up to two additional stickers can be equipped on the card in the workshop (ex. "base sticker- 1) gets power up when attacks. bonus stickers- 2) returns face down after a fight, 3) on win next card gets a power up"). In the workshop player can: 1) discard a card to get a star 2) get a special card with a special ability sticker (one per player) 3) get a new card (up to six cards in hand) 4) put a sticker on existing card
+
+The sticker system ensures players can make their own cards instead of only creating the visuals for a card. And the new battle system gets rid of the old boring battle phase where nothing really happens during placement stage and a fully non interactive battle phase that follows it.
+
+
+Attack-
+1) drag and play one of your cards
+2) a unit spawns, hearthstone style target arrow is following the cursor- player is expected to choose one of the opponent cards to attack
+3) chosen card is revealed (if its face down) attacked unit is spawned
+4) Most card effects trigger here- on the right from the unit d6s appear to number of power-ups that they get
+5) attacker d6s are rolled, each rolled d6 increases the power counter on the left from the unit. 
+6) Defending unit rolls their d6s
+7) An animation plays where the winning card quickly moves towards losing card and knocks it out of the field. Drawings on cards of the winning player jump up and down cheering for a moment.
+8) Winning card gets back to player's field face up. 
+9) Turn passes
+
+Stickers have different colors, so its easier to distinguish between them. Special stickers are bigger with a star shape behind the sticker.
+
+Base stickers:
+1) [4 power] power-up when attacking
+2) [4 power] defends card on the left(/right) (cards attacking it are targeting this card instead), power-up when attacked
+3) [2 power] (card on the) left(/right) gets power-up
+4) [3 power] power-up if you have less cards (than your opponent) 
+5) [3 power] power-up if you have less hp (than your opponent)
+6) [4 power] power-up if there's a face down card on your side
+7) [3 power] power-up if previous fight was lost
+8) [3 power] reveal cards on both sides of the target on attack
+9) [4 power] power-up, knocks itself out at the end of fight
+
+Additional stickers:
+1) power-up when attacking
+2) power-up when targeted
+3) power-up if opposing card has more power-ups (before this triggers)
+4) doesn't get discarded (instead this sticker gets destroyed)
+5) mixes up opponent card positions after a fight
+6) on win- powers up next card
+7) 2 power-ups, discards itself after a fight
+8) hides itself (face down and player can choose to switch its position with any other face down card) after a fight
+9) power-up if against a side card (card that is located on the very left or right of opponent cards)
+
+Special stickers:
+1) [BEAST 5 power] discards opponent's card on win, power-up unless already destroyed a card this round (in the workshop opponent gets compensated 1 star per destroyed card)
+2) [JOKER 4 power] hides itself on win, power-up when attacking, switches attacking card if targeted (if attacked switches attacking card to another random card from opponent's field)
+3) [PHANTOM 2 power] has a phantom copy with 2 power-ups. (creates a phantom copy of itself at the beginning of a round, phantom has 2 power-ups and 4 base power. After phantom or this fight they both get revealed, player chooses which one becomes phantom (only player sees which one of the two copies is the phantom with 2 power ups) if main card gets knocked out, the phantom discards. The phantom discards at the end of round.)
+4) [SEER 4 power] all your cards get power-up if predict face down target (when any of your cards attack a face down card choose from a list of known opponent cards, if guessed your attacking card gets a power-up)
+5) [DRAGON 5 power] knocks out opponent card in the same position (same position on the field, ex. dragon being most left discards most left card. If opponent has no card in that position knocks out the closest (the most right))
+
+
+Clarifications-
+
+Terms:
+- Knocked out = gone from the field until the round is over.
+- Discarded = gone for good.
+
+Round flow:
+- Both players arrange their cards at the same time.
+- Who attacks first alternates each round. Turns alternate within a round.
+- Any card can attack, including face down ones. The attacker and its target are revealed when the fight starts. The winner goes back to the field face up.
+- During an attack the attacker's spot stays open until it returns. Cards knocked out for the round leave no gap: remaining cards close up.
+- Tie: both cards are knocked out.
+- Round ends when one player has no cards left. That player takes damage equal to the opponent's cards left on the field. HP is 12.
+
+Discard (after the round):
+- One random card is discarded from each player's cards that got knocked out this round. A player with no knocked out cards skips the discard.
+- Discard screen shows both players' cards: your cards on the top row, opponent's on the bottom. The rat with scissors picks a random card from each row, cutting them with a slight interval.
+
+Workshop:
+- Works like the current one: buy things as long as you have stars. Stickers cost stars (cost TBD).
+- The player who lost the round gets an additional star.
+- Special cards: one in hand at a time. If it's lost, a new one can be bought. Specials can only be bought from round 2 onward.
+
+Stickers:
+- Base power comes from the base sticker. Special cards use their special sticker as the base sticker.
+- A card has a base sticker + up to 2 additional stickers (specials too). Stickers can't be replaced once a card has 3.
+- A card can have the same sticker more than once.
+- Left/right stickers: when a sticker is offered, its side is picked at random. Only one entry per sticker in the list, so these don't show up more often than the others.
+
+Sticker details:
+- Base 3: the neighbour gets the power-up only when it fights.
+- Base 7: "previous fight" = this side's previous fight. A tie counts as a loss.
+- Base 9: the card counts as knocked out, so it goes into the discard pool.
+- "Next card" (additional 6): the next card of yours to fight, attacking or defending.
+- Additional 3: only one card can have more power-ups. It triggers for the card with fewer and that's it.
+- Additional 4: also protects against BEAST.
+- Additional 5: triggers when this card is revealed (not after a fight).
+- Additional 7: the card is discarded for good.
+- JOKER: the new attacker is revealed and the previous attacker goes back to its spot. If the attacker is the opponent's only card, nothing happens.
+- PHANTOM: appears in a random spot at the start of the round. It copies the main card's stickers. The player reassigns which copy is the phantom after every fight either one is in. It disappears before damage is calculated, so it doesn't count for damage.
+- SEER: only the attacking card gets the power-up. The guess list has only the opponent cards this player has seen.
+- DRAGON: triggers at the very beginning of the round (after PHANTOM appears) and is revealed right away. It knocks out the card in addition to its normal attacks. Two DRAGONs can knock each other out. They resolve one after another, not at the exact same time.
+

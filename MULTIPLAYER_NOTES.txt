@@ -336,7 +336,7 @@ MatchCommand (struct, FishNet sends it as is)
   seat     who made it (set by the server, not trusted from the client).
   stateNr  GameManager.stateNr when it was made (+1 on every state change).
   type     CommandType enum. Add new commands here.
-  index, cardName, abilityName, color, abilityColor, layer1, layer2
+  index, cardName, abilityName, onRight, color, abilityColor, layer1, layer2
            values, which ones are used depends on the type (see the struct).
            Unused ones stay empty and cost almost nothing.
 
@@ -409,6 +409,12 @@ Desync check (MatchNetwork.CheckSync)
   games (animations), only state changes are a common point.
   Finding the cause: compare the two snapshots, then look for gameplay
   code that ran on one game only or used UnityEngine.Random.
+  Builds write the log to %USERPROFILE%\AppData\LocalLow\DefaultCompany\
+  <product name>\Player.log (commands, desync snapshots).
+
+Debug keys (O, A, K, E, Backspace) change the game on one machine only, so
+  they only work in editor bot matches (GameManager.DebugKeysEnabled). New
+  debug keys should check it too.
 
 Disconnects (GameManager.OnOpponentLeft)
   How each side finds out:
@@ -445,7 +451,8 @@ Workshop results (PickColor, CreateCard, DiscardFromHand)
   - PickColor: WorkshopColorSelect.LockPencilChoice. Other game sets the
     opponent's playerColor (+ PowerCounter.RefreshColor).
   - CreateCard: Workshop.CreateNewCard, sent before CardGenerator.CreateCard.
-      ability  sent by asset name -> CardGenerator.GetAbilityByName
+      ability  base sticker by asset name -> CardGenerator.GetAbilityByName,
+               plus its side (onRight)
       art      drawing: both layers as PNG bytes (256x256, a few KB;
                FishNet splits big reliable messages itself)
                empty canvas: index of the preset in

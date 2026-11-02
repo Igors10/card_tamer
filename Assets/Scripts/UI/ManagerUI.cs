@@ -91,12 +91,13 @@ public class ManagerUI : MonoBehaviour
         // play soundeffect
         AudioManager.instance.PlaySFX("RerollSFX");
 
-        // updating turn hint (top of the screen text)
+        // updating turn hint (top of the screen text), only the battle has turns
+        turnHint.gameObject.SetActive(GameManager.instance.currentState == GameState.BATTLING);
         turnHint.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;
         turnHint.text = (GameManager.instance.yourTurn) ? "YOUR TURN" : "OPPONENT'S TURN";
 
-        // enabling turn message only if it is a placing phase
-        if (GameManager.instance.currentState != GameState.PLACING) return;
+        // enabling turn message only in the battle (players take turns attacking)
+        if (GameManager.instance.currentState != GameState.BATTLING) return;
 
         // enabling the turn message
         turnMessage.color = (GameManager.instance.yourTurn) ? yourTurnColor : oppTurnColor;

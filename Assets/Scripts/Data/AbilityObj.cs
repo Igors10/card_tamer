@@ -10,6 +10,12 @@ public class AbilityObj : ScriptableObject
     [Tooltip("Special abilities make the card special: purple power counter, standout entrance, 2 dice when rolling, 1 per player")]
     public bool isSpecial;
 
+    [Header("sticker")]
+    [Tooltip("Color of the sticker strip on the card")]
+    public Color stickerColor = Color.white;
+    [Tooltip("Sticker has a left and a right version, picked at random when it's offered. Write {side} in the description")]
+    public bool hasSide;
+
     [SerializeReference, EffectPicker] public List<AbilityEffect> effects = new List<AbilityEffect>();
 
     /// <summary>
@@ -23,7 +29,7 @@ public class AbilityObj : ScriptableObject
         return (power + numberOfDice) + "-" + (power + 6 * numberOfDice);
     }
 
-    public string GetAbilityDesc(Color abilityColor)
+    public string GetAbilityDesc(Color abilityColor, bool onRight = false)
     {
         string abilityText = abilityDescription;
 
@@ -34,6 +40,9 @@ public class AbilityObj : ScriptableObject
         // coloring the 'color' of abilities that work with specific color
         string hexColor = ColorUtility.ToHtmlStringRGB(abilityColor);
         abilityText = abilityText.Replace("{color}", $"<color=#{hexColor}>color</color>");
+
+        // left or right version of the sticker
+        abilityText = abilityText.Replace("{side}", onRight ? "right" : "left");
 
         return abilityText;
     }

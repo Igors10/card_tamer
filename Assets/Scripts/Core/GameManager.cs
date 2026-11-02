@@ -62,7 +62,10 @@ public class GameManager : MonoBehaviour
     public int startingCardAmount = 4;
     public int maxHandSize;
     public PlayerConfigObj playerConfig;
-    
+
+    // debug keys (O, A, K, E, Backspace) only in editor bot matches, in builds/online they'd fire while typing card names
+    public bool DebugKeysEnabled => Application.isEditor && playerConfig.offlineMatch;
+
     //[Header("events")]
     public static event Action OnStateTransition;
     public static event Action OnRoundEnd;
@@ -71,6 +74,7 @@ public class GameManager : MonoBehaviour
     public static event Action<Card> OnCardPlayResolved;
     public static event Action OnLineResolved;
     public static event Action<Card> OnCardHovered;
+    public static event Action OnFightStart;
 
     private void Awake()
     {
@@ -224,18 +228,16 @@ public class GameManager : MonoBehaviour
 
                 managerUI.EnableWorkshop(false);
 
-                // starting new round
+                // starting new round (cards go to the field face down)
                 RoundStart();
 
-                // Rat tutorial
-                if (GameData.firstTimePlaying) StartCoroutine(RatSmart.instance.PlayDialogue("PlaceExplainDial"));
+                // both players arrange at the same time, the bot is done right away
+                if (opponent.isAI) opponent.AIplayer.ArrangeField();
                 break;
 
             case GameState.BATTLING:
                 managerUI.EnableUI(true);
-                managerUI.turnHint.gameObject.SetActive(false);
                 battleManager.ResetBattleVals();
-                battleManager.NextLine();
 
                 // playing workshop soundtrack
                 AudioManager.instance.PlaySoundtrack("BattleTrack");
@@ -266,9 +268,19 @@ public class GameManager : MonoBehaviour
         // trigger the event
         OnStateTransition?.Invoke();
 
-        // placing starts with the first player, in the other states the player acts right away
-        Player startingPlayer = (currentState == GameState.PLACING) ? firstPlayer : player;
-        startingPlayer.StartTurn();
+        // battle: players take turns attacking, the first attacker changes every round
+        if (currentState == GameState.BATTLING)
+        {
+            if (firstPlayer != player)
+            {
+                yourTurn = false;
+                managerUI.NewHint("It's your opponents turn");
+                managerUI.UpdateTurnMessage();
+            }
+            firstPlayer.StartTurn();
+        }
+        // arranging and the workshop: both act at the same time, the player starts right away
+        else player.StartTurn();
     }
 
     void RoundEnd()
@@ -279,6 +291,9 @@ public class GameManager : MonoBehaviour
 
         OnRoundEnd?.Invoke();
         roundNr++;
+
+        // the other player attacks first next round
+        firstPlayer = GetOpponentOfPlayer(firstPlayer);
     }
 
     /// <summary>
@@ -298,7 +313,7 @@ public class GameManager : MonoBehaviour
 
     void DebugStateInput()
     {
-        if (Input.GetKeyDown(KeyCode.O)) opponent.endStateReady = true;
+        if (DebugKeysEnabled && Input.GetKeyDown(KeyCode.O)) opponent.endStateReady = true;
     }
 
     public void EndTurn()
@@ -367,32 +382,9 @@ public class GameManager : MonoBehaviour
         switch (GameManager.instance.currentState)
         {
             case GameState.PLACING:
+                // arranging cards, ready when the order is good
                 readyButton.gameObject.SetActive(true);
-                GetCurrentPlayer().cardPlayed = false;
-
-                // disables "finish placing" button if there are no units on player's side
-                if (player.cardsOnField.Count <= 0) readyButton.gameObject.SetActive(false);
-
-                // automatically pressing "Finish placing" when no more cards in hand
-                // online it's sent like a button press, the other game has to know too (and checks its own hand itself)
-                else if (player.cardsInHand.Count <= 0 && !playerConfig.offlineMatch)
-                {
-                    readyButton.gameObject.SetActive(false);
-                    MatchNetwork.instance.SendReady();
-                }
-                else if (player.cardsInHand.Count <= 0)
-                {
-                    player.endStateReady = true;
-
-                    // checking if opponent has any cards left, ending their turn right away if has no cards
-                    if (opponent.cardsInHand.Count <= 0) opponent.endStateReady = true;
-                        
-                    EndTurn(); 
-                }
-
-                // otherwise resetting its visuals
-                else readyButton.UpdateButtonState();
-                
+                readyButton.UpdateButtonState();
                 break;
 
             case GameState.BATTLING:
@@ -500,5 +492,10 @@ public class GameManager : MonoBehaviour
     public void BroadcastOnCardHovered(Card card)
     {
         OnCardHovered?.Invoke(card);
+    }
+
+    public void BroadcastOnFightStart()
+    {
+        OnFightStart?.Invoke();
     }
 }

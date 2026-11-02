@@ -12,8 +12,9 @@ public class CardGenerator : MonoBehaviour
     [SerializeField] CardList mainList;
     [SerializeField] CardList basicList;
     [SerializeField] CardList specialList;
-    [SerializeField] AbiltiyList basicAbilityList;
-    [SerializeField] AbiltiyList specialAbilityList;
+    [SerializeField] AbiltiyList basicAbilityList; // base stickers
+    [SerializeField] AbiltiyList specialAbilityList; // special base stickers
+    [SerializeField] AbiltiyList addOnStickerList; // stickers added in the workshop
     [SerializeField] AbilityObj defaultAbility;
 
     [Header("prefabs")]
@@ -69,12 +70,24 @@ public class CardGenerator : MonoBehaviour
                 list = specialAbilityList;
                 break;
 
+            case "addon":
+                list = addOnStickerList;
+                break;
+
             default: return defaultAbility;
                 break;
         }
 
         int randomAbility_ID = Random.Range(0, list.abilityList.Count);
         return list.abilityList[randomAbility_ID];
+    }
+
+    /// <summary>
+    /// Random sticker from a list ("basic", "special", "addon"), stickers with a side get a random side
+    /// </summary>
+    public Sticker PickRandomSticker(string listName)
+    {
+        return new Sticker(PickRandomAbility(listName), Random.value < 0.5f);
     }
 
     /// <summary>
@@ -86,6 +99,7 @@ public class CardGenerator : MonoBehaviour
 
         AbilityObj ability = basicAbilityList.abilityList.Find(a => a != null && a.name == abilityName);
         if (ability == null) ability = specialAbilityList.abilityList.Find(a => a != null && a.name == abilityName);
+        if (ability == null) ability = addOnStickerList.abilityList.Find(a => a != null && a.name == abilityName);
         return ability;
     }
 
@@ -105,13 +119,13 @@ public class CardGenerator : MonoBehaviour
     }
 
     // creates new card scriptable object (temp before I remake cards into c# classes)
-    public CreatureObj ConstructNewCard(string cardName, Sprite[] cardSprite, AbilityObj cardAbility, Color secondaryColor, Color abilityColor)
+    public CreatureObj ConstructNewCard(string cardName, Sprite[] cardSprite, Sticker baseSticker, Color secondaryColor, Color abilityColor)
     {
         CreatureObj newCard = ScriptableObject.CreateInstance<CreatureObj>();
 
         newCard.name = cardName;
         newCard.unitSprite = cardSprite;
-        newCard.ability[0] = cardAbility;
+        newCard.stickers.Add(baseSticker);
         newCard.secondaryColor = secondaryColor;
         newCard.abilityColor = abilityColor;
 
@@ -150,7 +164,7 @@ public class CardGenerator : MonoBehaviour
     private void Update()
     {
         // temp solution for adding cards to hand
-        if (Input.GetKeyDown(KeyCode.A) && GameManager.instance.currentState == GameState.PLACING)
+        if (GameManager.instance.DebugKeysEnabled && Input.GetKeyDown(KeyCode.A) && GameManager.instance.currentState == GameState.PLACING)
         {
             if (cardsName != null || searchEnabled == false) CreateCard(PickRandomCard(), GameManager.instance.player);
 

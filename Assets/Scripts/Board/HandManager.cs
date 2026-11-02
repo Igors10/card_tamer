@@ -18,6 +18,7 @@ public class HandManager : MonoBehaviour
     [SerializeField] float fanSpread;
     [SerializeField] float defaultCardSpacing = 200f;
     [SerializeField] float verticalSpacing = 10f;
+    [SerializeField] float opponentCardSpacing = 270f; // opponent's row at the top, no fan
 
     [Header("Hand hide params")]
     [SerializeField] RectTransform handShownPos;
@@ -25,6 +26,7 @@ public class HandManager : MonoBehaviour
     [SerializeField] float handHideDistance;
     [SerializeField] float handHideDistanceVertical;
     [SerializeField] float handHideSpeed;
+    [SerializeField] float roundFieldRaise = 130f; // during the round the hand (field) sits this much higher
 
     /// <summary>
     /// Adds a card to player's hand
@@ -50,10 +52,15 @@ public class HandManager : MonoBehaviour
         GameManager.instance.managerUI.Refresh();
     }
 
+    /// <summary>
+    /// Knocked out: the card leaves the field until the round is over (the other cards close up)
+    /// </summary>
     public void AddCardToDiscarded(Card card, Player player)
     {
-        //player.cardsOnField.Remove(card);
+        player.cardsOnField.Remove(card);
         player.cardsInDiscard.Add(card);
+        card.gameObject.SetActive(false);
+        UpdateHandVisuals(player);
     }
 
     /// <summary>
@@ -73,8 +80,36 @@ public class HandManager : MonoBehaviour
         AddCardToHand(card, player);
     }
 
+    /// <summary>
+    /// Start of round: every card in hand goes to the field face down, in the same order
+    /// </summary>
+    public void MoveHandToField(Player player)
+    {
+        foreach (Card card in player.cardsInHand)
+        {
+            card.SetFaceDown(true);
+            player.cardsOnField.Add(card);
+        }
+        player.cardsInHand.Clear();
+
+        UpdateHandVisuals(player);
+    }
+
+    /// <summary>
+    /// Arranging: field order follows where the cards are on the screen (left to right), so a dropped card takes its new place
+    /// </summary>
+    public void ReorderField(Player player)
+    {
+        player.cardsOnField.Sort((a, b) => a.transform.localPosition.x.CompareTo(b.transform.localPosition.x));
+        UpdateHandVisuals(player);
+    }
+
     public void ReturnCardsToHand(Player player)
     {
+        // knocked out cards come back too (the destroyed one is already gone)
+        player.cardsOnField.AddRange(player.cardsInDiscard);
+        player.cardsInDiscard.Clear();
+
         // moving all cards to cards in hand
         foreach (Card card in player.cardsOnField)
         {
@@ -88,6 +123,7 @@ public class HandManager : MonoBehaviour
         }
 
         player.cardsOnField.Clear();
+        UpdateHandVisuals(player);
     }
 
     /// <summary>
@@ -95,28 +131,59 @@ public class HandManager : MonoBehaviour
     /// </summary>
     public void UpdateHandVisuals(Player player)
     {
-        if (player.isAI) return;
+        // during a round the cards are on the field (same place on the screen as the hand)
+        List<Card> cards = (player.cardsOnField.Count > 0) ? player.cardsOnField : player.cardsInHand;
 
-        int cardCount = player.cardsInHand.Count;
-
-        if (cardCount == 1)
+        // opponent's cards are a straight row at the top
+        if (player != GameManager.instance.player)
         {
-            player.cardsInHand[0].SetHandLayout(Vector3.zero, 0f);
+            for (int a = 0; a < cards.Count; a++)
+            {
+                cards[a].SetHandLayout(new Vector3(opponentCardSpacing * (a - (cards.Count - 1) / 2f), 0f, 0f), 0f);
+            }
             return;
         }
 
-        for (int a = 0; a < cardCount; a++) 
-        {
-            float rotationAngle = fanSpread * (a - (cardCount - 1) / 2f);
+        int cardCount = cards.Count;
 
-            float cardSpacing = (cardsInHand.Count < 7) ? -defaultCardSpacing : -defaultCardSpacing / cardsInHand.Count * 6;
+        if (cardCount == 1)
+        {
+            cards[0].SetHandLayout(Vector3.zero, 0f);
+            return;
+        }
+
+        for (int a = 0; a < cardCount; a++)
+        {
+            // first card on the left (field positions go left to right)
+            float rotationAngle = -fanSpread * (a - (cardCount - 1) / 2f);
+
+            float cardSpacing = (cardCount < 7) ? defaultCardSpacing : defaultCardSpacing / cardCount * 6;
             float horizontalOffset = cardSpacing * (a - (cardCount - 1) / 2f);
 
-            float normalizedPosition = 2f * a / (cardCount - 1) - 1f; 
+            float normalizedPosition = 2f * a / (cardCount - 1) - 1f;
             float verticalOffset = verticalSpacing * (1 - normalizedPosition * normalizedPosition);
             // cards ease to their new place instead of snapping
-            player.cardsInHand[a].SetHandLayout(new Vector3(horizontalOffset, verticalOffset, 0f), rotationAngle);
+            cards[a].SetHandLayout(new Vector3(horizontalOffset, verticalOffset, 0f), rotationAngle);
         }
+    }
+
+    /// <summary>
+    /// Opponent's row is only shown during the round (in the workshop their hand is private)
+    /// </summary>
+    void RefreshOpponentRow()
+    {
+        opponentHand.SetActive(GameManager.instance.currentState != GameState.BUYING);
+        UpdateHandVisuals(GameManager.instance.opponent);
+    }
+
+    void OnEnable()
+    {
+        GameManager.OnStateTransition += RefreshOpponentRow;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnStateTransition -= RefreshOpponentRow;
     }
 
     /// <summary>
@@ -124,26 +191,29 @@ public class HandManager : MonoBehaviour
     /// </summary>
     void HandHidingCheck()
     {
-        // Hide the hand if following
-        bool forceHide = (activeCard != null || GameManager.instance.managerUI.workshop.drawingCanvas.isDrawing);
+        // during the round the hand is the field, so it's always shown. In the workshop it hides
+        bool inRound = GameManager.instance.currentState != GameState.BUYING;
+        bool forceHide = !inRound && (activeCard != null || GameManager.instance.managerUI.workshop.drawingCanvas.isDrawing);
         RectTransform handRT = hand.GetComponent<RectTransform>();
         float hideSpeed = 0;
 
         // Deciding if hand should go up, down or not move
         // Hand goes down (hides)
-        if (Input.mousePosition.y >= handHideDistance && handRT.transform.position.y > handHiddenPos.transform.position.y || forceHide)
+        if (!inRound && Input.mousePosition.y >= handHideDistance && handRT.transform.position.y > handHiddenPos.transform.position.y || forceHide)
         {
             hideSpeed = -handHideSpeed;
             // Making the hand movement speed increase exponentially
             hideSpeed *= Mathf.Abs(handRT.transform.position.y - handHiddenPos.transform.position.y);
         }
         // Hand goes up (shows)
-        else if (Input.mousePosition.y < handHideDistance && Mathf.Abs(hand.transform.position.x - Input.mousePosition.x) < handHideDistanceVertical 
-            && handRT.transform.position.y < handShownPos.transform.position.y)
+        // (the field sits a bit higher than the hand, so the cards can be read)
+        float shownY = handShownPos.transform.position.y + ((inRound) ? roundFieldRaise * handRT.lossyScale.y : 0f);
+        if ((inRound || Input.mousePosition.y < handHideDistance && Mathf.Abs(hand.transform.position.x - Input.mousePosition.x) < handHideDistanceVertical)
+            && handRT.transform.position.y < shownY)
         {
             hideSpeed = handHideSpeed;
             // Making the hand movement speed increase exponentially
-            hideSpeed *= Mathf.Abs(handRT.transform.position.y - handShownPos.transform.position.y);
+            hideSpeed *= Mathf.Abs(handRT.transform.position.y - shownY);
         }
         else hideSpeed = 0f;
 
@@ -156,7 +226,7 @@ public class HandManager : MonoBehaviour
         HandHidingCheck();
 
         // temp clearing hand solution
-        if (Input.GetKey(KeyCode.Backspace) && GameManager.instance.currentState == GameState.PLACING) ClearHand();
+        if (GameManager.instance.DebugKeysEnabled && Input.GetKey(KeyCode.Backspace) && GameManager.instance.currentState == GameState.PLACING) ClearHand();
     }
 
     void ClearHand()

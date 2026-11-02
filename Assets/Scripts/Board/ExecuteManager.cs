@@ -215,6 +215,7 @@ public class ExecuteManager : MonoBehaviour
     private void Update()
     {
         // debug testing target show
+        if (!GameManager.instance.DebugKeysEnabled) return;
         if (Input.GetKeyDown(KeyCode.E))
         {
             List<Unit> allUnits = GameManager.instance.fieldManager.GetAllUnits();

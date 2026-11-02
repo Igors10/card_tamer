@@ -60,7 +60,7 @@ public class TitleScreen : MonoBehaviour
         if (ConnectionScript.connectionManager != null) ConnectionScript.connectionManager.Shutdown();
 
         // nickname from last time
-        GameData.nickname = PlayerPrefs.GetString(GameData.nicknamePrefKey, "");
+        GameData.nickname = PlayerPrefs.GetString(GameData.nicknamePrefKey, GameData.defaultNickname);
         nicknameField.characterLimit = GameData.maxNicknameLength;
         nicknameField.text = GameData.nickname;
         nicknameField.onValueChanged.AddListener(OnNicknameChanged);
