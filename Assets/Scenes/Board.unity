@@ -290,6 +290,52 @@ MonoBehaviour:
   - {fileID: 286176360}
   - {fileID: 2040194447}
   - {fileID: 284280376}
+--- !u!114 &14679678 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6283023732954040730, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
+  m_PrefabInstance: {fileID: 94385741}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!1 &23796402
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 23796403}
+  m_Layer: 0
+  m_Name: PlayerCardSpot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &23796403
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 23796402}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1630855802}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -730, y: 10}
+  m_SizeDelta: {x: 250, y: 340}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &25518361
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1695,7 +1741,7 @@ PrefabInstance:
     - target: {fileID: 3624528208294921098, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
       propertyPath: powerBG
       value: 
-      objectReference: {fileID: 429910092}
+      objectReference: {fileID: 14679678}
     - target: {fileID: 6007879081463497086, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
       propertyPath: m_Name
       value: secondOption
@@ -2405,17 +2451,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efe6e2872a806b04ab0ec13cf7346d67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitSprite
---- !u!114 &108297417 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4203227266784170634, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
-  m_PrefabInstance: {fileID: 3035084199826199807}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &118671997
 GameObject:
   m_ObjectHideFlags: 0
@@ -6095,17 +6130,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
---- !u!114 &429910092 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4203227266784170634, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
-  m_PrefabInstance: {fileID: 94385741}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1001 &450021567
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6770,6 +6794,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2113098668}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &498524431 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6283023732954040730, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
+  m_PrefabInstance: {fileID: 3035084199826199807}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &510724988
 GameObject:
   m_ObjectHideFlags: 0
@@ -11532,17 +11567,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 874517805}
   m_CullTransparentMesh: 1
---- !u!114 &885953089 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3873379120865954216, guid: 6dd5efa6fbd63f5408d7786c889f9c5b, type: 3}
-  m_PrefabInstance: {fileID: 7860115279638181159}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &889509993
 GameObject:
   m_ObjectHideFlags: 0
@@ -12082,7 +12106,7 @@ MonoBehaviour:
   basicAbilityList: {fileID: 11400000, guid: c3eabe3dafa931d408d032bdaeae22ea, type: 2}
   specialAbilityList: {fileID: 11400000, guid: d9cead77829135c4fb25d919d78cdc52, type: 2}
   addOnStickerList: {fileID: 11400000, guid: 2601bedd6d9ae204d8ff2fefd11f5724, type: 2}
-  defaultAbility: {fileID: 11400000, guid: 1838821c9ae63f2408ae82fb28ebbef2, type: 2}
+  defaultAbility: {fileID: 11400000, guid: 5f4bf878b1d76cd499539f2082b473e2, type: 2}
   cardPrefab: {fileID: 6614981847699036136, guid: 630a4b73555eb5842b257b9f93693f0f, type: 3}
   basicCardData: {fileID: 0}
   searchEnabled: 0
@@ -14884,7 +14908,7 @@ MonoBehaviour:
   drawSpecialPrice: 4
   stickerPrice: 2
   discardReward: 0
-  shopStarsAfterBattle: 3
+  shopStarsAfterBattle: 4
   shopStarPrefab: {fileID: 8485228647327631986, guid: c2a1de9d1668cc14094ab9d5ef2d133b, type: 3}
   starColor: {r: 0.5320754, g: 0.107418984, b: 0.52510643, a: 1}
   deadUnitsStarColor: {r: 1, g: 1, b: 1, a: 1}
@@ -19597,6 +19621,43 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1630099563}
   m_CullTransparentMesh: 1
+--- !u!1 &1630855801
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1630855802}
+  m_Layer: 0
+  m_Name: FightCards
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1630855802
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1630855801}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 23796403}
+  - {fileID: 1898533201}
+  m_Father: {fileID: 1955103754}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1635326576
 GameObject:
   m_ObjectHideFlags: 0
@@ -23274,6 +23335,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efe6e2872a806b04ab0ec13cf7346d67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitSprite
+--- !u!1 &1898533200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1898533201}
+  m_Layer: 0
+  m_Name: OpponentCardSpot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1898533201
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898533200}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1630855802}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 730, y: 10}
+  m_SizeDelta: {x: 250, y: 340}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!4 &1902207357 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8937901324503783893, guid: 16790799db852c04593f3a1f25569cb2, type: 3}
@@ -24006,6 +24102,7 @@ RectTransform:
   - {fileID: 1878616678}
   - {fileID: 1879375550}
   - {fileID: 1308964680}
+  - {fileID: 1630855802}
   - {fileID: 315927145}
   - {fileID: 1205934171}
   - {fileID: 1401537162}
@@ -26219,6 +26316,12 @@ MonoBehaviour:
   targetArrow: {fileID: 1567920301}
   guessPanel: {fileID: 1401537161}
   guessRow: {fileID: 726911824}
+  playerCardSpot: {fileID: 23796403}
+  opponentCardSpot: {fileID: 1898533201}
+  displayScale: 1.1
+  cardMoveTime: 0.35
+  chosenCardShowTime: 0.8
+  targetShowTime: 1.2
   attackDropHeight: 0.35
   afterSpawnPause: 0.6
   beforeRollPause: 0.4
@@ -26401,6 +26504,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -580}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2133555113 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6387254291909464760, guid: 6dd5efa6fbd63f5408d7786c889f9c5b, type: 3}
+  m_PrefabInstance: {fileID: 7860115279638181159}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1001 &178886241030640397
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27305,7 +27419,7 @@ PrefabInstance:
     - target: {fileID: 3624528208294921098, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
       propertyPath: powerBG
       value: 
-      objectReference: {fileID: 108297417}
+      objectReference: {fileID: 498524431}
     - target: {fileID: 6007879081463497086, guid: 8c41ad5e71b35c94c9d5f1806e0067d0, type: 3}
       propertyPath: m_Name
       value: firstOption
@@ -28072,7 +28186,7 @@ PrefabInstance:
     - target: {fileID: 4456650582006175912, guid: 6dd5efa6fbd63f5408d7786c889f9c5b, type: 3}
       propertyPath: powerBG
       value: 
-      objectReference: {fileID: 885953089}
+      objectReference: {fileID: 2133555113}
     - target: {fileID: 7376687533544702098, guid: 6dd5efa6fbd63f5408d7786c889f9c5b, type: 3}
       propertyPath: m_fontSizeMin
       value: 21

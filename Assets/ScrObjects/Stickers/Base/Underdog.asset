@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Underdog
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 3
-  abilityDescription: Power-up if you have fewer cards
+  power: 4
+  abilityDescription: Buff if you have fewer cards
   isSpecial: 0
   stickerColor: {r: 0.72156864, g: 0.9019608, b: 0.65882355, a: 1}
   hasSide: 0
+  icon: {fileID: 940748289767714487, guid: bb28eae246555e344a560882a0c182c7, type: 3}
   effects:
   - rid: 8466844326851248231
   references:
@@ -26,7 +27,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Power-up!
+        customText: Underdog!
         showPresentation: 1
         oncePerRound: 0
         condition: 3

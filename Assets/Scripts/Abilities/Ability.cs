@@ -17,6 +17,8 @@ public class Ability : MonoBehaviour
     [SerializeField] TextMeshProUGUI effectDesc;
     [SerializeField] Image stickerBG; // tinted with the sticker's color
     [SerializeField] GameObject specialStar; // special stickers have a star behind them
+    [SerializeField] Image icon; // sticker icon on the left of the description
+    [SerializeField] GameObject glow; // lights up behind the strip while its effect triggers
     [SerializeField] float specialScale = 1.1f; // special stickers are a bit bigger
     Vector3 restScale;
     bool restScaleSaved;
@@ -46,9 +48,41 @@ public class Ability : MonoBehaviour
         // sticker look
         if (stickerBG != null) stickerBG.color = abilityData.stickerColor;
         if (specialStar != null) specialStar.SetActive(abilityData.isSpecial);
+        if (icon != null)
+        {
+            icon.gameObject.SetActive(abilityData.icon != null);
+            icon.sprite = abilityData.icon;
+            icon.color = abilityData.IconColor;
+        }
 
         if (!restScaleSaved) { restScale = transform.localScale; restScaleSaved = true; }
         transform.localScale = (abilityData.isSpecial) ? restScale * specialScale : restScale;
+    }
+
+    /// <summary>
+    /// Strip height (cards with fewer stickers get bigger strips and bigger text)
+    /// </summary>
+    public void SetSize(float height, float maxFontSize)
+    {
+        RectTransform rt = (RectTransform)transform;
+        rt.sizeDelta = new Vector2(rt.sizeDelta.x, height);
+        effectDesc.fontSizeMax = maxFontSize;
+        if (icon != null)
+        {
+            float iconSize = Mathf.Min(height * 0.85f, 64f);
+            icon.rectTransform.sizeDelta = new Vector2(iconSize, iconSize);
+            icon.rectTransform.anchoredPosition = new Vector2(iconSize / 2f + 4f, 0f);
+            effectDesc.rectTransform.offsetMin = new Vector2(iconSize + 8f, effectDesc.rectTransform.offsetMin.y);
+        }
+    }
+
+    /// <summary>
+    /// The strip lights up on the card while its effect triggers
+    /// </summary>
+    public void Highlight(bool isOn)
+    {
+        if (glow != null) glow.SetActive(isOn);
+        if (isOn) Animations.instance.PopAnim(gameObject, 0.35f, 0.25f);
     }
 
     /// <summary>

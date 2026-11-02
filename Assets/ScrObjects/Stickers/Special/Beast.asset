@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Beast
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 5
-  abilityDescription: Power-up until it destroys a card. Destroys cards it beats
+  abilityDescription: Buff until it destroys a card. Destroys cards it beats
   isSpecial: 1
   stickerColor: {r: 0.83137256, g: 0.41568628, b: 0.41568628, a: 1}
   hasSide: 0
+  icon: {fileID: 21300000, guid: b2848342b4574fb479ad4f00ff5c73f0, type: 3}
   effects:
   - rid: 8466844326851248239
   - rid: 8466844326851248240
@@ -27,7 +28,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Power-up!
+        customText: Hungry!
         showPresentation: 1
         oncePerRound: 0
         condition: 9

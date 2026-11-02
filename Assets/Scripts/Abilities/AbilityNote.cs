@@ -7,6 +7,9 @@ public class AbilityNote : MonoBehaviour
     public Color storedAbilityColor;
     [HideInInspector] public bool storedOnRight; // side of the offered sticker
     [SerializeField] Image stickerBG; // tinted with the sticker's color
+    [SerializeField] Image icon; // sticker icon (in place of the old power star)
+    Vector3 iconRestPos;
+    bool iconRestSaved;
     [SerializeField] TextMeshProUGUI noteText;
     [SerializeField] TextMeshProUGUI powerValue;
     [SerializeField] Transform powerObj;
@@ -27,7 +30,16 @@ public class AbilityNote : MonoBehaviour
     /// </summary>
     public void InitAbilityNote(Sticker sticker, bool showPower = true)
     {
-        powerObj.gameObject.SetActive(showPower);
+        // the sticker icon sits on top of the note, base stickers show their power next to it
+        if (!iconRestSaved) { iconRestPos = icon.rectTransform.localPosition; iconRestSaved = true; }
+        icon.sprite = sticker.ability.icon;
+        icon.color = sticker.ability.IconColor;
+        icon.gameObject.SetActive(sticker.ability.icon != null);
+        icon.rectTransform.localPosition = showPower ? iconRestPos : Vector3.zero;
+        // power value sits in the yellow star right of the icon (powerBG), add-on stickers have no power
+        if (powerBG != null) powerBG.gameObject.SetActive(showPower);
+        else powerValue.gameObject.SetActive(showPower);
+        powerObj.gameObject.SetActive(true);
 
         // ability color
         //storedAbilityColor = Colors.instance.GetRandomSecondaryColor();

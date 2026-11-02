@@ -16,7 +16,9 @@ public enum CommandType : byte
     AddSticker,     // workshop: sticker put on a card in hand
     Arrange,        // arranging: final order of the field (sent right before Ready)
     Attack,         // battle: attacking card + target
-    Choice          // battle: card picked when a sticker asks (Phantom, Seer guess, hide and swap), -1 = skipped
+    Choice,         // battle: card picked when a sticker asks (Phantom, Seer guess, hide and swap), -1 = skipped
+    AttackStart,    // battle: card dragged out to attack, its unit comes out (target comes later with Attack)
+    AttackCancel    // battle: the attacker went back before a target was picked
 }
 
 /// <summary>
@@ -185,6 +187,16 @@ public class MatchNetwork : NetworkBehaviour
         SendCommand(new MatchCommand { type = CommandType.Choice, index = optionIndex });
     }
 
+    public void SendAttackStart(int attackerIndex)
+    {
+        SendCommand(new MatchCommand { type = CommandType.AttackStart, index = attackerIndex });
+    }
+
+    public void SendAttackCancel()
+    {
+        SendCommand(new MatchCommand { type = CommandType.AttackCancel });
+    }
+
     void SendCommand(MatchCommand command)
     {
         command.stateNr = GameManager.instance.stateNr;
@@ -230,6 +242,9 @@ public class MatchNetwork : NetworkBehaviour
 
         // own commands were made on our turn, so they fit right away
         if (command.seat == GameData.localSeat) return true;
+
+        // the other player's attacker is out (AttackStart), its target or cancel comes next
+        if (command.type == CommandType.Attack || command.type == CommandType.AttackCancel) return FightManager.instance.RemoteAttackPending;
 
         // the other player's dice have to be rolling here too
         if (command.type == CommandType.StopDice) return D6.CountRolling(gm.opponent) >= command.index;
@@ -296,6 +311,15 @@ public class MatchNetwork : NetworkBehaviour
 
             case CommandType.Choice:
                 FightManager.instance.AnswerChoice(command.index);
+                break;
+
+            case CommandType.AttackStart:
+                if (command.index < 0 || command.index >= p.cardsOnField.Count) { Debug.LogError("MatchNetwork: no attacker " + command.index + " on [" + p.playerName + "]'s field"); break; }
+                FightManager.instance.ApplyAttackStart(p.cardsOnField[command.index]);
+                break;
+
+            case CommandType.AttackCancel:
+                FightManager.instance.ApplyAttackCancel(p);
                 break;
         }
     }

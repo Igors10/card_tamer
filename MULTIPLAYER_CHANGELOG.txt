@@ -124,3 +124,13 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
   - Desync snapshot now lists hand / field / knocked out cards with stickers,
     face down and phantom marks instead of lanes.
   - Not tested with two players yet.
+
+2026-11-02  Power-up dice one by one (branch experimental-rules)
+  - Only a unit's first power-up die waits for the click / StopDice command,
+    the rest stop one after another by themselves on both games.
+
+2026-11-02  Attacker shows up right away (branch experimental-rules)
+  - New commands AttackStart (sent when the card is dropped, both games
+    bring the attacker out) and AttackCancel (right click before a target).
+    Attack now only carries the target part. The attacking card is revealed
+    when it comes out, also offline.

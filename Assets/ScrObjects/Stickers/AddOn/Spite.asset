@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Spite
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: Power-up if the opposing card has more power-ups
+  abilityDescription: Buff if the opposing card has more buffs
   isSpecial: 0
   stickerColor: {r: 0.9098039, g: 0.76862746, b: 0.41568628, a: 1}
   hasSide: 0
+  icon: {fileID: 21300000, guid: 836449e67f2e91648998f4e1b9dfd6a2, type: 3}
   effects:
   - rid: 8466844326851248226
   references:
@@ -26,7 +27,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 7
-        customText: Power-up!
+        customText: Spite!
         showPresentation: 1
         oncePerRound: 0
         condition: 8

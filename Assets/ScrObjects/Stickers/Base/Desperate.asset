@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
   m_Name: Desperate
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 3
-  abilityDescription: Power-up if you have less HP
+  power: 4
+  abilityDescription: Buff if you have less HP
   isSpecial: 0
   stickerColor: {r: 0.95686275, g: 0.7607843, b: 0.8784314, a: 1}
   hasSide: 0
+  icon: {fileID: 21300000, guid: 836449e67f2e91648998f4e1b9dfd6a2, type: 3}
   effects:
   - rid: 8466844326851248218
   references:
@@ -26,7 +27,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Power-up!
+        customText: Desperate!
         showPresentation: 1
         oncePerRound: 0
         condition: 4

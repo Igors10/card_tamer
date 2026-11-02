@@ -209,7 +209,9 @@ public class AIOpponent : MonoBehaviour
         if (playerObj.endStateReady) { Debug.Log("AIOpponent: AI already bought all the cards"); yield break; }
 
         ShopManager shop = GameManager.instance.shopManager;
-        int starAmount = playerObj.shopStars + shop.shopStarsAfterBattle + playerObj.deadUnitsThisRound + playerObj.compensationStars;
+        // same stars as the player: the base amount, +1 for losing the round, Beast compensation
+        bool lostRound = playerObj.damageTakenThisRound > GameManager.instance.player.damageTakenThisRound;
+        int starAmount = playerObj.shopStars + shop.shopStarsAfterBattle + (lostRound ? 1 : 0) + playerObj.compensationStars;
         playerObj.compensationStars = 0;
         Debug.Log("AIOpponent: AI opponent has " + starAmount + " stars");
         playerObj.shopStars = starAmount;

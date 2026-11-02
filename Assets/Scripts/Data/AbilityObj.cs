@@ -15,6 +15,20 @@ public class AbilityObj : ScriptableObject
     public Color stickerColor = Color.white;
     [Tooltip("Sticker has a left and a right version, picked at random when it's offered. Write {side} in the description")]
     public bool hasSide;
+    [Tooltip("Icon on the card's sticker strip and on the workshop note, tinted with IconColor")]
+    public Sprite icon;
+
+    /// <summary>
+    /// Icon tint: the sticker's color, a bit stronger so it shows on the strip
+    /// </summary>
+    public Color IconColor
+    {
+        get
+        {
+            Color.RGBToHSV(stickerColor, out float h, out float s, out float v);
+            return Color.HSVToRGB(h, Mathf.Clamp01(s * 1.8f), v * 0.9f);
+        }
+    }
 
     [SerializeReference, EffectPicker] public List<AbilityEffect> effects = new List<AbilityEffect>();
 
@@ -36,6 +50,7 @@ public class AbilityObj : ScriptableObject
         // coloring the power modifier numbers, buffs green and debuffs red
         abilityText = Regex.Replace(abilityText, @"\+\d+", "<color=#2DB043>$0</color>");
         abilityText = Regex.Replace(abilityText, @"\-\d+", "<color=red>$0</color>");
+        abilityText = Regex.Replace(abilityText, @"\b[Bb]uffs?\b", "<color=#2DB043>$0</color>");
 
         // coloring the 'color' of abilities that work with specific color
         string hexColor = ColorUtility.ToHtmlStringRGB(abilityColor);

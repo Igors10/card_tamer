@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Cheerer
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 2
-  abilityDescription: Card on the {side} gets a power-up
+  abilityDescription: Card on the {side} gets a buff
   isSpecial: 0
   stickerColor: {r: 0.95686275, g: 0.8901961, b: 0.6392157, a: 1}
   hasSide: 1
+  icon: {fileID: 4815476061570213978, guid: 299c733a2b9a39641802ed9f0fd86236, type: 3}
   effects:
   - rid: 8466844326851248233
   references:
@@ -26,7 +27,7 @@ MonoBehaviour:
       type: {class: NeighbourPowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 9
-        customText: Cheered on! Power-up!
+        customText: Cheered on!
         showPresentation: 1
         oncePerRound: 0
         amount: 1

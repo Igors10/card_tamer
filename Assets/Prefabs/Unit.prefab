@@ -1142,8 +1142,9 @@ MonoBehaviour:
   dieOffsetY: 3
   afterDiePause: 2
   powerUpDiceStart: {x: 3.6, y: 1, z: 0}
-  powerUpDicePerRow: 3
+  powerUpDicePerRow: 2
   powerUpDiceSpacing: 1.8
+  diceStopInterval: 0.25
   bonusPowerObj: {fileID: 7962674609946288711}
   bonusPowerValue: {fileID: 2451345806949978867}
   stunned: 0

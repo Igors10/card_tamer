@@ -17,6 +17,7 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.5411765, g: 0.84705883, b: 0.8156863, a: 1}
   hasSide: 0
+  icon: {fileID: 21300000, guid: f309641372d86df4d9d38727ee917e86, type: 3}
   effects:
   - rid: 8466844326851248221
   references:
@@ -26,6 +27,6 @@ MonoBehaviour:
       type: {class: HideSelfEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 8
-        customText: Hides!
+        customText: Hiding!
         showPresentation: 1
         oncePerRound: 0

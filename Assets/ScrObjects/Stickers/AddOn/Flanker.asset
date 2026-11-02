@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Flanker
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: Power-up against a side card
+  abilityDescription: Buff against a side card
   isSpecial: 0
   stickerColor: {r: 0.7411765, g: 0.7411765, b: 0.7411765, a: 1}
   hasSide: 0
+  icon: {fileID: 21300000, guid: a940ce1477e30f64b9e4d9f949819932, type: 3}
   effects:
   - rid: 8466844326851248232
   references:
@@ -26,7 +27,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Power-up!
+        customText: Flanking!
         showPresentation: 1
         oncePerRound: 0
         condition: 7

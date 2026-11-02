@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Bomb
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: 2 power-ups. Discarded after the fight
+  abilityDescription: 2 buffs. Discarded after the fight
   isSpecial: 0
   stickerColor: {r: 0.9411765, g: 0.65882355, b: 0.40784314, a: 1}
   hasSide: 0
+  icon: {fileID: 7593991043121532099, guid: 3fb3da6a9f8680e43ab227fef67bfd4e, type: 3}
   effects:
   - rid: 8466844326851248219
   - rid: 8466844326851248220
@@ -27,7 +28,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: 2 power-ups!
+        customText: Bomb!
         showPresentation: 1
         oncePerRound: 0
         condition: 0

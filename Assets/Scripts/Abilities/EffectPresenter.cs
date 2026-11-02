@@ -17,13 +17,14 @@ public static class EffectPresenter
         // play soundeffect
         AudioManager.instance.PlaySFX("EffectSFX", 0.75f);
 
-        // making the unit appear in front so that the effect is clearly visible
-        unit.AppearAbove(true);
+        // the sticker lights up on its card (a neighbour's sticker in the row lights up there)
+        if (StickerVisible(ctx)) ctx.ability.Highlight(true);
 
-        // showing text (turning it off first stops a fade out left from the previous effect on this unit)
-        unit.skillTextObj.SetActive(false);
+        // short text under the unit saying what triggered ("Attacking!"), the description if the effect has none
+        unit.AppearAbove(true);
+        unit.skillTextObj.SetActive(false); // turning it off first stops a fade out left from the previous effect on this unit
         unit.skillTextObj.SetActive(true);
-        unit.skillText.text = string.IsNullOrEmpty(customText) ? ctx.ability.GetDescription() : customText;
+        unit.skillText.text = (string.IsNullOrEmpty(customText) && ctx.ability != null) ? ctx.ability.GetDescription() : customText;
 
         // playing particle effect
         Animations.instance.PopAnim(unit.sprite.gameObject, 0.35f, 0.15f);
@@ -37,13 +38,16 @@ public static class EffectPresenter
     {
         yield return new WaitForSeconds(PauseAfterEffect);
 
+        if (ctx.ability != null) ctx.ability.Highlight(false);
+
         // unit could have been removed during the effect
         Unit unit = ctx.self;
         if (unit == null) yield break;
 
         unit.cardEffectVFX.gameObject.SetActive(false);
-        // the text can already be faded out (several effects on the same unit, or a long effect)
         if (unit.skillTextObj.activeInHierarchy) unit.skillTextObj.GetComponent<AutoFade>().FadeOut(textFadeOutTime);
         unit.AppearAbove(false);
     }
+
+    static bool StickerVisible(EffectContext ctx) => ctx.ability != null && ctx.ability.gameObject.activeInHierarchy;
 }

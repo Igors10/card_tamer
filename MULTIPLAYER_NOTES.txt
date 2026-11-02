@@ -369,12 +369,24 @@ Arrange (CommandType.Arrange: order)
   both games). Only the other game applies it (the sender already has it).
   Dragging stops once Ready is pressed.
 
+AttackStart (index = attacker in the sender's cardsOnField)
+  Dropping a card to attack (FightManager.TryStartAttack) only sends it.
+  Both games run ApplyAttackStart: the card is revealed, goes on display
+  and its unit comes out. The sender then picks a target (LocalAttackIntro),
+  the other game waits (RemoteAttackIntro, RemoteAttackPending).
+
+AttackCancel (no values)
+  Right click (not on a card) while picking a target sends it. Both games
+  put the attacker back; the other game sets waitingForRemote again, it's
+  still the sender's turn.
+
 Attack (CommandType.Attack: index = attacker in the sender's cardsOnField,
         lane = target in the other player's cardsOnField)
-  FightManager.TryPickTarget (local click on a target) sends it, the local
-  attacker unit is already out for the arrow (attackSent blocks a second
-  attack). Both games run FightManager.ApplyAttack -> Fight when it comes
-  back. The bot and the remote player's attacks spawn the attacker there.
+  FightManager.TryPickTarget (local click on a target) sends it (attackSent
+  blocks a second attack). Both games run FightManager.ApplyAttack -> Fight
+  when it comes back; the other game first shows an arrow to the target
+  (RemoteAttackTarget). CanApply lets the other player's Attack /
+  AttackCancel through while RemoteAttackPending.
   Everything inside a fight runs the same on both games: dice through
   StopDice, Joker / Mixer / Phantom spot use GameRandom.
 
@@ -397,6 +409,9 @@ Dice (CommandType.StopDice: index = how many dice)
   waits until that many of their dice are rolling there), then stops the
   oldest ones. Value comes from GameRandom when a die stops, so both games
   get the same numbers.
+  Several power-up dice: only the first one waits for the click / command
+  (D6.RollAnimation(true)), the others stop one by one after it
+  (Unit.RollPowerUps, D6.Stop), in the same order on both games.
 
 Targets (CommandType.ChooseTarget: index = unit in targetOptions)
   EffectContext.ChooseTarget -> ExecuteManager.ShowTargets(options, hint,

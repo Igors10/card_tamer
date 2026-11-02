@@ -23,6 +23,7 @@ public class ManagerUI : MonoBehaviour
     [Header("card preview")]
     [SerializeField] Card previewCard;
     [SerializeField] Vector3 cardPreviewOffset = new Vector3(0f, 400f, 0f);
+    [SerializeField] float zoomScale = 2f; // right click zoom size
 
     [Header("game over")]
     [SerializeField] GameObject gameOverScreen;
@@ -41,9 +42,11 @@ public class ManagerUI : MonoBehaviour
     public void PreviewCard(bool enable, CreatureObj cardData, Player player, Vector3 position, bool worldToScreen = true)
     {
         previewCard.gameObject.SetActive(enable);
+        ZoomedCard = null;
 
         // Passing correct data to the card and positioning it above the unit
         if (!enable) return;
+        if (previewRestScale != Vector3.zero) previewCard.transform.localScale = previewRestScale; // right click zoom made it bigger
         previewCard.AssignCardData(cardData, player);
         Vector3 previewPos = (worldToScreen) ? Camera.main.WorldToScreenPoint(position) : position;
         previewCard.transform.position = previewPos;
@@ -54,6 +57,30 @@ public class ManagerUI : MonoBehaviour
         float cardTopY = cardRT.position.y + (1f - cardRT.pivot.y) * cardRT.rect.height;
         if (cardTopY - 50f > Screen.height) previewCard.transform.position -= cardPreviewOffset * 2f;
     }
+
+    /// <summary>
+    /// Right click zoom: the preview card shows a big copy of the card in the middle of the screen, null hides it
+    /// </summary>
+    public void ZoomCard(Card card)
+    {
+        ZoomedCard = card;
+        previewCard.gameObject.SetActive(card != null);
+        if (card == null) return;
+
+        // the zoomed copy never catches the mouse, so the card under it keeps its hover
+        CanvasGroup group = previewCard.GetComponent<CanvasGroup>();
+        if (group == null) group = previewCard.gameObject.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = false;
+
+        if (previewRestScale == Vector3.zero) previewRestScale = previewCard.transform.localScale;
+        previewCard.AssignCardData(card.cardData, card.player);
+        previewCard.transform.position = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
+        previewCard.transform.localScale = previewRestScale * zoomScale;
+        previewCard.transform.SetAsLastSibling();
+    }
+
+    public Card ZoomedCard { get; private set; }
+    Vector3 previewRestScale;
 
     public void StateChangeMessage(string messageText)
     {

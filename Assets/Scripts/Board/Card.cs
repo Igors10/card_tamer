@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 public class Card : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class Card : MonoBehaviour
 
     [Header("refs")]
     public Ability[] abilities = new Ability[CreatureObj.maxStickers]; // sticker strips, first one is the base sticker
+    [SerializeField] float[] stripHeights = { 92f, 66f, 46f }; // strip height for a card with 1, 2, 3 stickers
+    [SerializeField] float[] stripFontSizes = { 34f, 28f, 24f };
     [SerializeField] TextMeshProUGUI powerText; // base power on the star
     [SerializeField] Image powerBG;
     [SerializeField] Color specialPowerColor = new Color(0.78f, 0.55f, 0.96f);
@@ -29,7 +32,8 @@ public class Card : MonoBehaviour
     public OrderMarker orderMarker;
     [SerializeField] GameObject specialIcon;
     [SerializeField] Image cardBack; // opponent's face down cards show only the back
-    [SerializeField] GameObject hiddenIcon; // your own face down cards show this, so you know the opponent can't see them
+    [FormerlySerializedAs("hiddenIcon")]
+    [SerializeField] GameObject revealedIcon; // your own face up field cards show this, so you know the opponent can see them
     [SerializeField] GameObject phantomLabel; // only the owner sees which card is the phantom
     [HideInInspector] public Unit unit;
     [HideInInspector] public Player player;
@@ -76,6 +80,7 @@ public class Card : MonoBehaviour
     [HideInInspector] public bool isPhantom; // Phantom's copy: looks the same, only its owner knows which one it is
     [HideInInspector] public Card twin; // Phantom card and its copy point at each other
     [HideInInspector] public bool destroyedCardThisRound; // Beast: already destroyed a card this round
+    [HideInInspector] public bool onDisplay; // fighting: shown big on the side of the screen, its place in the row waits for it
     bool specialCostPaid = false;
 
     private void Awake()
@@ -113,7 +118,9 @@ public class Card : MonoBehaviour
     {
         handTargetPosition = localPosition;
         cardRotation = rotationAngle;
-        inHandLayout = true;
+
+        // a fighting card stays on display, it moves back when the fight is over
+        inHandLayout = !onDisplay;
     }
 
     public void ExitHandLayout()
@@ -219,10 +226,13 @@ public class Card : MonoBehaviour
     /// </summary>
     public void AssignAbilies()
     {
+        // fewer stickers = bigger strips, so the text stays readable
+        int stickerCount = Mathf.Clamp(cardData.stickers.Count, 1, stripHeights.Length);
         for (int i = 0; i < abilities.Length; i++)
         {
             Sticker sticker = (i < cardData.stickers.Count) ? cardData.stickers[i] : null;
             abilities[i].InitAbility(sticker, this);
+            abilities[i].SetSize(stripHeights[stickerCount - 1], stripFontSizes[stickerCount - 1]);
         }
 
         // base power, special cards have a purple star (saved lazily, opponent cards can be initialized before Awake)
@@ -324,7 +334,8 @@ public class Card : MonoBehaviour
         bool showBack = faceDown && player != GameManager.instance.player;
         cardBack.gameObject.SetActive(showBack);
         cardBack.color = player.playerColor;
-        hiddenIcon.SetActive(faceDown && !showBack);
+        bool onField = GameManager.instance.currentState != GameState.BUYING && player.cardsOnField.Contains(this);
+        revealedIcon.SetActive(!faceDown && onField && player == GameManager.instance.player);
 
         // sticker strips are hidden under the back (the special star would stick out and give the card away)
         foreach (Ability strip in abilities) strip.gameObject.SetActive(strip.abilityData != null && !showBack);
@@ -357,8 +368,13 @@ public class Card : MonoBehaviour
     /// Function triggers whenever player is hovering over a card with their mouse
     /// </summary>
     /// <param name="mouseOver"></param>
+    public static Card hoveredCard; // card under the mouse (right click zooms it instead of cancelling)
+
     public void OnHover(bool mouseOver)
     {
+        if (mouseOver) hoveredCard = this;
+        else if (hoveredCard == this) hoveredCard = null;
+
         // highlighting cards that can be attacked
         if (FightManager.instance != null && FightManager.instance.IsTarget(this)) HighlightCard(mouseOver);
 
@@ -438,6 +454,19 @@ public class Card : MonoBehaviour
         // battle: attack target, workshop: card to put the new sticker on
         if (FightManager.instance.TryPickTarget(this)) return;
         GameManager.instance.managerUI.workshop.TryPutSticker(this);
+    }
+
+    /// <summary>
+    /// Right click: a big copy of the card shows in the middle of the screen until the mouse leaves the card
+    /// </summary>
+    public void Zoom(bool zoomIn)
+    {
+        // the opponent's face down cards only show their back
+        if (zoomIn && faceDown && player != GameManager.instance.player) return;
+
+        ManagerUI ui = GameManager.instance.managerUI;
+        if (zoomIn) ui.ZoomCard(this);
+        else if (ui.ZoomedCard == this) ui.ZoomCard(null);
     }
 
     /// <summary>
@@ -595,6 +624,7 @@ public class Card : MonoBehaviour
         auraPower = 0;
         specialCostPaid = false;
         destroyedCardThisRound = false;
+        onDisplay = false;
         SetFaceDown(false);
 
         //unit.RefreshUnitVisuals();

@@ -58,6 +58,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] Vector3 powerUpDiceStart = new Vector3(3.6f, 1f, 0f); // first power-up die, right of the unit
     [SerializeField] int powerUpDicePerRow = 3;
     [SerializeField] float powerUpDiceSpacing = 1.8f;
+    [SerializeField] float diceStopInterval = 0.25f; // after the click the dice stop one by one with this pause
     [SerializeField] GameObject bonusPowerObj;
     [SerializeField] TextMeshProUGUI bonusPowerValue;
 
@@ -489,21 +490,29 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             int column = i % powerUpDicePerRow;
             int row = i / powerUpDicePerRow;
             dice[i].transform.localPosition = powerUpDiceStart + new Vector3(column * powerUpDiceSpacing, -row * powerUpDiceSpacing, 0f);
-            Animations.instance.PopAnim(dice[i].gameObject, 0.3f, 0.3f);
         }
     }
 
     /// <summary>
-    /// Rolls all shown power-up dice at once, every result is added to the unit's power
+    /// All shown power-up dice roll, one click stops the first one and the others stop one by one after it.
+    /// Every result is added to the unit's power
     /// </summary>
     public IEnumerator RollPowerUps(int count)
     {
         if (count <= 0) yield break;
         rollingPower = true;
 
+        // only the first die waits for the click (online: the StopDice command), so both games stop them in the same order
         List<Coroutine> rolls = new List<Coroutine>();
-        for (int i = 0; i < count; i++) rolls.Add(StartCoroutine(dice[i].RollAnimation()));
-        foreach (Coroutine roll in rolls) yield return roll;
+        for (int i = 0; i < count; i++) rolls.Add(StartCoroutine(dice[i].RollAnimation(i == 0)));
+        yield return rolls[0];
+
+        for (int i = 1; i < count; i++)
+        {
+            yield return new WaitForSeconds(diceStopInterval);
+            dice[i].Stop();
+            yield return rolls[i];
+        }
 
         for (int i = 0; i < count; i++) dice[i].Glow(true);
         rollingPower = false;

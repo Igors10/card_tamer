@@ -16,6 +16,12 @@ public class FightManager : MonoBehaviour
     [SerializeField] TargetArrow targetArrow;
     [SerializeField] GameObject guessPanel; // Seer: known opponent cards are shown here to pick from
     [SerializeField] Transform guessRow;
+    [SerializeField] RectTransform playerCardSpot; // fighting cards are shown big here: yours on the left
+    [SerializeField] RectTransform opponentCardSpot; // opponent's on the right
+    [SerializeField] float displayScale = 1.1f;
+    [SerializeField] float cardMoveTime = 0.35f;
+    [SerializeField] float chosenCardShowTime = 0.8f; // opponent's chosen card lights up in its row this long
+    [SerializeField] float targetShowTime = 1.2f; // arrow to the opponent's target stays this long
 
     [Header("input")]
     [SerializeField] float attackDropHeight = 0.35f; // card has to be dropped above this part of the screen to attack
@@ -54,7 +60,7 @@ public class FightManager : MonoBehaviour
     public bool CanAttack(Player p)
     {
         GameManager gm = GameManager.instance;
-        return gm.currentState == GameState.BATTLING && !fighting && choosingFor == null && !attackSent
+        return gm.currentState == GameState.BATTLING && !fighting && !preparingAttack && choosingFor == null && !attackSent
             && (p == gm.player) == gm.yourTurn && !gm.gameOver;
     }
 
@@ -65,11 +71,43 @@ public class FightManager : MonoBehaviour
     {
         if (!CanAttack(card.player) || Input.mousePosition.y < Screen.height * attackDropHeight) return false;
 
+        // online the other player sees the attacker come out right away: both games start it when the command comes back
+        if (!GameManager.instance.playerConfig.offlineMatch)
+        {
+            preparingAttack = true;
+            MatchNetwork.instance.SendAttackStart(card.player.cardsOnField.IndexOf(card));
+            return true;
+        }
+
+        StartCoroutine(LocalAttackIntro(card));
+        return true;
+    }
+
+    bool preparingAttack; // the attacker is coming out, the target can be picked after its entrance
+
+    /// <summary>
+    /// Online: an AttackStart command arrived. The local player's attacker comes out and then they pick a target,
+    /// the other player's attacker comes out and the game waits for their target (Attack) or cancel
+    /// </summary>
+    public void ApplyAttackStart(Card card)
+    {
+        if (card.player == GameManager.instance.player) StartCoroutine(LocalAttackIntro(card));
+        else StartCoroutine(RemoteAttackIntro(card));
+    }
+
+    /// <summary>
+    /// The card is revealed (it attacks) and goes on display, its unit comes out with its entrance, then the player picks a target
+    /// </summary>
+    IEnumerator LocalAttackIntro(Card card)
+    {
+        preparingAttack = true;
+        yield return Reveal(card);
+        yield return BringOut(card, false, unit => attacker = unit);
+        preparingAttack = false;
+
         choosingFor = card;
-        attacker = SpawnFighter(card);
         targetArrow.Show(attacker.transform);
         GameManager.instance.managerUI.NewHint("Choose an opponent card to attack (right click to cancel)");
-        return true;
     }
 
     public bool IsTarget(Card card) => choosingFor != null && card.player != choosingFor.player && card.player.cardsOnField.Contains(card);
@@ -87,7 +125,7 @@ public class FightManager : MonoBehaviour
             return true;
         }
 
-        if (!IsTarget(card)) return false;
+        if (!IsTarget(card) || attackCancelSent) return false;
 
         card.HighlightCard(false);
         Card attackingCard = choosingFor;
@@ -116,50 +154,224 @@ public class FightManager : MonoBehaviour
             attackSent = false;
             StartCoroutine(Fight(attackingCard, target));
         }
+        else if (remoteAttacker == attackingCard) StartCoroutine(RemoteAttackTarget(target));
         else Attack(attackingCard, target);
+    }
+
+    Card remoteAttacker; // online: the other player's card that came out (AttackStart), waiting for its target
+    bool remoteIntroDone;
+
+    /// <summary>
+    /// Online: the other player's Attack / AttackCancel can be applied (their attacker is out)
+    /// </summary>
+    public bool RemoteAttackPending => remoteAttacker != null;
+
+    IEnumerator RemoteAttackIntro(Card card)
+    {
+        fighting = true;
+        remoteAttacker = card;
+        remoteIntroDone = false;
+        GameManager.instance.managerUI.NewHint(card.player.playerName + " is choosing a target...");
+        yield return Reveal(card);
+        yield return BringOut(card, true, unit => attacker = unit);
+        remoteIntroDone = true;
+    }
+
+    /// <summary>
+    /// Online: the other player picked a target, the arrow shows it and the fight starts (after their attacker's entrance here)
+    /// </summary>
+    IEnumerator RemoteAttackTarget(Card target)
+    {
+        while (!remoteIntroDone) yield return null;
+        Card attackingCard = remoteAttacker;
+        remoteAttacker = null;
+        GameManager.instance.managerUI.NewHint("");
+
+        target.HighlightCard(true);
+        targetArrow.Show(attacker.transform, target.transform);
+        yield return Animations.instance.SkippablePause(targetShowTime);
+        targetArrow.Hide();
+        target.HighlightCard(false);
+
+        yield return Fight(attackingCard, target);
+    }
+
+    /// <summary>
+    /// Online: a cancel arrived, the attacker of that player goes back
+    /// </summary>
+    public void ApplyAttackCancel(Player p)
+    {
+        if (p == GameManager.instance.player) { attackCancelSent = false; CancelAttack(); }
+        else StartCoroutine(RemoteCancel());
+    }
+
+    bool attackCancelSent;
+
+    IEnumerator RemoteCancel()
+    {
+        while (!remoteIntroDone) yield return null;
+        Card card = remoteAttacker;
+        remoteAttacker = null;
+        fighting = false;
+        attacker.RemoveFromBoard();
+        attacker = null;
+        card.currentPower = 0;
+        StartCoroutine(ReturnCard(card));
+        GameManager.instance.managerUI.NewHint("It's your opponents turn");
+
+        // still their turn, their next attack can come in
+        GameManager.instance.waitingForRemote = true;
     }
 
     bool attackSent; // online: local attack is on its way to the server
 
     void Update()
     {
-        // right click puts the attacker back
-        if (choosingFor != null && Input.GetMouseButtonDown(1)) CancelAttack();
+        // right click (not on a card, that zooms it) puts the attacker back. Online the cancel goes to the server first
+        if (choosingFor != null && !attackCancelSent && Input.GetMouseButtonDown(1) && Card.hoveredCard == null)
+        {
+            if (GameManager.instance.playerConfig.offlineMatch) CancelAttack();
+            else
+            {
+                attackCancelSent = true;
+                MatchNetwork.instance.SendAttackCancel();
+            }
+        }
     }
 
     void CancelAttack()
     {
+        if (choosingFor == null) return;
         targetArrow.Hide();
         attacker.RemoveFromBoard();
         attacker = null;
 
         Card card = choosingFor;
         choosingFor = null;
-        card.gameObject.SetActive(true);
-        GameManager.instance.handManager.UpdateHandVisuals(card.player);
+        card.currentPower = 0;
+        StartCoroutine(ReturnCard(card));
         GameManager.instance.managerUI.NewHint(GameManager.instance.GetState().defaultHintText);
     }
 
     /// <summary>
-    /// Bot (and later the online opponent) attacks straight away
+    /// Bot and the online opponent: their card lights up in the row, goes on display, comes out,
+    /// then an arrow shows which card it attacks
     /// </summary>
     public void Attack(Card attackingCard, Card target)
     {
-        attacker = SpawnFighter(attackingCard);
-        StartCoroutine(Fight(attackingCard, target));
+        StartCoroutine(OpponentAttack(attackingCard, target));
+    }
+
+    IEnumerator OpponentAttack(Card attackingCard, Card target)
+    {
+        fighting = true;
+        yield return Reveal(attackingCard);
+        yield return BringOut(attackingCard, true, unit => attacker = unit);
+
+        target.HighlightCard(true);
+        targetArrow.Show(attacker.transform, target.transform);
+        yield return Animations.instance.SkippablePause(targetShowTime);
+        targetArrow.Hide();
+        target.HighlightCard(false);
+
+        yield return Fight(attackingCard, target);
     }
 
     /// <summary>
-    /// Card leaves its place on the field (the place waits for it) and its unit comes out
+    /// The chosen card (optionally lit up in its row first) moves to its side of the screen and its unit comes out with the entrance animation
     /// </summary>
-    Unit SpawnFighter(Card card)
+    IEnumerator BringOut(Card card, bool showChoice, System.Action<Unit> setUnit)
     {
+        if (showChoice)
+        {
+            card.HighlightCard(true);
+            Animations.instance.PopAnim(card.gameObject, 0.3f, 0.25f);
+            AudioManager.instance.PlaySFX("NextCardSFX");
+            yield return Animations.instance.SkippablePause(chosenCardShowTime);
+            card.HighlightCard(false);
+        }
+
+        yield return DisplayCard(card);
+
         Transform spot = (card.player == GameManager.instance.player) ? playerSpot : opponentSpot;
-        card.gameObject.SetActive(false);
         Unit unit = GameManager.instance.fieldManager.SpawnFightUnit(card, spot.position);
         card.GetStartingPower();
-        return unit;
+        setUnit(unit);
+
+        // entrance: drop with squash, sunburst presenter, jump with stretch
+        while (unit.IsSpawning) yield return null;
+        unit.unitPresenter.gameObject.SetActive(true);
+        yield return unit.EntranceAnimation();
     }
+
+    /// <summary>
+    /// Card leaves its place in the row (the place waits for it) and moves big to its side of the screen: yours left, opponent's right
+    /// </summary>
+    IEnumerator DisplayCard(Card card)
+    {
+        RectTransform spot = (card.player == GameManager.instance.player) ? playerCardSpot : opponentCardSpot;
+        homeParents[card] = card.transform.parent;
+        card.onDisplay = true;
+        card.ExitHandLayout();
+        card.transform.SetParent(spot.parent, true);
+        card.transform.SetAsLastSibling();
+
+        yield return MoveCard(card.transform, spot.position, Vector3.one * displayScale);
+    }
+
+    /// <summary>
+    /// After the fight the card goes back to its place in the row (knocked out cards just leave the display)
+    /// </summary>
+    IEnumerator ReturnCard(Card card)
+    {
+        if (card == null || !homeParents.TryGetValue(card, out Transform home)) yield break;
+
+        homeParents.Remove(card);
+        card.onDisplay = false;
+        card.transform.SetParent(home, true);
+
+        // destroyed cards (Bomb, Beast) are gone, knocked out ones are hidden in the discard (back to normal size for next round)
+        if (!card.player.cardsOnField.Contains(card))
+        {
+            card.transform.localScale = card.defaultScale;
+            card.transform.localRotation = Quaternion.identity;
+            yield break;
+        }
+
+        GameManager.instance.handManager.UpdateHandVisuals(card.player);
+        Vector3 startScale = card.transform.localScale;
+        float t = 0;
+        while (t < cardMoveTime && card != null)
+        {
+            t += Time.deltaTime;
+            card.transform.localScale = Vector3.Lerp(startScale, card.defaultScale, Mathf.Clamp01(t / cardMoveTime));
+            yield return null;
+        }
+        if (card != null) card.transform.localScale = card.defaultScale;
+    }
+
+    IEnumerator MoveCard(Transform card, Vector3 targetPos, Vector3 targetScale)
+    {
+        Vector3 startPos = card.position;
+        Vector3 startScale = card.localScale;
+        Quaternion startRotation = card.localRotation;
+
+        float t = 0;
+        while (t < cardMoveTime)
+        {
+            t += Time.deltaTime;
+            float coolT = 1 - Mathf.Pow(1 - Mathf.Clamp01(t / cardMoveTime), 3);
+            card.position = Vector3.Lerp(startPos, targetPos, coolT);
+            card.localScale = Vector3.Lerp(startScale, targetScale, coolT);
+            card.localRotation = Quaternion.Slerp(startRotation, Quaternion.identity, coolT);
+            yield return null;
+        }
+        card.position = targetPos;
+        card.localScale = targetScale;
+        card.localRotation = Quaternion.identity;
+    }
+
+    readonly Dictionary<Card, Transform> homeParents = new Dictionary<Card, Transform>(); // row each displayed card came from
 
     // ===============
     // FIGHT
@@ -188,10 +400,10 @@ public class FightManager : MonoBehaviour
             yield return ShowMessage(target.cardName + " swaps the attacker!");
             attacker.RemoveFromBoard();
             attackingCard.currentPower = 0;
-            attackingCard.gameObject.SetActive(true);
+            StartCoroutine(ReturnCard(attackingCard));
             attackingCard = otherAttackers[GameRandom.Range(0, otherAttackers.Count)];
-            attacker = SpawnFighter(attackingCard);
-            gm.handManager.UpdateHandVisuals(attackingCard.player);
+            yield return Reveal(attackingCard);
+            yield return BringOut(attackingCard, true, unit => attacker = unit);
         }
 
         // Seer: a right guess of a face down target gives the attacker a power-up
@@ -201,14 +413,14 @@ public class FightManager : MonoBehaviour
         // both cards are revealed, the defender comes out
         yield return Reveal(attackingCard);
         yield return Reveal(target);
-        defender = SpawnFighter(target);
-        AudioManager.instance.PlaySFX("NextCardSFX");
+        yield return BringOut(target, false, unit => defender = unit);
         yield return Animations.instance.SkippablePause(afterSpawnPause);
 
         // stickers decide how many power-ups each one gets
         powerUps.Clear();
-        powerUps[attacker] = guessPowerUps;
+        powerUps[attacker] = 0;
         powerUps[defender] = 0;
+        if (guessPowerUps > 0) AddPowerUps(attacker, guessPowerUps);
         QueueNeighbourPowerUps(attacker);
         QueueNeighbourPowerUps(defender);
         executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnFightStart);
@@ -223,8 +435,6 @@ public class FightManager : MonoBehaviour
         yield return executeManager.TriggerEffects();
 
         Debug.Log("FightManager: " + attacker.card.cardName + " attacks " + defender.card.cardName + " with " + powerUps[attacker] + " vs " + powerUps[defender] + " power-ups");
-        attacker.ShowPowerUpDice(powerUps[attacker]);
-        defender.ShowPowerUpDice(powerUps[defender]);
         yield return Animations.instance.SkippablePause(beforeRollPause);
 
         // attacker rolls first, then the defender
@@ -277,6 +487,8 @@ public class FightManager : MonoBehaviour
 
         // whoever is still standing goes back to its place on the field (not if it knocked itself out or was destroyed)
         if (winner != null && !winner.knockedOut && winner.card.player.cardsOnField.Contains(winner.card)) ReturnToField(winner);
+        StartCoroutine(ReturnCard(attackerCard));
+        StartCoroutine(ReturnCard(defenderCard));
 
         // Phantom: copies of knocked out cards go away, the owner picks again which one is the phantom
         yield return UpdatePhantom(attackerCard);
@@ -305,6 +517,9 @@ public class FightManager : MonoBehaviour
     {
         if (!powerUps.ContainsKey(unit)) return;
         powerUps[unit] += amount;
+
+        // the dice appear right when the power-up triggers
+        unit.ShowPowerUpDice(powerUps[unit]);
     }
 
     /// <summary>
@@ -434,10 +649,11 @@ public class FightManager : MonoBehaviour
         Player owner = unit.card.player;
         if (owner.nextFightPowerUps <= 0) yield break;
 
-        AddPowerUps(unit, owner.nextFightPowerUps);
+        int saved = owner.nextFightPowerUps;
         owner.nextFightPowerUps = 0;
         EffectContext ctx = new EffectContext { self = unit };
-        yield return EffectPresenter.Show(ctx, "Momentum power-up!");
+        yield return EffectPresenter.Show(ctx, "Momentum!");
+        AddPowerUps(unit, saved);
         yield return EffectPresenter.Hide(ctx);
     }
 
@@ -492,7 +708,7 @@ public class FightManager : MonoBehaviour
 
         while (!choiceAnswered)
         {
-            if (local && canSkip && Input.GetMouseButtonDown(1)) PickChoice(-1);
+            if (local && canSkip && Input.GetMouseButtonDown(1) && Card.hoveredCard == null) PickChoice(-1);
             yield return null;
         }
 
@@ -802,7 +1018,5 @@ public class FightManager : MonoBehaviour
         unit.RemoveFromBoard();
         card.currentPower = 0;
         card.auraPower = 0;
-        card.gameObject.SetActive(true);
-        GameManager.instance.handManager.UpdateHandVisuals(card.player);
     }
 }

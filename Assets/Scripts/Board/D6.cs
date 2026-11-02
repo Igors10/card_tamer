@@ -50,7 +50,11 @@ public class D6 : MonoBehaviour
         rollingDice.Remove(this);
         rolling = false;
     }
-    public IEnumerator RollAnimation()
+    /// <summary>
+    /// waitForInput: the die waits for a click (bot: stops by itself, online opponent: StopDice command).
+    /// Without it the die keeps rolling until Stop is called (dice after the first one stop one by one)
+    /// </summary>
+    public IEnumerator RollAnimation(bool waitForInput = true)
     {
         Vector3 diceStartingPos = transform.position;
         Vector3 diceTargetPos = new Vector3(diceStartingPos.x, diceStartingPos.y + rollDistance, diceStartingPos.z);
@@ -63,8 +67,13 @@ public class D6 : MonoBehaviour
         // randomly picking dice values while it is rolling
         StartCoroutine(RandomizeDiceValue());
 
+        // stopped from outside (Stop)
+        if (!waitForInput)
+        {
+            while (rolling) yield return null;
+        }
         // automatically stop the die after some time if its AI (only the final roll counts, so timing doesn't matter)
-        if (unit.card.player.isAI)
+        else if (unit.card.player.isAI)
         {
             yield return new WaitForSeconds(rollingTime);
             rolling = false;
@@ -197,6 +206,14 @@ public class D6 : MonoBehaviour
             die.rolling = false;
             rollingDice.Remove(die);
         }
+    }
+
+    /// <summary>
+    /// Stops a die that was rolled without waiting for input
+    /// </summary>
+    public void Stop()
+    {
+        rolling = false;
     }
 
     void RotateDice()

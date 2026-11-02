@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Phantom
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 2
-  abilityDescription: Has a phantom copy with 4 power and 2 power-ups
+  abilityDescription: Has a phantom copy with 4 power and 2 buffs
   isSpecial: 1
   stickerColor: {r: 0.6039216, g: 0.6039216, b: 0.83137256, a: 1}
   hasSide: 0
+  icon: {fileID: 5189691121816951081, guid: c26b97f5853187947a1b951a6e559c45, type: 3}
   effects:
   - rid: 8466844326851248241
   - rid: 8466844326851248242
@@ -35,7 +36,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Phantom power-ups!
+        customText: Phantom!
         showPresentation: 1
         oncePerRound: 0
         condition: 10

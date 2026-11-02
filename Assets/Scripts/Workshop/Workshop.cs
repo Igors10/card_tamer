@@ -284,6 +284,15 @@ public class Workshop : MonoBehaviour
         List<AbilityObj> pickedAbilities = new List<AbilityObj>();
         for (int a = 0; a < abilityOption.Length; a++)
         {
+            // basic cards: first option is always the default sticker (power-up on attack)
+            if (!drawSpecial && a == 0)
+            {
+                Sticker defaultSticker = generator.PickRandomSticker("default");
+                pickedAbilities.Add(defaultSticker.ability);
+                abilityOption[a].abilityNote.InitAbilityNote(defaultSticker);
+                continue;
+            }
+
             // trying to give different options (only repeats if there are not enough stickers)
             Sticker stickerToAssign = generator.PickRandomSticker(listName);
             for (int tries = 0; tries < 20 && pickedAbilities.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker(listName);
