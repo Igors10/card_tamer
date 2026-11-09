@@ -50,13 +50,10 @@ public class FightManager : MonoBehaviour
     [SerializeField] float afterimageFade = 0.22f;
     [SerializeField] float afterimageAlpha = 0.45f;
     [SerializeField] float landHitStop = 0.06f; // everything freezes for a split second when it lands
-    [SerializeField] float landSquash = 0.22f;
-    [SerializeField] float landWobbleAngle = 7f; // the tilt wobbles around its end angle and settles
-    [SerializeField] float landWobbleTime = 0.45f;
     [SerializeField] float shockwaveScale = 1.35f; // a pulse in the owner's color grows out of the card and fades
     [SerializeField] float shockwaveTime = 0.35f;
     [SerializeField] float otherCardKnock = 9f; // the other shown card gets knocked a bit
-    [SerializeField] float pauseBeforeUnit = 0.3f; // the card settles before its unit appears (so the unit doesn't look like it comes out of the card)
+    [SerializeField] float pauseBeforeUnit = 0.3f; // a beat between the card landing and its unit appearing (so the unit doesn't look like it comes out of the card)
 
     [Header("input")]
     [SerializeField] float attackDropHeight = 0.35f; // card has to be dropped above this part of the screen to attack
@@ -397,7 +394,7 @@ public class FightManager : MonoBehaviour
 
     /// <summary>
     /// The card swings up into its spot like a card shown in a board game: pulls back, then rotates past upright to a small tilt
-    /// the other way and grows (stretching, leaving afterimages), overshooting a bit. Lands with a freeze, squash, wobble,
+    /// the other way and grows (stretching, leaving afterimages), overshooting a bit. Lands with a freeze,
     /// a pulse, particles, shake and a thud. Moving up a bit faster than sideways gives the arc
     /// </summary>
     IEnumerator CardEntrance(Card card, Vector3 startPos, Vector3 endPos, float startAngle, float endAngle)
@@ -452,8 +449,7 @@ public class FightManager : MonoBehaviour
         cardTransform.localRotation = Quaternion.Euler(0f, 0f, endAngle);
         cardTransform.localScale = endScale;
 
-        // LANDING: thud sounds, shake, particles, a pulse, the other card gets knocked, a split second freeze
-        AudioManager.instance.PlaySFX("CardPlaySFX", 1f, 0.85f);
+        // LANDING: thud, shake, particles, a pulse, the other card gets knocked, a split second freeze
         AudioManager.instance.PlaySFX("HitSFX", 0.35f, 1.3f);
         GameManager.instance.mainCamera.Shake(entranceShake, 0.2f);
         ParticleManager.instance.SpawnVFX(endPos, "HitVFX", true);
@@ -463,27 +459,6 @@ public class FightManager : MonoBehaviour
         Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(landHitStop);
         Time.timeScale = 1f;
-
-        // squash and a tilt wobble that settles (the fight goes on meanwhile)
-        StartCoroutine(Animations.instance.SquashStretch(cardTransform, endScale, landSquash, landWobbleTime));
-        StartCoroutine(LandWobble(card, endAngle));
-    }
-
-    /// <summary>
-    /// Damped tilt wobble around the end angle after the card lands (stops if the card leaves the display)
-    /// </summary>
-    IEnumerator LandWobble(Card card, float endAngle)
-    {
-        float t = 0;
-        while (t < landWobbleTime && card != null && card.onDisplay)
-        {
-            t += Time.deltaTime;
-            float clampedT = Mathf.Clamp01(t / landWobbleTime);
-            float wobble = landWobbleAngle * Mathf.Sin(clampedT * Mathf.PI * 3f) * (1 - clampedT) * (1 - clampedT);
-            card.transform.localRotation = Quaternion.Euler(0f, 0f, endAngle + wobble);
-            yield return null;
-        }
-        if (card != null && card.onDisplay) card.transform.localRotation = Quaternion.Euler(0f, 0f, endAngle);
     }
 
     /// <summary>

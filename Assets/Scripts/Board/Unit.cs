@@ -47,7 +47,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float powerScaleTime = 0.3f;
     [SerializeField] float powerFlashHold = 0.1f; // how long the buff/debuff color stays before fading back
     [SerializeField] float powerFlashTime = 0.4f;
-    [SerializeField] Vector2 cardCornerOffset = new Vector2(120f, -170f); // counter on the bottom corner of the shown card (right for yours, left for the opponent's)
+    [SerializeField] Vector2 cardCornerOffset = new Vector2(120f, 170f); // counter on the top corner of the shown card (right for yours, left for the opponent's)
     [SerializeField] float cardCounterScale = 70f; // counter size on the card (the card is in pixels, the unit's canvas in world units)
     bool counterOnCard;
 
@@ -446,7 +446,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// It has to stay inside the unit's canvas, so it's held in place every frame instead of moved out
     /// </summary>
     /// <summary>
-    /// The power counter and the gained power numbers move onto the bottom corner of the shown card
+    /// The power counter and the gained power numbers move onto the top corner of the shown card
     /// </summary>
     public void MovePowerCounterToCard(Card shownCard)
     {

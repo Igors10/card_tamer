@@ -1162,7 +1162,7 @@ MonoBehaviour:
   powerScaleTime: 0.3
   powerFlashHold: 0.1
   powerFlashTime: 0.4
-  cardCornerOffset: {x: 120, y: -170}
+  cardCornerOffset: {x: 120, y: 170}
   cardCounterScale: 70
   resultTime: 0.45
   winnerCounterScale: 1.35
