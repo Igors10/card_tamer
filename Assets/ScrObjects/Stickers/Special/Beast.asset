@@ -13,29 +13,17 @@ MonoBehaviour:
   m_Name: Beast
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 5
-  abilityDescription: +2 power, +2 more when attacking. Discards cards it knocks
-    out when attacking
+  abilityDescription: +2 if attacking. No mercy for units this kills
   isSpecial: 1
   stickerColor: {r: 0.83137256, g: 0.41568628, b: 0.41568628, a: 1}
   hasSide: 0
   icon: {fileID: 21300000, guid: b2848342b4574fb479ad4f00ff5c73f0, type: 3}
   effects:
-  - rid: 8466844466926059609
   - rid: 8466844466926059610
   - rid: 8466844466926059611
   references:
     version: 2
     RefIds:
-    - rid: 8466844466926059609
-      type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
-      data:
-        trigger: 6
-        customText: 
-        showPresentation: 1
-        oncePerRound: 0
-        condition: 0
-        amount: 2
-        maxAmount: 0
     - rid: 8466844466926059610
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:

@@ -44,7 +44,16 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float powerScaleTime = 0.3f;
     [SerializeField] float powerFlashHold = 0.1f; // how long the buff/debuff color stays before fading back
     [SerializeField] float powerFlashTime = 0.4f;
-    Vector3 powerRestScale;
+    [SerializeField] Vector2 cardCornerOffset = new Vector2(120f, -170f); // counter on the bottom corner of the shown card (right for yours, left for the opponent's)
+    [SerializeField] float cardCounterScale = 70f; // counter size on the card (the card is in pixels, the unit's canvas in world units)
+    bool counterOnCard;
+
+    [Header("fight result on the power counter (right before the clash)")]
+    [SerializeField] float resultTime = 0.45f;
+    [SerializeField] float winnerCounterScale = 1.35f; // stronger card's counter grows this much
+    [SerializeField] float loserCounterScale = 0.75f; // weaker card's counter shrinks to this
+    [SerializeField] float loserDarken = 0.45f; // and gets this much darker
+    [SerializeField] float loserShake = 10f;    Vector3 powerRestScale;
     Vector3 powerBonusRestScale;
     Color powerBGRestColor;
     float targetPowerScale = -1f;
@@ -186,7 +195,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     {
         if (powerChange == 0) return;
         string vfxName = (powerChange > 0) ? "BuffVFX" : "DebuffVFX";
-        ParticleManager.instance.SpawnVFX(powerValue.transform.position, vfxName);
+        ParticleManager.instance.SpawnVFX(powerValue.transform.position, vfxName, counterOnCard);
 
         // showing the gained or lost power as a number next to the counter
         powerBonus.StartShowingBonus(powerChange);
@@ -433,6 +442,85 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// The power counter stops following the unit and stays where it is now (units fly around during the clash).
     /// It has to stay inside the unit's canvas, so it's held in place every frame instead of moved out
     /// </summary>
+    /// <summary>
+    /// The power counter and the gained power numbers move onto the bottom corner of the shown card
+    /// </summary>
+    public void MovePowerCounterToCard(Card shownCard)
+    {
+        bool mirrored = card.player != GameManager.instance.player;
+        Vector3 cornerPos = new Vector3(mirrored ? -cardCornerOffset.x : cardCornerOffset.x, cardCornerOffset.y, 0f);
+        float scaleFactor = cardCounterScale / powerRestScale.x;
+
+        foreach (Transform part in new Transform[] { powerUI.transform, powerBonus.transform })
+        {
+            part.SetParent(shownCard.Visual, false);
+            part.localPosition = cornerPos;
+            part.localRotation = Quaternion.identity;
+            part.SetAsLastSibling();
+
+            // on the card they're drawn in the card's order (above the card), not above everything
+            Canvas sortingCanvas = part.GetComponent<Canvas>();
+            if (sortingCanvas != null) sortingCanvas.overrideSorting = false;
+        }
+
+        powerRestScale *= scaleFactor;
+        powerBonusRestScale *= scaleFactor;
+        powerUI.transform.localScale = powerRestScale * ((targetPowerScale > 0) ? targetPowerScale : 1f);
+        powerBonus.transform.localScale = powerBonusRestScale;
+        counterOnCard = true;
+    }
+
+    /// <summary>
+    /// Right before the clash the counters show who is stronger: the winner's pops bigger with a green outline and particles,
+    /// the loser's shrinks, darkens and shakes
+    /// </summary>
+    public IEnumerator ShowFightResult(bool winning)
+    {
+        // nothing else changes the counter from here
+        if (powerScaleRoutine != null) StopCoroutine(powerScaleRoutine);
+        if (powerFlashRoutine != null) StopCoroutine(powerFlashRoutine);
+        powerScaleRoutine = null;
+        powerFlashRoutine = null;
+
+        Transform counter = powerUI.transform;
+        Vector3 startScale = counter.localScale;
+        Vector3 targetScale = startScale * (winning ? winnerCounterScale : loserCounterScale);
+        Color startColor = powerBG.color;
+        Color targetColor = winning ? powerBGRestColor : Color.Lerp(powerBGRestColor, Color.black, loserDarken);
+
+        if (winning)
+        {
+            powerOutline.enabled = true;
+            powerOutline.material = buffedOutlineMaterial;
+            ParticleManager.instance.SpawnVFX(powerValue.transform.position, "BuffVFX", counterOnCard);
+        }
+        else Animations.instance.ShakeAnim(counter.gameObject, loserShake, resultTime);
+
+        float t = 0;
+        while (t < resultTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / resultTime);
+
+            // winner overshoots and settles, loser just sinks
+            float c = 2.5f;
+            float scaleT = winning ? 1 + (c + 1) * Mathf.Pow(clampedT - 1, 3) + c * Mathf.Pow(clampedT - 1, 2) : 1 - (1 - clampedT) * (1 - clampedT);
+            counter.localScale = Vector3.LerpUnclamped(startScale, targetScale, scaleT);
+            powerBG.color = Color.Lerp(startColor, targetColor, clampedT);
+            yield return null;
+        }
+        counter.localScale = targetScale;
+        powerBG.color = targetColor;
+    }
+
+    void OnDestroy()
+    {
+        // the counter on the card goes with the unit
+        if (!counterOnCard) return;
+        if (powerUI != null) Destroy(powerUI);
+        if (powerBonus != null) Destroy(powerBonus.gameObject);
+    }
+
     public void PinPowerCounter()
     {
         powerPinned = true;
@@ -448,7 +536,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     void LateUpdate()
     {
-        if (!powerPinned) return;
+        // a counter on the card doesn't move with the unit anyway
+        if (!powerPinned || counterOnCard) return;
 
         // same place and same size, whatever the unit does (it grows and squashes during the clash)
         powerUI.transform.position = pinnedPowerPos;
@@ -559,6 +648,43 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         for (int i = 0; i < count; i++) dice[i].Glow(true);
         rollingPower = false;
+    }
+
+    /// <summary>
+    /// Base power dice: special cards roll 2, the others 1
+    /// </summary>
+    public int BaseDiceCount => card.cardData.IsSpecial ? 2 : 1;
+
+    /// <summary>
+    /// Base power: the dice roll at the same time until the click (one click stops them all)
+    /// and land on the results (rolled beforehand with GameRandom)
+    /// </summary>
+    public IEnumerator RollBasePower(int[] results)
+    {
+        ShowPowerUpDice(results.Length);
+
+        // opponent's dice are on the left of the unit
+        if (card.player != GameManager.instance.player)
+        {
+            for (int i = 0; i < results.Length; i++)
+            {
+                Vector3 position = dice[i].transform.localPosition;
+                dice[i].transform.localPosition = new Vector3(-position.x, position.y, position.z);
+            }
+        }
+
+        rollingPower = true;
+        List<Coroutine> rolls = new List<Coroutine>();
+        for (int i = 0; i < results.Length; i++) rolls.Add(StartCoroutine(dice[i].RollAnimation(true, results[i])));
+        foreach (Coroutine roll in rolls) yield return roll;
+        rollingPower = false;
+
+        // the dice stay for a bit and fade away (the fight goes on meanwhile)
+        for (int i = 0; i < results.Length; i++)
+        {
+            dice[i].Glow(true);
+            dice[i].StartCoroutine(dice[i].FadeAway());
+        }
     }
 
     public void DisableRollingUI()

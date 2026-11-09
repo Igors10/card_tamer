@@ -218,14 +218,14 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameState.PLACING:
-                // disabling resource UI after shop
-                StartCoroutine(player.playerUI.ShowTokens(false));
-                StartCoroutine(opponent.playerUI.ShowTokens(false));
+                // disabling resource UI after shop (instantly, it happens under the loading fog)
+                StartCoroutine(player.playerUI.ShowTokens(false, true));
+                StartCoroutine(opponent.playerUI.ShowTokens(false, true));
 
                 // playing placing soundtrack
                 AudioManager.instance.PlaySoundtrack("AltMainTrack");
 
-                managerUI.EnableWorkshop(false);
+                managerUI.EnableWorkshop(false, instant: true);
 
                 // starting new round (cards go to the field face down)
                 RoundStart();
@@ -256,7 +256,7 @@ public class GameManager : MonoBehaviour
                 // resetting shop values
                 shopManager.ResetShopValues();
                 managerUI.EnableUI(true);
-                managerUI.EnableWorkshop(true);
+                managerUI.EnableWorkshop(true, instant: true);
                 readyButton.gameObject.SetActive(true);
 
                 // opponent buys cards
@@ -462,13 +462,32 @@ public class GameManager : MonoBehaviour
         opponent.FinishStatePlayer();
         player.FinishStatePlayer();
 
-        // disabling current state UI 
-        managerUI.EnableUI(false);
-
         // Deciding which next state should be
         //GameState nextGameState = ((int)currentState + 1 < gameStates.Count) ? (GameState)(currentState + 1) : GameState.PLACING;
         GameState nextGameState = (GameState)(((int)currentState + 1) % Enum.GetNames(typeof(GameState)).Length);
+
+        // workshop to board and battle to workshop happen under the loading fog
+        if (currentState == GameState.BUYING || currentState == GameState.BATTLING)
+        {
+            StartCoroutine(FogTransition(nextGameState));
+            return;
+        }
+
+        // disabling current state UI
+        managerUI.EnableUI(false);
         TransitionGameState(nextGameState);
+    }
+
+    /// <summary>
+    /// The loading fog covers the screen, the UI changes instantly under it, then the fog lifts.
+    /// Online the other player's commands for the new state wait meanwhile (stateNr)
+    /// </summary>
+    IEnumerator FogTransition(GameState nextState)
+    {
+        yield return StartCoroutine(loadingFog.ApplyLoadingFog(true));
+        managerUI.EnableUI(false);
+        TransitionGameState(nextState);
+        yield return StartCoroutine(loadingFog.ApplyLoadingFog(false));
     }
 
     // EVENTS

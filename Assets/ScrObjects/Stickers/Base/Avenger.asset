@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Avenger
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 4
-  abilityDescription: +2 power if your previous fight was lost
+  abilityDescription: +2 after a lost fight
   isSpecial: 0
   stickerColor: {r: 0.96862745, g: 0.77254903, b: 0.62352943, a: 1}
   hasSide: 0

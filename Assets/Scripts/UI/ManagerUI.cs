@@ -21,6 +21,7 @@ public class ManagerUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI stateTransitionText;
     public GameObject stateTransitionObj;
     [SerializeField] UnitSprite[] gameOverDoodles;
+    public EffectNotifier effectNotifier; // pops up when a sticker of a card that isn't fighting triggers
 
     [Header("card preview")]
     [SerializeField] Card previewCard;
@@ -91,9 +92,19 @@ public class ManagerUI : MonoBehaviour
     /// <summary>
     /// Fades a dark screen image in or out (each dim sits under the UI it highlights, they all look the same)
     /// </summary>
-    public void DimActivate(Image dim, bool activate)
+    public void DimActivate(Image dim, bool activate, bool instant = false)
     {
         if (dimFades.TryGetValue(dim, out Coroutine running) && running != null) StopCoroutine(running);
+        dimFades.Remove(dim);
+
+        if (instant)
+        {
+            Color color = dim.color;
+            color.a = activate ? dimAlpha : 0f;
+            dim.color = color;
+            dim.enabled = activate;
+            return;
+        }
         dimFades[dim] = StartCoroutine(DimFade(dim, activate ? dimAlpha : 0f));
     }
 
@@ -213,10 +224,14 @@ public class ManagerUI : MonoBehaviour
         rematchButton.SetActive(enable);
     }
 
-    public void EnableWorkshop(bool isEnable, bool moveWorkshopBG = true)
+    /// <summary>
+    /// instant: no slide animations (transitions between the workshop and the board happen under the loading fog)
+    /// </summary>
+    public void EnableWorkshop(bool isEnable, bool moveWorkshopBG = true, bool instant = false)
     {
         if (isEnable) workshopObj.SetActive(true);
-        StartCoroutine(workshop.WorkshopAnim(isEnable, moveWorkshopBG));
+        if (instant) workshop.SetShownInstantly(isEnable);
+        else StartCoroutine(workshop.WorkshopAnim(isEnable, moveWorkshopBG));
         hintMessage.gameObject.SetActive(!isEnable);
         turnHint.gameObject.SetActive(!isEnable);
         GameManager.instance.opponent.playerUI.UIobj.SetActive(!isEnable);

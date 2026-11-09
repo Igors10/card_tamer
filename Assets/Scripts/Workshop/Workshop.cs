@@ -97,10 +97,23 @@ public class Workshop : MonoBehaviour
     /// </summary>
     public IEnumerator WorkshopAnim(bool isAppearing, bool moveBackground = true)
     {
-        Vector3 bgHiddenPos = new Vector3(0, -Camera.main.pixelHeight - 200f, 0);
+        if (isAppearing) yield return Appear(moveBackground, BgHiddenPos);
+        else yield return Disappear(moveBackground, BgHiddenPos);
+    }
 
-        if (isAppearing) yield return Appear(moveBackground, bgHiddenPos);
-        else yield return Disappear(moveBackground, bgHiddenPos);
+    Vector3 BgHiddenPos => new Vector3(0, -Camera.main.pixelHeight - 200f, 0);
+
+    /// <summary>
+    /// Workshop is there or gone right away, everything ends up where Appear / Disappear leave it (used under the loading fog)
+    /// </summary>
+    public void SetShownInstantly(bool shown)
+    {
+        for (int i = 0; i < bgItems.Length; i++) bgItems[i].transform.localPosition = shown ? bgItemWorkshopPositions[i] : bgItemStartingPositions[i];
+        background.transform.localPosition = shown ? Vector3.zero : BgHiddenPos;
+        workshopHintObj.SetActive(shown);
+        workshopHintObj.transform.localPosition = hintRestPos;
+        title.transform.localScale = titleRestScale;
+        gameObject.SetActive(shown);
     }
 
     IEnumerator Appear(bool moveBackground, Vector3 bgHiddenPos)

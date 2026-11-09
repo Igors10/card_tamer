@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Scout
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 4
-  abilityDescription: Reveals a random opponent card after every turn. +2 power if
-    the opponent has no face down cards
+  abilityDescription: Reveals a card after your turn. +2 if the opponent has no secrets
   isSpecial: 0
   stickerColor: {r: 0.65882355, g: 0.9019608, b: 0.8784314, a: 1}
   hasSide: 0

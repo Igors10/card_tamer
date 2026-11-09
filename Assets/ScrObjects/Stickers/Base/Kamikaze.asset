@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Kamikaze
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 5
-  abilityDescription: +4 power. Knocks itself out after the fight
+  abilityDescription: +5. Knocks out after a fight
   isSpecial: 0
   stickerColor: {r: 0.8509804, g: 0.8509804, b: 0.8509804, a: 1}
   hasSide: 0
@@ -32,12 +32,12 @@ MonoBehaviour:
         showPresentation: 1
         oncePerRound: 0
         condition: 0
-        amount: 4
+        amount: 5
         maxAmount: 0
     - rid: 8466844466926059613
       type: {class: KnockSelfOutEffect, ns: , asm: Assembly-CSharp}
       data:
-        trigger: 3
+        trigger: 8
         customText: 
         showPresentation: 1
         oncePerRound: 0

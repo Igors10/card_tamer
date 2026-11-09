@@ -30,6 +30,11 @@ public class AbilityObj : ScriptableObject
         }
     }
 
+    /// <summary>
+    /// "+X power" in the description: a much lighter version of the sticker color
+    /// </summary>
+    public Color BuffTextColor => Color.Lerp(stickerColor, Color.white, 0.45f);
+
     [SerializeReference, EffectPicker] public List<AbilityEffect> effects = new List<AbilityEffect>();
 
     /// <summary>
@@ -47,9 +52,10 @@ public class AbilityObj : ScriptableObject
     {
         string abilityText = abilityDescription;
 
-        // coloring the power modifier numbers, buffs green and debuffs red
-        abilityText = Regex.Replace(abilityText, @"\+\d+", "<color=#2DB043>$0</color>");
-        abilityText = Regex.Replace(abilityText, @"\-\d+", "<color=red>$0</color>");
+        // coloring the power modifiers, buffs in a much lighter sticker color and debuffs red (the whole "+2 power", "+2 to +5 power", "+2 more power")
+        string buffHex = ColorUtility.ToHtmlStringRGB(BuffTextColor);
+        abilityText = Regex.Replace(abilityText, @"\+\d+(?: to \+\d+)?(?: more)?(?: power)?", $"<color=#{buffHex}>$0</color>");
+        abilityText = Regex.Replace(abilityText, @"\-\d+(?: power)?", "<color=red>$0</color>");
         abilityText = Regex.Replace(abilityText, @"\b[Bb]uffs?\b", "<color=#2DB043>$0</color>");
 
         // coloring the 'color' of abilities that work with specific color

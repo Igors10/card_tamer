@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Flanker
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: +3 power when attacking a leftmost or rightmost card
+  abilityDescription: +4 attacking side cards
   isSpecial: 0
   stickerColor: {r: 0.7411765, g: 0.7411765, b: 0.7411765, a: 1}
   hasSide: 0
@@ -30,6 +30,6 @@ MonoBehaviour:
         customText: 
         showPresentation: 1
         oncePerRound: 0
-        condition: 12
-        amount: 3
+        condition: 7
+        amount: 4
         maxAmount: 0

@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Battle phase: players take turns attacking one opponent card with one of their own.
-/// Attack: card dragged up -> unit spawns -> arrow -> target picked -> both revealed -> power-ups rolled -> stronger one wins
+/// Attack: card dragged up -> unit spawns -> arrow -> target picked -> both revealed -> base power rolled -> stickers add power -> stronger one wins
 /// </summary>
 public class FightManager : MonoBehaviour
 {
@@ -20,8 +20,25 @@ public class FightManager : MonoBehaviour
     [SerializeField] RectTransform opponentCardSpot; // opponent's on the right
     [SerializeField] float displayScale = 1.1f;
     [SerializeField] float cardMoveTime = 0.35f;
+    [SerializeField] float cardReturnTime = 0.3f; // after the fight (and the exit swing) the card glides back to its place in the row
+
+    [Header("card exit (the entrance backwards, softer)")]
+    [SerializeField] float exitTime = 0.22f;
+    [SerializeField] float exitDistance = 0.7f; // how much of the entrance arc it goes back along (1 = all the way to the start point)
+    [SerializeField] float exitTilt = 0.5f; // tilts back this part of the entrance start tilt
+    [SerializeField] float exitScale = 0.6f; // shrinks to this, relative to the display scale
     [SerializeField] float chosenCardShowTime = 0.8f; // opponent's chosen card lights up in its row this long
     [SerializeField] float targetShowTime = 1.2f; // arrow to the opponent's target stays this long
+
+    [Header("card entrance (shown like a card in a board game, mirrored for the opponent)")]
+    [SerializeField] bool moveToEntranceStart = true; // off: the card jumps to the start point instead of floating there
+    [SerializeField] Vector2 entranceStartOffset = new Vector2(-260f, -280f); // start point from the display spot (x mirrored for the opponent)
+    [SerializeField] float entranceStartScale = 0.3f; // card scale at the start, relative to the display scale
+    [SerializeField] float entranceStartAngle = 60f; // card tilt at the start, it rotates up from here
+    [SerializeField] float entranceEndAngle = -12f; // stays a bit tilted the other way while on display
+    [SerializeField] float entranceOvershoot = 2.2f; // how far the rotation and scale swing past the end before settling
+    [SerializeField] float entranceTime = 0.28f;
+    [SerializeField] float entranceShake = 0.03f; // small screen shake when the card lands
 
     [Header("input")]
     [SerializeField] float attackDropHeight = 0.35f; // card has to be dropped above this part of the screen to attack
@@ -320,6 +337,7 @@ public class FightManager : MonoBehaviour
 
         Transform spot = (card.player == GameManager.instance.player) ? playerSpot : opponentSpot;
         Unit unit = GameManager.instance.fieldManager.SpawnFightUnit(card, spot.position);
+        unit.MovePowerCounterToCard(card);
         card.GetStartingPower();
         setUnit(unit);
 
@@ -341,7 +359,59 @@ public class FightManager : MonoBehaviour
         card.transform.SetParent(spot.parent, true);
         card.transform.SetAsLastSibling();
 
-        yield return MoveCard(card.transform, spot.position, Vector3.one * displayScale);
+        // floats (or jumps) to the start point small and tilted, then swings up into the display spot
+        bool mirrored = card.player != GameManager.instance.player;
+        Vector2 offset = mirrored ? new Vector2(-entranceStartOffset.x, entranceStartOffset.y) : entranceStartOffset;
+        Vector3 startPos = spot.position + spot.parent.TransformVector(offset);
+        Vector3 startScale = Vector3.one * displayScale * entranceStartScale;
+        float startAngle = mirrored ? -entranceStartAngle : entranceStartAngle;
+        float endAngle = mirrored ? -entranceEndAngle : entranceEndAngle;
+        if (moveToEntranceStart) yield return MoveCard(card.transform, startPos, startScale, startAngle);
+        else
+        {
+            card.transform.position = startPos;
+            card.transform.localScale = startScale;
+            card.transform.localRotation = Quaternion.Euler(0f, 0f, startAngle);
+        }
+        yield return CardEntrance(card.transform, startPos, spot.position, startAngle, endAngle);
+    }
+
+    /// <summary>
+    /// The card swings up into its spot like a card shown in a board game: rotates past upright to a small tilt the other way
+    /// and grows, overshooting a bit, then lands with a thud. Moving up a bit faster than sideways gives the arc
+    /// </summary>
+    IEnumerator CardEntrance(Transform card, Vector3 startPos, Vector3 endPos, float startAngle, float endAngle)
+    {
+        Vector3 startScale = card.localScale;
+        Vector3 endScale = Vector3.one * displayScale;
+
+        float t = 0;
+        while (t < entranceTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / entranceTime);
+            float upT = 1 - Mathf.Pow(1 - clampedT, 3);
+            float sideT = 1 - Mathf.Pow(1 - clampedT, 2);
+            float swingT = EaseOutBack(clampedT);
+
+            card.position = new Vector3(Mathf.LerpUnclamped(startPos.x, endPos.x, sideT), Mathf.LerpUnclamped(startPos.y, endPos.y, upT), endPos.z);
+            card.localRotation = Quaternion.Euler(0f, 0f, Mathf.LerpUnclamped(startAngle, endAngle, swingT));
+            card.localScale = Vector3.LerpUnclamped(startScale, endScale, swingT);
+            yield return null;
+        }
+        card.position = endPos;
+        card.localRotation = Quaternion.Euler(0f, 0f, endAngle);
+        card.localScale = endScale;
+
+        // landing thud
+        GameManager.instance.mainCamera.Shake(entranceShake, 0.15f);
+        AudioManager.instance.PlaySFX("CardPlaySFX");
+    }
+
+    float EaseOutBack(float t)
+    {
+        float c = entranceOvershoot;
+        return 1 + (c + 1) * Mathf.Pow(t - 1, 3) + c * Mathf.Pow(t - 1, 2);
     }
 
     /// <summary>
@@ -350,36 +420,68 @@ public class FightManager : MonoBehaviour
     IEnumerator ReturnCard(Card card)
     {
         if (card == null || !homeParents.TryGetValue(card, out Transform home)) yield break;
-
         homeParents.Remove(card);
-        card.onDisplay = false;
-        card.transform.SetParent(home, true);
 
         // destroyed cards (Bomb, Beast) are gone, knocked out ones are hidden in the discard (back to normal size for next round)
         if (!card.player.cardsOnField.Contains(card))
         {
+            card.onDisplay = false;
+            card.transform.SetParent(home, true);
             card.transform.localScale = card.defaultScale;
             card.transform.localRotation = Quaternion.identity;
             yield break;
         }
 
+        // swings back down the way it came in (softer), then glides to its place in the row
+        // (both run on the card, so they stop if the card is destroyed meanwhile)
+        yield return card.StartCoroutine(CardExit(card));
+        card.onDisplay = false;
+        card.transform.SetParent(home, true);
         GameManager.instance.handManager.UpdateHandVisuals(card.player);
-        Vector3 startScale = card.transform.localScale;
-        float t = 0;
-        while (t < cardMoveTime && card != null)
-        {
-            t += Time.deltaTime;
-            card.transform.localScale = Vector3.Lerp(startScale, card.defaultScale, Mathf.Clamp01(t / cardMoveTime));
-            yield return null;
-        }
-        if (card != null) card.transform.localScale = card.defaultScale;
+        yield return card.StartCoroutine(card.EaseIntoHandLayout(cardReturnTime));
     }
 
-    IEnumerator MoveCard(Transform card, Vector3 targetPos, Vector3 targetScale)
+    /// <summary>
+    /// The entrance backwards with a softer swing: the card goes back along the same arc towards the entrance start point,
+    /// tilting and shrinking a bit, no overshoot
+    /// </summary>
+    IEnumerator CardExit(Card card)
+    {
+        Transform cardTransform = card.transform;
+        bool mirrored = card.player != GameManager.instance.player;
+        RectTransform spot = mirrored ? opponentCardSpot : playerCardSpot;
+        Vector2 offset = mirrored ? new Vector2(-entranceStartOffset.x, entranceStartOffset.y) : entranceStartOffset;
+        Vector3 entranceStart = spot.position + spot.parent.TransformVector(offset);
+
+        Vector3 displayPos = cardTransform.position;
+        Vector3 startScale = cardTransform.localScale;
+        Vector3 endScale = Vector3.one * displayScale * exitScale;
+        float startAngle = Mathf.DeltaAngle(0f, cardTransform.localEulerAngles.z);
+        float endAngle = (mirrored ? -entranceStartAngle : entranceStartAngle) * exitTilt;
+
+        float t = 0;
+        while (t < exitTime)
+        {
+            t += Time.deltaTime;
+            float smoothT = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / exitTime));
+
+            // same arc as the entrance, travelled backwards (only partly, then the glide to the row takes over)
+            float pathT = 1 - smoothT * exitDistance;
+            float sideT = 1 - Mathf.Pow(1 - pathT, 2);
+            float upT = 1 - Mathf.Pow(1 - pathT, 3);
+            cardTransform.position = new Vector3(Mathf.Lerp(entranceStart.x, displayPos.x, sideT), Mathf.Lerp(entranceStart.y, displayPos.y, upT), displayPos.z);
+            cardTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(startAngle, endAngle, smoothT));
+            cardTransform.localScale = Vector3.Lerp(startScale, endScale, smoothT);
+            yield return null;
+        }
+    }
+
+    IEnumerator MoveCard(Transform card, Vector3 targetPos, Vector3 targetScale, float targetAngle = 0f)
     {
         Vector3 startPos = card.position;
         Vector3 startScale = card.localScale;
         Quaternion startRotation = card.localRotation;
+        Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle);
 
         float t = 0;
         while (t < cardMoveTime)
@@ -388,12 +490,12 @@ public class FightManager : MonoBehaviour
             float coolT = 1 - Mathf.Pow(1 - Mathf.Clamp01(t / cardMoveTime), 3);
             card.position = Vector3.Lerp(startPos, targetPos, coolT);
             card.localScale = Vector3.Lerp(startScale, targetScale, coolT);
-            card.localRotation = Quaternion.Slerp(startRotation, Quaternion.identity, coolT);
+            card.localRotation = Quaternion.Slerp(startRotation, targetRotation, coolT);
             yield return null;
         }
         card.position = targetPos;
         card.localScale = targetScale;
-        card.localRotation = Quaternion.identity;
+        card.localRotation = targetRotation;
     }
 
     readonly Dictionary<Card, Transform> homeParents = new Dictionary<Card, Transform>(); // row each displayed card came from
@@ -413,7 +515,7 @@ public class FightManager : MonoBehaviour
         Card guard = FindGuard(target);
         if (guard != null)
         {
-            yield return ShowMessage(guard.cardName + " guards " + target.cardName + "!");
+            yield return StickerMessage<GuardNeighbourEffect>(guard, guard.cardName + " guards " + target.cardName + "!");
             target = guard;
         }
 
@@ -423,7 +525,7 @@ public class FightManager : MonoBehaviour
         if (joker != null)
         {
             yield return Reveal(joker);
-            yield return ShowMessage(joker.cardName + " swaps the attacker!");
+            yield return StickerMessage<SwapAttackerEffect>(joker, joker.cardName + " swaps the attacker!");
             attacker.RemoveFromBoard();
             attackingCard.currentPower = 0;
             StartCoroutine(ReturnCard(attackingCard));
@@ -441,6 +543,9 @@ public class FightManager : MonoBehaviour
         yield return Reveal(target);
         yield return BringOut(target, false, unit => defender = unit);
         yield return Animations.instance.SkippablePause(afterSpawnPause);
+
+        // both cards roll a d6 for their base power at the same time, stickers only give power after both dice landed
+        yield return RollBasePower();
 
         // stickers give power (attacker's first, then the defender's)
         if (guessPower > 0) yield return AddPower(attacker, guessPower);
@@ -462,7 +567,10 @@ public class FightManager : MonoBehaviour
         Card defenderCard = defender.card;
         Card loserCard = loser.card;
 
-        // both units lift up and fly at each other
+        // the power counters show who is stronger (the attacker on a tie), then both units lift up and fly at each other
+        AudioManager.instance.PlaySFX("BuffSFX");
+        StartCoroutine(loser.ShowFightResult(false));
+        yield return winner.ShowFightResult(true);
         yield return ClashUnits(attacker, defender);
 
         StartCoroutine(RecoilUnit(winner));
@@ -507,6 +615,33 @@ public class FightManager : MonoBehaviour
             yield return ScoutReveals(attackingCard.player);
             attackingCard.player.EndTurn();
         }
+    }
+
+    /// <summary>
+    /// Both fighting units roll their base power die, each player clicks to stop their own (bot stops by itself)
+    /// </summary>
+    IEnumerator RollBasePower()
+    {
+        // results are rolled up front (attacker's dice, then the defender's), so online both games get the same numbers whichever die stops first
+        int[] attackerRolls = RollBaseDice(attacker);
+        int[] defenderRolls = RollBaseDice(defender);
+
+        GameManager.instance.managerUI.NewHint("Click to roll your power!");
+        Coroutine attackerDie = StartCoroutine(attacker.RollBasePower(attackerRolls));
+        Coroutine defenderDie = StartCoroutine(defender.RollBasePower(defenderRolls));
+        yield return attackerDie;
+        yield return defenderDie;
+        GameManager.instance.managerUI.NewHint("");
+    }
+
+    /// <summary>
+    /// d6 results for the unit's base power dice (special cards roll 2)
+    /// </summary>
+    int[] RollBaseDice(Unit unit)
+    {
+        int[] results = new int[unit.BaseDiceCount];
+        for (int i = 0; i < results.Length; i++) results[i] = GameRandom.Range(1, 7);
+        return results;
     }
 
     /// <summary>
@@ -592,27 +727,27 @@ public class FightManager : MonoBehaviour
     }
 
     /// <summary>
-    /// End of a turn: every Scout on the field reveals a random face down card of its opponent
-    /// (the player whose turn it was goes first, so online both games reveal the same cards)
+    /// End of a turn: every Scout of the player whose turn it was reveals a random face down card of the opponent
+    /// (field order, so online both games reveal the same cards)
     /// </summary>
     IEnumerator ScoutReveals(Player turnPlayer)
     {
-        foreach (Player owner in new Player[] { turnPlayer, GameManager.instance.GetOpponentOfPlayer(turnPlayer) })
+        Player opponent = GameManager.instance.GetOpponentOfPlayer(turnPlayer);
+        foreach (Card scout in new List<Card>(turnPlayer.cardsOnField))
         {
-            Player opponent = GameManager.instance.GetOpponentOfPlayer(owner);
-            foreach (Card scout in new List<Card>(owner.cardsOnField))
+            foreach ((Ability strip, RevealRandomOnTurnEndEffect effect) in scout.GetEffects<RevealRandomOnTurnEndEffect>())
             {
-                foreach ((Ability strip, RevealRandomOnTurnEndEffect effect) in scout.GetEffects<RevealRandomOnTurnEndEffect>())
-                {
-                    List<Card> hidden = opponent.cardsOnField.FindAll(card => card.faceDown);
-                    if (hidden.Count == 0) continue;
+                List<Card> hidden = opponent.cardsOnField.FindAll(card => card.faceDown);
+                if (hidden.Count == 0) continue;
 
-                    Card revealed = hidden[GameRandom.Range(0, hidden.Count)];
-                    Animations.instance.PopAnim(scout.gameObject, 0.3f, 0.25f);
-                    Animations.instance.PopAnim(revealed.gameObject, 0.3f, 0.3f);
-                    yield return Reveal(revealed);
-                    yield return ShowMessage(scout.cardName + " scouts " + revealed.cardName + "!");
-                }
+                Card revealed = hidden[GameRandom.Range(0, hidden.Count)];
+                EffectNotifier notifier = GameManager.instance.managerUI.effectNotifier;
+                yield return notifier.Show(strip, "Revealing a card");
+                Animations.instance.PopAnim(scout.gameObject, 0.3f, 0.25f);
+                Animations.instance.PopAnim(revealed.gameObject, 0.3f, 0.3f);
+                yield return Reveal(revealed);
+                yield return ShowMessage(scout.cardName + " scouts " + revealed.cardName + "!");
+                notifier.Hide();
             }
         }
     }
@@ -636,6 +771,8 @@ public class FightManager : MonoBehaviour
         if (card.twin != null && card.twin.faceDown) yield return Reveal(card.twin);
 
         if (!card.HasEffect<ShuffleOpponentOnRevealEffect>()) yield break;
+        EffectNotifier notifier = GameManager.instance.managerUI.effectNotifier;
+        yield return notifier.Show(card.GetEffects<ShuffleOpponentOnRevealEffect>()[0].strip);
 
         // shuffled with GameRandom, so online both games get the same order
         List<Card> field = GameManager.instance.GetOpponentOfPlayer(card.player).cardsOnField;
@@ -647,6 +784,7 @@ public class FightManager : MonoBehaviour
         GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.GetOpponentOfPlayer(card.player));
         AudioManager.instance.PlaySFX("RerollSFX");
         yield return ShowMessage(card.cardName + " mixes up the cards!");
+        notifier.Hide();
     }
 
     /// <summary>
@@ -820,7 +958,7 @@ public class FightManager : MonoBehaviour
         foreach ((Card dragon, Card target) in dragonHits)
         {
             yield return Reveal(dragon);
-            yield return ShowMessage(dragon.cardName + " breathes fire on " + target.cardName + "!");
+            yield return StickerMessage<KnockOutSamePositionEffect>(dragon, dragon.cardName + " breathes fire on " + target.cardName + "!");
             if (target.player.cardsOnField.Contains(target)) yield return KnockOutCard(target);
         }
 
@@ -835,6 +973,9 @@ public class FightManager : MonoBehaviour
     IEnumerator CreatePhantom(Card card)
     {
         Player owner = card.player;
+        EffectNotifier notifier = GameManager.instance.managerUI.effectNotifier;
+        yield return notifier.Show(card.GetEffects<PhantomCopyEffect>()[0].strip);
+
         Card copy = GameManager.instance.cardGenerator.CreateLooseCard(card.cardData, owner, card.transform.parent);
         copy.isPhantom = true;
         copy.twin = card;
@@ -846,6 +987,7 @@ public class FightManager : MonoBehaviour
         Animations.instance.PopAnim(copy.gameObject, 0.4f, 0.3f);
         AudioManager.instance.PlaySFX("CardPlaySFX");
         yield return ShowMessage(owner.playerName + "'s Phantom appears!");
+        notifier.Hide();
     }
 
     /// <summary>
@@ -928,12 +1070,12 @@ public class FightManager : MonoBehaviour
         Sticker lucky = loser.GetStickerWith<ProtectFromDiscardEffect>();
         if (lucky != null)
         {
+            yield return StickerMessage<ProtectFromDiscardEffect>(loser, loser.cardName + " is lucky and loses its Lucky sticker instead!");
             loser.RemoveSticker(lucky);
-            yield return ShowMessage(loser.cardName + " is lucky and loses its Lucky sticker instead!");
             yield break;
         }
 
-        yield return ShowMessage(winner.cardName + " destroys " + loser.cardName + "!");
+        yield return StickerMessage<DestroyOnWinEffect>(winner, winner.cardName + " destroys " + loser.cardName + "!");
         winner.destroyedCardThisRound = true;
         loser.player.compensationStars++;
         if (loser.twin != null) RemovePhantom(loser.twin);
@@ -955,6 +1097,9 @@ public class FightManager : MonoBehaviour
         foreach (Card card in target.player.cardsInDiscard) if (guesser.seenCards.Contains(card.cardData) && !known.Contains(card.cardData)) known.Add(card.cardData);
         if (known.Count == 0) yield break;
 
+        EffectNotifier notifier = GameManager.instance.managerUI.effectNotifier;
+        yield return notifier.Show(seers[0].strip);
+
         // the options are shown as cards (only to the guessing player, online the other game waits for the pick)
         guessPanel.SetActive(guesser == GameManager.instance.player);
         List<Card> options = new List<Card>();
@@ -970,6 +1115,7 @@ public class FightManager : MonoBehaviour
             yield return ShowMessage("Right guess! Power-up!");
         }
         else yield return ShowMessage("Wrong guess!");
+        notifier.Hide();
     }
 
     /// <summary>
@@ -983,6 +1129,18 @@ public class FightManager : MonoBehaviour
         Player owner = card.player;
         card.DestroyCard();
         GameManager.instance.handManager.UpdateHandVisuals(owner);
+    }
+
+    /// <summary>
+    /// A sticker of a card that isn't fighting does something: the notifier shows the card and the sticker first, then the message
+    /// </summary>
+    IEnumerator StickerMessage<T>(Card card, string message) where T : AbilityEffect
+    {
+        EffectNotifier notifier = GameManager.instance.managerUI.effectNotifier;
+        List<(Ability strip, T effect)> effects = card.GetEffects<T>();
+        if (effects.Count > 0) yield return notifier.Show(effects[0].strip);
+        yield return ShowMessage(message);
+        notifier.Hide();
     }
 
     /// <summary>

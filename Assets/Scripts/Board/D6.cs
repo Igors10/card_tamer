@@ -34,6 +34,9 @@ public class D6 : MonoBehaviour
     [SerializeField] float sixLandMultiplier = 1.6f; // rolling a 6 lands harder
     [SerializeField] float oneShakeIntensity = 8f;
     [SerializeField] float oneShakeTime = 0.35f;
+    [Header("fading away after the roll")]
+    [SerializeField] float fadeStayTime = 1f; // stays this long after landing
+    [SerializeField] float fadeTime = 1.5f;
     Vector3 restScale;
     Vector2 spriteRestPos;
     float rollTime;
@@ -52,9 +55,10 @@ public class D6 : MonoBehaviour
     }
     /// <summary>
     /// waitForInput: the die waits for a click (bot: stops by itself, online opponent: StopDice command).
-    /// Without it the die keeps rolling until Stop is called (dice after the first one stop one by one)
+    /// Without it the die keeps rolling until Stop is called (dice after the first one stop one by one).
+    /// baseRoll above 0: the card's base power roll, lands on this result (rolled beforehand) and adds it as base power
     /// </summary>
-    public IEnumerator RollAnimation(bool waitForInput = true)
+    public IEnumerator RollAnimation(bool waitForInput = true, int baseRoll = 0)
     {
         Vector3 diceStartingPos = transform.position;
         Vector3 diceTargetPos = new Vector3(diceStartingPos.x, diceStartingPos.y + rollDistance, diceStartingPos.z);
@@ -114,7 +118,7 @@ public class D6 : MonoBehaviour
 
         // changing dice value again to prevent player from clicking at the correct value
         // this is the only roll that counts, so it comes from GameRandom (same result for both players online)
-        diceValue = ChangeDiceValue(GameRandom.Range(1, 7));
+        diceValue = ChangeDiceValue((baseRoll > 0) ? baseRoll : GameRandom.Range(1, 7));
 
         // snapping to correct position, rotation and scale
         transform.position = diceStartingPos;
@@ -136,8 +140,9 @@ public class D6 : MonoBehaviour
         //else if (GetDiceValue() == 6) sfxName = "sixRollSFX";
         AudioManager.instance.PlaySFX(sfxName);
 
-        // adding rolled power (a power-up gain: number above the counter, green outline, particles)
-        unit.card.GainPower(GetDiceValue());
+        // adding rolled power (base roll: plain base power, power-up: number above the counter, green outline, particles)
+        if (baseRoll > 0) unit.card.AddBasePower(GetDiceValue());
+        else unit.card.GainPower(GetDiceValue());
 
         // little pause after rolling
         yield return new WaitForSeconds(pauseAfterRolling);
@@ -266,6 +271,28 @@ public class D6 : MonoBehaviour
         // the landing squash might still be playing, so the die has to come back in the resting state
         if (restScale != Vector3.zero) transform.localScale = restScale;
         gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// After the roll: the die stays for a bit, slowly fades away and turns off
+    /// </summary>
+    public IEnumerator FadeAway()
+    {
+        yield return new WaitForSeconds(fadeStayTime);
+
+        CanvasGroup group = GetComponent<CanvasGroup>();
+        if (group == null) group = gameObject.AddComponent<CanvasGroup>();
+
+        float t = 0;
+        while (t < fadeTime)
+        {
+            t += Time.deltaTime;
+            group.alpha = 1 - Mathf.Clamp01(t / fadeTime);
+            yield return null;
+        }
+
+        DisableDie();
+        group.alpha = 1; // back to normal for the next roll
     }
 
     /// <summary>

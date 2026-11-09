@@ -388,12 +388,12 @@ Attack (CommandType.Attack: index = attacker in the sender's cardsOnField,
   when it comes back; the other game first shows an arrow to the target
   (RemoteAttackTarget). CanApply lets the other player's Attack /
   AttackCancel through while RemoteAttackPending.
-  Everything inside a fight runs the same on both games: sticker power is
-  fixed (no dice in fights now), random parts use GameRandom: random +0-3
-  power (PowerUpEffect maxAmount), Joker swap chance (FindSwappingJoker,
+  Everything inside a fight runs the same on both games: base power d6
+  (see Dice), sticker power is fixed, random parts use GameRandom: random
+  +2-5 power (PowerUpEffect maxAmount), Joker swap chance (FindSwappingJoker,
   rolled per Joker in field order, stops at the first swap), Phantom spot.
-  End of every turn: Scouts reveal a random face down card (ScoutReveals,
-  turn player's Scouts first, then the other's, field order).
+  End of every turn: the turn player's Scouts reveal a random face down
+  card (ScoutReveals, field order).
 
 Choice (CommandType.Choice: index = option, -1 = skipped)
   FightManager.ChooseCard asks a player to pick a card: Phantom (which copy
@@ -406,15 +406,21 @@ Choice (CommandType.Choice: index = option, -1 = skipped)
 Old commands (PlayCard, ChooseTarget) belong to the old lane rules and
   aren't sent anymore.
 
-Dice (CommandType.StopDice: index = how many dice) - not used in fights
-since the sticker rework (power is fixed), kept for dice abilities
+Dice (CommandType.StopDice: index = how many dice)
+  Base power: after the defender comes out both fighting units roll their
+  d6 (special cards 2) all at the same time (FightManager.RollBasePower,
+  Unit.RollBasePower), one click stops all of a player's dice (StopDice
+  index = 2 for a special card). All results are rolled with GameRandom
+  BEFORE the dice start (attacker's dice, then the defender's) and passed to
+  D6.RollAnimation(baseRoll), because the two dice can stop in a different
+  order on each game. Stickers apply only after both dice landed.
   Rolling dice wait in D6.rollingDice (oldest first). The bot's stop by
   themselves. A click stops all of the local player's rolling dice
   (D6.StopDice) and online sends StopDice with the count. The other game
   keeps the remote player's dice rolling until the command comes (CanApply
   waits until that many of their dice are rolling there), then stops the
-  oldest ones. Value comes from GameRandom when a die stops, so both games
-  get the same numbers.
+  oldest ones. Other dice (no baseRoll) take their value from GameRandom
+  when they stop.
   Several power-up dice: only the first one waits for the click / command
   (D6.RollAnimation(true)), the others stop one by one after it
   (Unit.RollPowerUps, D6.Stop), in the same order on both games.

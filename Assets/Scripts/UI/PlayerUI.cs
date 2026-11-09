@@ -153,10 +153,15 @@ public class PlayerUI : MonoBehaviour
         player.food[(int)type]++;
         StartCoroutine(TokenUpdateAnim(type, showing));
     }
-    public IEnumerator ShowTokens(bool show)
+    public IEnumerator ShowTokens(bool show, bool instant = false)
     {
         Vector3 startingPosition = foodObj.transform.localPosition;
         Vector3 targetPosition = (show) ? shownTokenPos : defaultTokenPos;
+        if (instant)
+        {
+            foodObj.transform.localPosition = targetPosition;
+            yield break;
+        }
         float t = 0;
         float timeAppearing = tokenShowTime;
 

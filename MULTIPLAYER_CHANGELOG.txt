@@ -144,3 +144,17 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
   - Attacker wins a tie, so no double knock outs.
   - Add-on sticker list removed, AddSticker sends a sticker from the shared
     pool (looked up by name in the base / special lists).
+
+2026-11-09  Base power d6 back in fights (branch experimental-rules)
+  - Both fighting units roll a d6 at the same time after the defender comes
+    out, each player clicks for their own die (StopDice). Results are rolled
+    with GameRandom up front (attacker, then defender) since the dice can
+    stop in a different order on each game. Stickers apply after both land.
+
+2026-11-09  Scouts only at the end of their owner's turn (branch experimental-rules)
+  - ScoutReveals only rolls for the turn player's Scouts (fewer GameRandom
+    calls per turn, same on both games).
+
+2026-11-09  Special cards roll 2 base dice (branch experimental-rules)
+  - Both dice roll at the same time and stop with one click (StopDice with
+    count 2). Results come from GameRandom up front, attacker's dice first.

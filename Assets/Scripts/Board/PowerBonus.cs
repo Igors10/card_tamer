@@ -15,16 +15,16 @@ public class PowerBonus : MonoBehaviour
     bool outlineSet;
 
     [Header("looks")]
-    [SerializeField] Color buffColor = new Color(0.18f, 0.69f, 0.26f);
+    [SerializeField] Color buffColor = Color.white;
     [SerializeField] Color debuffColor = new Color(0.94f, 0.25f, 0.25f);
-    [SerializeField] Color outlineColor = Color.black;
+    [SerializeField] Color buffOutlineColor = new Color(1f, 0.82f, 0.2f); // yellow, the buff color
+    [SerializeField] Color outlineColor = Color.black; // debuffs
     [SerializeField] float outlineWidth = 0.25f;
 
     [Header("anim params")]
     [SerializeField] float popTime = 0.3f;
     [SerializeField] float popOvershoot = 2.2f; // how far the scale shoots past its size before settling
     [SerializeField] float travelDistance = 0.6f; // buffs fly up from the counter, debuffs slam down onto it
-    [SerializeField] float tiltAngle = 15f;
     [SerializeField] float comboScaleBonus = 0.15f; // every stacked bonus makes the number a bit bigger
     [SerializeField] float maxComboScale = 1.6f;
     [SerializeField] float timeBeforeFade = 0.6f;
@@ -64,21 +64,21 @@ public class PowerBonus : MonoBehaviour
         float dir = isBuff ? 1f : -1f;
         float comboScale = Mathf.Min(1f + comboScaleBonus * (combo - 1), maxComboScale);
         Vector3 targetScale = restScale * comboScale;
-        float tilt = Random.Range(0.5f, 1f) * tiltAngle * (Random.value > 0.5f ? 1f : -1f);
 
-        // enabling text
+        // enabling text (no sway, it stays straight)
         text.text = isBuff ? "+" + bonus : bonus.ToString();
         Color color = isBuff ? buffColor : debuffColor;
         text.color = color;
+        rect.localRotation = Quaternion.identity;
         text.gameObject.SetActive(true);
 
         // outline can only be set once the text has been active (TMP sets up its material then)
         if (!outlineSet)
         {
             text.outlineWidth = outlineWidth;
-            text.outlineColor = outlineColor;
             outlineSet = true;
         }
+        text.outlineColor = isBuff ? buffOutlineColor : outlineColor;
 
         // POP IN
         Vector2 startPos = restPos - new Vector2(0f, travelDistance * dir);
@@ -94,7 +94,6 @@ public class PowerBonus : MonoBehaviour
 
             rect.localScale = Vector3.LerpUnclamped(Vector3.zero, targetScale, backT);
             rect.anchoredPosition = Vector2.Lerp(startPos, restPos, moveT);
-            rect.localRotation = Quaternion.Euler(0, 0, Mathf.Lerp(-tilt * 2f, tilt, moveT));
 
             // white flash at the start
             text.color = Color.Lerp(Color.white, color, clampedT * 2f);
@@ -106,16 +105,8 @@ public class PowerBonus : MonoBehaviour
         // debuffs land with a squash
         if (!isBuff) squashRoutine = StartCoroutine(Squash(rect, targetScale));
 
-        // HOLD with a wobble that dies down
-        t = 0;
-        while (t < timeBeforeFade)
-        {
-            t += Time.deltaTime;
-            float clampedT = Mathf.Clamp01(t / timeBeforeFade);
-            float wobble = Mathf.Sin(clampedT * Mathf.PI * 4f) * (1 - clampedT);
-            rect.localRotation = Quaternion.Euler(0, 0, tilt * (1 - clampedT) + wobble * tiltAngle * 0.5f);
-            yield return null;
-        }
+        // HOLD
+        yield return new WaitForSeconds(timeBeforeFade);
 
         // FADE OUT, drifting the same way the power went
         rect.localScale = targetScale;

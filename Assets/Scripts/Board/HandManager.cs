@@ -28,6 +28,7 @@ public class HandManager : MonoBehaviour
     [SerializeField] float handHideDistanceVertical;
     [SerializeField] float handHideSpeed;
     [SerializeField] float roundFieldRaise = 130f; // during the round the hand (field) sits this much higher
+    [SerializeField] bool neverHideInRound = false; // placing and battle: the cards always stay shown
 
     [Header("Arranging (cards lined up in the middle of the screen)")]
     [SerializeField] Transform arrangeRow; // your cards sit here while arranging, then fly down to the hand for the battle
@@ -103,8 +104,8 @@ public class HandManager : MonoBehaviour
         player.cardsInHand.Clear();
         player.roundStartOrder = new List<Card>(player.cardsOnField);
 
-        // the board gets darker, so the row in the middle stands out
-        if (player == GameManager.instance.player) GameManager.instance.managerUI.DimActivate(arrangeBackdrop, true);
+        // the board gets darker, so the row in the middle stands out (instantly, the round starts under the loading fog)
+        if (player == GameManager.instance.player) GameManager.instance.managerUI.DimActivate(arrangeBackdrop, true, true);
 
         UpdateHandVisuals(player);
     }
@@ -239,9 +240,9 @@ public class HandManager : MonoBehaviour
     void HandHidingCheck()
     {
         // hides in all phases when the cursor is away from it
-        // (always shown while picking a card for a new sticker)
+        // (always shown while picking a card for a new sticker, and in the round if neverHideInRound)
         bool inRound = GameManager.instance.currentState != GameState.BUYING;
-        bool forceShow = GameManager.instance.managerUI.workshop.ChoosingStickerCard;
+        bool forceShow = GameManager.instance.managerUI.workshop.ChoosingStickerCard || (inRound && neverHideInRound);
         bool forceHide = !inRound && !forceShow && (activeCard != null || GameManager.instance.managerUI.workshop.drawingCanvas.isDrawing);
         RectTransform handRT = hand.GetComponent<RectTransform>();
         float hideSpeed = 0f;

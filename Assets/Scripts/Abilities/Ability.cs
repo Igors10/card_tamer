@@ -82,13 +82,18 @@ public class Ability : MonoBehaviour
     public void Highlight(bool isOn)
     {
         if (glow != null) glow.SetActive(isOn);
-        if (isOn) Animations.instance.PopAnim(gameObject, 0.35f, 0.25f);
+        if (isOn) Animations.instance.PopAnim(gameObject, 0.3f, 0.06f);
     }
 
     /// <summary>
     /// Description with the right side filled in
     /// </summary>
     public string GetDescription() => abilityData.GetAbilityDesc(abilityColor, onRight);
+
+    /// <summary>
+    /// Shows other text on the strip instead of the description (the effect notifier says what the sticker is doing)
+    /// </summary>
+    public void SetText(string text) => effectDesc.text = text;
 
     // =====================
     // Effect

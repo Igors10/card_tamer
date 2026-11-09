@@ -39,21 +39,50 @@ public class PowerUpEffect : AbilityEffect
 
     public override bool CanTrigger(EffectContext ctx)
     {
-        FightManager fight = FightManager.instance;
+        return ConditionMet(ctx.self.card, ctx.IsAttacking, FightManager.instance.GetOpposing(ctx.self).card);
+    }
+
+    /// <summary>
+    /// The bonus depends on which card it fights (Flanker), so before the fight it's only a maybe
+    /// </summary>
+    public bool DependsOnOpposingCard => condition == PowerUpCondition.AgainstSideCard || condition == PowerUpCondition.AttackingSideCard;
+
+    /// <summary>
+    /// Before a fight: could the card get this bonus if it fought now (bonuses about the opposing card count as possible)
+    /// </summary>
+    public bool CouldTrigger(Card self, bool attacking)
+    {
         switch (condition)
         {
-            case PowerUpCondition.WhenAttacking: return ctx.IsAttacking;
-            case PowerUpCondition.WhenDefending: return ctx.IsDefending;
-            case PowerUpCondition.FewerCards: return ctx.Owner.cardsOnField.Count < ctx.Opponent.cardsOnField.Count;
-            case PowerUpCondition.LessHP: return ctx.Owner.health < ctx.Opponent.health;
-            case PowerUpCondition.FaceDownAlly: return ctx.Owner.cardsOnField.Exists(card => card != ctx.self.card && card.faceDown);
-            case PowerUpCondition.PreviousFightLost: return ctx.Owner.lostLastFight;
-            case PowerUpCondition.AgainstSideCard: return fight.IsSideCard(fight.GetOpposing(ctx.self).card);
+            case PowerUpCondition.AgainstSideCard: return true;
+            case PowerUpCondition.AttackingSideCard: return attacking;
+            default: return ConditionMet(self, attacking, null);
+        }
+    }
+
+    /// <summary>
+    /// The condition for a card that would fight (attacking or defending). Without the opposing card (null, the card
+    /// shows its possible bonuses before a fight) the conditions about the opposing card are false
+    /// </summary>
+    public bool ConditionMet(Card self, bool attacking, Card opposing)
+    {
+        FightManager fight = FightManager.instance;
+        Player owner = self.player;
+        Player opponent = GameManager.instance.GetOpponentOfPlayer(owner);
+        switch (condition)
+        {
+            case PowerUpCondition.WhenAttacking: return attacking;
+            case PowerUpCondition.WhenDefending: return !attacking;
+            case PowerUpCondition.FewerCards: return owner.cardsOnField.Count < opponent.cardsOnField.Count;
+            case PowerUpCondition.LessHP: return owner.health < opponent.health;
+            case PowerUpCondition.FaceDownAlly: return owner.cardsOnField.Exists(card => card != self && card.faceDown);
+            case PowerUpCondition.PreviousFightLost: return owner.lostLastFight;
+            case PowerUpCondition.AgainstSideCard: return opposing != null && fight.IsSideCard(opposing);
             case PowerUpCondition.OpponentHasMorePowerUps: return false;
-            case PowerUpCondition.NoCardDestroyedThisRound: return !ctx.self.card.destroyedCardThisRound;
-            case PowerUpCondition.IsPhantom: return ctx.self.card.isPhantom;
-            case PowerUpCondition.OpponentNoFaceDown: return !ctx.Opponent.cardsOnField.Exists(card => card.faceDown);
-            case PowerUpCondition.AttackingSideCard: return ctx.IsAttacking && fight.IsSideCard(fight.GetOpposing(ctx.self).card);
+            case PowerUpCondition.NoCardDestroyedThisRound: return !self.destroyedCardThisRound;
+            case PowerUpCondition.IsPhantom: return self.isPhantom;
+            case PowerUpCondition.OpponentNoFaceDown: return !opponent.cardsOnField.Exists(card => card.faceDown);
+            case PowerUpCondition.AttackingSideCard: return attacking && opposing != null && fight.IsSideCard(opposing);
             default: return true;
         }
     }

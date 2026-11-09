@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Guard
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 4
-  abilityDescription: Guards the card on the left. +3 power when attacked
+  abilityDescription: Guards the card on the left. +3 if attacked
   isSpecial: 0
   stickerColor: {r: 0.6392157, g: 0.76862746, b: 0.95686275, a: 1}
   hasSide: 0

@@ -1,14 +1,14 @@
 using System.Collections;
 
 /// <summary>
-/// Knocks this unit out (by default after the battle on its line)
+/// Knocks this unit out (by default after its fight)
 /// </summary>
 [System.Serializable]
 public class KnockSelfOutEffect : AbilityEffect
 {
     public KnockSelfOutEffect()
     {
-        trigger = EffectTrigger.OnOwnLineResolved;
+        trigger = EffectTrigger.OnFightEnd;
     }
 
     protected override IEnumerator Execute(EffectContext ctx)

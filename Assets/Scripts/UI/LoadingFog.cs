@@ -38,7 +38,8 @@ public class LoadingFog : MonoBehaviour
         while (t < moveTime)
         {
             t += Time.deltaTime;
-            float clampedT = t / moveTime;
+            // clamped so it ends exactly on the target, the next move starts from there (the fog moves in and out every round)
+            float clampedT = Mathf.Clamp01(t / moveTime);
             float coolT = (isApplied) ? clampedT * clampedT : 1 - (1 - clampedT) * (1 - clampedT);
 
             transform.localPosition = Vector3.Lerp(startingPosition, targetPosition, coolT);

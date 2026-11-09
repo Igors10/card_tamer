@@ -35,6 +35,7 @@ public class Card : MonoBehaviour
     [FormerlySerializedAs("hiddenIcon")]
     [SerializeField] GameObject revealedIcon; // your own face up field cards show this, so you know the opponent can see them
     [SerializeField] GameObject phantomLabel; // only the owner sees which card is the phantom
+    public Transform Visual => cardVisual.transform; // everything drawn on the card (the fighting unit's power counter goes here too)
     [HideInInspector] public Unit unit;
     [HideInInspector] public Player player;
     [SerializeField] DeathParticle deathParticle; 
@@ -71,6 +72,12 @@ public class Card : MonoBehaviour
     Vector3 lastDragPosition;
     Vector3 shadowRestPosition;
     Vector3 visualRestScale; // resting scale of cardVisual, relative to the card root
+
+    [Header("Buff indicators")]
+    [SerializeField] TextMeshProUGUI buffIndicatorTemplate; // copied for every possible sticker bonus, they stack in the top right ("+4")
+    readonly List<TextMeshProUGUI> buffIndicators = new List<TextMeshProUGUI>();
+    readonly List<string> buffTexts = new List<string>();
+    readonly List<string> shownBuffTexts = new List<string>();
 
     [Header("Gameplay")]
     [HideInInspector] public int currentPower = 0;
@@ -109,6 +116,54 @@ public class Card : MonoBehaviour
         Drag();
         AnimateHandLayout();
         AnimateVisual();
+        RefreshBuffIndicators();
+    }
+
+    /// <summary>
+    /// Battle: the sticker bonuses this card would get if it fought now (attacking on its owner's turn, defending otherwise).
+    /// Bonuses that depend on the opposing card aren't shown, the opponent's face down cards show nothing
+    /// </summary>
+    void RefreshBuffIndicators()
+    {
+        if (buffIndicatorTemplate == null) return;
+
+        buffTexts.Clear();
+        GameManager gm = GameManager.instance;
+        bool show = gm != null && player != null && gm.currentState == GameState.BATTLING && !onDisplay && !HiddenFromLocalPlayer && player.cardsOnField.Contains(this);
+        if (show)
+        {
+            bool attacking = gm.yourTurn == (player == gm.player);
+            foreach ((Ability strip, PowerUpEffect effect) in GetEffects<PowerUpEffect>())
+            {
+                if (!effect.CouldTrigger(this, attacking)) continue;
+                // bonuses that depend on the opposing card (Flanker) get an asterisk, they're only a maybe
+                buffTexts.Add("+" + effect.amount + ((effect.maxAmount > effect.amount) ? "-" + effect.maxAmount : "") + (effect.DependsOnOpposingCard ? "*" : ""));
+            }
+
+            // Cheerers on the field give the side cards power (a Cheerer on the side too)
+            if (FightManager.instance.IsSideCard(this))
+            {
+                foreach (Card card in player.cardsOnField)
+                {
+                    foreach ((Ability strip, NeighbourPowerUpEffect effect) in card.GetEffects<NeighbourPowerUpEffect>()) buffTexts.Add("+" + effect.amount);
+                }
+            }
+        }
+
+        // the texts only change when the bonuses do
+        bool same = buffTexts.Count == shownBuffTexts.Count;
+        for (int i = 0; same && i < buffTexts.Count; i++) same = buffTexts[i] == shownBuffTexts[i];
+        if (same) return;
+        shownBuffTexts.Clear();
+        shownBuffTexts.AddRange(buffTexts);
+
+        while (buffIndicators.Count < buffTexts.Count) buffIndicators.Add(Instantiate(buffIndicatorTemplate, buffIndicatorTemplate.transform.parent));
+        for (int i = 0; i < buffIndicators.Count; i++)
+        {
+            bool shown = i < buffTexts.Count;
+            buffIndicators[i].gameObject.SetActive(shown);
+            if (shown) buffIndicators[i].text = buffTexts[i];
+        }
     }
 
     /// <summary>
@@ -142,6 +197,33 @@ public class Card : MonoBehaviour
         transform.localRotation = Quaternion.Slerp(transform.localRotation, Quaternion.Euler(0f, 0f, targetRotation), easeT);
 
         if (!isDragged) transform.localPosition = Vector3.Lerp(transform.localPosition, handTargetPosition, easeT);
+    }
+
+    /// <summary>
+    /// Glides into its place in the row (position, size and tilt together, smooth start and end), then the hand layout takes over
+    /// </summary>
+    public IEnumerator EaseIntoHandLayout(float time)
+    {
+        inHandLayout = false;
+        Vector3 startPos = transform.localPosition;
+        Vector3 startScale = transform.localScale;
+        Quaternion startRotation = transform.localRotation;
+
+        // stops if the card goes on display again (it fights)
+        float t = 0;
+        while (t < time && !onDisplay)
+        {
+            t += Time.deltaTime;
+            float smoothT = Mathf.SmoothStep(0f, 1f, t / time);
+            // the target is read every frame, the row can change meanwhile
+            transform.localPosition = Vector3.Lerp(startPos, handTargetPosition, smoothT);
+            transform.localScale = Vector3.Lerp(startScale, defaultScale, smoothT);
+            transform.localRotation = Quaternion.Slerp(startRotation, Quaternion.Euler(0f, 0f, cardRotation), smoothT);
+            yield return null;
+        }
+        if (onDisplay) yield break;
+        transform.localScale = defaultScale;
+        inHandLayout = true;
     }
 
     /// <summary>
@@ -328,10 +410,15 @@ public class Card : MonoBehaviour
         RefreshFace();
     }
 
+    /// <summary>
+    /// The local player doesn't know this card (opponent's face down card)
+    /// </summary>
+    public bool HiddenFromLocalPlayer => faceDown && player != GameManager.instance.player;
+
     void RefreshFace()
     {
         // the opponent's face down cards only show the back, your own get a "hidden" icon
-        bool showBack = faceDown && player != GameManager.instance.player;
+        bool showBack = HiddenFromLocalPlayer;
         cardBack.gameObject.SetActive(showBack);
         cardBack.color = player.playerColor;
         bool onField = GameManager.instance.currentState != GameState.BUYING && player.cardsOnField.Contains(this);
@@ -535,7 +622,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void GetStartingPower()
     {
-        // cards have no base power, all of it comes from stickers during the fight
+        // base power comes from the d6 roll in the fight (AddBasePower), the rest from stickers
         startingPower = 0;
         GainPower(0, false);
     }
@@ -545,6 +632,15 @@ public class Card : MonoBehaviour
     /// </summary>
     /// <param name="power"></param>
     /// 
+    /// <summary>
+    /// Base power from the d6 roll: it counts as starting power, so no gain juice and no buff outline
+    /// </summary>
+    public void AddBasePower(int power)
+    {
+        startingPower += power;
+        GainPower(power, false);
+    }
+
     public void GainPower(int power, bool animated = true)
     {
         Debug.Log("Card: " + cardData.name + "gains " + power + " power.");

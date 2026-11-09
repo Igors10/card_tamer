@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Attacker
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 4
-  abilityDescription: +2 power when attacking
+  abilityDescription: +3 if attacking
   isSpecial: 0
   stickerColor: {r: 0.95686275, g: 0.6392157, b: 0.6392157, a: 1}
   hasSide: 0
@@ -31,5 +31,5 @@ MonoBehaviour:
         showPresentation: 1
         oncePerRound: 0
         condition: 1
-        amount: 2
+        amount: 3
         maxAmount: 0
