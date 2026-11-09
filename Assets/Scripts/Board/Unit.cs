@@ -22,6 +22,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] GameObject shieldVFX;
     public TextMeshProUGUI skillText;
     public GameObject skillTextObj;
+    [SerializeField] GameObject effectStickerObj; // the unit's own sticker pops up under it when it triggers (fades in with AutoFade)
+    [SerializeField] Ability effectSticker;
+    [SerializeField] float effectStickerFadeOut = 0.3f;
     public AutoFade unitPresenter;
     [SerializeField] bool firstSpawnShowcase = true; // zoom in + presenter the first time each unit is played
     public bool FirstSpawnShowcase => firstSpawnShowcase;
@@ -511,6 +514,25 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         }
         counter.localScale = targetScale;
         powerBG.color = targetColor;
+    }
+
+    /// <summary>
+    /// The triggering sticker pops up under the unit (customText replaces its description)
+    /// </summary>
+    public void ShowEffectSticker(Ability strip, string customText = null)
+    {
+        effectSticker.InitAbility(new Sticker(strip.abilityData, strip.onRight), card);
+        if (!string.IsNullOrEmpty(customText)) effectSticker.SetText(customText);
+
+        // turning it off first restarts the fade in (and stops a fade out left from the previous effect)
+        effectStickerObj.SetActive(false);
+        effectStickerObj.SetActive(true);
+        Animations.instance.PopAnim(effectStickerObj, 0.3f, 0.15f);
+    }
+
+    public void HideEffectSticker()
+    {
+        if (effectStickerObj.activeInHierarchy) effectStickerObj.GetComponent<AutoFade>().FadeOut(effectStickerFadeOut);
     }
 
     void OnDestroy()

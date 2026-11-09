@@ -26370,7 +26370,21 @@ MonoBehaviour:
   entranceEndAngle: -12
   entranceOvershoot: 2.2
   entranceTime: 0.28
-  entranceShake: 0.03
+  entranceShake: 0.07
+  windupTime: 0.1
+  windupAngle: 15
+  windupShrink: 0.85
+  swingStretch: 0.22
+  afterimageInterval: 0.03
+  afterimageFade: 0.22
+  afterimageAlpha: 0.45
+  landHitStop: 0.06
+  landSquash: 0.22
+  landWobbleAngle: 7
+  landWobbleTime: 0.45
+  shockwaveScale: 1.35
+  shockwaveTime: 0.35
+  otherCardKnock: 9
   attackDropHeight: 0.35
   afterSpawnPause: 0.6
   powerGainPause: 0.5
@@ -27688,11 +27702,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1095989090030049407, guid: f2193c9085961ba41954da3be78ba305, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -703.346
+      value: -247
       objectReference: {fileID: 0}
     - target: {fileID: 1095989090030049407, guid: f2193c9085961ba41954da3be78ba305, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 130.864
+      value: -299
       objectReference: {fileID: 0}
     - target: {fileID: 1095989090030049407, guid: f2193c9085961ba41954da3be78ba305, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

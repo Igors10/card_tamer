@@ -200,6 +200,25 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
+    /// A flat copy of the card's background in the given color, right where the card is (behind it). Used for afterimages and pulses,
+    /// the caller animates and destroys it
+    /// </summary>
+    public Image CreateGhost(Color tint)
+    {
+        Transform parent = transform.parent;
+        Image ghost = Instantiate(cardBackground, parent);
+        foreach (Transform child in ghost.transform) Destroy(child.gameObject);
+        ghost.raycastTarget = false;
+        ghost.color = tint;
+        ghost.transform.SetPositionAndRotation(cardBackground.transform.position, cardBackground.transform.rotation);
+        Vector3 parentScale = parent.lossyScale;
+        Vector3 lossy = cardBackground.transform.lossyScale;
+        ghost.transform.localScale = new Vector3(lossy.x / parentScale.x, lossy.y / parentScale.y, 1f);
+        ghost.transform.SetSiblingIndex(transform.GetSiblingIndex());
+        return ghost;
+    }
+
+    /// <summary>
     /// Glides into its place in the row (position, size and tilt together, smooth start and end), then the hand layout takes over
     /// </summary>
     public IEnumerator EaseIntoHandLayout(float time)

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Battle phase: players take turns attacking one opponent card with one of their own.
@@ -38,7 +39,24 @@ public class FightManager : MonoBehaviour
     [SerializeField] float entranceEndAngle = -12f; // stays a bit tilted the other way while on display
     [SerializeField] float entranceOvershoot = 2.2f; // how far the rotation and scale swing past the end before settling
     [SerializeField] float entranceTime = 0.28f;
-    [SerializeField] float entranceShake = 0.03f; // small screen shake when the card lands
+    [SerializeField] float entranceShake = 0.07f; // screen shake when the card lands
+
+    [Header("card entrance juice")]
+    [SerializeField] float windupTime = 0.1f; // the card pulls back before swinging
+    [SerializeField] float windupAngle = 15f; // tilts this much further back
+    [SerializeField] float windupShrink = 0.85f;
+    [SerializeField] float swingStretch = 0.22f; // stretches while swinging, most at full speed
+    [SerializeField] float afterimageInterval = 0.03f; // fading copies in the owner's color left behind while swinging
+    [SerializeField] float afterimageFade = 0.22f;
+    [SerializeField] float afterimageAlpha = 0.45f;
+    [SerializeField] float landHitStop = 0.06f; // everything freezes for a split second when it lands
+    [SerializeField] float landSquash = 0.22f;
+    [SerializeField] float landWobbleAngle = 7f; // the tilt wobbles around its end angle and settles
+    [SerializeField] float landWobbleTime = 0.45f;
+    [SerializeField] float shockwaveScale = 1.35f; // a pulse in the owner's color grows out of the card and fades
+    [SerializeField] float shockwaveTime = 0.35f;
+    [SerializeField] float otherCardKnock = 9f; // the other shown card gets knocked a bit
+    [SerializeField] float pauseBeforeUnit = 0.3f; // the card settles before its unit appears (so the unit doesn't look like it comes out of the card)
 
     [Header("input")]
     [SerializeField] float attackDropHeight = 0.35f; // card has to be dropped above this part of the screen to attack
@@ -334,6 +352,7 @@ public class FightManager : MonoBehaviour
         }
 
         yield return DisplayCard(card);
+        yield return Animations.instance.SkippablePause(pauseBeforeUnit);
 
         Transform spot = (card.player == GameManager.instance.player) ? playerSpot : opponentSpot;
         Unit unit = GameManager.instance.fieldManager.SpawnFightUnit(card, spot.position);
@@ -373,19 +392,41 @@ public class FightManager : MonoBehaviour
             card.transform.localScale = startScale;
             card.transform.localRotation = Quaternion.Euler(0f, 0f, startAngle);
         }
-        yield return CardEntrance(card.transform, startPos, spot.position, startAngle, endAngle);
+        yield return CardEntrance(card, startPos, spot.position, startAngle, endAngle);
     }
 
     /// <summary>
-    /// The card swings up into its spot like a card shown in a board game: rotates past upright to a small tilt the other way
-    /// and grows, overshooting a bit, then lands with a thud. Moving up a bit faster than sideways gives the arc
+    /// The card swings up into its spot like a card shown in a board game: pulls back, then rotates past upright to a small tilt
+    /// the other way and grows (stretching, leaving afterimages), overshooting a bit. Lands with a freeze, squash, wobble,
+    /// a pulse, particles, shake and a thud. Moving up a bit faster than sideways gives the arc
     /// </summary>
-    IEnumerator CardEntrance(Transform card, Vector3 startPos, Vector3 endPos, float startAngle, float endAngle)
+    IEnumerator CardEntrance(Card card, Vector3 startPos, Vector3 endPos, float startAngle, float endAngle)
     {
-        Vector3 startScale = card.localScale;
-        Vector3 endScale = Vector3.one * displayScale;
+        Transform cardTransform = card.transform;
+        Color ghostColor = card.player.playerColor;
 
+        // WIND-UP: pulls back (further tilt, a bit smaller, a bit away from the spot)
+        Vector3 restScale = cardTransform.localScale;
+        Vector3 windupPos = startPos + (startPos - endPos).normalized * 35f * cardTransform.parent.lossyScale.x;
+        float windupTilt = startAngle + Mathf.Sign(startAngle) * windupAngle;
+        AudioManager.instance.PlaySFX("PaperSFX", 0.8f, 1.4f);
         float t = 0;
+        while (t < windupTime)
+        {
+            t += Time.deltaTime;
+            float coolT = 1 - Mathf.Pow(1 - Mathf.Clamp01(t / windupTime), 2);
+            cardTransform.position = Vector3.Lerp(startPos, windupPos, coolT);
+            cardTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(startAngle, windupTilt, coolT));
+            cardTransform.localScale = Vector3.Lerp(restScale, restScale * windupShrink, coolT);
+            yield return null;
+        }
+
+        // SWING: from the pulled back pose into the spot, stretching at full speed and leaving afterimages
+        Vector3 swingStartPos = cardTransform.position;
+        Vector3 swingStartScale = cardTransform.localScale;
+        Vector3 endScale = Vector3.one * displayScale;
+        float nextGhost = 0f;
+        t = 0;
         while (t < entranceTime)
         {
             t += Time.deltaTime;
@@ -394,18 +435,75 @@ public class FightManager : MonoBehaviour
             float sideT = 1 - Mathf.Pow(1 - clampedT, 2);
             float swingT = EaseOutBack(clampedT);
 
-            card.position = new Vector3(Mathf.LerpUnclamped(startPos.x, endPos.x, sideT), Mathf.LerpUnclamped(startPos.y, endPos.y, upT), endPos.z);
-            card.localRotation = Quaternion.Euler(0f, 0f, Mathf.LerpUnclamped(startAngle, endAngle, swingT));
-            card.localScale = Vector3.LerpUnclamped(startScale, endScale, swingT);
+            cardTransform.position = new Vector3(Mathf.LerpUnclamped(swingStartPos.x, endPos.x, sideT), Mathf.LerpUnclamped(swingStartPos.y, endPos.y, upT), endPos.z);
+            cardTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.LerpUnclamped(windupTilt, endAngle, swingT));
+            Vector3 scale = Vector3.LerpUnclamped(swingStartScale, endScale, swingT);
+            float stretch = swingStretch * Mathf.Sin(clampedT * Mathf.PI) * (1 - clampedT);
+            cardTransform.localScale = new Vector3(scale.x * (1 - stretch * 0.5f), scale.y * (1 + stretch), scale.z);
+
+            if (t >= nextGhost && clampedT < 0.8f)
+            {
+                nextGhost = t + afterimageInterval;
+                StartCoroutine(FadeGhost(card.CreateGhost(new Color(ghostColor.r, ghostColor.g, ghostColor.b, afterimageAlpha)), 1f, afterimageFade));
+            }
             yield return null;
         }
-        card.position = endPos;
-        card.localRotation = Quaternion.Euler(0f, 0f, endAngle);
-        card.localScale = endScale;
+        cardTransform.position = endPos;
+        cardTransform.localRotation = Quaternion.Euler(0f, 0f, endAngle);
+        cardTransform.localScale = endScale;
 
-        // landing thud
-        GameManager.instance.mainCamera.Shake(entranceShake, 0.15f);
-        AudioManager.instance.PlaySFX("CardPlaySFX");
+        // LANDING: thud sounds, shake, particles, a pulse, the other card gets knocked, a split second freeze
+        AudioManager.instance.PlaySFX("CardPlaySFX", 1f, 0.85f);
+        AudioManager.instance.PlaySFX("HitSFX", 0.35f, 1.3f);
+        GameManager.instance.mainCamera.Shake(entranceShake, 0.2f);
+        ParticleManager.instance.SpawnVFX(endPos, "HitVFX", true);
+        StartCoroutine(FadeGhost(card.CreateGhost(new Color(ghostColor.r, ghostColor.g, ghostColor.b, 0.8f)), shockwaveScale, shockwaveTime));
+        foreach (Card other in homeParents.Keys) if (other != card && other != null && other.onDisplay) Animations.instance.ShakeAnim(other.gameObject, otherCardKnock, 0.25f);
+
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(landHitStop);
+        Time.timeScale = 1f;
+
+        // squash and a tilt wobble that settles (the fight goes on meanwhile)
+        StartCoroutine(Animations.instance.SquashStretch(cardTransform, endScale, landSquash, landWobbleTime));
+        StartCoroutine(LandWobble(card, endAngle));
+    }
+
+    /// <summary>
+    /// Damped tilt wobble around the end angle after the card lands (stops if the card leaves the display)
+    /// </summary>
+    IEnumerator LandWobble(Card card, float endAngle)
+    {
+        float t = 0;
+        while (t < landWobbleTime && card != null && card.onDisplay)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / landWobbleTime);
+            float wobble = landWobbleAngle * Mathf.Sin(clampedT * Mathf.PI * 3f) * (1 - clampedT) * (1 - clampedT);
+            card.transform.localRotation = Quaternion.Euler(0f, 0f, endAngle + wobble);
+            yield return null;
+        }
+        if (card != null && card.onDisplay) card.transform.localRotation = Quaternion.Euler(0f, 0f, endAngle);
+    }
+
+    /// <summary>
+    /// Afterimage / pulse: the ghost grows to the given scale while fading out, then it's gone
+    /// </summary>
+    IEnumerator FadeGhost(Image ghost, float growTo, float time)
+    {
+        Vector3 startScale = ghost.transform.localScale;
+        Color startColor = ghost.color;
+        float t = 0;
+        while (t < time && ghost != null)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / time);
+            float coolT = 1 - Mathf.Pow(1 - clampedT, 2);
+            ghost.transform.localScale = Vector3.Lerp(startScale, startScale * growTo, coolT);
+            ghost.color = new Color(startColor.r, startColor.g, startColor.b, startColor.a * (1 - coolT));
+            yield return null;
+        }
+        if (ghost != null) Destroy(ghost.gameObject);
     }
 
     float EaseOutBack(float t)
@@ -568,7 +666,6 @@ public class FightManager : MonoBehaviour
         Card loserCard = loser.card;
 
         // the power counters show who is stronger (the attacker on a tie), then both units lift up and fly at each other
-        AudioManager.instance.PlaySFX("BuffSFX");
         StartCoroutine(loser.ShowFightResult(false));
         yield return winner.ShowFightResult(true);
         yield return ClashUnits(attacker, defender);

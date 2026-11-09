@@ -5,7 +5,8 @@ using UnityEngine.UI;
 /// <summary>
 /// Pops up before a sticker of a card that isn't fighting triggers (Cheerer, Guard, Joker, Scout...):
 /// shows the card's creature on its owner's color and the sticker, stays a moment, then the effect plays.
-/// The local player's notifier appears where it's placed in the scene, the opponent's mirrored on the right
+/// The local player's notifier appears where it's placed in the scene, the opponent's mirrored on the right.
+/// A fighting card's own sticker pops up under its unit instead
 /// </summary>
 [RequireComponent(typeof(AutoFade))]
 public class EffectNotifier : MonoBehaviour
@@ -22,6 +23,7 @@ public class EffectNotifier : MonoBehaviour
 
     Vector3 playerPosition;
     bool playerPositionSaved;
+    Unit stickerUnit; // a fighting unit showing its own sticker under itself instead of the notifier (null: the notifier is used)
 
     /// <summary>
     /// Shows the notifier for the sticker strip's card, done after the show time (the effect triggers next).
@@ -33,6 +35,16 @@ public class EffectNotifier : MonoBehaviour
 
         Card owner = strip.card;
         Player p = owner.player;
+
+        // a fighting card's own sticker pops up under its unit instead (the unit is right there)
+        if (owner.onDisplay && owner.unit != null && !owner.unit.knockedOut)
+        {
+            stickerUnit = owner.unit;
+            AudioManager.instance.PlaySFX("EffectSFX");
+            stickerUnit.ShowEffectSticker(strip, customText);
+            yield break;
+        }
+        stickerUnit = null;
 
         // the opponent's one is mirrored to the right side of the screen (the parent is centered on the screen)
         if (!playerPositionSaved) { playerPosition = transform.localPosition; playerPositionSaved = true; }
@@ -61,6 +73,13 @@ public class EffectNotifier : MonoBehaviour
     /// </summary>
     public void Hide()
     {
+        if (stickerUnit != null)
+        {
+            stickerUnit.HideEffectSticker();
+            stickerUnit = null;
+            return;
+        }
+
         if (gameObject.activeInHierarchy) GetComponent<AutoFade>().FadeOut(fadeOutTime);
     }
 }
