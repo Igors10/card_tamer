@@ -28,18 +28,32 @@ public class FightManager : MonoBehaviour
 
     [Header("timing")]
     [SerializeField] float afterSpawnPause = 0.6f;
-    [SerializeField] float beforeRollPause = 0.4f;
+    [SerializeField] float powerGainPause = 0.5f; // after each power gain from a sticker
     [SerializeField] float beforeResultPause = 0.6f;
-    [SerializeField] float dashTime = 0.18f;
-    [SerializeField] float dashReturnTime = 0.3f;
     [SerializeField] float afterFightPause = 0.8f;
+
+    [Header("clash (fighting units fly at each other)")]
+    [SerializeField] float clashLiftTime = 0.3f; // units lift up into the air
+    [SerializeField] float clashLiftScale = 1.25f;
+    [SerializeField] float clashLiftHeight = 0.6f;
+    [SerializeField] float clashWindupTime = 0.35f; // pull back before flying
+    [SerializeField] float clashWindupDistance = 1.4f;
+    [SerializeField] float clashWindupSquash = 0.2f; // units squash down while pulling back
+    [SerializeField] float clashWindupTremble = 0.08f; // and shake harder and harder
+    [SerializeField] float clashWindupHold = 0.12f; // fully pulled back for a moment before letting go
+    [SerializeField] float clashFlyTime = 0.18f;
+    [SerializeField] float clashFlyStretch = 0.25f; // units stretch out while flying
+    [SerializeField] float clashHitGap = 1.2f; // distance between the units when they hit
+    [SerializeField] float clashHitStop = 0.1f; // everything freezes for a split second at the hit
+    [SerializeField] float clashHitSquash = 0.35f;
+    [SerializeField] float winnerRecoilDistance = 1.5f; // winner gets knocked back this far from the hit (and stays there)
+    [SerializeField] float winnerRecoilHop = 0.5f;
+    [SerializeField] float winnerRecoilTime = 0.25f;
     [SerializeField] float stickerMessagePause = 1.2f; // guard, mix up and similar messages stay this long
 
     // current fight
     [HideInInspector] public Unit attacker;
     [HideInInspector] public Unit defender;
-    readonly Dictionary<Unit, int> powerUps = new Dictionary<Unit, int>();
-    readonly Dictionary<Unit, int> countedPowerUps = new Dictionary<Unit, int>(); // power-ups before OnPowerUpsCounted stickers
     Card choosingFor; // local player's card waiting for a target
     List<Card> choiceOptions; // cards the local player can click right now (ChooseCard), null when nothing is asked
     Card chosenCard; // result of ChooseCard
@@ -131,6 +145,7 @@ public class FightManager : MonoBehaviour
         Card attackingCard = choosingFor;
         choosingFor = null;
         targetArrow.Hide();
+        PlayBattleMusic();
 
         // online the attack goes to the server first, both games start the fight when it comes back (ApplyAttack)
         if (!GameManager.instance.playerConfig.offlineMatch)
@@ -187,6 +202,7 @@ public class FightManager : MonoBehaviour
         remoteAttacker = null;
         GameManager.instance.managerUI.NewHint("");
 
+        PlayBattleMusic();
         target.HighlightCard(true);
         targetArrow.Show(attacker.transform, target.transform);
         yield return Animations.instance.SkippablePause(targetShowTime);
@@ -194,6 +210,14 @@ public class FightManager : MonoBehaviour
         target.HighlightCard(false);
 
         yield return Fight(attackingCard, target);
+    }
+
+    /// <summary>
+    /// Battle music plays from the moment an attack target is picked until the next turn starts (Player.StartTurn)
+    /// </summary>
+    void PlayBattleMusic()
+    {
+        AudioManager.instance.PlaySoundtrack("BattleTrack");
     }
 
     /// <summary>
@@ -268,6 +292,7 @@ public class FightManager : MonoBehaviour
         yield return Reveal(attackingCard);
         yield return BringOut(attackingCard, true, unit => attacker = unit);
 
+        PlayBattleMusic();
         target.HighlightCard(true);
         targetArrow.Show(attacker.transform, target.transform);
         yield return Animations.instance.SkippablePause(targetShowTime);
@@ -392,12 +417,13 @@ public class FightManager : MonoBehaviour
             target = guard;
         }
 
-        // Joker swaps the attacker for another random card of the attacking player (the old one stays hidden)
+        // Joker swaps the attacker for another random card of the attacking player (the old one goes back to its spot)
         List<Card> otherAttackers = attackingCard.player.cardsOnField.FindAll(card => card != attackingCard);
-        if (target.HasEffect<SwapAttackerEffect>() && otherAttackers.Count > 0)
+        Card joker = (otherAttackers.Count > 0) ? FindSwappingJoker(target) : null;
+        if (joker != null)
         {
-            yield return Reveal(target);
-            yield return ShowMessage(target.cardName + " swaps the attacker!");
+            yield return Reveal(joker);
+            yield return ShowMessage(joker.cardName + " swaps the attacker!");
             attacker.RemoveFromBoard();
             attackingCard.currentPower = 0;
             StartCoroutine(ReturnCard(attackingCard));
@@ -406,9 +432,9 @@ public class FightManager : MonoBehaviour
             yield return BringOut(attackingCard, true, unit => attacker = unit);
         }
 
-        // Seer: a right guess of a face down target gives the attacker a power-up
-        int guessPowerUps = 0;
-        if (target.faceDown) yield return GuessTarget(attackingCard.player, target, amount => guessPowerUps = amount);
+        // Seer: a right guess of a face down target gives the attacker power
+        int guessPower = 0;
+        if (target.faceDown) yield return GuessTarget(attackingCard.player, target, amount => guessPower = amount);
 
         // both cards are revealed, the defender comes out
         yield return Reveal(attackingCard);
@@ -416,66 +442,39 @@ public class FightManager : MonoBehaviour
         yield return BringOut(target, false, unit => defender = unit);
         yield return Animations.instance.SkippablePause(afterSpawnPause);
 
-        // stickers decide how many power-ups each one gets
-        powerUps.Clear();
-        powerUps[attacker] = 0;
-        powerUps[defender] = 0;
-        if (guessPowerUps > 0) AddPowerUps(attacker, guessPowerUps);
-        QueueNeighbourPowerUps(attacker);
-        QueueNeighbourPowerUps(defender);
+        // stickers give power (attacker's first, then the defender's)
+        if (guessPower > 0) yield return AddPower(attacker, guessPower);
+        QueueSideCardPower(attacker);
+        QueueSideCardPower(defender);
         executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnFightStart);
         yield return executeManager.TriggerEffects();
         yield return UseSavedPowerUps(attacker);
         yield return UseSavedPowerUps(defender);
-
-        // stickers that compare power-ups see the counts from before any of them trigger
-        countedPowerUps.Clear();
-        foreach (KeyValuePair<Unit, int> count in powerUps) countedPowerUps[count.Key] = count.Value;
-        executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnPowerUpsCounted);
-        yield return executeManager.TriggerEffects();
-
-        Debug.Log("FightManager: " + attacker.card.cardName + " attacks " + defender.card.cardName + " with " + powerUps[attacker] + " vs " + powerUps[defender] + " power-ups");
-        yield return Animations.instance.SkippablePause(beforeRollPause);
-
-        // attacker rolls first, then the defender
-        if (powerUps[attacker] > 0) gm.managerUI.NewHint(RollHint(attacker));
-        yield return attacker.RollPowerUps(powerUps[attacker]);
-        if (powerUps[defender] > 0) gm.managerUI.NewHint(RollHint(defender));
-        yield return defender.RollPowerUps(powerUps[defender]);
-        gm.managerUI.NewHint("");
         yield return Animations.instance.SkippablePause(beforeResultPause);
 
-        // stronger one knocks the other out, on a tie both are knocked out
+        // stronger one knocks the other out, the attacker wins a tie
         int attackerPower = attacker.card.currentPower;
         int defenderPower = defender.card.currentPower;
-        Unit winner = (attackerPower > defenderPower) ? attacker : (defenderPower > attackerPower) ? defender : null;
+        Debug.Log("FightManager: " + attacker.card.cardName + " attacks " + defender.card.cardName + " with " + attackerPower + " vs " + defenderPower + " power");
+        Unit winner = (attackerPower >= defenderPower) ? attacker : defender;
+        Unit loser = (winner == attacker) ? defender : attacker;
         Card attackerCard = attacker.card;
         Card defenderCard = defender.card;
+        Card loserCard = loser.card;
 
-        if (winner == null)
-        {
-            StartCoroutine(Dash(attacker, defender));
-            yield return Dash(defender, attacker);
-            StartCoroutine(attacker.KnockOut());
-            yield return defender.KnockOut();
-            attackerCard.player.lostLastFight = true;
-            defenderCard.player.lostLastFight = true;
-        }
-        else
-        {
-            Unit loser = (winner == attacker) ? defender : attacker;
-            yield return Dash(winner, loser);
-            Card loserCard = loser.card;
-            yield return loser.KnockOut();
-            winner.card.player.lostLastFight = false;
-            loserCard.player.lostLastFight = true;
+        // both units lift up and fly at each other
+        yield return ClashUnits(attacker, defender);
 
-            // Beast destroys the card it beat for good
-            yield return DestroyBeatenCard(winner.card, loserCard);
+        StartCoroutine(RecoilUnit(winner));
+        yield return KnockOutOrRecoil(loser);
+        winner.card.player.lostLastFight = false;
+        loserCard.player.lostLastFight = true;
 
-            // winner's side cheers
-            foreach (Card card in winner.card.player.cardsOnField) card.Cheer();
-        }
+        // Beast destroys the card it beat for good (only when it attacks)
+        if (winner == attacker) yield return DestroyBeatenCard(winner.card, loserCard);
+
+        // winner's side cheers
+        foreach (Card card in winner.card.player.cardsOnField) card.Cheer();
 
         // after fight stickers of the units still standing (knock itself out, hide, power-up for the next card)
         executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnFightEnd);
@@ -487,6 +486,7 @@ public class FightManager : MonoBehaviour
 
         // whoever is still standing goes back to its place on the field (not if it knocked itself out or was destroyed)
         if (winner != null && !winner.knockedOut && winner.card.player.cardsOnField.Contains(winner.card)) ReturnToField(winner);
+        if (loser != null && !loser.knockedOut && loser.card.player.cardsOnField.Contains(loser.card)) ReturnToField(loser);
         StartCoroutine(ReturnCard(attackerCard));
         StartCoroutine(ReturnCard(defenderCard));
 
@@ -500,32 +500,24 @@ public class FightManager : MonoBehaviour
         defender = null;
         fighting = false;
 
-        // round is over when someone has no cards left, otherwise the other player attacks
+        // round is over when someone has no cards left, otherwise the turn ends (Scouts reveal a card) and the other player attacks
         if (gm.player.cardsOnField.Count == 0 || gm.opponent.cardsOnField.Count == 0) gm.battleManager.EndBattle();
-        else attackingCard.player.EndTurn();
-    }
-
-    string RollHint(Unit unit)
-    {
-        return (unit.card.player == GameManager.instance.player) ? "Click to roll your power-ups!" : unit.card.player.playerName + " is rolling...";
-    }
-
-    /// <summary>
-    /// Stickers call this when they give power-ups
-    /// </summary>
-    public void AddPowerUps(Unit unit, int amount)
-    {
-        if (!powerUps.ContainsKey(unit)) return;
-        powerUps[unit] += amount;
-
-        // the dice appear right when the power-up triggers
-        unit.ShowPowerUpDice(powerUps[unit]);
+        else
+        {
+            yield return ScoutReveals(attackingCard.player);
+            attackingCard.player.EndTurn();
+        }
     }
 
     /// <summary>
-    /// Power-ups the unit had before the OnPowerUpsCounted stickers
+    /// Stickers call this when they give power: the gain shows on the power counter, then a short pause
     /// </summary>
-    public int CountedPowerUps(Unit unit) => countedPowerUps.TryGetValue(unit, out int count) ? count : 0;
+    public IEnumerator AddPower(Unit unit, int amount)
+    {
+        if (unit == null || amount == 0) yield break;
+        unit.card.GainPower(amount);
+        yield return Animations.instance.SkippablePause(powerGainPause);
+    }
 
     /// <summary>
     /// The unit fighting against this one
@@ -557,42 +549,70 @@ public class FightManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Sticker side as a direction: right = 1, left = -1
-    /// </summary>
-    int SideOf(Ability strip) => strip.onRight ? 1 : -1;
-
-    /// <summary>
-    /// Guard next to the target that protects it (its sticker points at the target), or null
+    /// Guard right of the target protects it (a guard always guards the card on its left), or null
     /// </summary>
     Card FindGuard(Card target)
     {
-        foreach (int side in new int[] { -1, 1 })
-        {
-            Card neighbour = GetNeighbour(target, side);
-            if (neighbour == null) continue;
+        Card neighbour = GetNeighbour(target, 1);
+        return (neighbour != null && neighbour.HasEffect<GuardNeighbourEffect>()) ? neighbour : null;
+    }
 
-            // the guard points back at the target
-            foreach ((Ability strip, GuardNeighbourEffect effect) in neighbour.GetEffects<GuardNeighbourEffect>())
+    /// <summary>
+    /// A fighting card on the side of its field gets power from every Cheerer on that field (itself included)
+    /// </summary>
+    void QueueSideCardPower(Unit unit)
+    {
+        if (!IsSideCard(unit.card)) return;
+
+        foreach (Card card in unit.card.player.cardsOnField)
+        {
+            foreach ((Ability strip, NeighbourPowerUpEffect effect) in card.GetEffects<NeighbourPowerUpEffect>())
             {
-                if (SideOf(strip) == -side) return neighbour;
+                GameManager.instance.executeManager.abilityRunner.QueueOnUnit(unit, strip, effect);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Joker of the attacked player that swaps the attacker, or null. A Joker that is the target always swaps,
+    /// every other Joker on the field swaps with its chance (GameRandom, so online both games roll the same)
+    /// </summary>
+    Card FindSwappingJoker(Card target)
+    {
+        if (target.HasEffect<SwapAttackerEffect>()) return target;
+
+        foreach (Card card in target.player.cardsOnField)
+        {
+            foreach ((Ability strip, SwapAttackerEffect effect) in card.GetEffects<SwapAttackerEffect>())
+            {
+                if (GameRandom.Range(0, 100) < effect.chancePercent) return card;
             }
         }
         return null;
     }
 
     /// <summary>
-    /// Neighbours whose stickers point at the fighting card give it power-ups (Cheerer)
+    /// End of a turn: every Scout on the field reveals a random face down card of its opponent
+    /// (the player whose turn it was goes first, so online both games reveal the same cards)
     /// </summary>
-    void QueueNeighbourPowerUps(Unit unit)
+    IEnumerator ScoutReveals(Player turnPlayer)
     {
-        foreach (int side in new int[] { -1, 1 })
+        foreach (Player owner in new Player[] { turnPlayer, GameManager.instance.GetOpponentOfPlayer(turnPlayer) })
         {
-            Card neighbour = GetNeighbour(unit.card, side);
-            if (neighbour == null) continue;
-
-            foreach ((Ability strip, NeighbourPowerUpEffect effect) in neighbour.GetEffects<NeighbourPowerUpEffect>())
+            Player opponent = GameManager.instance.GetOpponentOfPlayer(owner);
+            foreach (Card scout in new List<Card>(owner.cardsOnField))
             {
-                if (SideOf(strip) == -side) GameManager.instance.executeManager.abilityRunner.QueueOnUnit(unit, strip, effect);
+                foreach ((Ability strip, RevealRandomOnTurnEndEffect effect) in scout.GetEffects<RevealRandomOnTurnEndEffect>())
+                {
+                    List<Card> hidden = opponent.cardsOnField.FindAll(card => card.faceDown);
+                    if (hidden.Count == 0) continue;
+
+                    Card revealed = hidden[GameRandom.Range(0, hidden.Count)];
+                    Animations.instance.PopAnim(scout.gameObject, 0.3f, 0.25f);
+                    Animations.instance.PopAnim(revealed.gameObject, 0.3f, 0.3f);
+                    yield return Reveal(revealed);
+                    yield return ShowMessage(scout.cardName + " scouts " + revealed.cardName + "!");
+                }
             }
         }
     }
@@ -611,6 +631,9 @@ public class FightManager : MonoBehaviour
 
         if (!card.faceDown) yield break;
         card.SetFaceDown(false);
+
+        // Phantom: revealing one of the pair reveals the other one too
+        if (card.twin != null && card.twin.faceDown) yield return Reveal(card.twin);
 
         if (!card.HasEffect<ShuffleOpponentOnRevealEffect>()) yield break;
 
@@ -653,7 +676,7 @@ public class FightManager : MonoBehaviour
         owner.nextFightPowerUps = 0;
         EffectContext ctx = new EffectContext { self = unit };
         yield return EffectPresenter.Show(ctx, "Momentum!");
-        AddPowerUps(unit, saved);
+        yield return AddPower(unit, saved);
         yield return EffectPresenter.Hide(ctx);
     }
 
@@ -977,36 +1000,122 @@ public class FightManager : MonoBehaviour
     // ===============
 
     /// <summary>
-    /// Unit rushes at the other one and comes back
+    /// Both fighting units lift into the air, pull back and fly at each other. Ends at the hit
     /// </summary>
-    IEnumerator Dash(Unit unit, Unit target)
+    IEnumerator ClashUnits(Unit first, Unit second)
     {
-        Vector3 startPos = unit.transform.position;
-        Vector3 hitPos = Vector3.Lerp(startPos, target.transform.position, 0.75f);
+        clashRest.Clear();
+        first.PinPowerCounter();
+        second.PinPowerCounter();
+        Transform a = first.transform;
+        Transform b = second.transform;
+        Vector3 aRest = a.position, bRest = b.position;
+        Vector3 aRestScale = a.localScale, bRestScale = b.localScale;
+        clashRest[first] = (aRest, aRestScale);
+        clashRest[second] = (bRest, bRestScale);
+        Vector3 lift = Vector3.up * clashLiftHeight;
+        Vector3 aToB = (bRest - aRest).normalized;
 
+        // lifting up
         float t = 0;
-        while (t < dashTime)
+        while (t < clashLiftTime)
         {
             t += Time.deltaTime;
-            float clampedT = Mathf.Clamp01(t / dashTime);
-            unit.transform.position = Vector3.Lerp(startPos, hitPos, clampedT * clampedT);
+            float coolT = 1 - Mathf.Pow(1 - Mathf.Clamp01(t / clashLiftTime), 3);
+            a.position = aRest + lift * coolT;
+            b.position = bRest + lift * coolT;
+            a.localScale = Vector3.Lerp(aRestScale, aRestScale * clashLiftScale, coolT);
+            b.localScale = Vector3.Lerp(bRestScale, bRestScale * clashLiftScale, coolT);
             yield return null;
         }
 
-        GameManager.instance.mainCamera.Shake(0.02f, 0.2f);
-        StartCoroutine(DashBack(unit, hitPos, startPos));
+        // pulling back: squashing down and shaking harder and harder, like a spring getting loaded
+        Vector3 aLifted = aRest + lift, bLifted = bRest + lift;
+        Vector3 aLiftedScale = aRestScale * clashLiftScale, bLiftedScale = bRestScale * clashLiftScale;
+        Vector3 aBack = aLifted - aToB * clashWindupDistance, bBack = bLifted + aToB * clashWindupDistance;
+        t = 0;
+        while (t < clashWindupTime + clashWindupHold)
+        {
+            t += Time.deltaTime;
+            float pullT = Mathf.Clamp01(t / clashWindupTime);
+            float coolT = 1 - Mathf.Pow(1 - pullT, 3);
+            float tremble = clashWindupTremble * Mathf.Clamp01(t / (clashWindupTime + clashWindupHold));
+            a.position = Vector3.Lerp(aLifted, aBack, coolT) + (Vector3)(Random.insideUnitCircle * tremble);
+            b.position = Vector3.Lerp(bLifted, bBack, coolT) + (Vector3)(Random.insideUnitCircle * tremble);
+            Animations.instance.SetSquash(a, aLiftedScale, clashWindupSquash * coolT);
+            Animations.instance.SetSquash(b, bLiftedScale, clashWindupSquash * coolT);
+            yield return null;
+        }
+
+        // letting go: flying at each other, stretched out and speeding up until they hit in the middle
+        Vector3 middle = (aLifted + bLifted) / 2f;
+        Vector3 aHit = middle - aToB * clashHitGap / 2f;
+        Vector3 bHit = middle + aToB * clashHitGap / 2f;
+        t = 0;
+        while (t < clashFlyTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / clashFlyTime);
+            float coolT = clampedT * clampedT * clampedT;
+            a.position = Vector3.Lerp(aBack, aHit, coolT);
+            b.position = Vector3.Lerp(bBack, bHit, coolT);
+            // wide and flat towards the flying direction
+            float stretch = Mathf.Lerp(clashWindupSquash, clashFlyStretch, Mathf.Clamp01(clampedT * 3f));
+            Animations.instance.SetSquash(a, aLiftedScale, stretch);
+            Animations.instance.SetSquash(b, bLiftedScale, stretch);
+            yield return null;
+        }
+
+        // hit: both squash flat, burst, shake, sound and a split second freeze
+        a.position = aHit;
+        b.position = bHit;
+        Animations.instance.SetSquash(a, aLiftedScale, -clashHitSquash);
+        Animations.instance.SetSquash(b, bLiftedScale, -clashHitSquash);
+        ParticleManager.instance.SpawnVFX(middle, "HitVFX");
+        GameManager.instance.mainCamera.Shake(0.06f, 0.3f);
+        AudioManager.instance.PlaySFX("HitSFX");
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(clashHitStop);
+        Time.timeScale = 1f;
+        // wobbling back into shape (done before the winner starts going back to its spot)
+        float wobbleTime = winnerRecoilTime;
+        StartCoroutine(Animations.instance.SquashStretch(a, aLiftedScale, -clashHitSquash, wobbleTime));
+        StartCoroutine(Animations.instance.SquashStretch(b, bLiftedScale, -clashHitSquash, wobbleTime));
     }
 
-    IEnumerator DashBack(Unit unit, Vector3 from, Vector3 to)
+    /// <summary>
+    /// Winner gets knocked back from the hit in a little hop and stays there (still big from the clash)
+    /// </summary>
+    IEnumerator RecoilUnit(Unit unit)
     {
+        if (unit == null || !clashRest.TryGetValue(unit, out (Vector3 position, Vector3 scale) rest)) yield break;
+        Transform unitTransform = unit.transform;
+        Vector3 startPos = unitTransform.position;
+        Vector3 away = rest.position - startPos;
+        away.y = 0f;
+        Vector3 recoilPos = startPos + away.normalized * winnerRecoilDistance;
+
         float t = 0;
-        while (t < dashReturnTime && unit != null)
+        while (t < winnerRecoilTime && unit != null)
         {
             t += Time.deltaTime;
-            float clampedT = Mathf.Clamp01(t / dashReturnTime);
-            unit.transform.position = Vector3.Lerp(from, to, 1 - (1 - clampedT) * (1 - clampedT));
+            float clampedT = Mathf.Clamp01(t / winnerRecoilTime);
+            float coolT = 1 - Mathf.Pow(1 - clampedT, 3);
+            unitTransform.position = Vector3.Lerp(startPos, recoilPos, coolT) + Vector3.up * winnerRecoilHop * Mathf.Sin(clampedT * Mathf.PI);
             yield return null;
         }
+        if (unit != null) unitTransform.position = recoilPos;
+    }
+
+    readonly Dictionary<Unit, (Vector3 position, Vector3 scale)> clashRest = new Dictionary<Unit, (Vector3, Vector3)>(); // where each fighting unit stood before the clash
+
+    /// <summary>
+    /// Losing unit gets knocked out from the hit (it flies away), if a sticker saves it, it recoils like a winner
+    /// </summary>
+    IEnumerator KnockOutOrRecoil(Unit unit)
+    {
+        yield return unit.KnockOut();
+        if (unit != null && !unit.knockedOut) yield return RecoilUnit(unit);
     }
 
     /// <summary>

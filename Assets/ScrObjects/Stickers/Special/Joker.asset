@@ -13,39 +13,33 @@ MonoBehaviour:
   m_Name: Joker
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 4
-  abilityDescription: Buff when attacking. Hides on win. Swaps the attacker when
-    targeted
+  abilityDescription: Random +0 to +3 power. Opponent's attacks have a 33% chance
+    to get a different attacker (always if this card is attacked)
   isSpecial: 1
   stickerColor: {r: 0.41568628, g: 0.83137256, b: 0.5411765, a: 1}
   hasSide: 0
   icon: {fileID: 21300000, guid: 4801c33c99c43e84ea083b04bf2e5a28, type: 3}
   effects:
-  - rid: 8466844326851248244
-  - rid: 8466844326851248245
-  - rid: 8466844326851248246
+  - rid: 8466844466926059615
+  - rid: 8466844466926059616
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248244
+    - rid: 8466844466926059615
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Attacking!
+        customText: 
         showPresentation: 1
         oncePerRound: 0
-        condition: 1
-        amount: 1
-    - rid: 8466844326851248245
+        condition: 0
+        amount: 0
+        maxAmount: 3
+    - rid: 8466844466926059616
       type: {class: SwapAttackerEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 9
         customText: 
-        showPresentation: 0
-        oncePerRound: 0
-    - rid: 8466844326851248246
-      type: {class: HideSelfEffect, ns: , asm: Assembly-CSharp}
-      data:
-        trigger: 8
-        customText: Hiding!
         showPresentation: 1
         oncePerRound: 0
+        chancePercent: 33

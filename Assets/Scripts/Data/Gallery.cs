@@ -79,11 +79,11 @@ public static class Gallery
     }
 
     /// <summary>
-    /// Builds: saves the drawing into the save folder
+    /// Builds: saves the drawing into the save folder, returns the saved drawing (null if there was nothing to save)
     /// </summary>
-    public static void SaveToSaveFolder(string unitName, Texture2D[] layers)
+    public static UnitPreset SaveToSaveFolder(string unitName, Texture2D[] layers)
     {
-        if (layers == null) return;
+        if (layers == null) return null;
 
         Directory.CreateDirectory(SaveFolderPath);
         string basePath = Path.Combine(SaveFolderPath, GetFreeFileName(unitName, SaveFolderPath + "/", ".json"));
@@ -99,6 +99,7 @@ public static class Gallery
         GetSavedDrawings().Add(preset);
         savedFilePaths[preset] = basePath;
         Debug.Log("Gallery: saved drawing " + unitName + " to " + SaveFolderPath);
+        return preset;
     }
 
     public static void Rename(UnitPreset preset, string newName)

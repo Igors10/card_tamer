@@ -136,9 +136,8 @@ public class D6 : MonoBehaviour
         //else if (GetDiceValue() == 6) sfxName = "sixRollSFX";
         AudioManager.instance.PlaySFX(sfxName);
 
-        // adding rolled power
-        unit.card.startingPower += GetDiceValue();
-        unit.card.GainPower(GetDiceValue(), false);
+        // adding rolled power (a power-up gain: number above the counter, green outline, particles)
+        unit.card.GainPower(GetDiceValue());
 
         // little pause after rolling
         yield return new WaitForSeconds(pauseAfterRolling);

@@ -131,7 +131,7 @@ public class AIOpponent : MonoBehaviour
         if (currentAction != null) StopCoroutine(currentAction);
 
         if (GameManager.instance.player.endStateReady) GameManager.instance.CheckEndState();
-        else GameManager.instance.StartTurn();
+        else GameManager.instance.player.StartTurn();
     }
 
     void AIReady()
@@ -246,7 +246,7 @@ public class AIOpponent : MonoBehaviour
             else if (playerObj.shopStars >= shop.stickerPrice && playerObj.cardsInHand.Exists(card => card.cardData.CanAddSticker))
             {
                 List<Card> cardsWithRoom = playerObj.cardsInHand.FindAll(card => card.cardData.CanAddSticker);
-                cardsWithRoom[Random.Range(0, cardsWithRoom.Count)].AddSticker(generator.PickRandomSticker("addon"));
+                cardsWithRoom[Random.Range(0, cardsWithRoom.Count)].AddSticker(generator.PickRandomSticker("basic"));
                 playerObj.shopStars -= shop.stickerPrice;
             }
             // stops shopping only if it can't afford anything

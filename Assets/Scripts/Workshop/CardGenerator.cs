@@ -12,9 +12,8 @@ public class CardGenerator : MonoBehaviour
     [SerializeField] CardList mainList;
     [SerializeField] CardList basicList;
     [SerializeField] CardList specialList;
-    [SerializeField] AbiltiyList basicAbilityList; // base stickers
-    [SerializeField] AbiltiyList specialAbilityList; // special base stickers
-    [SerializeField] AbiltiyList addOnStickerList; // stickers added in the workshop
+    [SerializeField] AbiltiyList basicAbilityList; // stickers for new cards and for adding to cards in the workshop
+    [SerializeField] AbiltiyList specialAbilityList; // special stickers (special cards)
     [SerializeField] AbilityObj defaultAbility;
 
     [Header("prefabs")]
@@ -70,12 +69,7 @@ public class CardGenerator : MonoBehaviour
                 list = specialAbilityList;
                 break;
 
-            case "addon":
-                list = addOnStickerList;
-                break;
-
             default: return defaultAbility;
-                break;
         }
 
         int randomAbility_ID = Random.Range(0, list.abilityList.Count);
@@ -83,7 +77,7 @@ public class CardGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// Random sticker from a list ("basic", "special", "addon"), stickers with a side get a random side
+    /// Random sticker from a list ("basic", "special"), stickers with a side get a random side
     /// </summary>
     public Sticker PickRandomSticker(string listName)
     {
@@ -99,7 +93,6 @@ public class CardGenerator : MonoBehaviour
 
         AbilityObj ability = basicAbilityList.abilityList.Find(a => a != null && a.name == abilityName);
         if (ability == null) ability = specialAbilityList.abilityList.Find(a => a != null && a.name == abilityName);
-        if (ability == null) ability = addOnStickerList.abilityList.Find(a => a != null && a.name == abilityName);
         return ability;
     }
 

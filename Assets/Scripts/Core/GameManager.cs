@@ -238,8 +238,8 @@ public class GameManager : MonoBehaviour
                 managerUI.EnableUI(true);
                 battleManager.ResetBattleVals();
 
-                // playing workshop soundtrack
-                AudioManager.instance.PlaySoundtrack("BattleTrack");
+                // the placing soundtrack keeps going, battle music starts when an attack target is picked (FightManager)
+                AudioManager.instance.PlaySoundtrack("AltMainTrack");
                 break;
 
             case GameState.BUYING:

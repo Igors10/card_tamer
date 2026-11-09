@@ -12,6 +12,7 @@ public class RatSmart : MonoBehaviour
     [SerializeField] GameObject RSobj;
     [SerializeField] Image ratAvatar;
     [SerializeField] TextMeshProUGUI ratText;
+    [SerializeField] Image screenDarken;
 
     [Header("dialogue settings")]
     [SerializeField] float fadeTime = 0.5f;
@@ -69,6 +70,7 @@ public class RatSmart : MonoBehaviour
     {
         // Enabling the rat
         RSobj.SetActive(true);
+        GameManager.instance.managerUI.DimActivate(screenDarken, true);
         ratText.GetComponent<AutoFade>().fadeInTime = fadeTime;
 
         for (int i = 0; i < dialogue.line.Count; i++)
@@ -98,6 +100,8 @@ public class RatSmart : MonoBehaviour
             } while (clicked == false);
 
             ratText.gameObject.GetComponent<AutoFade>().FadeOut(fadeTime);
+            // the screen gets lighter together with the last line
+            if (i == dialogue.line.Count - 1) GameManager.instance.managerUI.DimActivate(screenDarken, false);
             yield return new WaitForSeconds(fadeTime);
         }
 
@@ -106,6 +110,7 @@ public class RatSmart : MonoBehaviour
 
     public void StopDialogue()
     {
+        GameManager.instance.managerUI.DimActivate(screenDarken, false);
         RSobj.SetActive(false);
     }
 

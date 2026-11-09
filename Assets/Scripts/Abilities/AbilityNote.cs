@@ -26,19 +26,18 @@ public class AbilityNote : MonoBehaviour
     bool restSaved;
 
     /// <summary>
-    /// showPower: base stickers show their power, add-on stickers have none
+    /// Shows the sticker on the note: icon, color and description (cards have no base power, so no power is shown)
     /// </summary>
-    public void InitAbilityNote(Sticker sticker, bool showPower = true)
+    public void InitAbilityNote(Sticker sticker)
     {
-        // the sticker icon sits on top of the note, base stickers show their power next to it
+        // the sticker icon sits in the middle on top of the note
         if (!iconRestSaved) { iconRestPos = icon.rectTransform.localPosition; iconRestSaved = true; }
         icon.sprite = sticker.ability.icon;
         icon.color = sticker.ability.IconColor;
         icon.gameObject.SetActive(sticker.ability.icon != null);
-        icon.rectTransform.localPosition = showPower ? iconRestPos : Vector3.zero;
-        // power value sits in the yellow star right of the icon (powerBG), add-on stickers have no power
-        if (powerBG != null) powerBG.gameObject.SetActive(showPower);
-        else powerValue.gameObject.SetActive(showPower);
+        icon.rectTransform.localPosition = Vector3.zero;
+        if (powerBG != null) powerBG.gameObject.SetActive(false);
+        else powerValue.gameObject.SetActive(false);
         powerObj.gameObject.SetActive(true);
 
         // ability color

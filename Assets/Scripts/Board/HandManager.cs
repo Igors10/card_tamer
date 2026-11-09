@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 using static UnityEngine.UI.CanvasScaler;
 public class HandManager : MonoBehaviour
 {
@@ -27,6 +28,12 @@ public class HandManager : MonoBehaviour
     [SerializeField] float handHideDistanceVertical;
     [SerializeField] float handHideSpeed;
     [SerializeField] float roundFieldRaise = 130f; // during the round the hand (field) sits this much higher
+
+    [Header("Arranging (cards lined up in the middle of the screen)")]
+    [SerializeField] Transform arrangeRow; // your cards sit here while arranging, then fly down to the hand for the battle
+    [SerializeField] Image arrangeBackdrop; // dims the board while arranging
+    [SerializeField] float arrangeCardSpacing = 280f;
+    [SerializeField] float arrangeRowWidth = 1600f; // with many cards they get closer together
 
     /// <summary>
     /// Adds a card to player's hand
@@ -89,9 +96,15 @@ public class HandManager : MonoBehaviour
         {
             card.SetFaceDown(true);
             player.cardsOnField.Add(card);
+
+            // your cards fly up to the middle of the screen for arranging
+            if (player == GameManager.instance.player) card.transform.SetParent(arrangeRow, true);
         }
         player.cardsInHand.Clear();
         player.roundStartOrder = new List<Card>(player.cardsOnField);
+
+        // the board gets darker, so the row in the middle stands out
+        if (player == GameManager.instance.player) GameManager.instance.managerUI.DimActivate(arrangeBackdrop, true);
 
         UpdateHandVisuals(player);
     }
@@ -147,6 +160,17 @@ public class HandManager : MonoBehaviour
 
         int cardCount = cards.Count;
 
+        // arranging: a straight row in the middle of the screen
+        if (cards == player.cardsOnField && GameManager.instance.currentState == GameState.PLACING)
+        {
+            float spacing = (cardCount > 0) ? Mathf.Min(arrangeCardSpacing, arrangeRowWidth / cardCount) : arrangeCardSpacing;
+            for (int a = 0; a < cardCount; a++)
+            {
+                cards[a].SetHandLayout(new Vector3(spacing * (a - (cardCount - 1) / 2f), 0f, 0f), 0f);
+            }
+            return;
+        }
+
         if (cardCount == 1)
         {
             cards[0].SetHandLayout(Vector3.zero, 0f);
@@ -177,14 +201,36 @@ public class HandManager : MonoBehaviour
         UpdateHandVisuals(GameManager.instance.opponent);
     }
 
+    /// <summary>
+    /// Arranging is over: your cards fly down from the middle of the screen into the hand
+    /// </summary>
+    void LeaveArrangeRow()
+    {
+        if (GameManager.instance.currentState != GameState.BATTLING) return;
+
+        GameManager.instance.managerUI.DimActivate(arrangeBackdrop, false);
+        Player player = GameManager.instance.player;
+        foreach (Card card in player.cardsOnField)
+        {
+            if (card.transform.parent == arrangeRow) card.transform.SetParent(hand.transform, true);
+        }
+        UpdateHandVisuals(player);
+    }
+
+    void OnStateTransition()
+    {
+        RefreshOpponentRow();
+        LeaveArrangeRow();
+    }
+
     void OnEnable()
     {
-        GameManager.OnStateTransition += RefreshOpponentRow;
+        GameManager.OnStateTransition += OnStateTransition;
     }
 
     void OnDisable()
     {
-        GameManager.OnStateTransition -= RefreshOpponentRow;
+        GameManager.OnStateTransition -= OnStateTransition;
     }
 
     /// <summary>
@@ -192,32 +238,34 @@ public class HandManager : MonoBehaviour
     /// </summary>
     void HandHidingCheck()
     {
-        // during the round the hand is the field, so it's always shown. In the workshop it hides
-        // (also shown while picking a card for a new sticker)
-        bool inRound = GameManager.instance.currentState != GameState.BUYING || GameManager.instance.managerUI.workshop.ChoosingStickerCard;
-        bool forceHide = !inRound && (activeCard != null || GameManager.instance.managerUI.workshop.drawingCanvas.isDrawing);
+        // hides in all phases when the cursor is away from it
+        // (always shown while picking a card for a new sticker)
+        bool inRound = GameManager.instance.currentState != GameState.BUYING;
+        bool forceShow = GameManager.instance.managerUI.workshop.ChoosingStickerCard;
+        bool forceHide = !inRound && !forceShow && (activeCard != null || GameManager.instance.managerUI.workshop.drawingCanvas.isDrawing);
         RectTransform handRT = hand.GetComponent<RectTransform>();
-        float hideSpeed = 0;
+        float hideSpeed = 0f;
 
-        // Deciding if hand should go up, down or not move
-        // Hand goes down (hides)
-        if (!inRound && Input.mousePosition.y >= handHideDistance && handRT.transform.position.y > handHiddenPos.transform.position.y || forceHide)
-        {
-            hideSpeed = -handHideSpeed;
-            // Making the hand movement speed increase exponentially
-            hideSpeed *= Mathf.Abs(handRT.transform.position.y - handHiddenPos.transform.position.y);
-        }
-        // Hand goes up (shows)
+        bool cursorNearHand = Input.mousePosition.y < handHideDistance && Mathf.Abs(hand.transform.position.x - Input.mousePosition.x) < handHideDistanceVertical;
+        bool shouldShow = !forceHide && (forceShow || cursorNearHand);
         // (the field sits a bit higher than the hand, so the cards can be read)
         float shownY = handShownPos.transform.position.y + ((inRound) ? roundFieldRaise * handRT.lossyScale.y : 0f);
-        if ((inRound || Input.mousePosition.y < handHideDistance && Mathf.Abs(hand.transform.position.x - Input.mousePosition.x) < handHideDistanceVertical)
-            && handRT.transform.position.y < shownY)
+
+        // Deciding if hand should go up, down or not move
+        // Hand goes up (shows)
+        if (shouldShow && handRT.transform.position.y < shownY)
         {
             hideSpeed = handHideSpeed;
             // Making the hand movement speed increase exponentially
             hideSpeed *= Mathf.Abs(handRT.transform.position.y - shownY);
         }
-        else hideSpeed = 0f;
+        // Hand goes down (hides)
+        else if (!shouldShow && handRT.transform.position.y > handHiddenPos.transform.position.y)
+        {
+            hideSpeed = -handHideSpeed;
+            // Making the hand movement speed increase exponentially
+            hideSpeed *= Mathf.Abs(handRT.transform.position.y - handHiddenPos.transform.position.y);
+        }
 
         // Actually moving the hand
         handRT.transform.position += new Vector3(0f, hideSpeed, 0f);

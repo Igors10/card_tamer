@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -25,9 +27,13 @@ public class ManagerUI : MonoBehaviour
     [SerializeField] Vector3 cardPreviewOffset = new Vector3(0f, 400f, 0f);
     [SerializeField] float zoomScale = 2f; // right click zoom size
 
+    [Header("screen dim")]
+    [SerializeField] float dimAlpha = 0.6f; // every dim (arranging, Rat Smart, game over) uses the same darkness
+    [SerializeField] float dimFadeTime = 0.3f;
+    readonly Dictionary<Image, Coroutine> dimFades = new Dictionary<Image, Coroutine>();
+
     [Header("game over")]
     [SerializeField] GameObject gameOverScreen;
-    [SerializeField] float bgAlpha;
     [SerializeField] float fadeInTime;
     [SerializeField] Image gameOverBG;
     [SerializeField] TextMeshProUGUI gameOverText;
@@ -81,6 +87,36 @@ public class ManagerUI : MonoBehaviour
 
     public Card ZoomedCard { get; private set; }
     Vector3 previewRestScale;
+
+    /// <summary>
+    /// Fades a dark screen image in or out (each dim sits under the UI it highlights, they all look the same)
+    /// </summary>
+    public void DimActivate(Image dim, bool activate)
+    {
+        if (dimFades.TryGetValue(dim, out Coroutine running) && running != null) StopCoroutine(running);
+        dimFades[dim] = StartCoroutine(DimFade(dim, activate ? dimAlpha : 0f));
+    }
+
+    IEnumerator DimFade(Image dim, float targetAlpha)
+    {
+        dim.enabled = true;
+        Color color = dim.color;
+        float startAlpha = color.a;
+
+        float t = 0;
+        while (t < dimFadeTime)
+        {
+            t += Time.deltaTime;
+            color.a = Mathf.Lerp(startAlpha, targetAlpha, Mathf.Clamp01(t / dimFadeTime));
+            dim.color = color;
+            yield return null;
+        }
+        color.a = targetAlpha;
+        dim.color = color;
+
+        // a hidden dim doesn't block clicks
+        dim.enabled = targetAlpha > 0f;
+    }
 
     public void StateChangeMessage(string messageText)
     {
@@ -139,6 +175,7 @@ public class ManagerUI : MonoBehaviour
 
         // creating game over text
         gameOverScreen.SetActive(true);
+        DimActivate(gameOverBG, true);
         gameOverText.text = customText ?? ((lostPlayer == localPlayer) ? lostText : localPlayer.playerName + " won!");
         gameOverText.color = localPlayer.playerColor;
 

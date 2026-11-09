@@ -28,13 +28,11 @@ public class DiscardManager : MonoBehaviour
     [SerializeField] float rewardStarTrailFadeTime = 0.25f;
 
     [Header("rows")]
-    [SerializeField] int rowSize = 6; // units[0..5] = your row, units[6..11] = opponent's row
-    [SerializeField] float topRowY = 170f;
-    [SerializeField] float bottomRowY = -170f;
+    [SerializeField] int rowSize = 6; // most cards shown in a row
     [SerializeField] float rowWidth = 1000f;
     [SerializeField] float maxDoodleSpacing = 325f; // with few cards they are this far apart
     [SerializeField] float maxDoodleScale = 1.3f; // and this big
-    [SerializeField] float betweenCutsTime = 0.35f; // pause between cutting your card and the opponent's
+    [SerializeField] float rowFadeTime = 0.3f; // one player's cards fade out, the other's fade in
 
     [Header("refs")]
     [SerializeField] DeathAnim death;
@@ -73,8 +71,8 @@ public class DiscardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// After the round: both players' knocked out cards are shown (yours on top, opponent's below),
-    /// Scissor Rat destroys one from each row. Picks are rolled before (RollAutoDiscard), -1 = that player lost no cards
+    /// After the round: each player's knocked out cards are shown one player after the other (host first on both games),
+    /// Scissor Rat destroys one of them. Picks are rolled before (RollAutoDiscard), -1 = that player lost no cards
     /// </summary>
     public IEnumerator StartRoundDiscard(int playerPick, int opponentPick)
     {
@@ -87,16 +85,61 @@ public class DiscardManager : MonoBehaviour
         // little pause before enabling the discards
         yield return new WaitForSeconds(beforeDiscardTime);
 
+        bool playerFirst = GameData.localSeat == 0 || GameManager.instance.playerConfig.offlineMatch;
+        if (playerFirst)
+        {
+            yield return RoundDiscardFor(player, playerPick);
+            yield return RoundDiscardFor(opponent, opponentPick);
+        }
+        else
+        {
+            yield return RoundDiscardFor(opponent, opponentPick);
+            yield return RoundDiscardFor(player, playerPick);
+        }
+
+        yield return HideDiscardUI();
+        FinishDiscard();
+    }
+
+    /// <summary>
+    /// One player's knocked out cards: Scissor Rat destroys the picked one (-1 = this player lost no cards).
+    /// The discard screen stays open between the players, only the cards fade out and the next ones fade in
+    /// </summary>
+    IEnumerator RoundDiscardFor(Player owner, int pick)
+    {
+        if (pick < 0) yield break;
+
+        // the previous player's cards fade away
+        bool screenOpen = discardUI.activeSelf;
+        if (screenOpen)
+        {
+            yield return new WaitForSeconds(afterDiscardTime);
+            discardPointer.SetActive(false);
+            yield return FadeRow(currentUnits, false);
+        }
+
         StartDiscard(true);
-        int longestRow = Mathf.Max(player.cardsInDiscard.Count, opponent.cardsInDiscard.Count); // both rows use the same size
-        List<UnitAtDiscard> playerRow = AssignRow(player.cardsInDiscard, player, 0, topRowY, longestRow);
-        List<UnitAtDiscard> opponentRow = AssignRow(opponent.cardsInDiscard, opponent, rowSize, bottomRowY, longestRow);
-        discardText.text = "Scissor Rat destroys one knocked out card from each side";
+        List<UnitAtDiscard> row = AssignRow(owner.cardsInDiscard, owner, 0, 0f, owner.cardsInDiscard.Count);
+        discardText.text = "Scissor Rat destroys one of " + ((owner == GameManager.instance.player) ? "your" : "the opponent's") + " knocked out cards";
+        if (screenOpen) yield return FadeRow(row, true);
 
-        StartCoroutine(AutoDiscard(playerPick >= 0 ? playerRow[playerPick] : null, opponentPick >= 0 ? opponentRow[opponentPick] : null));
+        yield return AutoDiscard(row[pick]);
+    }
 
-        // not finishing the coroutine before the discard is finished so that the battle phase doesnt change for the shop
-        while (discarding) { yield return null; }
+    /// <summary>
+    /// Fades a row of cards in or out
+    /// </summary>
+    IEnumerator FadeRow(List<UnitAtDiscard> row, bool fadeIn)
+    {
+        float t = 0;
+        while (t < rowFadeTime)
+        {
+            t += Time.deltaTime;
+            float alpha = Mathf.Clamp01(t / rowFadeTime);
+            foreach (UnitAtDiscard unit in row) unit.SetAlpha(fadeIn ? alpha : 1 - alpha);
+            yield return null;
+        }
+        foreach (UnitAtDiscard unit in row) unit.SetAlpha(fadeIn ? 1f : 0f);
     }
 
     /// <summary>
@@ -128,7 +171,7 @@ public class DiscardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Shows the cards as a row of doodles, using the doodles from firstUnit on. Returns the doodles in card order
+    /// Shows the cards in a row, using the discard slots from firstUnit on. Returns the slots in card order
     /// </summary>
     List<UnitAtDiscard> AssignRow(List<Card> cards, Player player, int firstUnit, float rowY, int layoutCount)
     {
@@ -143,8 +186,8 @@ public class DiscardManager : MonoBehaviour
             UnitAtDiscard unit = units[firstUnit + i];
             unit.gameObject.SetActive(true);
             ((RectTransform)unit.transform).anchoredPosition = new Vector2(spacing * (i - (cards.Count - 1) / 2f), rowY);
-            unit.sprite.RefreshSprite(cards[i].cardData.unitSprite, player.playerColor, cards[i].cardData.secondaryColor);
-            unit.storedCard = cards[i];
+            unit.SetCard(cards[i]);
+            unit.SetAlpha(1f);
             unit.SetRestScale(Vector3.one * scale);
             unit.Discard(false);
             unit.lockInteraction = currentDiscardRandom;
@@ -159,10 +202,16 @@ public class DiscardManager : MonoBehaviour
     /// </summary>
     public void CloseDiscardWindow()
     {
-        StartCoroutine(FinishDiscard());
+        StartCoroutine(CloseSequence());
     }
 
-    IEnumerator FinishDiscard()
+    IEnumerator CloseSequence()
+    {
+        yield return HideDiscardUI();
+        FinishDiscard();
+    }
+
+    IEnumerator HideDiscardUI()
     {
         // pause to let all the anims play out and let player understand which card was discarded
         if (currentDiscardRandom) yield return new WaitForSeconds(afterDiscardTime);
@@ -179,12 +228,16 @@ public class DiscardManager : MonoBehaviour
         // resetting discard vals
         currentUnits.Clear();
         discardAvailable = false;
-        discarding = false;
 
         discardPointer.SetActive(false);
         discardUI.SetActive(false);
-        // hiding the unit preview, units don't get the pointer exit event when the window closes under the cursor
+        // hiding the card preview, cards don't get the pointer exit event when the window closes under the cursor
         GameManager.instance.managerUI.PreviewCard(false, null, null, Vector3.zero);
+    }
+
+    void FinishDiscard()
+    {
+        discarding = false;
         GameManager.instance.shopManager.cardDisarded = true;
 
         // refreshin the shop (to see if the discard button still available)
@@ -218,9 +271,9 @@ public class DiscardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Scissor Rat thinks for a moment, then cuts the picked unit of each row (null = that row has none), one right after the other
+    /// Scissor Rat thinks for a moment, then cuts the picked card
     /// </summary>
-    IEnumerator AutoDiscard(UnitAtDiscard playerPick, UnitAtDiscard opponentPick)
+    IEnumerator AutoDiscard(UnitAtDiscard chosenUnit)
     {
         yield return Animations.instance.SkippablePause(beforeDiscardTime);
         Debug.Log("DiscardManager: auto discard started");
@@ -250,37 +303,26 @@ public class DiscardManager : MonoBehaviour
         }
 
 
-        // the picked units tremble for a moment and get cut, a short interval between the two
+        // the picked card trembles for a moment and gets cut
         discardAvailable = false;
-        List<string> messages = new List<string>();
-        foreach (UnitAtDiscard chosenUnit in new UnitAtDiscard[] { playerPick, opponentPick })
+        MovePointer(chosenUnit.transform.position, false, pointerEndPitch);
+        yield return chosenUnit.Tremble(finalTrembleTime, finalTrembleIntensity);
+
+        // Lucky: the card stays, its Lucky sticker is used up instead
+        Card card = chosenUnit.storedCard;
+        Sticker lucky = card.GetStickerWith<ProtectFromDiscardEffect>();
+        if (lucky != null)
         {
-            if (chosenUnit == null) continue;
-
-            MovePointer(chosenUnit.transform.position, false, pointerEndPitch);
-            yield return chosenUnit.Tremble(finalTrembleTime, finalTrembleIntensity);
-
-            // Lucky: the card stays, its Lucky sticker is used up instead
-            Card card = chosenUnit.storedCard;
-            Sticker lucky = card.GetStickerWith<ProtectFromDiscardEffect>();
-            if (lucky != null)
-            {
-                card.RemoveSticker(lucky);
-                Animations.instance.PopAnim(chosenUnit.gameObject, 0.4f, 0.3f);
-                AudioManager.instance.PlaySFX("ShopStarSFX");
-                messages.Add(card.cardData.name + " is lucky and loses its Lucky sticker instead");
-                discardText.text = string.Join(". ", messages);
-                yield return new WaitForSeconds(afterDiscardTime / 2);
-                continue;
-            }
-
-            messages.Add(card.cardData.name + " is destroyed");
-            yield return DiscardUnitSequence(chosenUnit);
-            discardText.text = string.Join(". ", messages);
-            yield return new WaitForSeconds(betweenCutsTime);
+            card.RemoveSticker(lucky);
+            chosenUnit.SetCard(card); // the shown card loses the sticker too
+            Animations.instance.PopAnim(chosenUnit.gameObject, 0.4f, 0.3f);
+            AudioManager.instance.PlaySFX("ShopStarSFX");
+            discardText.text = card.cardData.name + " is lucky and loses its Lucky sticker instead";
+            yield break;
         }
 
-        StartCoroutine(FinishDiscard());
+        yield return DiscardUnitSequence(chosenUnit);
+        discardText.text = card.cardData.name + " is destroyed";
     }
 
     /// <summary>
@@ -305,7 +347,7 @@ public class DiscardManager : MonoBehaviour
         yield return FlyRewardStar(unit.transform.position);
         GameManager.instance.shopManager.AddShopStar();
 
-        StartCoroutine(FinishDiscard());
+        StartCoroutine(CloseSequence());
     }
 
     /// <summary>

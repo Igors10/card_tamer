@@ -10,33 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
-  m_Name: Bomb
+  m_Name: Flanker
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: 2 buffs. Discarded after the fight
+  abilityDescription: +3 power when attacking a leftmost or rightmost card
   isSpecial: 0
-  stickerColor: {r: 0.9411765, g: 0.65882355, b: 0.40784314, a: 1}
+  stickerColor: {r: 0.7411765, g: 0.7411765, b: 0.7411765, a: 1}
   hasSide: 0
-  icon: {fileID: 7593991043121532099, guid: 3fb3da6a9f8680e43ab227fef67bfd4e, type: 3}
+  icon: {fileID: 21300000, guid: a940ce1477e30f64b9e4d9f949819932, type: 3}
   effects:
-  - rid: 8466844326851248219
-  - rid: 8466844326851248220
+  - rid: 8466844466926059620
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248219
+    - rid: 8466844466926059620
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Bomb!
+        customText: 
         showPresentation: 1
         oncePerRound: 0
-        condition: 0
-        amount: 2
-    - rid: 8466844326851248220
-      type: {class: DiscardSelfAfterFightEffect, ns: , asm: Assembly-CSharp}
-      data:
-        trigger: 9
-        customText: 
-        showPresentation: 0
-        oncePerRound: 0
+        condition: 12
+        amount: 3
+        maxAmount: 0

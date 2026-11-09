@@ -13,20 +13,32 @@ MonoBehaviour:
   m_Name: Scout
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 4
-  abilityDescription: 'On attack: reveals cards next to the target'
+  abilityDescription: Reveals a random opponent card after every turn. +2 power if
+    the opponent has no face down cards
   isSpecial: 0
   stickerColor: {r: 0.65882355, g: 0.9019608, b: 0.8784314, a: 1}
   hasSide: 0
   icon: {fileID: 21300000, guid: 8a467bc9ddf05f0408549fbd58c718a8, type: 3}
   effects:
-  - rid: 8466844326851248238
+  - rid: 8466844466926059623
+  - rid: 8466844466926059624
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248238
-      type: {class: RevealTargetNeighboursEffect, ns: , asm: Assembly-CSharp}
+    - rid: 8466844466926059623
+      type: {class: RevealRandomOnTurnEndEffect, ns: , asm: Assembly-CSharp}
       data:
-        trigger: 6
-        customText: Scouting!
+        trigger: 9
+        customText: 
         showPresentation: 1
         oncePerRound: 0
+    - rid: 8466844466926059624
+      type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 6
+        customText: 
+        showPresentation: 1
+        oncePerRound: 0
+        condition: 11
+        amount: 2
+        maxAmount: 0

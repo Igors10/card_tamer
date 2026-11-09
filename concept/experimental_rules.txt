@@ -24,33 +24,27 @@ Attack-
 Stickers have different colors, so its easier to distinguish between them. Special stickers are bigger with a star shape behind the sticker.
 
 Base stickers:
-1) [4 power] power-up when attacking
-2) [4 power] defends card on the left(/right) (cards attacking it are targeting this card instead), power-up when attacked
-3) [2 power] (card on the) left(/right) gets power-up
-4) [3 power] power-up if you have less cards (than your opponent) 
-5) [3 power] power-up if you have less hp (than your opponent)
-6) [4 power] power-up if there's a face down card on your side
-7) [3 power] power-up if previous fight was lost
-8) [3 power] reveal cards on both sides of the target on attack
-9) [4 power] power-up, knocks itself out at the end of fight
+1) [4 power] power-up when attacking -> +2 power when attacking
+2) [4 power] defends card on the left(/right) (cards attacking it are targeting this card instead), power-up when attacked -> +3 power when attacked, defends card on the left (only left is possible)
+3) [2 power] (card on the) left(/right) gets power-up -> most left and most right cards get +1 power
+4) [3 power] power-up if you have less cards (than your opponent) -> remove
+5) [3 power] power-up if you have less hp (than your opponent) -> remove
+6) [4 power] power-up if there's a face down card on your side -> remove
+7) [3 power] power-up if previous fight was lost -> +2 power if previous fight was lost
+8) [3 power] reveal cards on both sides of the target on attack -> reveal a random unrevealed card on opponents side at the end of the turn. +2 power if opponent has no face down cards
+9) [4 power] power-up, knocks itself out at the end of fight -> +4 power, knocks itself at the end of the fight
+new) +0-3 power
+new) +3 power when attacking most left or right card
 
-Additional stickers:
-1) power-up when attacking
-2) power-up when targeted
-3) power-up if opposing card has more power-ups (before this triggers)
-4) doesn't get discarded (instead this sticker gets destroyed)
-5) mixes up opponent card positions after a fight
-6) on win- powers up next card
-7) 2 power-ups, discards itself after a fight
-8) hides itself (face down and player can choose to switch its position with any other face down card) after a fight
-9) power-up if against a side card (card that is located on the very left or right of opponent cards)
+Additional stickers (no such thing as additional or base stickers anymore, any previously base sticker can be an additional, when buying add sticker it chooses from the sticker list)
 
 Special stickers:
-1) [BEAST 5 power] discards opponent's card on win, power-up unless already destroyed a card this round (in the workshop opponent gets compensated 1 star per destroyed card)
-2) [JOKER 4 power] hides itself on win, power-up when attacking, switches attacking card if targeted (if attacked switches attacking card to another random card from opponent's field)
-3) [PHANTOM 2 power] has a phantom copy with 2 power-ups. (creates a phantom copy of itself at the beginning of a round, phantom has 2 power-ups and 4 base power. After phantom or this fight they both get revealed, player chooses which one becomes phantom (only player sees which one of the two copies is the phantom with 2 power ups) if main card gets knocked out, the phantom discards. The phantom discards at the end of round.)
-4) [SEER 4 power] all your cards get power-up if predict face down target (when any of your cards attack a face down card choose from a list of known opponent cards, if guessed your attacking card gets a power-up)
-5) [DRAGON 5 power] knocks out opponent card in the same position (same position on the field, ex. dragon being most left discards most left card. If opponent has no card in that position knocks out the closest (the most right))
+1) [BEAST 5 power] discards opponent's card on win, power-up unless already destroyed a card this round (in the workshop opponent gets compensated 1 star per destroyed card) -> +2 power; +2 power when attacking, discards cards it knocks out when attacking (compensates 1 star per card)
+2) [JOKER 4 power] hides itself on win, power-up when attacking, switches attacking card if targeted (if attacked switches attacking card to another random card from opponent's field) -> +0-3 power, every time opponent attacks there's a 33% chance the attacker will get changed (it's a 100% chance when joker itself is attacked)
+3) [PHANTOM 2 power] has a phantom copy with 2 power-ups. (creates a phantom copy of itself at the beginning of a round, phantom has 2 power-ups and 4 base power. After phantom or this fight they both get revealed, player chooses which one becomes phantom (only player sees which one of the two copies is the phantom with 2 power ups) if main card gets knocked out, the phantom discards. The phantom discards at the end of round.) -> main idea is the same, the phantom version has +12 power, whenever one of them is reveal the other gets automatically revealed too.
+
+4) [SEER 4 power] all your cards get power-up if predict face down target (when any of your cards attack a face down card choose from a list of known opponent cards, if guessed your attacking card gets a power-up) -> remove from the list
+5) [DRAGON 5 power] knocks out opponent card in the same position (same position on the field, ex. dragon being most left discards most left card. If opponent has no card in that position knocks out the closest (the most right)) -> remove from the list
 
 
 Clarifications-

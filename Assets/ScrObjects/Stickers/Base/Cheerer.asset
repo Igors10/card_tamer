@@ -13,21 +13,21 @@ MonoBehaviour:
   m_Name: Cheerer
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 2
-  abilityDescription: Card on the {side} gets a buff
+  abilityDescription: Your leftmost and rightmost cards get +1 power
   isSpecial: 0
   stickerColor: {r: 0.95686275, g: 0.8901961, b: 0.6392157, a: 1}
-  hasSide: 1
+  hasSide: 0
   icon: {fileID: 4815476061570213978, guid: 299c733a2b9a39641802ed9f0fd86236, type: 3}
   effects:
-  - rid: 8466844326851248233
+  - rid: 8466844466926059621
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248233
+    - rid: 8466844466926059621
       type: {class: NeighbourPowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 9
-        customText: Cheered on!
+        customText: 
         showPresentation: 1
         oncePerRound: 0
         amount: 1

@@ -10,25 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
-  m_Name: Fierce
+  m_Name: Wildcard
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 0
-  abilityDescription: Buff when attacking
+  abilityDescription: Random +0 to +3 power
   isSpecial: 0
   stickerColor: {r: 0.9098039, g: 0.5411765, b: 0.5411765, a: 1}
   hasSide: 0
   icon: {fileID: 21300000, guid: c0be3b17518754449883d2d170b43786, type: 3}
   effects:
-  - rid: 8466844326851248224
+  - rid: 8466844466926059614
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248224
+    - rid: 8466844466926059614
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Attacking!
+        customText: 
         showPresentation: 1
         oncePerRound: 0
-        condition: 1
-        amount: 1
+        condition: 0
+        amount: 0
+        maxAmount: 3

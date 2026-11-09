@@ -40,6 +40,7 @@ public class Workshop : MonoBehaviour
     [SerializeField] GameObject randomPresetButton;
     [SerializeField] UnitPresetList galleryList;
     UnitPreset loadedGalleryPreset;
+    HashSet<UnitPreset> usedGalleryPresets = new HashSet<UnitPreset>(); // drawings already made into cards this game
     [SerializeField] GameObject createButton;
     [SerializeField] AutoFade createdCardPresenter;
     [SerializeField] Card cardPresenterPreviewCard;
@@ -307,7 +308,7 @@ public class Workshop : MonoBehaviour
     // ====================
 
     /// <summary>
-    /// Shop "Add sticker": offers add-on stickers, then the player clicks a card in hand to put it on
+    /// Shop "Add sticker": offers stickers from the same pool as new cards, then the player clicks a card in hand to put it on
     /// </summary>
     public void StickerOptions()
     {
@@ -324,11 +325,11 @@ public class Workshop : MonoBehaviour
         for (int a = 0; a < abilityOption.Length; a++)
         {
             // trying to give different options (only repeats if there are not enough stickers)
-            Sticker stickerToAssign = generator.PickRandomSticker("addon");
-            for (int tries = 0; tries < 20 && pickedStickers.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker("addon");
+            Sticker stickerToAssign = generator.PickRandomSticker("basic");
+            for (int tries = 0; tries < 20 && pickedStickers.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker("basic");
             pickedStickers.Add(stickerToAssign.ability);
 
-            abilityOption[a].abilityNote.InitAbilityNote(stickerToAssign, false);
+            abilityOption[a].abilityNote.InitAbilityNote(stickerToAssign);
         }
     }
 
@@ -399,8 +400,9 @@ public class Workshop : MonoBehaviour
         // new drawings are saved by default
         saveToGalleryToggle.isOn = true;
 
-        // random preset button only when there's something in the gallery
-        randomPresetButton.SetActive(GetGalleryDrawings().Exists(preset => preset != null));
+        // gallery button starts from the first drawing again, only shown when there's an unused one
+        loadedGalleryPreset = null;
+        randomPresetButton.SetActive(GetUnusedGalleryDrawings().Count > 0);
 
         // Rat explaining the drawing
         if (RatSmart.instance.drawingExplained == false && GameData.firstTimePlaying)
@@ -506,6 +508,9 @@ public class Workshop : MonoBehaviour
         // named drawing, saving it if the checkmark is on
         else if (saveToGalleryToggle.isOn) SaveCanvasToGallery();
 
+        // the loaded gallery drawing is used now, the gallery button skips it for the rest of the game
+        if (!drawingCanvas.IsCanvasEmpty() && loadedGalleryPreset != null) usedGalleryPresets.Add(loadedGalleryPreset);
+
         // online the other game creates the same card in this player's hand
         if (!GameManager.instance.playerConfig.offlineMatch) MatchNetwork.instance.SendCreateCard(newCardData, randomUnitPreset, canvasTextures);
 
@@ -547,26 +552,27 @@ public class Workshop : MonoBehaviour
             savedPreset.unitName = nameInput.text;
             EditorUtility.SetDirty(savedPreset);
             AssetDatabase.SaveAssets();
+            usedGalleryPresets.Add(savedPreset); // just drawn, it's used this game
         }
         SyncGalleryList();
 #else
-        Gallery.SaveToSaveFolder(nameInput.text, drawingCanvas.GetTextures());
+        usedGalleryPresets.Add(Gallery.SaveToSaveFolder(nameInput.text, drawingCanvas.GetTextures()));
 #endif
     }
 
     /// <summary>
-    /// Random preset button: puts a random gallery drawing (different from the current one) on the canvas and enters its name
+    /// Load from gallery button: puts the next gallery drawing not used this game on the canvas (from the first one, wraps around) and enters its name
     /// </summary>
-    public void LoadRandomGalleryPreset()
+    public void LoadNextGalleryPreset()
     {
         AudioManager.instance.PlaySFX("ButtonSFX");
 
-        List<UnitPreset> options = GetGalleryDrawings().FindAll(preset => preset != null && preset != loadedGalleryPreset);
-        // only one drawing in the gallery and it's already loaded
-        if (options.Count == 0 && loadedGalleryPreset != null) options.Add(loadedGalleryPreset);
+        List<UnitPreset> options = GetUnusedGalleryDrawings();
         if (options.Count == 0) { Animations.instance.ShakeAnim(randomPresetButton, 5f, 1f); return; }
 
-        loadedGalleryPreset = options[Random.Range(0, options.Count)];
+        // nothing loaded yet = -1, so it starts from the first one
+        int next = (options.IndexOf(loadedGalleryPreset) + 1) % options.Count;
+        loadedGalleryPreset = options[next];
         drawingCanvas.LoadLayers(loadedGalleryPreset.sprite);
 
         nameInput.text = loadedGalleryPreset.unitName;
@@ -577,9 +583,9 @@ public class Workshop : MonoBehaviour
     }
 
     /// <summary>
-    /// Drawings the random preset button picks from. Builds start with an empty gallery, only the player's own saved drawings
+    /// Drawings the gallery button goes through, without the ones used this game. Builds start with an empty gallery, only the player's own saved drawings
     /// </summary>
-    List<UnitPreset> GetGalleryDrawings()
+    List<UnitPreset> GetUnusedGalleryDrawings()
     {
         List<UnitPreset> gallery = new List<UnitPreset>();
 #if UNITY_EDITOR
@@ -587,7 +593,7 @@ public class Workshop : MonoBehaviour
         gallery.AddRange(galleryList.presets);
 #endif
         gallery.AddRange(Gallery.GetSavedDrawings());
-        return gallery;
+        return gallery.FindAll(preset => preset != null && !usedGalleryPresets.Contains(preset));
     }
 
 #if UNITY_EDITOR

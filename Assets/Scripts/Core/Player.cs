@@ -155,6 +155,9 @@ public class Player : MonoBehaviour
         // resetting vals
         cardPlayed = false;
 
+        // battle: back to the placing soundtrack until the next attack target is picked
+        if (GameManager.instance.currentState == GameState.BATTLING) AudioManager.instance.PlaySoundtrack("AltMainTrack");
+
         // Triggering player specific events
         StartTurnEvents();
 

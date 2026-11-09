@@ -7,17 +7,12 @@ using System.Collections.Generic;
 public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("refs")]
-    [SerializeField] Material defaultMaterial;
-    [SerializeField] Material selectMaterial;
-    [SerializeField] Material discardMaterial;
-    public UnitSprite sprite;
-    [SerializeField] Image[] unitPiece;
+    public Card card; // read only copy of the card that is shown (and cut)
     [SerializeField] CartoonShakeEffect cartoonShakeEffect;
     [SerializeField] HoverEffect hoverEffect;
     [SerializeField] GameObject CutVFX;
 
     [Header("discard attributes")]
-    [SerializeField] Color discardedUnitColor;
     [SerializeField] float discardedUnitSizeMod = 0.75f;
 
     [Header("cut in half")]
@@ -36,15 +31,34 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     bool discarded = false;
     [HideInInspector] public bool lockInteraction = false;
     Vector3 defaultScale;
-    Vector3 spriteRestScale;
-    Vector3 spriteRestPos;
+    Vector3 cardRestScale;
+    Vector3 cardRestPos;
     List<GameObject> cutHalves = new List<GameObject>();
 
     private void Awake()
     {
         defaultScale = transform.localScale;
-        spriteRestScale = sprite.transform.localScale;
-        spriteRestPos = sprite.transform.localPosition;
+        cardRestScale = card.transform.localScale;
+        cardRestPos = card.transform.localPosition;
+    }
+
+    /// <summary>
+    /// Fading the whole slot (used when the discard switches to the other player's cards)
+    /// </summary>
+    public void SetAlpha(float alpha)
+    {
+        CanvasGroup group = GetComponent<CanvasGroup>();
+        if (group == null) group = gameObject.AddComponent<CanvasGroup>();
+        group.alpha = alpha;
+    }
+
+    /// <summary>
+    /// Shows this card (its owner's colors)
+    /// </summary>
+    public void SetCard(Card newCard)
+    {
+        storedCard = newCard;
+        card.AssignCardData(newCard.cardData, newCard.player);
     }
 
     private void OnDisable()
@@ -87,9 +101,8 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         GameManager.instance.discardManager.discardPointer.SetActive(isHover);
         GameManager.instance.discardManager.MovePointer(transform.position);
 
-        // color the unit as selectable
-        Material newMaterial = (isHover && GameManager.instance.discardManager.discardAvailable) ? selectMaterial : defaultMaterial;
-        sprite.RefreshSpriteMaterial(newMaterial);
+        // highlighting the card as selectable
+        card.HighlightCard(isHover && GameManager.instance.discardManager.discardAvailable);
 
         // creating card preview above the unit
         Vector3 previewPos = GameManager.instance.discardManager.previewPoint.transform.position;
@@ -125,25 +138,9 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (isDiscarded) UnitDeathAnim();
         else RemoveCutHalves();
 
-        // Making unit appear cut in half
-        /*
-        for (int i = 0; i < unitPiece.Length; i++)
-        {
-            unitPiece[i].gameObject.SetActive(isDiscarded);
-            //unitPiece[i].sprite = sprite.sprite;
-        }*/
-
-        // Disabling the preview
+        // Disabling the preview and the highlight
         GameManager.instance.managerUI.PreviewCard(false, storedCard.cardData, storedCard.player, Vector3.zero);
-
-        // chaning the material
-        Material material = (isDiscarded) ? discardMaterial : defaultMaterial; 
-        sprite.RefreshSpriteMaterial(material);
-
-        // changing the color
-        Color primColor = (isDiscarded) ? discardedUnitColor : storedCard.player.playerColor;
-        Color secColor = (isDiscarded) ? discardedUnitColor : storedCard.cardData.secondaryColor;
-        sprite.RefreshColor(primColor, secColor);
+        card.HighlightCard(false);
 
         // chaning the size (always from the default size, so units don't shrink a little more every discard)
         transform.localScale = (isDiscarded) ? defaultScale * discardedUnitSizeMod : defaultScale;
@@ -158,31 +155,31 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     // ===============
 
     /// <summary>
-    /// Unit shakes harder and harder right before getting cut
+    /// Card shakes harder and harder right before getting cut
     /// </summary>
     public IEnumerator Tremble(float time, float maxIntensity)
     {
-        Transform spriteTransform = sprite.transform;
+        Transform cardTransform = card.transform;
         float t = 0;
         while (t < time)
         {
             t += Time.deltaTime;
             float intensity = maxIntensity * Mathf.Clamp01(t / time);
-            spriteTransform.localPosition = spriteRestPos + (Vector3)(Random.insideUnitCircle * intensity);
+            cardTransform.localPosition = cardRestPos + (Vector3)(Random.insideUnitCircle * intensity);
             yield return null;
         }
-        spriteTransform.localPosition = spriteRestPos;
+        cardTransform.localPosition = cardRestPos;
     }
 
     /// <summary>
-    /// Replaces the unit with two halves cut along the slash, they split apart, hang for a moment and fall off
+    /// Replaces the card with two halves cut along the slash, they split apart, hang for a moment and fall off
     /// </summary>
     public void CutInHalf()
     {
         RemoveCutHalves();
 
-        // the unit might still have the hover highlight on, halves should have the normal outline
-        sprite.RefreshSpriteMaterial(defaultMaterial);
+        // the card might still have the hover highlight on, halves shouldn't have it
+        card.HighlightCard(false);
 
         // picking a cut angle around the slash and turning the slash VFX to match it
         float angleOffset = Random.Range(-cutAngleVariation, cutAngleVariation);
@@ -194,7 +191,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         // halves are created next to the unit (not inside it), so the discard shrink doesn't affect them
         GameObject upperHalf = CreateHalf(cutNormal);
         GameObject lowerHalf = CreateHalf(-cutNormal);
-        sprite.gameObject.SetActive(false);
+        card.gameObject.SetActive(false);
 
         StartCoroutine(HalfFlyAnim(upperHalf.transform, cutNormal, cutDirection, 1f));
         StartCoroutine(HalfFlyAnim(lowerHalf.transform, -cutNormal, -cutDirection, -1f));
@@ -211,10 +208,13 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         halfTransform.localScale = transform.localScale;
         half.GetComponent<CanvasGroup>().blocksRaycasts = false;
 
-        // copying the whole layered sprite (colors and outline materials) and cutting every layer along the same line
-        GameObject spriteCopy = Instantiate(sprite.gameObject, halfTransform);
+        // copying the whole card (only its looks) and cutting every graphic along the same line
+        GameObject cardCopy = Instantiate(card.gameObject, halfTransform);
+        Destroy(cardCopy.GetComponent<Card>());
+        Destroy(cardCopy.GetComponent<CardInput>());
+        Destroy(cardCopy.GetComponent<HoverEffect>());
         Vector2 linePoint = halfTransform.InverseTransformPoint(CutVFX.transform.position);
-        foreach (Image layer in spriteCopy.GetComponentsInChildren<Image>(true))
+        foreach (Graphic layer in cardCopy.GetComponentsInChildren<Graphic>(true))
         {
             layer.raycastTarget = false;
             layer.gameObject.AddComponent<HalfPlaneClip>().SetLine(halfTransform, linePoint, keptSide);
@@ -263,14 +263,14 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     /// <summary>
-    /// Cleaning up halves from the previous cut and showing the whole unit again
+    /// Cleaning up halves from the previous cut and showing the whole card again
     /// </summary>
     void RemoveCutHalves()
     {
         foreach (GameObject half in cutHalves) if (half != null) Destroy(half);
         cutHalves.Clear();
-        sprite.gameObject.SetActive(true);
-        sprite.transform.localPosition = spriteRestPos;
-        sprite.transform.localScale = spriteRestScale;
+        card.gameObject.SetActive(true);
+        card.transform.localPosition = cardRestPos;
+        card.transform.localScale = cardRestScale;
     }
 }

@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Cuts away the part of a UI graphic that is on the wrong side of a line by changing its mesh,
-/// so it works with any shader (masks don't work with the unit outline shader). Used for cutting units in half
+/// so it works with any shader (masks don't work with the unit outline shader). Used for cutting cards in half
 /// </summary>
 public class HalfPlaneClip : BaseMeshEffect
 {
@@ -22,7 +23,44 @@ public class HalfPlaneClip : BaseMeshEffect
         space = newSpace;
         linePoint = point;
         lineNormal = normal.normalized;
-        if (graphic != null) graphic.SetVerticesDirty();
+
+        // text doesn't use mesh effects, its letters get hidden whole on the cut away side instead
+        if (graphic is TMP_Text text)
+        {
+            text.OnPreRenderText -= HideCutLetters;
+            text.OnPreRenderText += HideCutLetters;
+
+            // inactive text has no mesh yet, it gets cut when it builds one
+            if (!text.isActiveAndEnabled) return;
+            text.ForceMeshUpdate();
+            HideCutLetters(text.textInfo);
+            text.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
+        }
+        else if (graphic != null) graphic.SetVerticesDirty();
+    }
+
+    protected override void OnDestroy()
+    {
+        if (graphic is TMP_Text text) text.OnPreRenderText -= HideCutLetters;
+        base.OnDestroy();
+    }
+
+    void HideCutLetters(TMP_TextInfo textInfo)
+    {
+        if (space == null) return;
+        Matrix4x4 toSpace = space.worldToLocalMatrix * transform.localToWorldMatrix;
+
+        for (int i = 0; i < textInfo.characterCount; i++)
+        {
+            TMP_CharacterInfo letter = textInfo.characterInfo[i];
+            if (!letter.isVisible) continue;
+
+            Vector2 center = toSpace.MultiplyPoint3x4((letter.bottomLeft + letter.topRight) / 2f);
+            if (Vector2.Dot(center - linePoint, lineNormal) >= 0) continue;
+
+            Color32[] colors = textInfo.meshInfo[letter.materialReferenceIndex].colors32;
+            for (int k = 0; k < 4; k++) colors[letter.vertexIndex + k].a = 0;
+        }
     }
 
     public override void ModifyMesh(VertexHelper vh)

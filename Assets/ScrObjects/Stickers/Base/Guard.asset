@@ -13,30 +13,31 @@ MonoBehaviour:
   m_Name: Guard
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 4
-  abilityDescription: Guards the card on the {side}. Buff when attacked
+  abilityDescription: Guards the card on the left. +3 power when attacked
   isSpecial: 0
   stickerColor: {r: 0.6392157, g: 0.76862746, b: 0.95686275, a: 1}
-  hasSide: 1
+  hasSide: 0
   icon: {fileID: 21300000, guid: 8b200c435b8448f4188ada337653f818, type: 3}
   effects:
-  - rid: 8466844326851248229
-  - rid: 8466844326851248230
+  - rid: 8466844466926059618
+  - rid: 8466844466926059619
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248229
+    - rid: 8466844466926059618
       type: {class: GuardNeighbourEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 9
         customText: 
-        showPresentation: 0
+        showPresentation: 1
         oncePerRound: 0
-    - rid: 8466844326851248230
+    - rid: 8466844466926059619
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Defending!
+        customText: 
         showPresentation: 1
         oncePerRound: 0
         condition: 2
-        amount: 1
+        amount: 3
+        maxAmount: 0

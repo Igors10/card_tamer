@@ -170,7 +170,8 @@ GameRandom (Assets/Scripts/Core/GameRandom.cs) wraps System.Random.
                     only one machine.
 
 Uses it: D6 final roll, random lane (Field), random discard
-(DiscardManager.AutoDiscard), PlayerUI.AddRandomFoodToken, tie-breaks in
+(DiscardManager.AutoDiscard), random sticker power (PowerUpEffect), Joker
+swap chance, Scout reveals, PlayerUI.AddRandomFoodToken, tie-breaks in
 KnockOutHighestEachSide, KnockOutLowestEnemy, SetLowestAllyPower,
 SwapHighestLowestPower, PushOpposingEnemy.
 
@@ -387,8 +388,12 @@ Attack (CommandType.Attack: index = attacker in the sender's cardsOnField,
   when it comes back; the other game first shows an arrow to the target
   (RemoteAttackTarget). CanApply lets the other player's Attack /
   AttackCancel through while RemoteAttackPending.
-  Everything inside a fight runs the same on both games: dice through
-  StopDice, Joker / Mixer / Phantom spot use GameRandom.
+  Everything inside a fight runs the same on both games: sticker power is
+  fixed (no dice in fights now), random parts use GameRandom: random +0-3
+  power (PowerUpEffect maxAmount), Joker swap chance (FindSwappingJoker,
+  rolled per Joker in field order, stops at the first swap), Phantom spot.
+  End of every turn: Scouts reveal a random face down card (ScoutReveals,
+  turn player's Scouts first, then the other's, field order).
 
 Choice (CommandType.Choice: index = option, -1 = skipped)
   FightManager.ChooseCard asks a player to pick a card: Phantom (which copy
@@ -401,7 +406,8 @@ Choice (CommandType.Choice: index = option, -1 = skipped)
 Old commands (PlayCard, ChooseTarget) belong to the old lane rules and
   aren't sent anymore.
 
-Dice (CommandType.StopDice: index = how many dice)
+Dice (CommandType.StopDice: index = how many dice) - not used in fights
+since the sticker rework (power is fixed), kept for dice abilities
   Rolling dice wait in D6.rollingDice (oldest first). The bot's stop by
   themselves. A click stops all of the local player's rolling dice
   (D6.StopDice) and online sends StopDice with the count. The other game
@@ -427,8 +433,8 @@ Discard after battle (no command, it's random)
   BattleManager end: both picks are rolled up front with
   DiscardManager.RollAutoDiscard, in seat order (host first, offline the
   player first), so both games use GameRandom the same way. Then
-  StartRoundDiscard(playerPick, opponentPick) shows both rows and cuts both
-  picked cards on both games.
+  StartRoundDiscard(playerPick, opponentPick) shows one player's cards at a
+  time, also in seat order (host's first), and cuts the picked card.
 
 Desync check (MatchNetwork.CheckSync)
   At every state change (GameManager.TransitionGameState, before the new

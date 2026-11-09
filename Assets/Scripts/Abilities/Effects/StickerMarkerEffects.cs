@@ -5,7 +5,8 @@ using UnityEngine;
 // They aren't queued by events (trigger Manual), FightManager / DiscardManager look for them on the card.
 
 /// <summary>
-/// Neighbour on the sticker's side gets power-ups when it fights (Cheerer). Runs on the fighting neighbour
+/// The leftmost and rightmost cards of its field get power when they fight, this card too if it's on a side (Cheerer).
+/// Runs on the fighting card
 /// </summary>
 [System.Serializable]
 public class NeighbourPowerUpEffect : AbilityEffect
@@ -19,13 +20,12 @@ public class NeighbourPowerUpEffect : AbilityEffect
 
     protected override IEnumerator Execute(EffectContext ctx)
     {
-        FightManager.instance.AddPowerUps(ctx.self, amount);
-        yield break;
+        yield return FightManager.instance.AddPower(ctx.self, amount);
     }
 }
 
 /// <summary>
-/// Attacks on the neighbour on the sticker's side hit this card instead (Guard)
+/// Attacks on the card on the left of this one hit this card instead (Guard)
 /// </summary>
 [System.Serializable]
 public class GuardNeighbourEffect : AbilityEffect
@@ -97,11 +97,15 @@ public class DestroyOnWinEffect : AbilityEffect
 }
 
 /// <summary>
-/// When this card is attacked, the attacker is swapped for another random card of the attacking player (Joker)
+/// When the opponent attacks, the attacker can get swapped for another random card of theirs (Joker).
+/// Always when this card is the target, otherwise with the chance
 /// </summary>
 [System.Serializable]
 public class SwapAttackerEffect : AbilityEffect
 {
+    [Tooltip("Chance in % to swap the attacker when another card of yours is attacked")]
+    public int chancePercent = 33;
+
     public SwapAttackerEffect()
     {
         trigger = EffectTrigger.Manual;
@@ -111,12 +115,13 @@ public class SwapAttackerEffect : AbilityEffect
 }
 
 /// <summary>
-/// At the start of the battle the card gets a phantom copy in a random spot (Phantom)
+/// At the start of the battle the card gets a phantom copy in a random spot (Phantom). The phantom's power comes from
+/// a PowerUpEffect with the IsPhantom condition. Revealing one of them reveals both
 /// </summary>
 [System.Serializable]
 public class PhantomCopyEffect : AbilityEffect
 {
-    [Tooltip("Base power of the phantom copy")]
+    [Tooltip("Old base power of the phantom copy, cards have no base power now")]
     public int phantomPower = 4;
 
     public PhantomCopyEffect()
@@ -174,6 +179,20 @@ public class RevealTargetNeighboursEffect : AbilityEffect
     {
         yield return FightManager.instance.RevealNeighbours(FightManager.instance.defender.card);
     }
+}
+
+/// <summary>
+/// While this card is on the field, a random face down opponent card is revealed at the end of every turn (Scout)
+/// </summary>
+[System.Serializable]
+public class RevealRandomOnTurnEndEffect : AbilityEffect
+{
+    public RevealRandomOnTurnEndEffect()
+    {
+        trigger = EffectTrigger.Manual;
+    }
+
+    protected override IEnumerator Execute(EffectContext ctx) { yield break; }
 }
 
 /// <summary>

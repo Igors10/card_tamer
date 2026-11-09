@@ -102,6 +102,8 @@ public class AudioManager : MonoBehaviour
         AudioClip soundtrack = Array.Find(musicClips, x => x.name == name);
 
         if (soundtrack == null) Debug.Log("Sound Not Found");
+        // already playing, it keeps going instead of starting over
+        else if (musicSource.clip == soundtrack && musicSource.isPlaying) return;
         else
         {
             musicSource.Stop();

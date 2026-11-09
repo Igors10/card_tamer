@@ -45,6 +45,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] float powerFlashHold = 0.1f; // how long the buff/debuff color stays before fading back
     [SerializeField] float powerFlashTime = 0.4f;
     Vector3 powerRestScale;
+    Vector3 powerBonusRestScale;
     Color powerBGRestColor;
     float targetPowerScale = -1f;
     Coroutine powerScaleRoutine;
@@ -140,6 +141,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         spriteRestScale = sprite.transform.localScale;
         spriteRestRotation = sprite.transform.localRotation;
         powerRestScale = powerUI.transform.localScale;
+        powerBonusRestScale = powerBonus.transform.localScale;
         powerBGRestColor = powerBG.color;
     }
 
@@ -156,9 +158,19 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         card = cardToInitialize;
         cardToInitialize.unit = this;
 
-        // special units have a purple power counter (buff/debuff flashes fade back to it)
-        if (IsSpecial) powerBGRestColor = specialPowerColor;
+        // power counter in the owner's color (buff/debuff flashes fade back to it)
+        powerBGRestColor = card.player.playerColor;
         powerBG.color = powerBGRestColor;
+
+        // the opponent's counter sits on the right of the unit (yours on the left, both on the outer side)
+        if (card.player != GameManager.instance.player)
+        {
+            foreach (Transform counterPart in new Transform[] { powerUI.transform, powerBonus.transform })
+            {
+                Vector3 pos = counterPart.localPosition;
+                counterPart.localPosition = new Vector3(Mathf.Abs(pos.x), pos.y, pos.z);
+            }
+        }
 
         RefreshUnitVisuals();
         sprite.RefreshSpriteMaterial(defaultMaterial);
@@ -257,8 +269,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
     public void RefreshUnitVisuals()
     {
-        // POWER
-        if (card.currentPower > 0 && stunned == false)
+        // POWER (cards start a fight with 0, the counter shows it anyway)
+        if (card.currentPower >= 0 && stunned == false)
         {
             powerUI.SetActive(true);
             powerValue.text = card.currentPower.ToString();
@@ -417,6 +429,37 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// <summary>
     /// Removes the unit off the board
     /// </summary>
+    /// <summary>
+    /// The power counter stops following the unit and stays where it is now (units fly around during the clash).
+    /// It has to stay inside the unit's canvas, so it's held in place every frame instead of moved out
+    /// </summary>
+    public void PinPowerCounter()
+    {
+        powerPinned = true;
+        pinnedPowerPos = powerUI.transform.position;
+        pinnedBonusPos = powerBonus.transform.position;
+        pinnedUnitScale = transform.localScale;
+    }
+
+    bool powerPinned;
+    Vector3 pinnedPowerPos;
+    Vector3 pinnedBonusPos;
+    Vector3 pinnedUnitScale;
+
+    void LateUpdate()
+    {
+        if (!powerPinned) return;
+
+        // same place and same size, whatever the unit does (it grows and squashes during the clash)
+        powerUI.transform.position = pinnedPowerPos;
+        powerBonus.transform.position = pinnedBonusPos;
+        Vector3 scale = transform.localScale;
+        Vector3 scaleFix = new Vector3(pinnedUnitScale.x / Mathf.Max(0.0001f, Mathf.Abs(scale.x)), pinnedUnitScale.y / Mathf.Max(0.0001f, Mathf.Abs(scale.y)), 1f);
+        float powerScale = (targetPowerScale > 0) ? targetPowerScale : 1f;
+        powerUI.transform.localScale = Vector3.Scale(powerRestScale * powerScale, scaleFix);
+        powerBonus.transform.localScale = Vector3.Scale(powerBonusRestScale, scaleFix);
+    }
+
     public void RemoveFromBoard()
     {
         // removes unit reference from field (fighting units aren't on a field)

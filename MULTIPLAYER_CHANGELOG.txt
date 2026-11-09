@@ -134,3 +134,13 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
     bring the attacker out) and AttackCancel (right click before a target).
     Attack now only carries the target part. The attacking card is revealed
     when it comes out, also offline.
+
+2026-11-09  Sticker rework (branch experimental-rules)
+  - No power-up dice in fights: stickers give fixed power. Random +0-3 power
+    (Wildcard, Joker) uses GameRandom.
+  - New GameRandom rolls in fights: Joker swap chance (every Joker of the
+    attacked player, in field order) and Scout reveals at the end of every
+    turn (turn player's Scouts first). Same order on both games.
+  - Attacker wins a tie, so no double knock outs.
+  - Add-on sticker list removed, AddSticker sends a sticker from the shared
+    pool (looked up by name in the base / special lists).

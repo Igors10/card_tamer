@@ -535,16 +535,9 @@ public class Card : MonoBehaviour
     /// </summary>
     public void GetStartingPower()
     {
-        int powerToGain = cardData.BaseSticker.power;
-
-        // phantom copy has its own base power
-        if (isPhantom)
-        {
-            List<(Ability strip, PhantomCopyEffect effect)> phantom = GetEffects<PhantomCopyEffect>();
-            if (phantom.Count > 0) powerToGain = phantom[0].effect.phantomPower;
-        }
-        startingPower = powerToGain;
-        GainPower(powerToGain, false);
+        // cards have no base power, all of it comes from stickers during the fight
+        startingPower = 0;
+        GainPower(0, false);
     }
 
     /// <summary>
