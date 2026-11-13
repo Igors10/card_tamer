@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
     [Header("players")]
     public Player player;
     public Player opponent;
-    public int startingMaxHealth;
+    public int startingHearts = 3; // losing a round costs a heart, the last one lost loses the game
     public int startingStars;
     public int startingResourceAmount;
     public int startingCardAmount = 4;
@@ -317,8 +317,7 @@ public class GameManager : MonoBehaviour
 
     void DebugStateInput()
     {
-        if (DebugKeysEnabled && Input.GetKeyDown(KeyCode.O)) opponent.endStateReady = true;
-    }
+        if (DebugKeysEnabled && Input.GetKeyDown(KeyCode.O)) opponent.endStateReady = true;    }
 
     public void EndTurn()
     {
@@ -389,10 +388,17 @@ public class GameManager : MonoBehaviour
                 // arranging cards, ready when the order is good
                 readyButton.gameObject.SetActive(true);
                 readyButton.UpdateButtonState();
+
+                // Rat buddy: how to arrange, then the Guard and Cheerer cards if there are any (all go away on Ready)
+                RatBuddy.instance.Hint("ArrangeHint");
+                Card guard = player.cardsOnField.Find(card => card.HasEffect<GuardNeighbourEffect>());
+                if (guard != null) RatBuddy.instance.Hint("ArrangeProtectHint", guard);
+                Card cheerer = player.cardsOnField.Find(card => card.HasEffect<NeighbourPowerUpEffect>());
+                if (cheerer != null) RatBuddy.instance.Hint("ArrangeBuffHint", cheerer);
                 break;
 
             case GameState.BATTLING:
-                
+
                 readyButton.gameObject.SetActive(false);
                 break;
 

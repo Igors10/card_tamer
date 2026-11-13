@@ -34,8 +34,9 @@ public class Workshop : MonoBehaviour
     [Header("refs")]
     Player player;
     CardGenerator generator;
-    [SerializeField] TextMeshProUGUI abilityReminder;
-    [SerializeField] TextMeshProUGUI abilityReminderPower;
+    [SerializeField] Ability abilityReminder; // chosen sticker shown next to the drawing canvas
+    [SerializeField] float stickerHeight = 66f; // strip size of the option and reminder stickers
+    [SerializeField] float stickerFontSize = 28f;
     [SerializeField] Toggle saveToGalleryToggle; // drawing is saved when the card is created. Editor saves into the project gallery, builds into the player's save folder
     [SerializeField] GameObject randomPresetButton;
     [SerializeField] UnitPresetList galleryList;
@@ -303,7 +304,7 @@ public class Workshop : MonoBehaviour
             {
                 Sticker defaultSticker = generator.PickRandomSticker("default");
                 pickedAbilities.Add(defaultSticker.ability);
-                abilityOption[a].abilityNote.InitAbilityNote(defaultSticker);
+                ShowSticker(abilityOption[a].sticker, defaultSticker, default);
                 continue;
             }
 
@@ -312,7 +313,14 @@ public class Workshop : MonoBehaviour
             for (int tries = 0; tries < 20 && pickedAbilities.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker(listName);
             pickedAbilities.Add(stickerToAssign.ability);
 
-            abilityOption[a].abilityNote.InitAbilityNote(stickerToAssign);
+            ShowSticker(abilityOption[a].sticker, stickerToAssign, default);
+        }
+
+        // Rat explaining the abilities
+        if (RatSmart.instance.abilitiesExplained == false && GameData.firstTimePlaying)
+        {
+            StartCoroutine(RatSmart.instance.PlayDialogue("AbilityExplainDial"));
+            RatSmart.instance.abilitiesExplained = true;
         }
     }
 
@@ -342,8 +350,14 @@ public class Workshop : MonoBehaviour
             for (int tries = 0; tries < 20 && pickedStickers.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker("basic");
             pickedStickers.Add(stickerToAssign.ability);
 
-            abilityOption[a].abilityNote.InitAbilityNote(stickerToAssign);
+            ShowSticker(abilityOption[a].sticker, stickerToAssign, default);
         }
+    }
+
+    void ShowSticker(Ability stickerUI, Sticker sticker, Color color)
+    {
+        stickerUI.InitSticker(sticker, color);
+        stickerUI.SetSize(stickerHeight, stickerFontSize);
     }
 
     void PickStickerOption(Sticker pickedSticker)
@@ -403,9 +417,7 @@ public class Workshop : MonoBehaviour
         workshopHintText.text = "Draw and name the card";
 
         // passing the ability
-        AbilityNote reminderNote = abilityReminder.GetComponentInParent<AbilityNote>();
-        reminderNote.storedAbilityColor = chosenAbilityColor;
-        reminderNote.InitAbilityNote(chosenAbility);
+        ShowSticker(abilityReminder, chosenAbility, chosenAbilityColor);
 
         // resetting name input field
         nameInput.text = "";

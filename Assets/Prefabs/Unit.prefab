@@ -1151,8 +1151,6 @@ MonoBehaviour:
   powerBG: {fileID: 4982152648981304929}
   specialPowerColor: {r: 0.78, g: 0.55, b: 0.96, a: 1}
   powerValue: {fileID: 532405815697476448}
-  buffedPowerColor: {r: 1, g: 0.82, b: 0.2, a: 1}
-  debuffedPowerColor: {r: 0.93962264, g: 0.38825914, b: 0.38825914, a: 1}
   powerOutline: {fileID: 86049159975142612}
   buffedOutlineMaterial: {fileID: 2100000, guid: 1971e54581b0a2840b408de8d1e3d948, type: 2}
   debuffedOutlineMaterial: {fileID: 2100000, guid: 36e61dd17a8ee9240bbd2b39c8fed356, type: 2}
@@ -1268,8 +1266,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PowerBonus
   text: {fileID: 4402346790521224490}
   buffColor: {r: 1, g: 1, b: 1, a: 1}
-  debuffColor: {r: 0.94, g: 0.25, b: 0.25, a: 1}
-  buffOutlineColor: {r: 1, g: 0.82, b: 0.2, a: 1}
   outlineColor: {r: 0, g: 0, b: 0, a: 1}
   outlineWidth: 0.25
   popTime: 0.3
@@ -3047,6 +3043,22 @@ PrefabInstance:
     - target: {fileID: 2588659275681599809, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
       propertyPath: m_Name
       value: Ability
+      objectReference: {fileID: 0}
+    - target: {fileID: 8193803934883941528, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 111.65
+      objectReference: {fileID: 0}
+    - target: {fileID: 8193803934883941528, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 111.65
+      objectReference: {fileID: 0}
+    - target: {fileID: 8193803934883941528, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 39.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8193803934883941528, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

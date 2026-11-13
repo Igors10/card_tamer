@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7736234372672870096}
   - component: {fileID: 3142292742626784239}
   - component: {fileID: 8879636440874054206}
+  - component: {fileID: 1890201409686690723}
   m_Layer: 5
   m_Name: unitAtDiscard
   m_TagString: Untagged
@@ -110,18 +111,8 @@ MonoBehaviour:
   card: {fileID: 4108238828413845030}
   cartoonShakeEffect: {fileID: 7736234372672870096}
   hoverEffect: {fileID: 8879636440874054206}
-  CutVFX: {fileID: 3230157483957034053}
+  cardCutter: {fileID: 1890201409686690723}
   discardedUnitSizeMod: 0.75
-  slashAngle: 9.2
-  cutAngleVariation: 15
-  splitDistance: 18
-  slipDistance: 14
-  splitTime: 0.15
-  holdTime: 0.35
-  fallTime: 0.8
-  fallSpeed: 250
-  fallGravity: 2200
-  fallSpin: 160
   storedCard: {fileID: 0}
   lockInteraction: 0
 --- !u!114 &8879636440874054206
@@ -139,6 +130,29 @@ MonoBehaviour:
   image: {fileID: 0}
   inGame: 1
   sizeMod: 1.1
+--- !u!114 &1890201409686690723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089137591101936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfd6c1a23e6d0b143b9f1faf32bfa9c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CardCutter
+  CutVFX: {fileID: 3230157483957034053}
+  slashAngle: 9.2
+  cutAngleVariation: 15
+  splitDistance: 18
+  slipDistance: 14
+  splitTime: 0.15
+  holdTime: 0.35
+  fallTime: 0.8
+  fallSpeed: 250
+  fallGravity: 2200
+  fallSpin: 160
 --- !u!1 &3230157483957034053
 GameObject:
   m_ObjectHideFlags: 0

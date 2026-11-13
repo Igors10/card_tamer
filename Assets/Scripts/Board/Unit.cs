@@ -36,11 +36,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     [SerializeField] Image powerBG;
     [SerializeField] Color specialPowerColor = new Color(0.78f, 0.55f, 0.96f);
     public TextMeshProUGUI powerValue;
-    [SerializeField] Color buffedPowerColor;
-    [SerializeField] Color debuffedPowerColor;
     [SerializeField] Image powerOutline; // shows if the power is buffed or debuffed
-    [SerializeField] Material buffedOutlineMaterial;
+    [SerializeField] Material buffedOutlineMaterial; // outline color comes from Colors (buff / debuff color)
     [SerializeField] Material debuffedOutlineMaterial;
+    static Material buffOutline, debuffOutline; // copies of the outline materials in the Colors colors, shared by all units
     [SerializeField] int defaultSizePower = 3; // power at which the counter has its default size
     [SerializeField] float scalePerPower = 0.08f; // how much the counter grows or shrinks per point of power
     [SerializeField] Vector2 powerScaleLimits = new Vector2(0.7f, 1.8f);
@@ -205,7 +204,25 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
 
         // flashing the counter background green or red
         if (powerFlashRoutine != null) StopCoroutine(powerFlashRoutine);
-        powerFlashRoutine = StartCoroutine(FlashPowerBG((powerChange > 0) ? buffedPowerColor : debuffedPowerColor));
+        powerFlashRoutine = StartCoroutine(FlashPowerBG((powerChange > 0) ? Colors.instance.buffColor : Colors.instance.debuffColor));
+    }
+
+    /// <summary>
+    /// Outline material for a buffed or debuffed counter, in the buff / debuff color from Colors
+    /// </summary>
+    Material OutlineMaterial(bool buffed)
+    {
+        if (buffOutline == null)
+        {
+            buffOutline = new Material(buffedOutlineMaterial);
+            buffOutline.SetColor("_SolidOutline", Colors.instance.buffColor);
+        }
+        if (debuffOutline == null)
+        {
+            debuffOutline = new Material(debuffedOutlineMaterial);
+            debuffOutline.SetColor("_SolidOutline", Colors.instance.debuffColor);
+        }
+        return buffed ? buffOutline : debuffOutline;
     }
 
     IEnumerator FlashPowerBG(Color flashColor)
@@ -288,9 +305,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
             powerValue.text = card.currentPower.ToString();
             RefreshPowerScale();
 
-            // green outline when buffed, red when debuffed
+            // buff colored outline when buffed, debuff colored when debuffed
             powerOutline.enabled = card.currentPower != card.startingPower;
-            powerOutline.material = (card.currentPower > card.startingPower) ? buffedOutlineMaterial : debuffedOutlineMaterial;
+            powerOutline.material = OutlineMaterial(card.currentPower > card.startingPower);
 
             // chaning the power indicator colors when buffed or debuffed
             //powerBG.color = (card.currentPower >= card.startingPower) ? buffedPowerColor : debuffedPowerColor;
@@ -494,7 +511,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (winning)
         {
             powerOutline.enabled = true;
-            powerOutline.material = buffedOutlineMaterial;
+            powerOutline.material = OutlineMaterial(true);
             ParticleManager.instance.SpawnVFX(powerValue.transform.position, "BuffVFX", counterOnCard);
         }
         else Animations.instance.ShakeAnim(counter.gameObject, loserShake, resultTime);
@@ -673,9 +690,9 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     }
 
     /// <summary>
-    /// Base power dice: special cards roll 2, the others 1
+    /// Base power dice: special cards roll 2 if FightManager allows it, the others 1
     /// </summary>
-    public int BaseDiceCount => card.cardData.IsSpecial ? 2 : 1;
+    public int BaseDiceCount => (card.cardData.IsSpecial && FightManager.instance.SpecialRollsTwoDice) ? 2 : 1;
 
     /// <summary>
     /// Base power: the dice roll at the same time until the click (one click stops them all)

@@ -9,6 +9,8 @@ public class Colors : MonoBehaviour
     public List<Color> allColorList = new List<Color>();
     const float secDarkColorCoof = 0.65f;
     const float secLightColorCoof = 0.55f;
+    public Color buffColor;
+    public Color debuffColor;
 
     void Awake()
     {

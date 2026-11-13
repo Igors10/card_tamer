@@ -28,6 +28,8 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
     [SerializeField] float deathThinkingTime;
     [SerializeField] float deathChoosingTime;
     [SerializeField] float afterDeathTime;
+    [SerializeField] float beforeHeartBreakTime = 0.5f; // winner's cards cheer first
+    [SerializeField] float afterHeartBreakTime = 1f; // the broken heart is seen before the round (or the game) ends
 
     [HideInInspector] public int currentLine;
     [HideInInspector] public bool lostCurrentRound;
@@ -58,45 +60,27 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         // phantoms disappear before damage is counted
         FightManager.instance.RemoveAllPhantoms();
 
-        // the player with cards left deals 1 damage for each of them
+        // the player with no cards left loses one heart (however many cards the winner has left)
         Player player = GameManager.instance.player;
         Player opponent = GameManager.instance.opponent;
-        if (player.cardsOnField.Count > 0) yield return DealRoundDamage(player, opponent);
-        else if (opponent.cardsOnField.Count > 0) yield return DealRoundDamage(opponent, player);
+        if (player.cardsOnField.Count > 0 && opponent.cardsOnField.Count == 0) yield return BreakHeart(player, opponent);
+        else if (opponent.cardsOnField.Count > 0 && player.cardsOnField.Count == 0) yield return BreakHeart(opponent, player);
 
         yield return WrapUpBattle();
     }
 
     /// <summary>
-    /// A damage particle flies from every card the winner has left to the loser's health
+    /// Winner's cards cheer, then one of the loser's hearts breaks. No hearts left: the loser loses the game
     /// </summary>
-    IEnumerator DealRoundDamage(Player winner, Player loser)
+    IEnumerator BreakHeart(Player winner, Player loser)
     {
-        PowerCounter counter = winner.powerCounter;
-        Vector3 healthbarPos = loser.playerUI.healthbar.transform.position;
+        foreach (Card card in winner.cardsOnField) card.Cheer();
+        yield return new WaitForSeconds(beforeHeartBreakTime);
 
-        List<GameObject> particles = new List<GameObject>();
-        foreach (Card card in winner.cardsOnField)
-        {
-            GameObject particle = Instantiate(dmgParticlePrefab, card.transform.position, Quaternion.identity, damageObj.transform);
-            particle.GetComponent<UnityEngine.UI.Image>().color = winner.playerColor;
-            particles.Add(particle);
-            AudioManager.instance.PlaySFX("MoreDamageSFX");
-            Animations.instance.PopAnim(particle, 0.3f, 0.45f);
-            card.Cheer();
-            yield return new WaitForSeconds(0.2f);
-        }
+        loser.LoseHeart();
+        yield return new WaitForSeconds(afterHeartBreakTime);
 
-        foreach (GameObject particle in particles)
-        {
-            yield return counter.Damage(healthbarPos, particle);
-            loser.TakeDamage(1);
-            Destroy(particle);
-            if (GameManager.instance.gameOver) yield break;
-            yield return new WaitForSeconds(0.2f);
-        }
-
-        yield return new WaitForSeconds(0.5f);
+        if (loser.health < 1) loser.PlayerDeath();
     }
 
     IEnumerator WrapUpBattle()

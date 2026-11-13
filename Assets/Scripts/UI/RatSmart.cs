@@ -31,6 +31,9 @@ public class RatSmart : MonoBehaviour
     [HideInInspector] public bool abilitiesExplained;
     [HideInInspector] public bool drawingExplained;
     [HideInInspector] public bool battleExplained;
+    [HideInInspector] public bool placingExplained;
+    [HideInInspector] public bool shopExplained;
+    [HideInInspector] public bool specialExplained;
 
 
     bool clicked;
@@ -38,6 +41,13 @@ public class RatSmart : MonoBehaviour
     private void Awake()
     {
         instance = this;
+
+        // the workshop tutorials come after the first round, when firstTimePlaying is already off, so they only check these
+        if (!GameData.firstTimePlaying)
+        {
+            shopExplained = true;
+            specialExplained = true;
+        }
     }
 
     /// <summary>
@@ -70,7 +80,7 @@ public class RatSmart : MonoBehaviour
     {
         // Enabling the rat
         RSobj.SetActive(true);
-        GameManager.instance.managerUI.DimActivate(screenDarken, true);
+        GameManager.instance.managerUI.DimActivate(screenDarken, true, true);
         ratText.GetComponent<AutoFade>().fadeInTime = fadeTime;
 
         for (int i = 0; i < dialogue.line.Count; i++)
@@ -100,8 +110,6 @@ public class RatSmart : MonoBehaviour
             } while (clicked == false);
 
             ratText.gameObject.GetComponent<AutoFade>().FadeOut(fadeTime);
-            // the screen gets lighter together with the last line
-            if (i == dialogue.line.Count - 1) GameManager.instance.managerUI.DimActivate(screenDarken, false);
             yield return new WaitForSeconds(fadeTime);
         }
 
@@ -110,7 +118,8 @@ public class RatSmart : MonoBehaviour
 
     public void StopDialogue()
     {
-        GameManager.instance.managerUI.DimActivate(screenDarken, false);
+        // the dim goes away instantly together with the rat
+        GameManager.instance.managerUI.DimActivate(screenDarken, false, true);
         RSobj.SetActive(false);
     }
 

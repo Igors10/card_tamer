@@ -10,22 +10,10 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public Card card; // read only copy of the card that is shown (and cut)
     [SerializeField] CartoonShakeEffect cartoonShakeEffect;
     [SerializeField] HoverEffect hoverEffect;
-    [SerializeField] GameObject CutVFX;
+    [SerializeField] CardCutter cardCutter;
 
     [Header("discard attributes")]
     [SerializeField] float discardedUnitSizeMod = 0.75f;
-
-    [Header("cut in half")]
-    [SerializeField] float slashAngle = 9.2f; // angle of the CutVFX slash, the cut line follows it
-    [SerializeField] float cutAngleVariation = 15f;
-    [SerializeField] float splitDistance = 18f; // how far the halves jump apart right after the cut
-    [SerializeField] float slipDistance = 14f; // how far the halves slide along the cut line
-    [SerializeField] float splitTime = 0.15f;
-    [SerializeField] float holdTime = 0.35f; // halves hang in the air for a moment before falling
-    [SerializeField] float fallTime = 0.8f;
-    [SerializeField] float fallSpeed = 250f;
-    [SerializeField] float fallGravity = 2200f;
-    [SerializeField] float fallSpin = 160f;
 
     [HideInInspector] public Card storedCard;
     bool discarded = false;
@@ -33,7 +21,6 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     Vector3 defaultScale;
     Vector3 cardRestScale;
     Vector3 cardRestPos;
-    List<GameObject> cutHalves = new List<GameObject>();
 
     private void Awake()
     {
@@ -118,15 +105,6 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         GameManager.instance.discardManager.DiscardUnit(this);
     }
 
-    void UnitDeathAnim()
-    {
-        // VFX
-        CutVFX.SetActive(true);
-
-        // SFX
-        AudioManager.instance.PlaySFX("UnitDeathSFX");
-    }
-
     /// <summary>
     /// Indicates that unit is discarded (or reverses it if false)
     /// </summary>
@@ -135,8 +113,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         discarded = isDiscarded;
 
-        if (isDiscarded) UnitDeathAnim();
-        else RemoveCutHalves();
+        if (!isDiscarded) RemoveCutHalves();
 
         // Disabling the preview and the highlight
         GameManager.instance.managerUI.PreviewCard(false, storedCard.cardData, storedCard.player, Vector3.zero);
@@ -172,94 +149,12 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     }
 
     /// <summary>
-    /// Replaces the card with two halves cut along the slash, they split apart, hang for a moment and fall off
+    /// Replaces the card with two halves cut along the slash, they split apart, hang for a moment and fall off.
+    /// Halves are created next to the unit (not inside it), so the discard shrink doesn't affect them
     /// </summary>
     public void CutInHalf()
     {
-        RemoveCutHalves();
-
-        // the card might still have the hover highlight on, halves shouldn't have it
-        card.HighlightCard(false);
-
-        // picking a cut angle around the slash and turning the slash VFX to match it
-        float angleOffset = Random.Range(-cutAngleVariation, cutAngleVariation);
-        CutVFX.transform.localRotation = Quaternion.Euler(0f, 0f, angleOffset);
-        float cutAngle = (slashAngle + angleOffset) * Mathf.Deg2Rad;
-        Vector2 cutDirection = new Vector2(Mathf.Cos(cutAngle), Mathf.Sin(cutAngle));
-        Vector2 cutNormal = new Vector2(-cutDirection.y, cutDirection.x);
-
-        // halves are created next to the unit (not inside it), so the discard shrink doesn't affect them
-        GameObject upperHalf = CreateHalf(cutNormal);
-        GameObject lowerHalf = CreateHalf(-cutNormal);
-        card.gameObject.SetActive(false);
-
-        StartCoroutine(HalfFlyAnim(upperHalf.transform, cutNormal, cutDirection, 1f));
-        StartCoroutine(HalfFlyAnim(lowerHalf.transform, -cutNormal, -cutDirection, -1f));
-    }
-
-    GameObject CreateHalf(Vector2 keptSide)
-    {
-        GameObject half = new GameObject("cutHalf", typeof(RectTransform), typeof(CanvasGroup));
-        RectTransform halfTransform = half.GetComponent<RectTransform>();
-        halfTransform.SetParent(transform.parent, false);
-        halfTransform.SetSiblingIndex(transform.GetSiblingIndex() + 1);
-        halfTransform.position = transform.position;
-        halfTransform.rotation = transform.rotation;
-        halfTransform.localScale = transform.localScale;
-        half.GetComponent<CanvasGroup>().blocksRaycasts = false;
-
-        // copying the whole card (only its looks) and cutting every graphic along the same line
-        GameObject cardCopy = Instantiate(card.gameObject, halfTransform);
-        Destroy(cardCopy.GetComponent<Card>());
-        Destroy(cardCopy.GetComponent<CardInput>());
-        Destroy(cardCopy.GetComponent<HoverEffect>());
-        Vector2 linePoint = halfTransform.InverseTransformPoint(CutVFX.transform.position);
-        foreach (Graphic layer in cardCopy.GetComponentsInChildren<Graphic>(true))
-        {
-            layer.raycastTarget = false;
-            layer.gameObject.AddComponent<HalfPlaneClip>().SetLine(halfTransform, linePoint, keptSide);
-        }
-
-        cutHalves.Add(half);
-        return half;
-    }
-
-    IEnumerator HalfFlyAnim(Transform half, Vector2 awayDirection, Vector2 slipDirection, float spinDirection)
-    {
-        Vector3 startingPos = half.localPosition;
-        Quaternion startingRotation = half.localRotation;
-        Vector3 splitOffset = (Vector3)(awayDirection * splitDistance + slipDirection * slipDistance);
-        CanvasGroup canvasGroup = half.GetComponent<CanvasGroup>();
-
-        // jumping apart
-        float t = 0;
-        while (t < splitTime)
-        {
-            if (half == null) yield break;
-            t += Time.deltaTime;
-            float coolT = 1 - Mathf.Pow(1 - Mathf.Clamp01(t / splitTime), 3);
-            half.localPosition = startingPos + splitOffset * coolT;
-            half.localRotation = startingRotation * Quaternion.Euler(0f, 0f, 8f * spinDirection * coolT);
-            yield return null;
-        }
-
-        yield return new WaitForSeconds(holdTime);
-
-        // falling down, spinning and fading out
-        Vector3 velocity = (Vector3)(awayDirection * fallSpeed * 0.4f) + Vector3.up * fallSpeed;
-        t = 0;
-        while (t < fallTime)
-        {
-            if (half == null) yield break;
-            t += Time.deltaTime;
-            velocity.y -= fallGravity * Time.deltaTime;
-            half.localPosition += velocity * Time.deltaTime;
-            half.Rotate(0f, 0f, fallSpin * spinDirection * Time.deltaTime);
-            canvasGroup.alpha = 1 - Mathf.Clamp01(t / fallTime);
-            yield return null;
-        }
-
-        half.gameObject.SetActive(false);
+        cardCutter.Cut(card, transform);
     }
 
     /// <summary>
@@ -267,8 +162,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     /// </summary>
     void RemoveCutHalves()
     {
-        foreach (GameObject half in cutHalves) if (half != null) Destroy(half);
-        cutHalves.Clear();
+        cardCutter.RemoveHalves();
         card.gameObject.SetActive(true);
         card.transform.localPosition = cardRestPos;
         card.transform.localScale = cardRestScale;

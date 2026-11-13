@@ -57,7 +57,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 87eb8fd327474f7b8fc55d2ec783e6a6, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -260,6 +260,9 @@ MonoBehaviour:
   icon: {fileID: 5507093274599945598}
   glow: {fileID: 7815542958291332781}
   specialScale: 1.1
+  buffOutline: {r: 0.6449341, g: 0.90188676, b: 0.69119895, a: 1}
+  debuffOutline: {r: 1, g: 0.6, b: 0.6, a: 1}
+  outlineWidth: 0.443
 --- !u!114 &8585581551969793057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -492,7 +495,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: effect desc
+  m_text: effect desc <material="Marimpa Atlas Material Buff">+1</material> <material="Marimpa
+    Atlas Material Debuff">-1</material>
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4468543f77b3bac438c92c4c99d7f57d, type: 2}
   m_sharedMaterial: {fileID: -6037277960551167827, guid: 4468543f77b3bac438c92c4c99d7f57d, type: 2}
@@ -519,7 +523,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
+  m_fontSize: 24
   m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -542,7 +546,7 @@ MonoBehaviour:
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
   m_ActiveFontFeatures: 6e72656b
-  m_enableExtraPadding: 0
+  m_enableExtraPadding: 1
   checkPaddingRequired: 0
   m_isRichText: 1
   m_EmojiFallbackSupport: 1

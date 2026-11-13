@@ -135,7 +135,8 @@ public class Card : MonoBehaviour
             bool attacking = gm.yourTurn == (player == gm.player);
             foreach ((Ability strip, PowerUpEffect effect) in GetEffects<PowerUpEffect>())
             {
-                if (!effect.CouldTrigger(this, attacking)) continue;
+                // the phantom's bonus isn't shown, it would give away which card is the phantom
+                if (effect.condition == PowerUpCondition.IsPhantom || !effect.CouldTrigger(this, attacking)) continue;
                 // bonuses that depend on the opposing card (Flanker) get an asterisk, they're only a maybe
                 buffTexts.Add("+" + effect.amount + ((effect.maxAmount > effect.amount) ? "-" + effect.maxAmount : "") + (effect.DependsOnOpposingCard ? "*" : ""));
             }
@@ -157,7 +158,12 @@ public class Card : MonoBehaviour
         shownBuffTexts.Clear();
         shownBuffTexts.AddRange(buffTexts);
 
-        while (buffIndicators.Count < buffTexts.Count) buffIndicators.Add(Instantiate(buffIndicatorTemplate, buffIndicatorTemplate.transform.parent));
+        while (buffIndicators.Count < buffTexts.Count)
+        {
+            TextMeshProUGUI indicator = Instantiate(buffIndicatorTemplate, buffIndicatorTemplate.transform.parent);
+            indicator.color = Colors.instance.buffColor;
+            buffIndicators.Add(indicator);
+        }
         for (int i = 0; i < buffIndicators.Count; i++)
         {
             bool shown = i < buffTexts.Count;

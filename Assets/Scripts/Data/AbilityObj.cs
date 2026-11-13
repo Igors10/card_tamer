@@ -30,11 +30,6 @@ public class AbilityObj : ScriptableObject
         }
     }
 
-    /// <summary>
-    /// "+X power" in the description: a much lighter version of the sticker color
-    /// </summary>
-    public Color BuffTextColor => Color.Lerp(stickerColor, Color.white, 0.45f);
-
     [SerializeReference, EffectPicker] public List<AbilityEffect> effects = new List<AbilityEffect>();
 
     /// <summary>
@@ -48,15 +43,18 @@ public class AbilityObj : ScriptableObject
         return (power + numberOfDice) + "-" + (power + 6 * numberOfDice);
     }
 
-    public string GetAbilityDesc(Color abilityColor, bool onRight = false)
+    /// <summary>
+    /// buffMaterial / debuffMaterial: TMP material names that outline the "+X" / "-X" numbers (null: plain numbers)
+    /// </summary>
+    public string GetAbilityDesc(Color abilityColor, bool onRight = false, string buffMaterial = null, string debuffMaterial = null)
     {
         string abilityText = abilityDescription;
 
-        // coloring the power modifiers, buffs in a much lighter sticker color and debuffs red (the whole "+2 power", "+2 to +5 power", "+2 more power")
-        string buffHex = ColorUtility.ToHtmlStringRGB(BuffTextColor);
-        abilityText = Regex.Replace(abilityText, @"\+\d+(?: to \+\d+)?(?: more)?(?: power)?", $"<color=#{buffHex}>$0</color>");
-        abilityText = Regex.Replace(abilityText, @"\-\d+(?: power)?", "<color=red>$0</color>");
         abilityText = Regex.Replace(abilityText, @"\b[Bb]uffs?\b", "<color=#2DB043>$0</color>");
+
+        // outlining the power modifiers ("+2", "-1", not ranges like "1-6"). After the word coloring, the material names have "Buff" in them
+        if (buffMaterial != null) abilityText = Regex.Replace(abilityText, @"(?<!\w)\+\d+", $"<material=\"{buffMaterial}\">$0</material>");
+        if (debuffMaterial != null) abilityText = Regex.Replace(abilityText, @"(?<!\w)\-\d+", $"<material=\"{debuffMaterial}\">$0</material>");
 
         // coloring the 'color' of abilities that work with specific color
         string hexColor = ColorUtility.ToHtmlStringRGB(abilityColor);

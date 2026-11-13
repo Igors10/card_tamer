@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: AbilityExplainDial
   m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
   line:
-  - First step of making a card is choosing an ability for it
-  - One on the left is just power
-  - One on the right has some unique effect
-  - Don't overthink what ability to choose, especially before you know how the game
-    works
+  - Stickers give your cards special effects
+  - Choose a starting one for your card
+  - Just go off vibes before you know the game rules

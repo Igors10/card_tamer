@@ -39,7 +39,7 @@ public class Player : MonoBehaviour
     public PowerCounter powerCounter;
 
     [Header("player attributes")]
-    public int health;
+    public int health; // hearts left
     public int maxStars;
     public int currentStars;
     public string playerName;
@@ -62,6 +62,7 @@ public class Player : MonoBehaviour
     [HideInInspector] public int[] food = new int[3];
     [HideInInspector] public int deadUnitsThisRound = 0;
     [HideInInspector] public int shopStars = 0;
+    [HideInInspector] public int freeStickersUsed = 0; // the first stickers of every round are free (ShopManager.freeStickers)
 
     [HideInInspector] public int damageTakenThisRound = 0;
 
@@ -73,8 +74,8 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        // health is set before any Start: PlayerUI.Start refreshes the healthbar, and 0 hp there looked like taking damage
-        health = GameManager.instance.startingMaxHealth;
+        // hearts are set before any Start: PlayerUI.Start spawns the hearts for them
+        health = GameManager.instance.startingHearts;
     }
 
     private void Start()
@@ -158,6 +159,14 @@ public class Player : MonoBehaviour
         // battle: back to the placing soundtrack until the next attack target is picked
         if (GameManager.instance.currentState == GameState.BATTLING) AudioManager.instance.PlaySoundtrack("AltMainTrack");
 
+        // Rat buddy: the opponent's first turn, your first turn (how to attack) and your second one
+        if (GameManager.instance.currentState == GameState.BATTLING)
+        {
+            if (this != GameManager.instance.player) RatBuddy.instance.Comment("OpponentTurnCom");
+            else if (!RatBuddy.instance.WasShown("AttackHint")) RatBuddy.instance.Hint("AttackHint");
+            else RatBuddy.instance.Comment("SecondTurnCom");
+        }
+
         // Triggering player specific events
         StartTurnEvents();
 
@@ -210,7 +219,19 @@ public class Player : MonoBehaviour
 
         if (health < 1) PlayerDeath();
     }
-    void PlayerDeath()
+
+    /// <summary>
+    /// Lost the round: one heart breaks. The game over is left to the caller (BattleManager lets the heart break first)
+    /// </summary>
+    public void LoseHeart()
+    {
+        if (health < 1) return;
+        damageTakenThisRound++;
+        health--;
+        playerUI.Refresh();
+    }
+
+    public void PlayerDeath()
     {
         dead = true;
         GameManager.instance.GameOver(this);
@@ -220,6 +241,9 @@ public class Player : MonoBehaviour
     public void EndRound()
     {
         GameData.firstTimePlaying = false;
+
+        // the next workshop has free stickers again
+        freeStickersUsed = 0;
 
         GameManager.instance.handManager.ReturnCardsToHand(this);
 

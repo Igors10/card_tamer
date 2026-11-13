@@ -119,6 +119,9 @@ public class AIOpponent : MonoBehaviour
     {
         yield return new WaitForSeconds(1.5f);
 
+        // first game: the bot thinks until the rat is done talking, so the player can read everything
+        while (RatBuddy.instance.IsTalking) yield return null;
+
         Player target = GameManager.instance.player;
         Card attackingCard = playerObj.cardsOnField[Random.Range(0, playerObj.cardsOnField.Count)];
         Card targetCard = target.cardsOnField[Random.Range(0, target.cardsOnField.Count)];
@@ -230,8 +233,14 @@ public class AIOpponent : MonoBehaviour
                 starsUpgraded = true;
             } */
 
+            // a free sticker is taken first, it costs nothing
+            if (shop.StickerPriceFor(playerObj) == 0 && playerObj.cardsInHand.Exists(card => card.cardData.CanAddSticker))
+            {
+                AddRandomSticker();
+                playerObj.shopStars -= shop.TakeStickerPrice(playerObj);
+            }
             // if has enough stars and no specials the AI will buy a special card
-            if (!playerObj.HasSpecialCard() && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
+            else if (!playerObj.HasSpecialCard() && playerObj.shopStars >= shop.drawSpecialPrice && playerObj.cardsInHand.Count < GameManager.instance.maxHandSize)
             {
                 AddSpecial();
                 playerObj.shopStars -= shop.drawSpecialPrice;
@@ -245,9 +254,8 @@ public class AIOpponent : MonoBehaviour
             // leftover stars go to stickers on random cards
             else if (playerObj.shopStars >= shop.stickerPrice && playerObj.cardsInHand.Exists(card => card.cardData.CanAddSticker))
             {
-                List<Card> cardsWithRoom = playerObj.cardsInHand.FindAll(card => card.cardData.CanAddSticker);
-                cardsWithRoom[Random.Range(0, cardsWithRoom.Count)].AddSticker(generator.PickRandomSticker("basic"));
-                playerObj.shopStars -= shop.stickerPrice;
+                AddRandomSticker();
+                playerObj.shopStars -= shop.TakeStickerPrice(playerObj);
             }
             // stops shopping only if it can't afford anything
             else nothingToBuy = true;
@@ -258,6 +266,15 @@ public class AIOpponent : MonoBehaviour
 
         playerObj.endStateReady = true;
         AIEndTurn();
+    }
+
+    /// <summary>
+    /// A random basic sticker on a random hand card that has room for it
+    /// </summary>
+    void AddRandomSticker()
+    {
+        List<Card> cardsWithRoom = playerObj.cardsInHand.FindAll(card => card.cardData.CanAddSticker);
+        cardsWithRoom[Random.Range(0, cardsWithRoom.Count)].AddSticker(generator.PickRandomSticker("basic"));
     }
     
     // =========================================================

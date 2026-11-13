@@ -17,7 +17,7 @@ MonoBehaviour:
   isSpecial: 0
   stickerColor: {r: 0.6392157, g: 0.76862746, b: 0.95686275, a: 1}
   hasSide: 0
-  icon: {fileID: 21300000, guid: 8b200c435b8448f4188ada337653f818, type: 3}
+  icon: {fileID: 21300000, guid: 54b0202791aac4644b1c33347215afd2, type: 3}
   effects:
   - rid: 8466844466926059618
   - rid: 8466844466926059619

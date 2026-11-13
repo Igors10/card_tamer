@@ -30,6 +30,9 @@ public class ReadyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
         // general buttom clicks effects
         buttonGlow.SetActive(false);
 
+        // the cards are arranged
+        if (GameManager.instance.currentState == GameState.PLACING) RatBuddy.instance.ClearHint("ArrangeHint", "ArrangeProtectHint", "ArrangeBuffHint");
+
         // online the press goes to the server first, both games apply it when it comes back (MatchNetwork)
         if (!GameManager.instance.playerConfig.offlineMatch)
         {

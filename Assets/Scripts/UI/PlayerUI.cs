@@ -17,21 +17,19 @@ public class PlayerUI : MonoBehaviour
     public GameObject UIobj;
     public TextMeshProUGUI playerName;
 
-    [Header("HP")]
-    public GameObject healthbar;
-    [SerializeField] Image healthbarFill;
-    [SerializeField] TextMeshProUGUI hpValue;
+    [Header("Hearts")]
+    public GameObject healthbar; // holds the hearts
+    [SerializeField] PlayerHeart heartTemplate; // the first heart, copied until there are GameManager.startingHearts, the row is centered on it
+    [SerializeField] float heartSpacing = 90f;
+    readonly List<PlayerHeart> hearts = new List<PlayerHeart>();
 
     [Header("Stars")]
     [SerializeField] GameObject starsObj;
     [SerializeField] TextMeshProUGUI starsText;
 
-    [Header("Damage effects")]
-    [SerializeField] ParticleSystem damageVFX;
-    [SerializeField] UIParticleBurst damageBurst; // UI particles that burst out of the healthbar when taking damage
+    [Header("Heart break effects")]
     [SerializeField] float shakeLenght;
-    [SerializeField] float shakeIntensity; 
-
+    [SerializeField] float shakeIntensity;
     [Header("Avatar")]
     [SerializeField] Image head;
     [SerializeField] Image face;
@@ -64,39 +62,40 @@ public class PlayerUI : MonoBehaviour
         defaultTokenPos = foodObj.transform.localPosition;
         shownTokenPos = (player.isOpponent) ? defaultTokenPos - new Vector3(offsetX, 0, 0) : defaultTokenPos + new Vector3(offsetX, 0, 0);
 
+        SpawnHearts();
         Refresh();
     }
 
     /// <summary>
-    /// Updates hp value on the healthbar (and plays damage animation if needed)
+    /// Copies the heart until there are as many as GameManager.startingHearts, in a row centered where the first one was
     /// </summary>
-    /// <param name="isDamage"></param>
+    void SpawnHearts()
+    {
+        hearts.Add(heartTemplate);
+        for (int i = 1; i < GameManager.instance.startingHearts; i++) hearts.Add(Instantiate(heartTemplate, heartTemplate.transform.parent));
+
+        RectTransform templateRect = (RectTransform)heartTemplate.transform;
+        Vector2 center = templateRect.anchoredPosition;
+        for (int i = 0; i < hearts.Count; i++)
+        {
+            ((RectTransform)hearts[i].transform).anchoredPosition = center + new Vector2(heartSpacing * (i - (hearts.Count - 1) / 2f), 0f);
+            hearts[i].SetFull(true);
+        }
+    }
+
+    /// <summary>
+    /// Updates the hearts (a heart that just got lost breaks) and the rest of the player UI
+    /// </summary>
     public void Refresh()
     {
-        // REFRESHING HP
+        // REFRESHING HEARTS
         // ==============
-        // checking if there was damage and applying shake effect if there was
-        if (Convert.ToInt32(hpValue.text) > player.health)
+        // hearts are lost from the last one
+        for (int i = 0; i < hearts.Count; i++)
         {
-            int damage = Convert.ToInt32(hpValue.text) - player.health;
-            DamageEffect(damage);
-        }
-        else if (Convert.ToInt32(hpValue.text) < player.health && Convert.ToInt32(hpValue.text) > 0)
-        {
-            // effects when healed
-
-            // play soundeffect
-            AudioManager.instance.PlaySFX("HealSFX");
-        }
-
-            // Updating the text
-            hpValue.text = player.health.ToString();
-
-        // Updating the healthbar fill
-        if (healthbarFill != null)
-        {
-            float newHealthbarFill = (player.health <= GameManager.instance.startingMaxHealth) ? (float)player.health / (float)GameManager.instance.startingMaxHealth : 1f;
-            healthbarFill.fillAmount = newHealthbarFill;
+            bool full = i < player.health;
+            if (hearts[i].IsFull && !full) HeartBreakEffect(hearts[i]);
+            hearts[i].SetFull(full);
         }
 
         // REFRESHING CARD COUNT
@@ -121,21 +120,11 @@ public class PlayerUI : MonoBehaviour
     } 
 
     /// <summary>
-    /// Juice for taking damage
+    /// Juice for losing a heart: the heart breaks in two (with its sound) and the hearts shake
     /// </summary>
-    /// <param name="intensity"></param>
-    /// <returns></returns>
-    void DamageEffect(float damage)
+    void HeartBreakEffect(PlayerHeart heart)
     {
-        // playing the particle effect
-        if (damageVFX != null) damageVFX.Play();
-        if (damageBurst != null)
-        {
-            Transform canvas = healthbar.GetComponentInParent<Canvas>().rootCanvas.transform;
-            UIParticleBurst.Spawn(damageBurst, healthbar.transform.position, canvas, Mathf.Clamp(damage, 1f, 3f));
-        }
-
-        // playing the shaking effect
+        heart.Break(); // plays the sound when the heart shatters
         Animations.instance.ShakeAnim(healthbar, shakeLenght, shakeIntensity);
     }
 

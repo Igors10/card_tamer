@@ -3,10 +3,10 @@ using UnityEngine.EventSystems;
 
 public class WorkshopOption : MonoBehaviour, IPointerClickHandler
 {
-    public AbilityNote abilityNote;
+    public Ability sticker;
     [HideInInspector] public Workshop workshop;
     public void OnPointerClick(PointerEventData eventData)
     {
-        workshop.PickAbilityOption(new Sticker(abilityNote.storedAbility, abilityNote.storedOnRight), abilityNote.storedAbilityColor);
+        workshop.PickAbilityOption(new Sticker(sticker.abilityData, sticker.onRight), sticker.abilityColor);
     }
 }

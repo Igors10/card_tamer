@@ -22,6 +22,7 @@ public class ShopManager : MonoBehaviour
     public int drawCardPrice;
     public int drawSpecialPrice = 4;
     public int stickerPrice = 2; // placeholder until the sticker cost is decided
+    [SerializeField] int freeStickers = 1; // the first sticker purchases of every round are free (for the bot too)
     public int discardReward;
     // upgrade price is current max star amount + 1
 
@@ -96,8 +97,9 @@ public class ShopManager : MonoBehaviour
         if (player.HasSpecialCard()) buttons[3].interactable = false;
 
         // refreshing add sticker button (needs a card with room for another sticker)
-        prices[4].text = stickerPrice.ToString();
-        CheckButtonAvailability(4, stickerPrice);
+        // free ones cost 0
+        prices[4].text = StickerPriceFor(player).ToString();
+        CheckButtonAvailability(4, StickerPriceFor(player));
         if (!player.cardsInHand.Exists(card => card.cardData.CanAddSticker)) buttons[4].interactable = false;
 
         // refreshing discard button
@@ -165,12 +167,34 @@ public class ShopManager : MonoBehaviour
 
         // Paying
         Pay(playerToGetSpecial, drawSpecialPrice);
+
+        // Rat explaining special cards
+        if (RatSmart.instance.specialExplained == false)
+        {
+            RatSmart.instance.StartCoroutine(RatSmart.instance.PlayDialogue("SpecialDial")); // on the rat, the shop is hidden by now
+            RatSmart.instance.specialExplained = true;
+        }
+    }
+
+    /// <summary>
+    /// Sticker price for this player: 0 while they still have free ones
+    /// </summary>
+    public int StickerPriceFor(Player p) => (p.freeStickersUsed < freeStickers) ? 0 : stickerPrice;
+
+    /// <summary>
+    /// Price of the sticker the player is buying now (uses up a free one if there is one left)
+    /// </summary>
+    public int TakeStickerPrice(Player p)
+    {
+        int price = StickerPriceFor(p);
+        if (price == 0) p.freeStickersUsed++;
+        return price;
     }
 
     void BuySticker(Player playerToGetSticker)
     {
         GameManager.instance.managerUI.workshop.StickerOptions();
-        Pay(playerToGetSticker, stickerPrice);
+        Pay(playerToGetSticker, TakeStickerPrice(playerToGetSticker));
     }
 
     void DiscardCard(Player playerToDiscard)
@@ -227,9 +251,10 @@ public class ShopManager : MonoBehaviour
 
         // CHAT WITH RAT
         // shop tutorial
-        if (GameData.firstTimePlaying)
+        if (RatSmart.instance.shopExplained == false)
         {
             yield return RatSmart.instance.PlayDialogue("ShopExplainDial");
+            RatSmart.instance.shopExplained = true;
         }
         // adding the star if player lost previous round
         if (GameManager.instance.battleManager.lostCurrentRound)

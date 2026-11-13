@@ -58,6 +58,10 @@ public class FightManager : MonoBehaviour
     [Header("input")]
     [SerializeField] float attackDropHeight = 0.35f; // card has to be dropped above this part of the screen to attack
 
+    [Header("base power")]
+    [SerializeField] bool specialRollsTwoDice = false; // special cards roll 2 dice for their base power instead of 1
+    public bool SpecialRollsTwoDice => specialRollsTwoDice;
+
     [Header("timing")]
     [SerializeField] float afterSpawnPause = 0.6f;
     [SerializeField] float powerGainPause = 0.5f; // after each power gain from a sticker
@@ -82,6 +86,11 @@ public class FightManager : MonoBehaviour
     [SerializeField] float winnerRecoilHop = 0.5f;
     [SerializeField] float winnerRecoilTime = 0.25f;
     [SerializeField] float stickerMessagePause = 1.2f; // guard, mix up and similar messages stay this long
+
+    [Header("destroyed card (Beast), cut in half like the Scissor Rat discard")]
+    [SerializeField] CardCutter cardCutter;
+    [SerializeField] float cutHitStop = 0.08f;
+    [SerializeField] float afterCutPause = 0.6f;
 
     // current fight
     [HideInInspector] public Unit attacker;
@@ -146,6 +155,7 @@ public class FightManager : MonoBehaviour
     /// </summary>
     IEnumerator LocalAttackIntro(Card card)
     {
+        RatBuddy.instance.ClearHint("AttackHint");
         preparingAttack = true;
         yield return Reveal(card);
         yield return BringOut(card, false, unit => attacker = unit);
@@ -154,6 +164,7 @@ public class FightManager : MonoBehaviour
         choosingFor = card;
         targetArrow.Show(attacker.transform);
         GameManager.instance.managerUI.NewHint("Choose an opponent card to attack (right click to cancel)");
+        RatBuddy.instance.Hint("TargetHint", card);
     }
 
     public bool IsTarget(Card card) => choosingFor != null && card.player != choosingFor.player && card.player.cardsOnField.Contains(card);
@@ -176,6 +187,7 @@ public class FightManager : MonoBehaviour
         card.HighlightCard(false);
         Card attackingCard = choosingFor;
         choosingFor = null;
+        RatBuddy.instance.ClearHint("TargetHint");
         targetArrow.Hide();
         PlayBattleMusic();
 
@@ -307,6 +319,7 @@ public class FightManager : MonoBehaviour
         card.currentPower = 0;
         StartCoroutine(ReturnCard(card));
         GameManager.instance.managerUI.NewHint(GameManager.instance.GetState().defaultHintText);
+        RatBuddy.instance.ClearHint("TargetHint");
     }
 
     /// <summary>
@@ -619,6 +632,7 @@ public class FightManager : MonoBehaviour
 
         // both cards roll a d6 for their base power at the same time, stickers only give power after both dice landed
         yield return RollBasePower();
+        RatBuddy.instance.Comment("ModifiersCom");
 
         // stickers give power (attacker's first, then the defender's)
         if (guessPower > 0) yield return AddPower(attacker, guessPower);
@@ -643,10 +657,16 @@ public class FightManager : MonoBehaviour
         // the power counters show who is stronger (the attacker on a tie), then both units lift up and fly at each other
         StartCoroutine(loser.ShowFightResult(false));
         yield return winner.ShowFightResult(true);
+        if (attackerPower == defenderPower) RatBuddy.instance.Comment("TieCom");
+        RatBuddy.instance.Comment("ClashCom");
         yield return ClashUnits(attacker, defender);
 
         StartCoroutine(RecoilUnit(winner));
         yield return KnockOutOrRecoil(loser);
+
+        // Rat buddy: about your card, the winner or the knocked out one
+        if (winner.card.player == gm.player) RatBuddy.instance.Comment("ClashWinCom", winner.card);
+        else RatBuddy.instance.Comment("ClashLoseCom", loserCard);
         winner.card.player.lostLastFight = false;
         loserCard.player.lostLastFight = true;
 
@@ -699,15 +719,17 @@ public class FightManager : MonoBehaviour
         int[] defenderRolls = RollBaseDice(defender);
 
         GameManager.instance.managerUI.NewHint("Click to roll your power!");
+        RatBuddy.instance.Hint("FightHint");
         Coroutine attackerDie = StartCoroutine(attacker.RollBasePower(attackerRolls));
         Coroutine defenderDie = StartCoroutine(defender.RollBasePower(defenderRolls));
         yield return attackerDie;
         yield return defenderDie;
         GameManager.instance.managerUI.NewHint("");
+        RatBuddy.instance.ClearHint("FightHint");
     }
 
     /// <summary>
-    /// d6 results for the unit's base power dice (special cards roll 2)
+    /// d6 results for the unit's base power dice (special cards can roll 2, see specialRollsTwoDice)
     /// </summary>
     int[] RollBaseDice(Unit unit)
     {
@@ -815,7 +837,8 @@ public class FightManager : MonoBehaviour
                 Card revealed = hidden[GameRandom.Range(0, hidden.Count)];
                 EffectNotifier notifier = GameManager.instance.managerUI.effectNotifier;
                 yield return notifier.Show(strip, "Revealing a card");
-                Animations.instance.PopAnim(scout.gameObject, 0.3f, 0.25f);
+                // a face down scout doesn't pop, that would show the opponent which card it is
+                if (!scout.HiddenFromLocalPlayer) Animations.instance.PopAnim(scout.gameObject, 0.3f, 0.25f);
                 Animations.instance.PopAnim(revealed.gameObject, 0.3f, 0.3f);
                 yield return Reveal(revealed);
                 yield return ShowMessage(scout.cardName + " scouts " + revealed.cardName + "!");
@@ -1151,7 +1174,15 @@ public class FightManager : MonoBehaviour
         winner.destroyedCardThisRound = true;
         loser.player.compensationStars++;
         if (loser.twin != null) RemovePhantom(loser.twin);
+
+        // the card on display (hidden when its unit got knocked out) gets cut in half, freezing for a split second right as it's cut
+        loser.gameObject.SetActive(true);
+        cardCutter.Cut(loser, loser.transform);
         loser.DestroyCard();
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(cutHitStop);
+        Time.timeScale = 1f;
+        yield return Animations.instance.SkippablePause(afterCutPause);
     }
 
     /// <summary>

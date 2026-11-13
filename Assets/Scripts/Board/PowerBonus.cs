@@ -14,10 +14,8 @@ public class PowerBonus : MonoBehaviour
     bool restSaved;
     bool outlineSet;
 
-    [Header("looks")]
+    [Header("looks (buff outline and debuff text use the Colors buff / debuff colors)")]
     [SerializeField] Color buffColor = Color.white;
-    [SerializeField] Color debuffColor = new Color(0.94f, 0.25f, 0.25f);
-    [SerializeField] Color buffOutlineColor = new Color(1f, 0.82f, 0.2f); // yellow, the buff color
     [SerializeField] Color outlineColor = Color.black; // debuffs
     [SerializeField] float outlineWidth = 0.25f;
 
@@ -67,7 +65,7 @@ public class PowerBonus : MonoBehaviour
 
         // enabling text (no sway, it stays straight)
         text.text = isBuff ? "+" + bonus : bonus.ToString();
-        Color color = isBuff ? buffColor : debuffColor;
+        Color color = isBuff ? buffColor : Colors.instance.debuffColor;
         text.color = color;
         rect.localRotation = Quaternion.identity;
         text.gameObject.SetActive(true);
@@ -78,7 +76,7 @@ public class PowerBonus : MonoBehaviour
             text.outlineWidth = outlineWidth;
             outlineSet = true;
         }
-        text.outlineColor = isBuff ? buffOutlineColor : outlineColor;
+        text.outlineColor = isBuff ? Colors.instance.buffColor : outlineColor;
 
         // POP IN
         Vector2 startPos = restPos - new Vector2(0f, travelDistance * dir);

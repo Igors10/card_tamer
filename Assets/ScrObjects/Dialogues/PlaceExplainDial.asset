@@ -14,7 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
   line:
   - Its time to put the cards you made to action
-  - Drag and drop your cards on one of the lanes to play them
-  - Effects trigger right after the card is played
-  - Your goal is to have more power on each line than your opponent
-  - Use your big brain to outsmart the opponent
+  - Your cards will fight against cards drawn by your opponent (oooo exciting!)
+  - Drag and drop a card to play them
+  - Then choose a card to clash with
+  - 'Pay attention to abilities, '
+  - and play cards strategically to maximize power bonuses
+  - Win every opponent's card to complete the round
+  - 68% of wins are made by people with big brains.
+  - I hope you are one of the smart ones
