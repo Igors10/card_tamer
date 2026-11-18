@@ -17,6 +17,7 @@ public class LobbyClient : NetworkBehaviour
     public readonly SyncVar<string> nickname = new SyncVar<string>("");
     public readonly SyncVar<bool> ready = new SyncVar<bool>();
     public readonly SyncVar<int> seat = new SyncVar<int>(-1); // 0 = host, 1 = guest
+    public readonly SyncVar<int> color = new SyncVar<int>(); // index in CardDatabase.allPlayerColors
 
     public override void OnStartNetwork()
     {
@@ -27,6 +28,7 @@ public class LobbyClient : NetworkBehaviour
         nickname.OnChange += OnValueChanged;
         ready.OnChange += OnValueChanged;
         seat.OnChange += OnValueChanged;
+        color.OnChange += OnValueChanged;
     }
 
     public override void OnStopNetwork()
@@ -38,6 +40,7 @@ public class LobbyClient : NetworkBehaviour
         nickname.OnChange -= OnValueChanged;
         ready.OnChange -= OnValueChanged;
         seat.OnChange -= OnValueChanged;
+        color.OnChange -= OnValueChanged;
 
         RefreshLobby();
     }
@@ -50,6 +53,21 @@ public class LobbyClient : NetworkBehaviour
         // (on a dedicated server nobody is local, so whoever joins first gets seat 0 and can start the match)
         seat.Value = Owner.IsLocalClient ? 0 : FindFreeSeat();
         nickname.Value = DefaultNickname();
+        color.Value = FreeColorFrom(Mathf.Max(0, seat.Value)); // players start with different colors
+    }
+
+    /// <summary>
+    /// Server: the given color, or the next one after it the other player doesn't have
+    /// </summary>
+    int FreeColorFrom(int value)
+    {
+        int count = (LobbyManager.instance != null) ? LobbyManager.instance.ColorCount : 1;
+        for (int i = 0; i < count; i++)
+        {
+            int candidate = (value + i) % count;
+            if (!all.Exists(other => other != this && other.color.Value == candidate)) return candidate;
+        }
+        return value % count;
     }
 
     int FindFreeSeat()
@@ -78,8 +96,13 @@ public class LobbyClient : NetworkBehaviour
     {
         base.OnStartClient();
 
-        // sending our nickname to the server, which then syncs it to everyone
-        if (IsOwner) SetNickname(GameData.nickname);
+        // sending our nickname and last picked color to the server, which then syncs them to everyone
+        // (the color is skipped if the other player already has it)
+        if (IsOwner)
+        {
+            SetNickname(GameData.nickname);
+            if (LobbyManager.instance != null) SetColor(GameData.GetColorIndex(LobbyManager.instance.ColorCount));
+        }
 
         RefreshLobby();
     }
@@ -126,6 +149,14 @@ public class LobbyClient : NetworkBehaviour
         value = (value ?? "").Trim();
         if (value.Length > maxNicknameLength) value = value.Substring(0, maxNicknameLength);
         nickname.Value = (value == "") ? DefaultNickname() : value;
+    }
+
+    [ServerRpc]
+    public void SetColor(int value)
+    {
+        if (LobbyManager.instance != null && LobbyManager.instance.matchStarting) return;
+        // the other player's color is skipped, both can't have the same one
+        color.Value = FreeColorFrom(Mathf.Max(0, value));
     }
 
     [ServerRpc]

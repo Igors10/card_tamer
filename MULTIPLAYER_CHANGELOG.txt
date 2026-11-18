@@ -158,3 +158,26 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
 2026-11-09  Special cards roll 2 base dice (branch experimental-rules)
   - Both dice roll at the same time and stop with one click (StopDice with
     count 2). Results come from GameRandom up front, attacker's dice first.
+
+2026-11-18  Lock sticker: turn start choice (branch experimental-rules)
+  - Battle turns start with FightManager.StartTurnLocks before the real start
+    (AIStartTurn / StartRemoteTurn / GameManager.StartTurn). The turn player's
+    Locks each ask a Choice. Runs before StartRemoteTurn, so the Choice apply
+    can't clear waitingForRemote for the coming attack.
+
+2026-11-18  Colors picked in the lobby (branch experimental-rules)
+  - LobbyClient: color SyncVar (index in CardDatabase.allPlayerColors, starts
+    as the seat) + SetColor ServerRpc. Pencil on your lobby card cycles it.
+  - Lobby cards: yours left, the other player's right (role text from seat),
+    nicknames in the player's color.
+  - OnMatchStarting saves GameData.seatColors and the local PlayerConfig color.
+  - Board online: workshop color select skipped, remote color from
+    GameData.seatColors. PickColor command no longer sent.
+
+2026-11-18  No shared lobby colors (branch experimental-rules)
+  - LobbyClient.FreeColorFrom: server skips the other player's color in
+    SetColor and when picking the starting color.
+
+2026-11-18  Lobby starts with the last picked color (branch experimental-rules)
+  - LobbyClient.OnStartClient sends SetColor(GameData.GetColorIndex). Pencil
+    clicks skip the other player's color client side too and save the result.

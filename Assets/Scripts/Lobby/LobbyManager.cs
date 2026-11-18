@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using FishNet;
 using FishNet.Managing.Scened;
 using TMPro;
@@ -29,7 +30,8 @@ public class LobbyManager : MonoBehaviour
 
     [Header("lobby screen")]
     [SerializeField] GameObject lobbyScreen;
-    [SerializeField] LobbyPanel[] panels = new LobbyPanel[2]; // by seat
+    [SerializeField] LobbyPanel[] panels = new LobbyPanel[2]; // 0 = your own card (left), 1 = the other player's
+    [SerializeField] CardDatabase cardDatabase; // player colors
     [SerializeField] Button readyButton;
     [SerializeField] TMP_Text readyButtonText;
     [SerializeField] Button startButton;
@@ -61,6 +63,7 @@ public class LobbyManager : MonoBehaviour
         startButton.onClick.AddListener(StartButton);
         leaveButton.onClick.AddListener(LeaveButton);
         copyCodeButton.onClick.AddListener(CopyCodeButton);
+        panels[0].pencilButton.onClick.AddListener(NextColorButton);
     }
 
     private void OnEnable()
@@ -264,11 +267,12 @@ public class LobbyManager : MonoBehaviour
         }
         if (!lobbyScreen.activeSelf) return;
 
-        // player cards
+        // player cards: yours on the left, the other player's on the right
         LobbyClient host = LobbyClient.GetBySeat(0);
         LobbyClient guest = LobbyClient.GetBySeat(1);
-        panels[0].Show(host, host != null && host == local);
-        panels[1].Show(guest, guest != null && guest == local);
+        LobbyClient other = (local == host) ? guest : host;
+        panels[0].Show(local, true, GetPlayerColor(local));
+        panels[1].Show(other, false, GetPlayerColor(other));
 
         bool bothJoined = host != null && guest != null;
         bool bothReady = bothJoined && host.ready.Value && guest.ready.Value;
@@ -292,6 +296,33 @@ public class LobbyManager : MonoBehaviour
         else if (!bothReady) hintText.text = "Waiting for both players to get ready";
         else if (localIsHost) hintText.text = "Everyone is ready!";
         else hintText.text = "Waiting for the host to start";
+    }
+
+    public int ColorCount => cardDatabase.allPlayerColors.Count;
+
+    Color GetPlayerColor(LobbyClient client)
+    {
+        List<Color> colors = cardDatabase.allPlayerColors;
+        return (client != null) ? colors[client.color.Value % colors.Count] : Color.white;
+    }
+
+    /// <summary>
+    /// Pencil on your card: next player color, like the gallery pencil. Synced to the other player through the server
+    /// </summary>
+    void NextColorButton()
+    {
+        LobbyClient local = LobbyClient.GetLocal();
+        if (local == null || matchStarting) return;
+
+        AudioManager.instance.PlaySFX("ButtonSFX");
+        // skipping the other player's color (the server checks it too)
+        LobbyClient other = LobbyClient.all.Find(client => client != local);
+        int next = (local.color.Value + 1) % ColorCount;
+        if (other != null && other.color.Value == next) next = (next + 1) % ColorCount;
+        local.SetColor(next);
+
+        // remembered for the gallery and the next lobby
+        GameData.SaveColorIndex(next);
     }
 
     void CopyCodeButton()
@@ -396,11 +427,13 @@ public class LobbyManager : MonoBehaviour
         {
             LobbyClient client = LobbyClient.GetBySeat(s);
             GameData.seatNicknames[s] = client != null ? client.nickname.Value : "";
+            GameData.seatColors[s] = GetPlayerColor(client);
         }
 
-        // fresh card config like in offline matches
+        // fresh card config like in offline matches, with the color picked here (the board skips its color select)
         playerConfig.ResetCardConfig();
         playerConfig.offlineMatch = false;
+        playerConfig.playerColor = GameData.seatColors[GameData.localSeat];
 
         AudioManager.instance.PlaySFX("StartGameSFX");
         StartCoroutine(CoverScreen(null));

@@ -126,6 +126,13 @@ public class FightManager : MonoBehaviour
     {
         if (!CanAttack(card.player) || Input.mousePosition.y < Screen.height * attackDropHeight) return false;
 
+        if (!card.player.CanAttackWith(card))
+        {
+            Animations.instance.ShakeAnim(card.gameObject, 8f, 0.3f);
+            GameManager.instance.managerUI.NewHint("This card is locked until your opponent's next turn");
+            return false;
+        }
+
         // online the other player sees the attacker come out right away: both games start it when the command comes back
         if (!GameManager.instance.playerConfig.offlineMatch)
         {
@@ -157,7 +164,7 @@ public class FightManager : MonoBehaviour
     {
         RatBuddy.instance.ClearHint("AttackHint");
         preparingAttack = true;
-        yield return Reveal(card);
+        yield return RevealFighter(card);
         yield return BringOut(card, false, unit => attacker = unit);
         preparingAttack = false;
 
@@ -231,7 +238,7 @@ public class FightManager : MonoBehaviour
         remoteAttacker = card;
         remoteIntroDone = false;
         GameManager.instance.managerUI.NewHint(card.player.playerName + " is choosing a target...");
-        yield return Reveal(card);
+        yield return RevealFighter(card);
         yield return BringOut(card, true, unit => attacker = unit);
         remoteIntroDone = true;
     }
@@ -334,7 +341,7 @@ public class FightManager : MonoBehaviour
     IEnumerator OpponentAttack(Card attackingCard, Card target)
     {
         fighting = true;
-        yield return Reveal(attackingCard);
+        yield return RevealFighter(attackingCard);
         yield return BringOut(attackingCard, true, unit => attacker = unit);
 
         PlayBattleMusic();
@@ -601,6 +608,7 @@ public class FightManager : MonoBehaviour
         Card guard = FindGuard(target);
         if (guard != null)
         {
+            target.StartCoroutine(target.FlashGuardedShield());
             yield return StickerMessage<GuardNeighbourEffect>(guard, guard.cardName + " guards " + target.cardName + "!");
             target = guard;
         }
@@ -616,7 +624,7 @@ public class FightManager : MonoBehaviour
             attackingCard.currentPower = 0;
             StartCoroutine(ReturnCard(attackingCard));
             attackingCard = otherAttackers[GameRandom.Range(0, otherAttackers.Count)];
-            yield return Reveal(attackingCard);
+            yield return RevealFighter(attackingCard);
             yield return BringOut(attackingCard, true, unit => attacker = unit);
         }
 
@@ -626,7 +634,7 @@ public class FightManager : MonoBehaviour
 
         // both cards are revealed, the defender comes out
         yield return Reveal(attackingCard);
-        yield return Reveal(target);
+        yield return RevealFighter(target);
         yield return BringOut(target, false, unit => defender = unit);
         yield return Animations.instance.SkippablePause(afterSpawnPause);
 
@@ -638,6 +646,8 @@ public class FightManager : MonoBehaviour
         if (guessPower > 0) yield return AddPower(attacker, guessPower);
         QueueSideCardPower(attacker);
         QueueSideCardPower(defender);
+        QueueSupportPower(attacker);
+        QueueSupportPower(defender);
         executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnFightStart);
         yield return executeManager.TriggerEffects();
         yield return UseSavedPowerUps(attacker);
@@ -803,6 +813,20 @@ public class FightManager : MonoBehaviour
     }
 
     /// <summary>
+    /// A fighting card gets power from the Support on its right
+    /// </summary>
+    void QueueSupportPower(Unit unit)
+    {
+        Card supporter = GetNeighbour(unit.card, 1);
+        if (supporter == null) return;
+
+        foreach ((Ability strip, SupportLeftEffect effect) in supporter.GetEffects<SupportLeftEffect>())
+        {
+            GameManager.instance.executeManager.abilityRunner.QueueOnUnit(unit, strip, effect);
+        }
+    }
+
+    /// <summary>
     /// Joker of the attacked player that swaps the attacker, or null. A Joker that is the target always swaps,
     /// every other Joker on the field swaps with its chance (GameRandom, so online both games roll the same)
     /// </summary>
@@ -847,6 +871,49 @@ public class FightManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Start of a battle turn: the opponent's cards this player locked last turn unlock, then every Lock of this player
+    /// locks an opponent card. The turn really starts (onDone) after that
+    /// </summary>
+    public void StartTurnLocks(Player turnPlayer, System.Action onDone)
+    {
+        StartCoroutine(LockCards(turnPlayer, onDone));
+    }
+
+    IEnumerator LockCards(Player turnPlayer, System.Action onDone)
+    {
+        Player opponent = GameManager.instance.GetOpponentOfPlayer(turnPlayer);
+        foreach (Card card in opponent.cardsOnField) card.SetLocked(false);
+
+        // nobody attacks while the locks are picked
+        fighting = true;
+        foreach (Card lockCard in new List<Card>(turnPlayer.cardsOnField))
+        {
+            foreach ((Ability strip, LockCardEffect effect) in lockCard.GetEffects<LockCardEffect>())
+            {
+                // the last unlocked card stays unlocked
+                List<Card> unlocked = opponent.cardsOnField.FindAll(card => !card.locked);
+                if (unlocked.Count < 2) continue;
+
+                EffectNotifier notifier = GameManager.instance.managerUI.effectNotifier;
+                yield return notifier.Show(strip, "Locking a card");
+                // a face down lock doesn't pop, that would show the opponent which card it is
+                if (!lockCard.HiddenFromLocalPlayer) Animations.instance.PopAnim(lockCard.gameObject, 0.3f, 0.25f);
+                yield return ChooseCard(turnPlayer, unlocked, "Click an opponent card to lock", false);
+                if (chosenCard != null)
+                {
+                    chosenCard.SetLocked(true);
+                    Animations.instance.PopAnim(chosenCard.gameObject, 0.3f, 0.3f);
+                    AudioManager.instance.PlaySFX("UnitMoveSFX");
+                    yield return ShowMessage("A card is locked!");
+                }
+                notifier.Hide();
+            }
+        }
+        fighting = false;
+        onDone();
+    }
+
     // ===============
     // STICKER ACTIONS
     // ===============
@@ -880,6 +947,15 @@ public class FightManager : MonoBehaviour
         AudioManager.instance.PlaySFX("RerollSFX");
         yield return ShowMessage(card.cardName + " mixes up the cards!");
         notifier.Hide();
+    }
+
+    /// <summary>
+    /// Reveals a card that is about to fight, remembering if it started the fight face down (Ambush)
+    /// </summary>
+    IEnumerator RevealFighter(Card card)
+    {
+        card.startedFightFaceDown = card.faceDown;
+        yield return Reveal(card);
     }
 
     /// <summary>

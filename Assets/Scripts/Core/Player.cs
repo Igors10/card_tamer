@@ -35,6 +35,11 @@ public class Player : MonoBehaviour
         Card special = GetSpecialInHand();
         return special == null || special == card;
     }
+
+    /// <summary>
+    /// Battle: locked cards can't attack, unless all field cards are locked (the unlocked ones got knocked out)
+    /// </summary>
+    public bool CanAttackWith(Card card) => !card.locked || !cardsOnField.Exists(other => !other.locked);
     public Field[] fields = new Field[4];
     public PowerCounter powerCounter;
 
@@ -103,8 +108,10 @@ public class Player : MonoBehaviour
             food[i] = GameManager.instance.startingResourceAmount;
         }
 
-        // player color
+        // player color (online both were picked in the lobby)
         if (!isAI && !isRemote) playerColor = config.playerColor;
+        if (isRemote) playerColor = GameData.seatColors[1 - GameData.localSeat];
+        if (!config.offlineMatch) powerCounter.RefreshColor();
 
         // nickname chosen in the main menu (bots set their own name in AIOpponent)
         if (!isAI && !isOpponent)
@@ -170,6 +177,13 @@ public class Player : MonoBehaviour
         // Triggering player specific events
         StartTurnEvents();
 
+        // battle: Lock stickers lock opponent cards before the turn really starts
+        if (GameManager.instance.currentState == GameState.BATTLING) FightManager.instance.StartTurnLocks(this, BeginTurn);
+        else BeginTurn();
+    }
+
+    void BeginTurn()
+    {
         if (isAI) AIplayer.AIStartTurn();
         else if (isRemote) GameManager.instance.StartRemoteTurn();
         else GameManager.instance.StartTurn();
@@ -192,6 +206,7 @@ public class Player : MonoBehaviour
 
         // all cards go to the field face down
         GameManager.instance.handManager.MoveHandToField(this);
+        foreach (Card card in cardsOnField) card.SetLocked(false);
 
         playerUI.Refresh();
     }

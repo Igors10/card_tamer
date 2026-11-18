@@ -33,7 +33,14 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject specialIcon;
     [SerializeField] Image cardBack; // opponent's face down cards show only the back
     [FormerlySerializedAs("hiddenIcon")]
-    [SerializeField] GameObject revealedIcon; // your own face up field cards show this, so you know the opponent can see them
+    [FormerlySerializedAs("revealedIcon")]
+    [SerializeField] GameObject hiddenIcon; // your own face down field cards show this, so you know the opponent can't see them
+    [SerializeField] GameObject lockedIcon; // Lock: locked cards show this
+    [SerializeField] Image guardedIcon; // Guard: a shield flashes over the card when a guard takes the attack for it
+    [SerializeField] float guardedPopScale = 1.4f; // shield starts this big and shrinks into place
+    [SerializeField] float guardedPopTime = 0.2f;
+    [SerializeField] float guardedHoldTime = 0.6f;
+    [SerializeField] float guardedFadeTime = 0.4f;
     [SerializeField] GameObject phantomLabel; // only the owner sees which card is the phantom
     public Transform Visual => cardVisual.transform; // everything drawn on the card (the fighting unit's power counter goes here too)
     [HideInInspector] public Unit unit;
@@ -88,6 +95,9 @@ public class Card : MonoBehaviour
     [HideInInspector] public Card twin; // Phantom card and its copy point at each other
     [HideInInspector] public bool destroyedCardThisRound; // Beast: already destroyed a card this round
     [HideInInspector] public bool onDisplay; // fighting: shown big on the side of the screen, its place in the row waits for it
+    [HideInInspector] public int baseRoll; // base power dice result of the current fight (Lowroll)
+    [HideInInspector] public bool startedFightFaceDown; // was face down when its current fight started (Ambush)
+    [HideInInspector] public bool locked; // Lock: can't attack until the locking player's next turn
     bool specialCostPaid = false;
 
     private void Awake()
@@ -148,6 +158,13 @@ public class Card : MonoBehaviour
                 {
                     foreach ((Ability strip, NeighbourPowerUpEffect effect) in card.GetEffects<NeighbourPowerUpEffect>()) buffTexts.Add("+" + effect.amount);
                 }
+            }
+
+            // Support on the right of this card gives it power
+            Card supporter = FightManager.instance.GetNeighbour(this, 1);
+            if (supporter != null)
+            {
+                foreach ((Ability strip, SupportLeftEffect effect) in supporter.GetEffects<SupportLeftEffect>()) buffTexts.Add("+" + effect.amount);
             }
         }
 
@@ -436,6 +453,56 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
+    /// Lock: locked cards can't attack and show a lock (over the card back too)
+    /// </summary>
+    public void SetLocked(bool isLocked)
+    {
+        locked = isLocked;
+        lockedIcon.SetActive(isLocked);
+    }
+
+    /// <summary>
+    /// Guard: a shield pops in over the card, stays for a moment and fades away
+    /// </summary>
+    public IEnumerator FlashGuardedShield()
+    {
+        Transform shield = guardedIcon.transform;
+        Color color = guardedIcon.color;
+        guardedIcon.gameObject.SetActive(true);
+
+        // pops in: shrinks into place while fading in
+        float t = 0;
+        while (t < guardedPopTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / guardedPopTime);
+            float coolT = 1 - Mathf.Pow(1 - clampedT, 3);
+            shield.localScale = Vector3.one * Mathf.Lerp(guardedPopScale, 1f, coolT);
+            guardedIcon.color = new Color(color.r, color.g, color.b, color.a * clampedT);
+            yield return null;
+        }
+        shield.localScale = Vector3.one;
+        guardedIcon.color = color;
+
+        yield return new WaitForSeconds(guardedHoldTime);
+
+        // fades away, growing a little
+        t = 0;
+        while (t < guardedFadeTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / guardedFadeTime);
+            shield.localScale = Vector3.one * Mathf.Lerp(1f, 1.15f, clampedT);
+            guardedIcon.color = new Color(color.r, color.g, color.b, color.a * (1 - clampedT));
+            yield return null;
+        }
+
+        guardedIcon.gameObject.SetActive(false);
+        shield.localScale = Vector3.one;
+        guardedIcon.color = color;
+    }
+
+    /// <summary>
     /// The local player doesn't know this card (opponent's face down card)
     /// </summary>
     public bool HiddenFromLocalPlayer => faceDown && player != GameManager.instance.player;
@@ -447,7 +514,7 @@ public class Card : MonoBehaviour
         cardBack.gameObject.SetActive(showBack);
         cardBack.color = player.playerColor;
         bool onField = GameManager.instance.currentState != GameState.BUYING && player.cardsOnField.Contains(this);
-        revealedIcon.SetActive(!faceDown && onField && player == GameManager.instance.player);
+        hiddenIcon.SetActive(faceDown && onField && player == GameManager.instance.player);
 
         // sticker strips are hidden under the back (the special star would stick out and give the card away)
         foreach (Ability strip in abilities) strip.gameObject.SetActive(strip.abilityData != null && !showBack);

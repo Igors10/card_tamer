@@ -23,8 +23,7 @@ public class Workshop : MonoBehaviour
     [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
     [SerializeField] TMP_InputField nameInput;
     [HideInInspector] public Sticker chosenAbility; // base sticker of the new card
-    bool pickingSticker; // the options show add-on stickers instead of base stickers
-    Sticker chosenSticker; // add-on sticker waiting for a card
+    Sticker chosenSticker; // sticker bought in the shop, waiting for a card
     public bool ChoosingStickerCard { get; private set; } // player has to click a card in hand
     [HideInInspector] public Color chosenAbilityColor;
     [HideInInspector] public Color chosenSecondColor;
@@ -89,7 +88,9 @@ public class Workshop : MonoBehaviour
         titleRestScale = title.transform.localScale;
         hintRestPos = workshopHintObj.transform.localPosition;
 
-        WorkshopColorSelect();
+        // online the colors were picked in the lobby, the workshop starts with making cards (see PlayWelcomeDialogue)
+        if (GameManager.instance.playerConfig.offlineMatch) WorkshopColorSelect();
+        else colorSelectUI.SetActive(false);
     }
 
     /// <summary>
@@ -238,7 +239,8 @@ public class Workshop : MonoBehaviour
     }
 
     /// <summary>
-    /// Welcoming message from Rat Smart, called once the "Workshop" intro text is gone
+    /// Welcoming message from Rat Smart, called once the "Workshop" intro text is gone.
+    /// Online there's no color select here, making cards starts after it (or right away)
     /// </summary>
     public void PlayWelcomeDialogue()
     {
@@ -246,6 +248,7 @@ public class Workshop : MonoBehaviour
         {
             StartCoroutine(WelcomeDialogue());
         }
+        else if (!GameManager.instance.playerConfig.offlineMatch) LaunchStartingSequence();
     }
 
     IEnumerator WelcomeDialogue()
@@ -253,7 +256,8 @@ public class Workshop : MonoBehaviour
         yield return RatSmart.instance.PlayDialogue("WelcomeDial");
 
         // color can be picked only after the rat is done talking
-        EnableColorSelect(true);
+        if (GameManager.instance.playerConfig.offlineMatch) EnableColorSelect(true);
+        else LaunchStartingSequence();
     }
 
     /// <summary>
@@ -328,47 +332,22 @@ public class Workshop : MonoBehaviour
     // Stickers
     // ====================
 
-    /// <summary>
-    /// Shop "Add sticker": offers stickers from the same pool as new cards, then the player clicks a card in hand to put it on
-    /// </summary>
-    public void StickerOptions()
-    {
-        // disabling shop UI
-        GameManager.instance.gameStateUI[(int)GameState.BUYING].SetActive(false);
-        GameManager.instance.readyButton.gameObject.SetActive(false);
-
-        cardCreationUI.SetActive(true);
-        EnableAbilityOptions(true);
-        workshopHintText.text = "Choose a sticker";
-        pickingSticker = true;
-
-        List<AbilityObj> pickedStickers = new List<AbilityObj>();
-        for (int a = 0; a < abilityOption.Length; a++)
-        {
-            // trying to give different options (only repeats if there are not enough stickers)
-            Sticker stickerToAssign = generator.PickRandomSticker("basic");
-            for (int tries = 0; tries < 20 && pickedStickers.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker("basic");
-            pickedStickers.Add(stickerToAssign.ability);
-
-            ShowSticker(abilityOption[a].sticker, stickerToAssign, default);
-        }
-    }
-
     void ShowSticker(Ability stickerUI, Sticker sticker, Color color)
     {
         stickerUI.InitSticker(sticker, color);
         stickerUI.SetSize(stickerHeight, stickerFontSize);
     }
 
-    void PickStickerOption(Sticker pickedSticker)
+    /// <summary>
+    /// Shop sticker bought: the shop hides, the hand comes up and the cards that still have room for a sticker glow
+    /// </summary>
+    public void ChooseCardForSticker(Sticker boughtSticker)
     {
-        chosenSticker = pickedSticker;
-        pickingSticker = false;
-        AudioManager.instance.PlaySFX("ShopStarSFX");
+        GameManager.instance.gameStateUI[(int)GameState.BUYING].SetActive(false);
+        GameManager.instance.readyButton.gameObject.SetActive(false);
 
-        // the hand comes up, cards that still have room for a sticker glow
-        abilitySelectUI.SetActive(false);
-        cardCreationUI.SetActive(false);
+        chosenSticker = boughtSticker;
+        AudioManager.instance.PlaySFX("ShopStarSFX");
         ChoosingStickerCard = true;
         workshopHintText.text = "Click a card to put the sticker on";
         foreach (Card card in player.cardsInHand) card.HighlightCard(card.cardData.CanAddSticker);
@@ -439,9 +418,6 @@ public class Workshop : MonoBehaviour
 
     public void PickAbilityOption(Sticker pickedAbility, Color abilityColor)
     {
-        // the options were add-on stickers for a card in hand
-        if (pickingSticker) { PickStickerOption(pickedAbility); return; }
-
         // save the ability and color
         chosenAbility = pickedAbility;
         chosenAbilityColor = abilityColor;

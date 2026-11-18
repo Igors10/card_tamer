@@ -46,6 +46,10 @@ public class GalleryMenu : MonoBehaviour
         Init();
         page = 0;
         drawings = Gallery.GetPlayerDrawings();
+
+        // starts with the color the player picked last
+        colorIndex = GameData.GetColorIndex(cardDatabase.allPlayerColors.Count);
+        pencilColorPart.color = PrimaryColor;
         ShowPage();
     }
 
@@ -82,6 +86,7 @@ public class GalleryMenu : MonoBehaviour
     {
         AudioManager.instance.PlaySFX("ButtonSFX");
         colorIndex = (colorIndex + 1) % cardDatabase.allPlayerColors.Count;
+        GameData.SaveColorIndex(colorIndex);
         pencilColorPart.color = PrimaryColor;
 
         foreach (GalleryPresetSlot slot in slots) slot.RefreshColor(PrimaryColor, SecondaryColor);

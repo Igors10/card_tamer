@@ -12,8 +12,11 @@ using System.Diagnostics.CodeAnalysis;
 public class ShopManager : MonoBehaviour
 {
     [Header("refs")]
-    [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- discard card; 3- draw special; 4- add sticker
+    [SerializeField] Button[] buttons; // 0- up star; 1- draw card; 2- discard card; 3- draw special
     [SerializeField] TextMeshProUGUI[] prices;
+    [SerializeField] ShopSticker[] stickerOffers; // random stickers for sale, new ones every round
+    [SerializeField] Button stickerRefreshButton; // swaps all offered stickers for new ones
+    [SerializeField] TextMeshProUGUI stickerRefreshPriceText;
     [SerializeField] TextMeshProUGUI nextStarAmountText;
     [SerializeField] Player player;
     [SerializeField] Workshop workshop;
@@ -21,8 +24,9 @@ public class ShopManager : MonoBehaviour
     [Header("prices")]
     public int drawCardPrice;
     public int drawSpecialPrice = 4;
-    public int stickerPrice = 2; // placeholder until the sticker cost is decided
+    public int stickerPrice = 2;
     [SerializeField] int freeStickers = 1; // the first sticker purchases of every round are free (for the bot too)
+    public int stickerRefreshPrice = 1;
     public int discardReward;
     // upgrade price is current max star amount + 1
 
@@ -40,20 +44,30 @@ public class ShopManager : MonoBehaviour
 
     bool starsAlreadyUpgraded;
     [HideInInspector] public bool cardDisarded = false;
+    bool stickersOffered; // this round's stickers are already rolled
+    bool shopLoaded; // buttons are shown after the intro text and the stars
 
     private void Start()
     {
         // adding functionality to buttons
-        buttons[0].onClick.AddListener(() => UpgradeStars(player));
+        if (buttons[0] != null) buttons[0].onClick.AddListener(() => UpgradeStars(player)); // star upgrade button isn't in the shop right now
         buttons[1].onClick.AddListener(() => DrawCard(player));
         buttons[2].onClick.AddListener(() => DiscardCard(player));
         buttons[3].onClick.AddListener(() => DrawSpecial(player));
-        buttons[4].onClick.AddListener(() => BuySticker(player));
+        foreach (ShopSticker offer in stickerOffers) offer.Button.onClick.AddListener(() => BuySticker(player, offer));
+        stickerRefreshButton.onClick.AddListener(() => RefreshStickers(player));
     }
 
     private void OnEnable()
     {
         Debug.Log("ShopManager: OnEnable triggers");
+
+        // new stickers for sale every round
+        if (!stickersOffered)
+        {
+            RollStickers();
+            stickersOffered = true;
+        }
 
         StartCoroutine(CreateShopStars());
 
@@ -73,6 +87,7 @@ public class ShopManager : MonoBehaviour
         skipStarAppearance = false;
         starsAlreadyUpgraded = false;
         cardDisarded = false;
+        stickersOffered = false;
     }
 
     public void Refresh(bool onlyRefreshStars = false)
@@ -87,25 +102,41 @@ public class ShopManager : MonoBehaviour
 
         if (onlyRefreshStars) return;
 
+        // with a full hand the draw card button is swapped for discarding a card for a star
+        bool handFull = player.cardsInHand.Count >= GameManager.instance.maxHandSize;
+
         // refreshing draw card button
         prices[1].text = drawCardPrice.ToString();
         CheckButtonAvailability(1, drawCardPrice);
+        buttons[1].gameObject.SetActive(shopLoaded && !handFull);
 
         // refreshing draw special button (only one special card per player)
         prices[3].text = drawSpecialPrice.ToString();
         CheckButtonAvailability(3, drawSpecialPrice);
         if (player.HasSpecialCard()) buttons[3].interactable = false;
 
-        // refreshing add sticker button (needs a card with room for another sticker)
-        // free ones cost 0
-        prices[4].text = StickerPriceFor(player).ToString();
-        CheckButtonAvailability(4, StickerPriceFor(player));
-        if (!player.cardsInHand.Exists(card => card.cardData.CanAddSticker)) buttons[4].interactable = false;
-
-        // refreshing discard button
+        // refreshing discard button (only shown with a full hand)
+        buttons[2].gameObject.SetActive(shopLoaded && handFull);
         buttons[2].interactable = player.cardsInHand.Count > 1;
-        //prices[2].text = "+ " + discardReward.ToString();
-        //CheckButtonAvailability(2, discardReward);
+
+        // refreshing the offered stickers (free ones cost 0, they need a card with room for another sticker)
+        int stickerPriceNow = StickerPriceFor(player);
+        bool cardHasRoom = player.cardsInHand.Exists(card => card.cardData.CanAddSticker);
+        foreach (ShopSticker offer in stickerOffers)
+        {
+            offer.gameObject.SetActive(shopLoaded && offer.Offered != null);
+            offer.PriceText.text = stickerPriceNow.ToString();
+            bool affordable = stickerPriceNow <= player.shopStars;
+            offer.PriceText.color = affordable ? Color.black : Color.red;
+            offer.Button.interactable = affordable && cardHasRoom;
+        }
+
+        // refreshing the sticker refresh button
+        stickerRefreshButton.gameObject.SetActive(shopLoaded);
+        stickerRefreshPriceText.text = stickerRefreshPrice.ToString();
+        bool canRefresh = stickerRefreshPrice <= player.shopStars;
+        stickerRefreshPriceText.color = canRefresh ? Color.black : Color.red;
+        stickerRefreshButton.interactable = canRefresh;
     }
 
     // SHOP BUTTONS
@@ -191,10 +222,50 @@ public class ShopManager : MonoBehaviour
         return price;
     }
 
-    void BuySticker(Player playerToGetSticker)
+    /// <summary>
+    /// Offered sticker clicked: it's paid and leaves the shop, then the player clicks a card in hand to put it on
+    /// </summary>
+    void BuySticker(Player playerToGetSticker, ShopSticker offer)
     {
-        GameManager.instance.managerUI.workshop.StickerOptions();
+        Sticker sticker = offer.Offered;
+        if (sticker == null) return;
+
+        offer.Show(null);
         Pay(playerToGetSticker, TakeStickerPrice(playerToGetSticker));
+        GameManager.instance.managerUI.workshop.ChooseCardForSticker(sticker);
+    }
+
+    /// <summary>
+    /// Every offer slot gets a new random sticker
+    /// </summary>
+    void RollStickers()
+    {
+        List<Sticker> stickers = RollStickerOffers();
+        for (int i = 0; i < stickerOffers.Length; i++) stickerOffers[i].Show(stickers[i]);
+    }
+
+    /// <summary>
+    /// Random stickers for the offer slots (the bot uses its own), different ones while the pool has enough
+    /// </summary>
+    public List<Sticker> RollStickerOffers()
+    {
+        CardGenerator generator = GameManager.instance.cardGenerator;
+        List<Sticker> stickers = new List<Sticker>();
+        for (int i = 0; i < stickerOffers.Length; i++)
+        {
+            Sticker sticker = generator.PickRandomSticker("basic");
+            for (int tries = 0; tries < 20 && stickers.Exists(other => other.ability == sticker.ability); tries++) sticker = generator.PickRandomSticker("basic");
+            stickers.Add(sticker);
+        }
+        return stickers;
+    }
+
+    void RefreshStickers(Player playerToPay)
+    {
+        RollStickers();
+        foreach (ShopSticker offer in stickerOffers) Animations.instance.PopAnim(offer.gameObject, 0.3f, 0.15f);
+        AudioManager.instance.PlaySFX("RerollSFX");
+        Pay(playerToPay, stickerRefreshPrice);
     }
 
     void DiscardCard(Player playerToDiscard)
@@ -216,10 +287,13 @@ public class ShopManager : MonoBehaviour
         if (skipStarAppearance) yield break;
 
         // disabling buttons before workshop fully loaded
+        shopLoaded = false;
         for (int a = 0; a < buttons.Count(); a++)
         {
-            buttons[a].gameObject.SetActive(false);
+            if (buttons[a] != null) buttons[a].gameObject.SetActive(false);
         }
+        foreach (ShopSticker offer in stickerOffers) offer.gameObject.SetActive(false);
+        stickerRefreshButton.gameObject.SetActive(false);
 
         // pause while intro text is on the screen
         while (GameManager.instance.managerUI.stateTransitionObj.activeSelf)
@@ -227,13 +301,16 @@ public class ShopManager : MonoBehaviour
             yield return null;
         }
 
-        // enabling buttons back
+        // enabling buttons back (draw card / discard, sticker offers and their refresh button are shown by Refresh)
+        shopLoaded = true;
         for (int a = 0; a < buttons.Count(); a++)
         {
             if (a == 0) continue; // skip the star button (temp solution)
+            if (a == 1 || a == 2) continue;
 
             buttons[a].gameObject.SetActive(true);
         }
+        Refresh();
 
         // calculating player's shop stars
         int newStars = shopStarsAfterBattle;

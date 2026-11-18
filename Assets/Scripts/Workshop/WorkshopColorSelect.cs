@@ -101,7 +101,13 @@ public class WorkshopColorSelect : MonoBehaviour
         // locking the color
         GameManager.instance.player.playerColor = selectedPencil.pencilColorImage.color;
         GameManager.instance.player.config.playerColor = selectedPencil.pencilColorImage.color;
+        int colorIndex = GameManager.instance.cardDatabase.allPlayerColors.IndexOf(selectedPencil.pencilColorImage.color);
+        if (colorIndex >= 0) GameData.SaveColorIndex(colorIndex); // the gallery and lobby start with it
         if (!GameManager.instance.playerConfig.offlineMatch) MatchNetwork.instance.SendPickColor(selectedPencil.pencilColorImage.color);
+
+        // the bot never has the same color
+        Player opponent = GameManager.instance.opponent;
+        if (opponent.isAI && opponent.playerColor == selectedPencil.pencilColorImage.color) opponent.AIplayer.PickColor();
 
         // after locking the color game can create 3 secondary colors
         //Colors.instance.GenerateRandomSecondaryColors();

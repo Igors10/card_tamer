@@ -700,6 +700,8 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
     /// </summary>
     public IEnumerator RollBasePower(int[] results)
     {
+        card.baseRoll = 0;
+        foreach (int result in results) card.baseRoll += result;
         ShowPowerUpDice(results.Length);
 
         // opponent's dice are on the left of the unit

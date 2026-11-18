@@ -15,6 +15,8 @@ public class LobbyPanel : MonoBehaviour
     public GameObject youTag; // little "you" note on your own card
     public GameObject waitingSpinner;
     [SerializeField] CanvasGroup contentGroup; // faded when the seat is empty
+    public Button pencilButton; // color pick: clicking goes to the next color (only on your own card)
+    [SerializeField] Image pencilColorPart;
 
     [Header("colors")]
     [SerializeField] Color readyColor = new Color(0.2f, 0.6f, 0.25f);
@@ -30,10 +32,12 @@ public class LobbyPanel : MonoBehaviour
     bool shownReady = false;
     Vector3 restScale;
     Coroutine popRoutine;
+    Color waitingTextColor; // nickname text color from the scene, used for "Waiting for player..."
 
     private void Awake()
     {
         restScale = transform.localScale;
+        waitingTextColor = nicknameText.color;
     }
 
     private void Update()
@@ -42,9 +46,9 @@ public class LobbyPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// Shows given player on this card, null client = empty seat
+    /// Shows given player on this card in their color, null client = empty seat
     /// </summary>
-    public void Show(LobbyClient client, bool isLocal)
+    public void Show(LobbyClient client, bool isLocal, Color playerColor)
     {
         bool occupied = client != null;
         bool isReady = occupied && client.ready.Value;
@@ -52,16 +56,22 @@ public class LobbyPanel : MonoBehaviour
         contentGroup.alpha = occupied ? 1f : 0.45f;
         waitingSpinner.SetActive(!occupied);
         youTag.SetActive(occupied && isLocal);
+        pencilButton.gameObject.SetActive(occupied);
+        pencilButton.interactable = isLocal;
 
         if (occupied)
         {
+            roleText.text = (client.seat.Value == 0) ? "Host" : "Guest";
             nicknameText.text = client.nickname.Value;
+            nicknameText.color = playerColor;
+            pencilColorPart.color = playerColor;
             statusText.text = isReady ? "Ready!" : "Not ready";
             statusText.color = isReady ? readyColor : notReadyColor;
         }
         else
         {
             nicknameText.text = "Waiting for player...";
+            nicknameText.color = waitingTextColor;
             statusText.text = "";
         }
 

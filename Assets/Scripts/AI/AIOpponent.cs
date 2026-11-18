@@ -34,8 +34,17 @@ public class AIOpponent : MonoBehaviour
     {
         if (playerObj == null) return; // removed itself in Awake (online match)
 
-        // picking random color
-        playerObj.playerColor = GameManager.instance.cardDatabase.allPlayerColors[Random.Range(0, GameManager.instance.cardDatabase.allPlayerColors.Count)];
+        PickColor();
+    }
+
+    /// <summary>
+    /// Random player color, never the player's (picked again when the player locks their color)
+    /// </summary>
+    public void PickColor()
+    {
+        List<Color> colors = GameManager.instance.cardDatabase.allPlayerColors.FindAll(color => color != GameManager.instance.player.playerColor);
+        playerObj.playerColor = colors[Random.Range(0, colors.Count)];
+        playerObj.powerCounter.RefreshColor();
     }
 
     /// <summary>
@@ -123,7 +132,8 @@ public class AIOpponent : MonoBehaviour
         while (RatBuddy.instance.IsTalking) yield return null;
 
         Player target = GameManager.instance.player;
-        Card attackingCard = playerObj.cardsOnField[Random.Range(0, playerObj.cardsOnField.Count)];
+        List<Card> ready = playerObj.cardsOnField.FindAll(card => playerObj.CanAttackWith(card));
+        Card attackingCard = ready[Random.Range(0, ready.Count)];
         Card targetCard = target.cardsOnField[Random.Range(0, target.cardsOnField.Count)];
         FightManager.instance.Attack(attackingCard, targetCard);
     }
@@ -223,8 +233,14 @@ public class AIOpponent : MonoBehaviour
 
         bool nothingToBuy = false;
 
+        // the bot gets its own sticker offers, like the player's shop
+        List<Sticker> stickerOffers = shop.RollStickerOffers();
+        bool cardHasRoom;
+
         while (nothingToBuy == false)
         {
+            cardHasRoom = playerObj.cardsInHand.Exists(card => card.cardData.CanAddSticker);
+
             /*
             if (playerObj.shopStars >= nextStarAmount && starsUpgraded == false && nextStarAmount < 2) 
             {
@@ -234,9 +250,9 @@ public class AIOpponent : MonoBehaviour
             } */
 
             // a free sticker is taken first, it costs nothing
-            if (shop.StickerPriceFor(playerObj) == 0 && playerObj.cardsInHand.Exists(card => card.cardData.CanAddSticker))
+            if (shop.StickerPriceFor(playerObj) == 0 && cardHasRoom && stickerOffers.Count > 0)
             {
-                AddRandomSticker();
+                BuyOfferedSticker(stickerOffers);
                 playerObj.shopStars -= shop.TakeStickerPrice(playerObj);
             }
             // if has enough stars and no specials the AI will buy a special card
@@ -252,10 +268,16 @@ public class AIOpponent : MonoBehaviour
                 playerObj.shopStars -= shop.drawCardPrice;
             }
             // leftover stars go to stickers on random cards
-            else if (playerObj.shopStars >= shop.stickerPrice && playerObj.cardsInHand.Exists(card => card.cardData.CanAddSticker))
+            else if (playerObj.shopStars >= shop.stickerPrice && cardHasRoom && stickerOffers.Count > 0)
             {
-                AddRandomSticker();
+                BuyOfferedSticker(stickerOffers);
                 playerObj.shopStars -= shop.TakeStickerPrice(playerObj);
+            }
+            // all offers bought: refreshes them if it can still buy one after
+            else if (playerObj.shopStars >= shop.stickerRefreshPrice + shop.stickerPrice && cardHasRoom && stickerOffers.Count == 0)
+            {
+                stickerOffers = shop.RollStickerOffers();
+                playerObj.shopStars -= shop.stickerRefreshPrice;
             }
             // stops shopping only if it can't afford anything
             else nothingToBuy = true;
@@ -269,12 +291,14 @@ public class AIOpponent : MonoBehaviour
     }
 
     /// <summary>
-    /// A random basic sticker on a random hand card that has room for it
+    /// A random one of the offered stickers goes on a random hand card that has room for it, the offer is gone
     /// </summary>
-    void AddRandomSticker()
+    void BuyOfferedSticker(List<Sticker> offers)
     {
+        Sticker sticker = offers[Random.Range(0, offers.Count)];
+        offers.Remove(sticker);
         List<Card> cardsWithRoom = playerObj.cardsInHand.FindAll(card => card.cardData.CanAddSticker);
-        cardsWithRoom[Random.Range(0, cardsWithRoom.Count)].AddSticker(generator.PickRandomSticker("basic"));
+        cardsWithRoom[Random.Range(0, cardsWithRoom.Count)].AddSticker(sticker);
     }
     
     // =========================================================

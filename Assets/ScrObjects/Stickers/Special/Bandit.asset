@@ -10,25 +10,34 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
-  m_Name: Ambusher
+  m_Name: Bandit
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 5
-  abilityDescription: Buff if you have a face down card
-  isSpecial: 0
-  stickerColor: {r: 0.7882353, g: 0.72156864, b: 0.9411765, a: 1}
+  power: 0
+  abilityDescription: +3 if face down. Hides your cards and moves
+  isSpecial: 1
+  stickerColor: {r: 0.55, g: 0.55, b: 0.6, a: 1}
   hasSide: 0
-  icon: {fileID: 21300000, guid: f309641372d86df4d9d38727ee917e86, type: 3}
+  icon: {fileID: 21300000, guid: 280c825ab4e8ed64aad01cb846926568, type: 3}
   effects:
-  - rid: 8466844326851248235
+  - rid: 7100000000000000006
+  - rid: 7100000000000000007
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248235
+    - rid: 7100000000000000006
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
         customText: Ambush!
         showPresentation: 1
         oncePerRound: 0
-        condition: 5
-        amount: 1
+        condition: 13
+        amount: 3
+        maxAmount: 0
+    - rid: 7100000000000000007
+      type: {class: HideAllAndSwapEffect, ns: , asm: Assembly-CSharp}
+      data:
+        trigger: 8
+        customText: 
+        showPresentation: 1
+        oncePerRound: 0

@@ -80,7 +80,59 @@ public class DiscardSelfAfterFightEffect : AbilityEffect
     protected override IEnumerator Execute(EffectContext ctx) { yield break; }
 }
 
+/// <summary>
+/// The card on the left of this one gets power when it fights (Support). Runs on the fighting card
+/// </summary>
+[System.Serializable]
+public class SupportLeftEffect : AbilityEffect
+{
+    public int amount = 2;
+
+    public SupportLeftEffect()
+    {
+        trigger = EffectTrigger.Manual;
+    }
+
+    protected override IEnumerator Execute(EffectContext ctx)
+    {
+        yield return FightManager.instance.AddPower(ctx.self, amount);
+    }
+}
+
+/// <summary>
+/// At the start of its owner's turn locks a chosen opponent card, it can't attack until the owner's next turn (Lock).
+/// The last unlocked card can't be locked
+/// </summary>
+[System.Serializable]
+public class LockCardEffect : AbilityEffect
+{
+    public LockCardEffect()
+    {
+        trigger = EffectTrigger.Manual;
+    }
+
+    protected override IEnumerator Execute(EffectContext ctx) { yield break; }
+}
+
 // ===== specials =====
+
+/// <summary>
+/// After a fight (attacking or defending), all of its owner's field cards turn face down and it can swap places with any of them (Bandit)
+/// </summary>
+[System.Serializable]
+public class HideAllAndSwapEffect : AbilityEffect
+{
+    public HideAllAndSwapEffect()
+    {
+        trigger = EffectTrigger.OnFightEnd;
+    }
+
+    protected override IEnumerator Execute(EffectContext ctx)
+    {
+        foreach (Card card in ctx.Owner.cardsOnField) card.SetFaceDown(true);
+        yield return FightManager.instance.HideAndSwap(ctx.self.card);
+    }
+}
 
 /// <summary>
 /// Cards this one beats are destroyed for good, their owner gets a star in the workshop (Beast)

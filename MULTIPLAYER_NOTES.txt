@@ -202,7 +202,10 @@ Flow
     Back arrow -> main menu.
 
   Lobby scene, LOBBY SCREEN (appears once your own LobbyClient is spawned)
-    Two player cards: left = host (seat 0), right = guest (seat 1).
+    Two player cards: left = you, right = the other player (role text says
+    Host / Guest). Each card has a pencil (CyclePencil prefab, same as the
+    gallery): clicking yours goes to the next player color, the other one
+    only shows their color. The nickname is written in the player's color.
     Empty seat shows "Waiting for player..." with a spinner.
     Ready button switches between ready / not ready. Faded and not clickable
     until the other player has joined (the server also refuses SetReady(true)
@@ -217,7 +220,8 @@ Flow
     host client --RequestStartMatch (ServerRpc)--> server
     server re-checks both players are in and ready, stops accepting players,
     sends MatchStartingRpc (ObserversRpc) to everyone
-    every client saves seat + nicknames into GameData, resets PlayerConfig
+    every client saves seat + nicknames + colors into GameData, resets
+    PlayerConfig and sets its playerColor to the local player's color
     server waits matchStartDelay (1.2s), then loads Board for everyone.
 
 Files
@@ -232,10 +236,16 @@ Files
 
   Assets/Scripts/Lobby/LobbyClient.cs       (on LobbyClient.prefab)
     - One per connected player. Networked.
-    - SyncVars: nickname, ready, seat (0 host, 1 guest)
+    - SyncVars: nickname, ready, seat (0 host, 1 guest),
+      color (index in CardDatabase.allPlayerColors, starts as the seat).
+      The server never gives both players the same color: SetColor and the
+      starting color skip the other player's (FreeColorFrom).
+      On joining, the owner asks for its last picked color
+      (GameData.GetColorIndex, saved in PlayerPrefs; gallery, lobby and the
+      offline workshop pick all save it with GameData.SaveColorIndex).
     - Server assigns the seat in OnStartServer (host's own connection = 0,
       otherwise first free seat)
-    - ServerRpcs: SetNickname, SetReady, RequestStartMatch
+    - ServerRpcs: SetNickname, SetColor, SetReady, RequestStartMatch
     - ObserversRpc: MatchStartingRpc
     - LobbyClient.all = every LobbyClient on this machine,
       GetLocal() = yours, GetBySeat(i)
@@ -255,8 +265,9 @@ Files
         "Couldn't connect to the lobby..."     - Relay found it, connecting failed
 
   Assets/Scripts/Lobby/LobbyPanel.cs        (each player card)
-    - Show(client, isLocal): nickname/status/"You" tag, empty seat look,
-      pop animation when a player joins or gets ready.
+    - Show(client, isLocal, color): role/nickname/status/"You" tag, pencil
+      (clickable only on your card), empty seat look, pop animation when a
+      player joins or gets ready.
 
   Assets/Scripts/Core/GameData.cs
     - nickname, nicknamePrefKey, maxNicknameLength (16)
@@ -398,10 +409,15 @@ Attack (CommandType.Attack: index = attacker in the sender's cardsOnField,
 Choice (CommandType.Choice: index = option, -1 = skipped)
   FightManager.ChooseCard asks a player to pick a card: Phantom (which copy
   is the phantom), Seer guess (options built from seenCards in field order),
-  Sneaky / Joker hide and swap. Both games ask the same question with the
+  Sneaky / Bandit hide and swap, Lock (turn start, see below). Both games
+  ask the same question with the
   same options list. The chooser's click (or right click skip) goes through
   PickChoice -> SendChoice, both games answer with AnswerChoice when it
   comes back. The other game shows "<name> is choosing...".
+  Lock: Player.StartTurn (battle) goes through FightManager.StartTurnLocks
+  first, the real turn start (AIStartTurn / StartRemoteTurn / GameManager
+  .StartTurn) runs after the Lock choices, so waitingForRemote is only set
+  once they're done. Locked cards can't attack (Player.CanAttackWith).
 
 Old commands (PlayCard, ChooseTarget) belong to the old lane rules and
   aren't sent anymore.
@@ -494,8 +510,9 @@ Workshop results (PickColor, CreateCard, DiscardFromHand, AddSticker)
   MatchNetwork.Apply only runs these for the remote player.
   Order still holds: they're sent before your Ready, so the other game gets
   your cards before it hears you're done.
-  - PickColor: WorkshopColorSelect.LockPencilChoice. Other game sets the
-    opponent's playerColor (+ PowerCounter.RefreshColor).
+  - PickColor: not sent anymore, colors are picked in the lobby. Online the
+    workshop skips its color select (Workshop.Start / PlayWelcomeDialogue),
+    Player.InitPlayer takes the remote color from GameData.seatColors.
   - CreateCard: Workshop.CreateNewCard, sent before CardGenerator.CreateCard.
       ability  base sticker by asset name -> CardGenerator.GetAbilityByName,
                plus its side (onRight)
@@ -542,6 +559,7 @@ Adding a command (example: play card)
   Relay connection type           ConnectionScript.relayConnectionType ("dtls")
   Error texts for codes           ConnectionScript.GetErrorMessage
   Code note / copy button         LobbyManager.Refresh, CopyCodeButton
+  Lobby color pick                LobbyManager.NextColorButton, LobbyClient.SetColor
   Transport settings              UnityTransport component on the NetworkManager
   Gameplay random numbers         GameRandom (seeded in GameManager.Awake,
                                     online in StartOnlineMatch)
@@ -550,12 +568,12 @@ Adding a command (example: play card)
   When a command may run          MatchNetwork.CanApply
   Online restart                  ConnectionScript.RestartMatch (+ "Rematch" scene)
 
-Adding a new synced lobby value (example: chosen color)
-  1. LobbyClient: public readonly SyncVar<int> color = new SyncVar<int>();
+Adding a new synced lobby value (done this way: color)
+  1. LobbyClient: public readonly SyncVar<int> x = new SyncVar<int>();
   2. Subscribe it in OnStartNetwork / unsubscribe in OnStopNetwork
-     (color.OnChange += OnValueChanged;) so the UI refreshes.
-  3. Add a [ServerRpc] SetColor(int value) { color.Value = value; }
-  4. Call LobbyClient.GetLocal().SetColor(x) from the UI.
+     (x.OnChange += OnValueChanged;) so the UI refreshes.
+  3. Add a [ServerRpc] SetX(int value) { x.Value = value; }
+  4. Call LobbyClient.GetLocal().SetX(v) from the UI.
   5. Show it in LobbyPanel.Show.
   6. If the board needs it, copy it into GameData in LobbyManager.OnMatchStarting.
 
@@ -589,11 +607,10 @@ other player types it in. No port forwarding needed.
   - Face down cards and which copy is the phantom are hidden only on screen:
     both games hold all card data (command model). Fine between friends,
     a modified game could read them.
-  - Both players can pick the same color.
   - Between pressing Ready and the command coming back, the player can
     still act (short window, button is disabled).
-  - LobbyClient objects are destroyed when Board loads. Seat and nicknames
-    survive in GameData.
+  - LobbyClient objects are destroyed when Board loads. Seat, nicknames and
+    colors survive in GameData.
   - If a player disconnects during the 1.2s before Board loads, Board still
     loads for whoever is left. The leave happened before the Board existed,
     so the host can still end up waiting in the fog (rare).

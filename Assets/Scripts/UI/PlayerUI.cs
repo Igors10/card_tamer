@@ -30,6 +30,7 @@ public class PlayerUI : MonoBehaviour
     [Header("Heart break effects")]
     [SerializeField] float shakeLenght;
     [SerializeField] float shakeIntensity;
+    [SerializeField] float heartVFXDistance = 8f; // the broken heart VFX plays this far in front of the camera, over the lost heart
     [Header("Avatar")]
     [SerializeField] Image head;
     [SerializeField] Image face;
@@ -120,11 +121,15 @@ public class PlayerUI : MonoBehaviour
     } 
 
     /// <summary>
-    /// Juice for losing a heart: the heart breaks in two (with its sound) and the hearts shake
+    /// Juice for losing a heart: the broken heart VFX plays over it (rising for the player, sinking for the opponent
+    /// at the top of the screen) and the hearts shake. The VFX is in the world, hearts are only lost in battle when nothing covers it
     /// </summary>
     void HeartBreakEffect(PlayerHeart heart)
     {
-        heart.Break(); // plays the sound when the heart shatters
+        Vector3 screenPosition = heart.transform.position;
+        screenPosition.z = heartVFXDistance;
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+        ParticleManager.instance.SpawnVFX(worldPosition, player.isOpponent ? "BrokenHeartDownVFX" : "BrokenHeartVFX");
         Animations.instance.ShakeAnim(healthbar, shakeLenght, shakeIntensity);
     }
 

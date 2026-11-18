@@ -8,6 +8,7 @@ public class DiscardManager : MonoBehaviour
 {
     [Header("animation times")]
     [SerializeField] float ratThinkingTime;
+    [SerializeField] float singleCardThinkingTime = 0.5f; // with only one knocked out card there is nothing to choose, the rat thinks shorter
     [SerializeField] float beforeDiscardTime;
     [SerializeField] float afterDiscardTime;
     [SerializeField] float unitsMovingTime;
@@ -120,11 +121,16 @@ public class DiscardManager : MonoBehaviour
 
         StartDiscard(true);
         List<UnitAtDiscard> row = AssignRow(owner.cardsInDiscard, owner, 0, 0f, owner.cardsInDiscard.Count);
-        discardText.text = "Scissor Rat destroys one of " + ((owner == GameManager.instance.player) ? "your" : "the opponent's") + " knocked out cards";
+        discardText.text = "Discarding for " + Colored(owner.playerName, owner);
         if (screenOpen) yield return FadeRow(row, true);
 
         yield return AutoDiscard(row[pick]);
     }
+
+    /// <summary>
+    /// Text in the player's color (rich text)
+    /// </summary>
+    string Colored(string text, Player player) => $"<color=#{ColorUtility.ToHtmlStringRGB(player.playerColor)}>{text}</color>";
 
     /// <summary>
     /// Fades a row of cards in or out
@@ -283,8 +289,9 @@ public class DiscardManager : MonoBehaviour
         float t = 0;
         float pointerT = 0;
         float currentInterval = pointerInterval;
+        float thinkingTime = (currentUnits.Count == 1) ? singleCardThinkingTime : ratThinkingTime;
 
-        while (t < ratThinkingTime)
+        while (t < thinkingTime)
         {
             t += Time.deltaTime;
             pointerT += Time.deltaTime;
@@ -293,7 +300,7 @@ public class DiscardManager : MonoBehaviour
             if (pointerT >= currentInterval)
             {
                 pointerT = 0;
-                float progress = Mathf.Clamp01(t / ratThinkingTime);
+                float progress = Mathf.Clamp01(t / thinkingTime);
                 currentInterval = Mathf.Lerp(pointerInterval, pointerSlowestInterval, progress * progress);
 
                 // every jump sounds a little higher
@@ -317,12 +324,14 @@ public class DiscardManager : MonoBehaviour
             chosenUnit.SetCard(card); // the shown card loses the sticker too
             Animations.instance.PopAnim(chosenUnit.gameObject, 0.4f, 0.3f);
             AudioManager.instance.PlaySFX("ShopStarSFX");
-            discardText.text = card.cardData.name + " is lucky and loses its Lucky sticker instead";
+            discardText.text = Colored(card.cardData.name, card.player) + " is lucky and loses its Lucky sticker instead";
             yield break;
         }
 
+        // the card is gone after the cut, its owner is kept for the color
+        Player owner = card.player;
         yield return DiscardUnitSequence(chosenUnit);
-        discardText.text = card.cardData.name + " is destroyed";
+        discardText.text = Colored(card.cardData.name, owner) + " is destroyed";
     }
 
     /// <summary>
@@ -339,7 +348,7 @@ public class DiscardManager : MonoBehaviour
 
     IEnumerator ManualDiscardSequence(UnitAtDiscard unit)
     {
-        string cardName = unit.storedCard.cardData.name;
+        string cardName = Colored(unit.storedCard.cardData.name, unit.storedCard.player);
         yield return DiscardUnitSequence(unit);
         discardText.text = cardName + " is destroyed for +1 coin";
 

@@ -260,7 +260,7 @@ MonoBehaviour:
   icon: {fileID: 5507093274599945598}
   glow: {fileID: 7815542958291332781}
   specialScale: 1.1
-  buffOutline: {r: 0.6449341, g: 0.90188676, b: 0.69119895, a: 1}
+  buffOutline: {r: 1, g: 1, b: 1, a: 1}
   debuffOutline: {r: 1, g: 0.6, b: 0.6, a: 1}
   outlineWidth: 0.443
 --- !u!114 &8585581551969793057

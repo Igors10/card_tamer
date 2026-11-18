@@ -16,7 +16,10 @@ public enum PowerUpCondition
     NoCardDestroyedThisRound, // this card hasn't destroyed a card this round
     IsPhantom,               // this card is the phantom copy (Phantom)
     OpponentNoFaceDown,      // the opponent has no face down cards on the field (Scout)
-    AttackingSideCard        // attacking the leftmost or rightmost card of the opponent's field (Flanker)
+    AttackingSideCard,       // attacking the leftmost or rightmost card of the opponent's field (Flanker)
+    StartedFaceDown,         // this card was face down when its fight started (Ambush, Bandit)
+    NotSideCard,             // this card isn't the leftmost or rightmost on its field (Ranged, Dragon)
+    RolledLower              // this card's base power roll is lower than the opposing card's (Lowroll)
 }
 
 /// <summary>
@@ -45,7 +48,7 @@ public class PowerUpEffect : AbilityEffect
     /// <summary>
     /// The bonus depends on which card it fights (Flanker), so before the fight it's only a maybe
     /// </summary>
-    public bool DependsOnOpposingCard => condition == PowerUpCondition.AgainstSideCard || condition == PowerUpCondition.AttackingSideCard;
+    public bool DependsOnOpposingCard => condition == PowerUpCondition.AgainstSideCard || condition == PowerUpCondition.AttackingSideCard || condition == PowerUpCondition.RolledLower;
 
     /// <summary>
     /// Before a fight: could the card get this bonus if it fought now (bonuses about the opposing card count as possible)
@@ -56,6 +59,8 @@ public class PowerUpEffect : AbilityEffect
         {
             case PowerUpCondition.AgainstSideCard: return true;
             case PowerUpCondition.AttackingSideCard: return attacking;
+            case PowerUpCondition.RolledLower: return true;
+            case PowerUpCondition.StartedFaceDown: return self.faceDown;
             default: return ConditionMet(self, attacking, null);
         }
     }
@@ -83,6 +88,9 @@ public class PowerUpEffect : AbilityEffect
             case PowerUpCondition.IsPhantom: return self.isPhantom;
             case PowerUpCondition.OpponentNoFaceDown: return !opponent.cardsOnField.Exists(card => card.faceDown);
             case PowerUpCondition.AttackingSideCard: return attacking && opposing != null && fight.IsSideCard(opposing);
+            case PowerUpCondition.StartedFaceDown: return self.startedFightFaceDown;
+            case PowerUpCondition.NotSideCard: return !fight.IsSideCard(self);
+            case PowerUpCondition.RolledLower: return opposing != null && self.baseRoll < opposing.baseRoll;
             default: return true;
         }
     }

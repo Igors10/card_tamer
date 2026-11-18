@@ -86,7 +86,8 @@ public class Ability : MonoBehaviour
 
         if (!MaterialReferenceManager.TryGetMaterial(hash, out Material outlined))
         {
-            outlined = new Material(fontMaterial) { name = materialName };
+            // DontSave: opening another scene in the editor would destroy it, but TMP keeps pointing at it
+            outlined = new Material(fontMaterial) { name = materialName, hideFlags = HideFlags.DontSave };
             outlined.EnableKeyword(ShaderUtilities.Keyword_Outline);
             MaterialReferenceManager.AddFontMaterial(hash, outlined);
         }

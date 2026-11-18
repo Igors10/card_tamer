@@ -10,25 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de60e445d82e8e647ae6d2d788a2de0b, type: 3}
-  m_Name: Underdog
+  m_Name: Ranged
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
-  power: 4
-  abilityDescription: Buff if you have fewer cards
+  power: 0
+  abilityDescription: '+3 if not a side card'
   isSpecial: 0
-  stickerColor: {r: 0.72156864, g: 0.9019608, b: 0.65882355, a: 1}
+  stickerColor: {r: 0.72, g: 0.88, b: 0.65, a: 1}
   hasSide: 0
-  icon: {fileID: 940748289767714487, guid: bb28eae246555e344a560882a0c182c7, type: 3}
+  icon: {fileID: 21300000, guid: 22ec825eb5549ba4b9d78b775567e972, type: 3}
   effects:
-  - rid: 8466844326851248231
+  - rid: 7100000000000000004
   references:
     version: 2
     RefIds:
-    - rid: 8466844326851248231
+    - rid: 7100000000000000004
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Underdog!
+        customText: 
         showPresentation: 1
         oncePerRound: 0
-        condition: 3
-        amount: 1
+        condition: 14
+        amount: 3
+        maxAmount: 0
