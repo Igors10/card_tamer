@@ -796,7 +796,7 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         spawnRoutine = null;
     }
 
-    void PlaySquash(float amount, float time)
+    public void PlaySquash(float amount, float time)
     {
         if (squashRoutine != null) StopCoroutine(squashRoutine);
         squashRoutine = StartCoroutine(SquashRoutine(amount, time));

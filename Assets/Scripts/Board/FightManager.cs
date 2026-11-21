@@ -85,6 +85,16 @@ public class FightManager : MonoBehaviour
     [SerializeField] float winnerRecoilDistance = 1.5f; // winner gets knocked back this far from the hit (and stays there)
     [SerializeField] float winnerRecoilHop = 0.5f;
     [SerializeField] float winnerRecoilTime = 0.25f;
+    [SerializeField] int winnerCheerHops = 3; // winner hops up and down while the losing card is discarded
+    [SerializeField] float winnerCheerDelay = 0.4f; // pause after the clash before the hopping starts
+    [SerializeField] float winnerCheerHeight = 1f;
+    [SerializeField] float winnerCheerHopTime = 0.4f;
+    [SerializeField] float winnerCheerSquash = 0.2f; // squashes on every landing
+    [SerializeField] float winnerCheerLandPause = 0.12f; // stays on the ground this long between hops
+    [SerializeField] float winnerCheerFinalHopMod = 1.6f; // last hop is this much higher (and a bit longer)
+    [SerializeField] float loserDiscardTime = 0.5f; // losing card slides to the side, tilting and fading away
+    [SerializeField] float loserDiscardDistance = 150f;
+    [SerializeField] float loserDiscardTilt = 25f;
     [SerializeField] float stickerMessagePause = 1.2f; // guard, mix up and similar messages stay this long
 
     [Header("destroyed card (Beast), cut in half like the Scissor Rat discard")]
@@ -522,6 +532,7 @@ public class FightManager : MonoBehaviour
             card.transform.SetParent(home, true);
             card.transform.localScale = card.defaultScale;
             card.transform.localRotation = Quaternion.identity;
+            if (card.TryGetComponent(out CanvasGroup group)) group.alpha = 1f; // faded out by the discard
             yield break;
         }
 
@@ -672,7 +683,9 @@ public class FightManager : MonoBehaviour
         yield return ClashUnits(attacker, defender);
 
         StartCoroutine(RecoilUnit(winner));
+        Coroutine celebration = StartCoroutine(CheerAndDiscard(winner, loser, loserCard));
         yield return KnockOutOrRecoil(loser);
+        if (loser != null && !loser.knockedOut) StopCoroutine(celebration); // a sticker saved the loser
 
         // Rat buddy: about your card, the winner or the knocked out one
         if (winner.card.player == gm.player) RatBuddy.instance.Comment("ClashWinCom", winner.card);
@@ -682,9 +695,6 @@ public class FightManager : MonoBehaviour
 
         // Beast destroys the card it beat for good (only when it attacks)
         if (winner == attacker) yield return DestroyBeatenCard(winner.card, loserCard);
-
-        // winner's side cheers
-        foreach (Card card in winner.card.player.cardsOnField) card.Cheer();
 
         // after fight stickers of the units still standing (knock itself out, hide, power-up for the next card)
         executeManager.abilityRunner.QueueFightTrigger(EffectTrigger.OnFightEnd);
@@ -1442,6 +1452,76 @@ public class FightManager : MonoBehaviour
             yield return null;
         }
         if (unit != null) unitTransform.position = recoilPos;
+    }
+
+    /// <summary>
+    /// Once the loser flies off, the winning unit cheers while the losing card is discarded
+    /// </summary>
+    IEnumerator CheerAndDiscard(Unit winner, Unit loser, Card loserCard)
+    {
+        yield return new WaitForSeconds(winnerRecoilTime);
+        yield return new WaitUntil(() => loser == null || loser.knockedOut);
+        StartCoroutine(DiscardCard(loserCard));
+        yield return new WaitForSeconds(winnerCheerDelay);
+        yield return CheerUnit(winner);
+    }
+
+    /// <summary>
+    /// Unit hops up and down a few times, squashing on every landing, the last hop is the biggest
+    /// </summary>
+    IEnumerator CheerUnit(Unit unit)
+    {
+        if (unit == null) yield break;
+        Transform unitTransform = unit.transform;
+        Vector3 restPos = unitTransform.position;
+        for (int hop = 0; hop < winnerCheerHops; hop++)
+        {
+            bool lastHop = hop == winnerCheerHops - 1;
+            float height = winnerCheerHeight * (lastHop ? winnerCheerFinalHopMod : 1f);
+            float hopTime = winnerCheerHopTime * (lastHop ? Mathf.Sqrt(winnerCheerFinalHopMod) : 1f);
+
+            float t = 0;
+            while (t < hopTime)
+            {
+                if (unit == null) yield break;
+                t += Time.deltaTime;
+                float clampedT = Mathf.Clamp01(t / hopTime);
+                unitTransform.position = restPos + Vector3.up * height * 4f * clampedT * (1 - clampedT); // falls like with gravity
+                yield return null;
+            }
+            if (unit == null) yield break;
+            unitTransform.position = restPos;
+            unit.PlaySquash(winnerCheerSquash * (lastHop ? 1.5f : 1f), winnerCheerLandPause * 2f);
+            if (!lastHop) yield return new WaitForSeconds(winnerCheerLandPause);
+        }
+    }
+
+    /// <summary>
+    /// Losing card slides off to its side of the screen, tilting and fading away (reset in ReturnCard)
+    /// </summary>
+    IEnumerator DiscardCard(Card card)
+    {
+        if (card == null) yield break;
+        Transform cardTransform = card.transform;
+        if (!card.TryGetComponent(out CanvasGroup group)) group = card.gameObject.AddComponent<CanvasGroup>();
+
+        float side = (cardTransform.position.x < Screen.width / 2f) ? -1f : 1f;
+        Vector3 startPos = cardTransform.position;
+        Vector3 endPos = startPos + cardTransform.parent.TransformVector(new Vector3(side * loserDiscardDistance, 0f, 0f));
+        float startAngle = Mathf.DeltaAngle(0f, cardTransform.localEulerAngles.z);
+        float endAngle = startAngle - side * loserDiscardTilt;
+
+        float t = 0;
+        while (t < loserDiscardTime && card != null)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / loserDiscardTime);
+            float easeT = 1 - Mathf.Pow(1 - clampedT, 2);
+            cardTransform.position = Vector3.Lerp(startPos, endPos, easeT);
+            cardTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(startAngle, endAngle, easeT));
+            group.alpha = 1 - clampedT;
+            yield return null;
+        }
     }
 
     readonly Dictionary<Unit, (Vector3 position, Vector3 scale)> clashRest = new Dictionary<Unit, (Vector3, Vector3)>(); // where each fighting unit stood before the clash

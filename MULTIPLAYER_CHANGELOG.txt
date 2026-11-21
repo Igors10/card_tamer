@@ -181,3 +181,7 @@ What changed in multiplayer and when. How it works now: MULTIPLAYER_NOTES.txt
 2026-11-18  Lobby starts with the last picked color (branch experimental-rules)
   - LobbyClient.OnStartClient sends SetColor(GameData.GetColorIndex). Pencil
     clicks skip the other player's color client side too and save the result.
+
+2026-11-19  Ability color removed (branch experimental-rules)
+  - MatchCommand.abilityColor removed, CreateCard sends only the second color
+    (leftover of the cut color abilities).

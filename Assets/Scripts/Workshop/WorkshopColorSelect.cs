@@ -109,9 +109,6 @@ public class WorkshopColorSelect : MonoBehaviour
         Player opponent = GameManager.instance.opponent;
         if (opponent.isAI && opponent.playerColor == selectedPencil.pencilColorImage.color) opponent.AIplayer.PickColor();
 
-        // after locking the color game can create 3 secondary colors
-        //Colors.instance.GenerateRandomSecondaryColors();
-
         // start creating player hand
         GameManager.instance.managerUI.workshop.LaunchStartingSequence();
     }

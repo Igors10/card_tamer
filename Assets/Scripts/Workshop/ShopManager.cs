@@ -128,6 +128,7 @@ public class ShopManager : MonoBehaviour
             offer.PriceText.text = stickerPriceNow.ToString();
             bool affordable = stickerPriceNow <= player.shopStars;
             offer.PriceText.color = affordable ? Color.black : Color.red;
+            offer.SetDimmed(!affordable);
             offer.Button.interactable = affordable && cardHasRoom;
         }
 

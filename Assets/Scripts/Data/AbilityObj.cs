@@ -46,7 +46,7 @@ public class AbilityObj : ScriptableObject
     /// <summary>
     /// buffMaterial / debuffMaterial: TMP material names that outline the "+X" / "-X" numbers (null: plain numbers)
     /// </summary>
-    public string GetAbilityDesc(Color abilityColor, bool onRight = false, string buffMaterial = null, string debuffMaterial = null)
+    public string GetAbilityDesc(bool onRight = false, string buffMaterial = null, string debuffMaterial = null)
     {
         string abilityText = abilityDescription;
 
@@ -55,10 +55,6 @@ public class AbilityObj : ScriptableObject
         // outlining the power modifiers ("+2", "-1", not ranges like "1-6"). After the word coloring, the material names have "Buff" in them
         if (buffMaterial != null) abilityText = Regex.Replace(abilityText, @"(?<!\w)\+\d+", $"<material=\"{buffMaterial}\">$0</material>");
         if (debuffMaterial != null) abilityText = Regex.Replace(abilityText, @"(?<!\w)\-\d+", $"<material=\"{debuffMaterial}\">$0</material>");
-
-        // coloring the 'color' of abilities that work with specific color
-        string hexColor = ColorUtility.ToHtmlStringRGB(abilityColor);
-        abilityText = abilityText.Replace("{color}", $"<color=#{hexColor}>color</color>");
 
         // left or right version of the sticker
         abilityText = abilityText.Replace("{side}", onRight ? "right" : "left");

@@ -71,7 +71,6 @@ public class Card : MonoBehaviour
     [SerializeField] float dragTiltPerSpeed = 0.012f; // degrees of tilt per pixel/second of movement
     [SerializeField] Vector2 dragShadowOffset = new Vector2(14f, -18f);
     [SerializeField] float dragShadowAlpha = 0.35f;
-    [SerializeField] float cheerHeight = 25f; // how high the drawing hops when its side wins a fight
     Vector3 handTargetPosition;
     bool inHandLayout = false; // when true the card eases to its place in the hand fan
     float dragTilt = 0f;
@@ -649,32 +648,6 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Drawing on the card hops up and down
-    /// </summary>
-    public void Cheer()
-    {
-        if (gameObject.activeInHierarchy) StartCoroutine(CheerAnim());
-    }
-
-    IEnumerator CheerAnim()
-    {
-        Transform art = cardSprite.transform;
-        Vector3 restPos = art.localPosition;
-        float hopTime = 0.22f;
-        for (int hop = 0; hop < 2; hop++)
-        {
-            float t = 0;
-            while (t < hopTime)
-            {
-                t += Time.deltaTime;
-                art.localPosition = restPos + new Vector3(0f, Mathf.Sin(Mathf.Clamp01(t / hopTime) * Mathf.PI) * cheerHeight, 0f);
-                yield return null;
-            }
-        }
-        art.localPosition = restPos;
-    }
-
-    /// <summary>
     /// Drags the card around with mouse cursor
     /// </summary>
     public void Drag()
@@ -807,8 +780,17 @@ public class Card : MonoBehaviour
         destroyedCardThisRound = false;
         onDisplay = false;
         SetFaceDown(false);
+        ClearStatusEffects();
 
         //unit.RefreshUnitVisuals();
+    }
+
+    /// <summary>
+    /// Removes every status effect from the card (Lock), so none of them reach the workshop
+    /// </summary>
+    public void ClearStatusEffects()
+    {
+        SetLocked(false);
     }
 
 }

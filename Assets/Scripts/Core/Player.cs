@@ -206,7 +206,6 @@ public class Player : MonoBehaviour
 
         // all cards go to the field face down
         GameManager.instance.handManager.MoveHandToField(this);
-        foreach (Card card in cardsOnField) card.SetLocked(false);
 
         playerUI.Refresh();
     }
@@ -241,6 +240,7 @@ public class Player : MonoBehaviour
     public void LoseHeart()
     {
         if (health < 1) return;
+        AudioManager.instance.PlaySFX("HitSFX");
         damageTakenThisRound++;
         health--;
         playerUI.Refresh();

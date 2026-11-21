@@ -41,7 +41,6 @@ public struct MatchCommand
     public string abilityName;  // CreateCard: base sticker, AddSticker: the sticker (AbilityObj asset name)
     public bool onRight;        // CreateCard, AddSticker: sticker side
     public Color color;         // PickColor: player color. CreateCard: second color
-    public Color abilityColor;  // CreateCard
     public byte[] layer1;       // CreateCard: drawing layers as PNG
     public byte[] layer2;
 }
@@ -144,7 +143,6 @@ public class MatchNetwork : NetworkBehaviour
             abilityName = cardData.BaseSticker.name,
             onRight = cardData.stickers[0].onRight,
             color = cardData.secondaryColor,
-            abilityColor = cardData.abilityColor,
             index = -1
         };
 
@@ -385,7 +383,7 @@ public class MatchNetwork : NetworkBehaviour
             ? gm.cardDatabase.GetAllPresets()[command.index].sprite
             : new Sprite[] { PngToSprite(command.layer1), PngToSprite(command.layer2) };
 
-        CreatureObj cardData = gm.cardGenerator.ConstructNewCard(command.cardName, sprites, new Sticker(ability, command.onRight), command.color, command.abilityColor);
+        CreatureObj cardData = gm.cardGenerator.ConstructNewCard(command.cardName, sprites, new Sticker(ability, command.onRight), command.color);
         gm.cardGenerator.CreateCard(cardData, p);
     }
 

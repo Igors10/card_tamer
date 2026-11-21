@@ -18,14 +18,12 @@ public class Workshop : MonoBehaviour
     [Header("creating cards")]
     [SerializeField] GameObject cardCreationUI;
     [SerializeField] GameObject abilitySelectUI;
-    [SerializeField] GameObject secondaryColorSelectUI;
     [SerializeField] GameObject canvasUI;
     [SerializeField] WorkshopOption[] abilityOption = new WorkshopOption[2];
     [SerializeField] TMP_InputField nameInput;
     [HideInInspector] public Sticker chosenAbility; // base sticker of the new card
     Sticker chosenSticker; // sticker bought in the shop, waiting for a card
     public bool ChoosingStickerCard { get; private set; } // player has to click a card in hand
-    [HideInInspector] public Color chosenAbilityColor;
     [HideInInspector] public Color chosenSecondColor;
     public DrawingTool drawingCanvas;
     [SerializeField] Sprite placeholderSprite;
@@ -233,6 +231,31 @@ public class Workshop : MonoBehaviour
         AbilityOptions();
     }
 
+    /// <summary>
+    /// Debug: skips color select and card making, both players get random starting cards (the player keeps the last picked color)
+    /// </summary>
+    public void DebugSkipStartingSequence()
+    {
+        colorSelectUI.SetActive(false);
+        startingMinionCounter.gameObject.SetActive(false);
+
+        // last picked color, the bot never has the same one
+        List<Color> colors = GameManager.instance.cardDatabase.allPlayerColors;
+        player.playerColor = colors[GameData.GetColorIndex(colors.Count)];
+        player.powerCounter.RefreshColor();
+        Player opponent = GameManager.instance.opponent;
+        if (opponent.isAI && opponent.playerColor == player.playerColor) opponent.AIplayer.PickColor();
+
+        // random premade cards, like when the canvas is left empty
+        for (int i = 0; i < GameManager.instance.startingCardAmount; i++)
+        {
+            UnitPreset preset = GameManager.instance.cardDatabase.GetRandomBasicPreset();
+            CreatureObj cardData = generator.ConstructNewCard(preset.unitName, preset.sprite, generator.PickRandomSticker("basic"), Colors.instance.GetDarkenColor(player.playerColor));
+            generator.CreateCard(cardData, player);
+        }
+        if (opponent.isAI) opponent.AIplayer.CreateAIStartingHand();
+    }
+
     public void ChangeHint(string newHintText)
     {
         workshopHintText.text = newHintText;
@@ -308,7 +331,7 @@ public class Workshop : MonoBehaviour
             {
                 Sticker defaultSticker = generator.PickRandomSticker("default");
                 pickedAbilities.Add(defaultSticker.ability);
-                ShowSticker(abilityOption[a].sticker, defaultSticker, default);
+                ShowSticker(abilityOption[a].sticker, defaultSticker);
                 continue;
             }
 
@@ -317,7 +340,7 @@ public class Workshop : MonoBehaviour
             for (int tries = 0; tries < 20 && pickedAbilities.Contains(stickerToAssign.ability); tries++) stickerToAssign = generator.PickRandomSticker(listName);
             pickedAbilities.Add(stickerToAssign.ability);
 
-            ShowSticker(abilityOption[a].sticker, stickerToAssign, default);
+            ShowSticker(abilityOption[a].sticker, stickerToAssign);
         }
 
         // Rat explaining the abilities
@@ -332,9 +355,9 @@ public class Workshop : MonoBehaviour
     // Stickers
     // ====================
 
-    void ShowSticker(Ability stickerUI, Sticker sticker, Color color)
+    void ShowSticker(Ability stickerUI, Sticker sticker)
     {
-        stickerUI.InitSticker(sticker, color);
+        stickerUI.InitSticker(sticker);
         stickerUI.SetSize(stickerHeight, stickerFontSize);
     }
 
@@ -396,7 +419,7 @@ public class Workshop : MonoBehaviour
         workshopHintText.text = "Draw and name the card";
 
         // passing the ability
-        ShowSticker(abilityReminder, chosenAbility, chosenAbilityColor);
+        ShowSticker(abilityReminder, chosenAbility);
 
         // resetting name input field
         nameInput.text = "";
@@ -416,28 +439,16 @@ public class Workshop : MonoBehaviour
         }
     }
 
-    public void PickAbilityOption(Sticker pickedAbility, Color abilityColor)
+    public void PickAbilityOption(Sticker pickedAbility)
     {
-        // save the ability and color
+        // save the ability
         chosenAbility = pickedAbility;
-        chosenAbilityColor = abilityColor;
 
         // play Audio Effect
         AudioManager.instance.PlaySFX("ShopStarSFX");
 
-        // switching to second color UI
-        workshopHintText.text = "Pick second color for the card";
-        abilitySelectUI.SetActive(false);
-        EnableDrawingCanvas();
-    }
-
-    public void PickSecondaryColor(Color pickedColor)
-    {
-        // saving the picked color
-        chosenSecondColor = pickedColor;
-
         // switching to drawing UI
-        secondaryColorSelectUI.SetActive(false);
+        abilitySelectUI.SetActive(false);
         EnableDrawingCanvas();
     }
 
@@ -487,7 +498,7 @@ public class Workshop : MonoBehaviour
             if (drawingCanvas.IsCanvasEmpty() == false && canvasTextures[i] != null) newCardSprites[i] = Sprite.Create(canvasTextures[i], new Rect(0, 0, drawingCanvas.textureSize, drawingCanvas.textureSize), new Vector2(0.5f, 0.5f));
         }
       
-        newCardData = newCardData = generator.ConstructNewCard(nameInput.text, newCardSprites, chosenAbility, chosenSecondColor, chosenAbilityColor);
+        newCardData = newCardData = generator.ConstructNewCard(nameInput.text, newCardSprites, chosenAbility, chosenSecondColor);
 
         // if the canvas is empty applying a random unit sprite and name instead
         UnitPreset randomUnitPreset = null;
@@ -495,7 +506,7 @@ public class Workshop : MonoBehaviour
         {
             randomUnitPreset = (chosenAbility.ability.isSpecial) ? GameManager.instance.cardDatabase.GetRandomSpecialPreset() : GameManager.instance.cardDatabase.GetRandomBasicPreset();
             // presets are made with the darker second color in mind (same as AI cards)
-            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, Colors.instance.GetDarkenColor(player.playerColor), chosenAbilityColor);
+            newCardData = generator.ConstructNewCard(randomUnitPreset.unitName, randomUnitPreset.sprite, chosenAbility, Colors.instance.GetDarkenColor(player.playerColor));
         }
         // also checking if the minion is named
         else if (nameInput.text == "")

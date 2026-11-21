@@ -66,6 +66,10 @@ public class GameManager : MonoBehaviour
     // debug keys (O, A, K, E, Backspace) only in editor bot matches, in builds/online they'd fire while typing card names
     public bool DebugKeysEnabled => Application.isEditor && playerConfig.offlineMatch;
 
+    [Header("debug (editor bot matches only)")]
+    [SerializeField] bool debugStartInPlacing; // skips the card making, both players start arranging random cards
+    [SerializeField] bool debugStartInShop; // skips the card making, both players start in the shop with random cards
+
     //[Header("events")]
     public static event Action OnStateTransition;
     public static event Action OnRoundEnd;
@@ -168,6 +172,18 @@ public class GameManager : MonoBehaviour
             loadingFog.StartLoading("Waiting for opponent...");
             while (!matchStarted) yield return null;
             loadingFog.StopLoading();
+        }
+
+        // debug: straight to arranging or the shop with random cards (under the fog)
+        if (DebugKeysEnabled && (debugStartInPlacing || debugStartInShop))
+        {
+            yield return null; // every Start has run (workshop, bot)
+            managerUI.workshop.DebugSkipStartingSequence();
+            managerUI.EnableUI(false);
+            TransitionGameState(debugStartInPlacing ? GameState.PLACING : GameState.BUYING);
+            player.playerUI.Refresh();
+            yield return StartCoroutine(loadingFog.LoadingAnimation(loadingTime));
+            yield break;
         }
 
         // Loading fog fading away effect

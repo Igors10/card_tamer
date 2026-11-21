@@ -12,6 +12,8 @@ public class ShopSticker : MonoBehaviour
     [SerializeField] TextMeshProUGUI priceText;
     [SerializeField] float stickerHeight = 54f;
     [SerializeField] float stickerFontSize = 24f;
+    [SerializeField] float dimmedAlpha = 0.4f; // too expensive stickers fade to this
+    CanvasGroup group;
 
     public Sticker Offered { get; private set; } // null once it's bought
     public Button Button => button;
@@ -23,8 +25,17 @@ public class ShopSticker : MonoBehaviour
     public void Show(Sticker sticker)
     {
         Offered = sticker;
-        stickerStrip.InitSticker(sticker, default);
+        stickerStrip.InitSticker(sticker);
         if (sticker != null) stickerStrip.SetSize(stickerHeight, stickerFontSize);
         priceText.gameObject.SetActive(sticker != null);
+    }
+
+    /// <summary>
+    /// Fades the whole sticker (strip and price) when the player can't afford it
+    /// </summary>
+    public void SetDimmed(bool dimmed)
+    {
+        if (group == null && !TryGetComponent(out group)) group = gameObject.AddComponent<CanvasGroup>();
+        group.alpha = dimmed ? dimmedAlpha : 1f;
     }
 }

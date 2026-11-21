@@ -25,7 +25,6 @@ public class CreatureObj : ScriptableObject
     public string creatureName;
     public Sprite[] unitSprite = new Sprite[2];
     public Color secondaryColor;
-    public Color abilityColor;
     public List<Sticker> stickers = new List<Sticker>(); // first one is the base sticker
 
     // doodle varialbes

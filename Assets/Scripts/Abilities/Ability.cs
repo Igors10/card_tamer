@@ -10,7 +10,6 @@ public class Ability : MonoBehaviour
     [Header("AbilityData")]
     public AbilityObj abilityData;
     [HideInInspector] public Card card;
-    public Color abilityColor;
     [HideInInspector] public bool onRight; // left or right version of the sticker
 
     [Header("refs")]
@@ -39,13 +38,13 @@ public class Ability : MonoBehaviour
     public void InitAbility(Sticker sticker, Card cardAssignTo)
     {
         card = cardAssignTo;
-        InitSticker(sticker, card.cardData.abilityColor);
+        InitSticker(sticker);
     }
 
     /// <summary>
     /// Applying sticker data without a card (workshop options and the drawing reminder)
     /// </summary>
-    public void InitSticker(Sticker sticker, Color color)
+    public void InitSticker(Sticker sticker)
     {
         abilityData = sticker?.ability;
         gameObject.SetActive(abilityData != null);
@@ -53,12 +52,9 @@ public class Ability : MonoBehaviour
 
         onRight = sticker.onRight;
 
-        // Ability color
-        abilityColor = color;
-
         // EFFECT DESCRIPTION
         effectDesc.extraPadding = true; // room for the outline around the numbers
-        effectDesc.text = abilityData.GetAbilityDesc(abilityColor, onRight, OutlineMaterial(buffOutline, "Buff"), OutlineMaterial(debuffOutline, "Debuff"));
+        effectDesc.text = abilityData.GetAbilityDesc(onRight, OutlineMaterial(buffOutline, "Buff"), OutlineMaterial(debuffOutline, "Debuff"));
 
         // sticker look
         if (stickerBG != null) stickerBG.color = abilityData.stickerColor;
@@ -139,7 +135,7 @@ public class Ability : MonoBehaviour
     /// <summary>
     /// Description with the right side filled in
     /// </summary>
-    public string GetDescription() => abilityData.GetAbilityDesc(abilityColor, onRight);
+    public string GetDescription() => abilityData.GetAbilityDesc(onRight);
 
     /// <summary>
     /// Shows other text on the strip instead of the description (the effect notifier says what the sticker is doing)

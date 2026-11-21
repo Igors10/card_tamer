@@ -28,7 +28,7 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
     [SerializeField] float deathThinkingTime;
     [SerializeField] float deathChoosingTime;
     [SerializeField] float afterDeathTime;
-    [SerializeField] float beforeHeartBreakTime = 0.5f; // winner's cards cheer first
+    [SerializeField] float beforeHeartBreakTime = 0.5f; // short pause before the heart breaks
     [SerializeField] float afterHeartBreakTime = 1f; // the broken heart is seen before the round (or the game) ends
 
     [HideInInspector] public int currentLine;
@@ -70,11 +70,10 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
     }
 
     /// <summary>
-    /// Winner's cards cheer, then one of the loser's hearts breaks. No hearts left: the loser loses the game
+    /// One of the loser's hearts breaks. No hearts left: the loser loses the game
     /// </summary>
     IEnumerator BreakHeart(Player winner, Player loser)
     {
-        foreach (Card card in winner.cardsOnField) card.Cheer();
         yield return new WaitForSeconds(beforeHeartBreakTime);
 
         loser.LoseHeart();

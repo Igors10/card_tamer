@@ -37,7 +37,7 @@ public class ParticleManager : MonoBehaviour
         }
         else
         {
-            newVFX = Instantiate(vfxPrefab, position, Quaternion.identity);
+            newVFX = Instantiate(vfxPrefab, position, vfxPrefab.transform.rotation); // prefab's own rotation (broken hearts are tilted to face the camera)
         }
 
         // recoloring the effect (like the purple poof of special units)

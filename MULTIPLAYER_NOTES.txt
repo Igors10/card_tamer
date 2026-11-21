@@ -352,8 +352,7 @@ MatchCommand (struct, FishNet sends it as is)
   seat     who made it (set by the server, not trusted from the client).
   stateNr  GameManager.stateNr when it was made (+1 on every state change).
   type     CommandType enum. Add new commands here.
-  index, lane, order, cardName, abilityName, onRight, color, abilityColor,
-  layer1, layer2
+  index, lane, order, cardName, abilityName, onRight, color, layer1, layer2
            values, which ones are used depends on the type (see the struct).
            Unused ones stay empty and cost almost nothing.
 
@@ -520,7 +519,7 @@ Workshop results (PickColor, CreateCard, DiscardFromHand, AddSticker)
                FishNet splits big reliable messages itself)
                empty canvas: index of the preset in
                CardDatabase.GetAllPresets() (sets in order, basic then special)
-      colors   second color + ability color as they are.
+      color    second color as it is.
     Other game builds the same CreatureObj and calls CreateCard for the
     opponent (hand full check is the same on both).
   - DiscardFromHand: DiscardManager.DiscardUnitSequence (only the workshop
