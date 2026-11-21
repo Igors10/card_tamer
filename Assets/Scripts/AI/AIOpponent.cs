@@ -129,7 +129,7 @@ public class AIOpponent : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         // first game: the bot thinks until the rat is done talking, so the player can read everything
-        while (RatBuddy.instance.IsTalking) yield return null;
+        yield return RatBuddy.instance.WaitUntilQuiet();
 
         Player target = GameManager.instance.player;
         List<Card> ready = playerObj.cardsOnField.FindAll(card => playerObj.CanAttackWith(card));

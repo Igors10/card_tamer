@@ -31,11 +31,17 @@ public class ShopSticker : MonoBehaviour
     }
 
     /// <summary>
-    /// Fades the whole sticker (strip and price) when the player can't afford it
+    /// Fades the button and the sticker when the player can't afford it (the price and its star stay clear)
     /// </summary>
     public void SetDimmed(bool dimmed)
     {
-        if (group == null && !TryGetComponent(out group)) group = gameObject.AddComponent<CanvasGroup>();
+        if (group == null)
+        {
+            if (!TryGetComponent(out group)) group = gameObject.AddComponent<CanvasGroup>();
+            // the price has its own group that ignores the fade
+            if (!priceText.TryGetComponent(out CanvasGroup priceGroup)) priceGroup = priceText.gameObject.AddComponent<CanvasGroup>();
+            priceGroup.ignoreParentGroups = true;
+        }
         group.alpha = dimmed ? dimmedAlpha : 1f;
     }
 }

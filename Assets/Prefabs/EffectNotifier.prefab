@@ -509,7 +509,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3611328577316369035, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
       propertyPath: m_fontSize
-      value: 24
+      value: 20.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3611328577316369035, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
+      propertyPath: m_margin.x
+      value: 29.710571
       objectReference: {fileID: 0}
     - target: {fileID: 5507093274599945598, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
       propertyPath: m_Sprite

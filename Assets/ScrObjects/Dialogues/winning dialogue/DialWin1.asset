@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RSDialogueObj
   line:
   - Good job!
-  - You can win this I believe in you!
+  - You can win this, I believe in you!

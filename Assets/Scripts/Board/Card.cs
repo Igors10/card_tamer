@@ -37,10 +37,16 @@ public class Card : MonoBehaviour
     [SerializeField] GameObject hiddenIcon; // your own face down field cards show this, so you know the opponent can't see them
     [SerializeField] GameObject lockedIcon; // Lock: locked cards show this
     [SerializeField] Image guardedIcon; // Guard: a shield flashes over the card when a guard takes the attack for it
-    [SerializeField] float guardedPopScale = 1.4f; // shield starts this big and shrinks into place
-    [SerializeField] float guardedPopTime = 0.2f;
-    [SerializeField] float guardedHoldTime = 0.6f;
-    [SerializeField] float guardedFadeTime = 0.4f;
+    [SerializeField] Image scoutedIcon; // Scout: flashes over the card it reveals
+    [FormerlySerializedAs("guardedPopScale")]
+    [SerializeField] float iconPopScale = 1.4f; // flashing icons (shield, scout, lock) start this big and shrink into place
+    [FormerlySerializedAs("guardedPopTime")]
+    [SerializeField] float iconPopTime = 0.2f;
+    [FormerlySerializedAs("guardedHoldTime")]
+    [SerializeField] float iconHoldTime = 0.6f;
+    [FormerlySerializedAs("guardedFadeTime")]
+    [SerializeField] float iconFadeTime = 0.4f;
+    [SerializeField] float iconFlashAlpha = 0.8f; // flashing icons (shield, scout) are a bit see-through
     [SerializeField] GameObject phantomLabel; // only the owner sees which card is the phantom
     public Transform Visual => cardVisual.transform; // everything drawn on the card (the fighting unit's power counter goes here too)
     [HideInInspector] public Unit unit;
@@ -53,6 +59,17 @@ public class Card : MonoBehaviour
     [HideInInspector] public Vector3 highlightedScale = new Vector3();
     Vector3 dragScale = new Vector3();
     float highlightOffsetY = 220f;
+    [SerializeField] float targetedOffsetY = 200f; // a card picked by a sticker (Lock, Scout) lifts towards the middle of the screen
+    [HideInInspector] public bool targeted;
+    [SerializeField] float aimOffsetY = 40f; // you hover an opponent card while picking a target: it moves this much towards the middle
+    [SerializeField] float aimScale = 1.1f;
+    static Card aimedCard; // opponent card under the mouse while you pick a target
+    Transform aimParent; // row the aimed card was in
+
+    /// <summary>
+    /// Card is the one you're aiming at right now (stops by itself when the picking is over)
+    /// </summary>
+    static bool IsAimedAt(Card card) => card != null && FightManager.instance != null && FightManager.instance.IsLocalAimTarget(card);
     Vector3 originalHandPosition = new Vector3();
     float cardRotation = 0f;
     int hierarchyIndex = 0;
@@ -278,10 +295,23 @@ public class Card : MonoBehaviour
         Transform visual = cardVisual.transform;
 
         // scale and raise
-        bool raised = hovered || isDragged;
+        // arranging: hovered cards only grow, they stay in the row (right click zooms them for reading)
+        bool raised = (hovered && GameManager.instance.currentState != GameState.PLACING) || isDragged;
         // visual is a child of the card, so its scale is relative to the card root
-        Vector3 targetScale = (isDragged) ? visualRestScale * 1.2f * dragLiftScale : (hovered) ? visualRestScale * 1.2f : visualRestScale;
+        Vector3 targetScale = (isDragged) ? visualRestScale * 1.2f * dragLiftScale : (hovered || targeted) ? visualRestScale * 1.2f : visualRestScale;
         Vector3 targetPosition = (raised) ? transform.InverseTransformVector(new Vector3(0f, highlightOffsetY, 0f)) : Vector3.zero;
+        // targeted: your cards lift up, the opponent's down (towards the middle)
+        if (targeted && !raised)
+        {
+            float liftY = (player == GameManager.instance.player) ? targetedOffsetY : -targetedOffsetY;
+            targetPosition = transform.InverseTransformVector(new Vector3(0f, liftY, 0f));
+        }
+        // you aim at an opponent card: it comes a bit towards the middle
+        else if (!raised && aimedCard == this && IsAimedAt(this))
+        {
+            targetScale = visualRestScale * aimScale;
+            targetPosition = transform.InverseTransformVector(new Vector3(0f, -aimOffsetY, 0f));
+        }
         visual.localScale = Vector3.Lerp(visual.localScale, targetScale, easeT);
         visual.localPosition = Vector3.Lerp(visual.localPosition, targetPosition, easeT);
 
@@ -452,53 +482,73 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Lock: locked cards can't attack and show a lock (over the card back too)
+    /// Lock: locked cards can't attack and show a lock (over the card back too). Animated = the lock pops in
     /// </summary>
-    public void SetLocked(bool isLocked)
+    public void SetLocked(bool isLocked, bool animated = false)
     {
         locked = isLocked;
         lockedIcon.SetActive(isLocked);
+        if (isLocked && animated) StartCoroutine(PopIconIn(lockedIcon.transform));
     }
 
     /// <summary>
     /// Guard: a shield pops in over the card, stays for a moment and fades away
     /// </summary>
-    public IEnumerator FlashGuardedShield()
-    {
-        Transform shield = guardedIcon.transform;
-        Color color = guardedIcon.color;
-        guardedIcon.gameObject.SetActive(true);
+    public IEnumerator FlashGuardedShield() => FlashIcon(guardedIcon);
 
-        // pops in: shrinks into place while fading in
+    /// <summary>
+    /// Scout: the scout icon pops in over the revealed card, stays for a moment and fades away
+    /// </summary>
+    public IEnumerator FlashScouted() => FlashIcon(scoutedIcon);
+
+    /// <summary>
+    /// Icon shrinks into place from big (fading in, if it has a graphic)
+    /// </summary>
+    IEnumerator PopIconIn(Transform icon, Graphic graphic = null)
+    {
+        Color color = (graphic != null) ? graphic.color : Color.white;
         float t = 0;
-        while (t < guardedPopTime)
+        while (t < iconPopTime)
         {
             t += Time.deltaTime;
-            float clampedT = Mathf.Clamp01(t / guardedPopTime);
+            float clampedT = Mathf.Clamp01(t / iconPopTime);
             float coolT = 1 - Mathf.Pow(1 - clampedT, 3);
-            shield.localScale = Vector3.one * Mathf.Lerp(guardedPopScale, 1f, coolT);
-            guardedIcon.color = new Color(color.r, color.g, color.b, color.a * clampedT);
+            icon.localScale = Vector3.one * Mathf.Lerp(iconPopScale, 1f, coolT);
+            if (graphic != null) graphic.color = new Color(color.r, color.g, color.b, color.a * clampedT);
             yield return null;
         }
-        shield.localScale = Vector3.one;
-        guardedIcon.color = color;
+        icon.localScale = Vector3.one;
+        if (graphic != null) graphic.color = color;
+    }
 
-        yield return new WaitForSeconds(guardedHoldTime);
+    /// <summary>
+    /// Icon pops in over the card, stays for a moment and fades away
+    /// </summary>
+    IEnumerator FlashIcon(Image icon)
+    {
+        Transform iconTransform = icon.transform;
+        Color restColor = icon.color;
+        Color color = new Color(restColor.r, restColor.g, restColor.b, restColor.a * iconFlashAlpha);
+        icon.color = color;
+        icon.gameObject.SetActive(true);
+
+        yield return PopIconIn(iconTransform, icon);
+        yield return new WaitForSeconds(iconHoldTime);
 
         // fades away, growing a little
-        t = 0;
-        while (t < guardedFadeTime)
+        float t = 0;
+        while (t < iconFadeTime)
         {
             t += Time.deltaTime;
-            float clampedT = Mathf.Clamp01(t / guardedFadeTime);
-            shield.localScale = Vector3.one * Mathf.Lerp(1f, 1.15f, clampedT);
-            guardedIcon.color = new Color(color.r, color.g, color.b, color.a * (1 - clampedT));
+            float clampedT = Mathf.Clamp01(t / iconFadeTime);
+            iconTransform.localScale = Vector3.one * Mathf.Lerp(1f, 1.15f, clampedT);
+            icon.color = new Color(color.r, color.g, color.b, color.a * (1 - clampedT));
             yield return null;
         }
 
-        guardedIcon.gameObject.SetActive(false);
-        shield.localScale = Vector3.one;
-        guardedIcon.color = color;
+        icon.gameObject.SetActive(false);
+        iconTransform.localScale = Vector3.one;
+        icon.color = restColor;
     }
 
     /// <summary>
@@ -553,8 +603,20 @@ public class Card : MonoBehaviour
         if (mouseOver) hoveredCard = this;
         else if (hoveredCard == this) hoveredCard = null;
 
-        // highlighting cards that can be attacked
-        if (FightManager.instance != null && FightManager.instance.IsTarget(this)) HighlightCard(mouseOver);
+        // aiming at an opponent card (attack target, Lock...): it comes forward, drawn over the cards next to it
+        if (mouseOver && IsAimedAt(this))
+        {
+            aimedCard = this;
+            aimParent = transform.parent;
+            hierarchyIndex = transform.GetSiblingIndex();
+            transform.SetAsLastSibling();
+        }
+        else if (!mouseOver && aimedCard == this)
+        {
+            aimedCard = null;
+            // back to its draw order, unless it left the row meanwhile (went on display to fight)
+            if (transform.parent == aimParent) transform.SetSiblingIndex(hierarchyIndex);
+        }
 
         Player localPlayer = GameManager.instance.player;
         if (localPlayer.cardsInHand.Contains(this) || localPlayer.cardsOnField.Contains(this))
@@ -600,6 +662,17 @@ public class Card : MonoBehaviour
         isDragged = true;
         lastDragPosition = transform.position;
         GameManager.instance.handManager.activeCard = this;
+        ArrangeHints();
+    }
+
+    /// <summary>
+    /// Rat buddy: arranging, a clicked Guard or Cheerer gets explained (goes away on Ready)
+    /// </summary>
+    void ArrangeHints()
+    {
+        if (GameManager.instance.currentState != GameState.PLACING || player != GameManager.instance.player || player.endStateReady) return;
+        if (HasEffect<GuardNeighbourEffect>()) RatBuddy.instance.Hint("ArrangeProtectHint", this);
+        if (HasEffect<NeighbourPowerUpEffect>()) RatBuddy.instance.Hint("ArrangeBuffHint", this);
     }
 
     public void EndDrag()
@@ -629,7 +702,8 @@ public class Card : MonoBehaviour
     /// </summary>
     public void OnClick()
     {
-        // battle: attack target, workshop: card to put the new sticker on
+        // battle: attack target, workshop: card to put the new sticker on, arranging: hints about the card
+        ArrangeHints();
         if (FightManager.instance.TryPickTarget(this)) return;
         GameManager.instance.managerUI.workshop.TryPutSticker(this);
     }
@@ -639,8 +713,8 @@ public class Card : MonoBehaviour
     /// </summary>
     public void Zoom(bool zoomIn)
     {
-        // the opponent's face down cards only show their back
-        if (zoomIn && faceDown && player != GameManager.instance.player) return;
+        // the opponent's face down cards only show their back, clashing cards are already big on display
+        if (zoomIn && (HiddenFromLocalPlayer || onDisplay)) return;
 
         ManagerUI ui = GameManager.instance.managerUI;
         if (zoomIn) ui.ZoomCard(this);

@@ -122,11 +122,7 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
 
         lostCurrentRound = GameManager.instance.player.damageTakenThisRound > GameManager.instance.opponent.damageTakenThisRound;
 
-        // CHAT WITH THE RAT
-        // Rat encouraging you 
-        if (lostCurrentRound) yield return RatSmart.instance.PlayDialogue("lose");
-        else yield return RatSmart.instance.PlayDialogue("win");
-
+        // CHAT WITH THE RAT (losing the round is talked about in the workshop, ShopManager)
         // Rat explaining the discard
         if (RatSmart.instance.discardingExplained == false && GameManager.instance.player.cardsInDiscard.Count >= 1)
         {

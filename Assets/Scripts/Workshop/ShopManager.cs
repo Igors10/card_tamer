@@ -328,6 +328,14 @@ public class ShopManager : MonoBehaviour
         }
 
         // CHAT WITH RAT
+        // lost round (= lost a heart): a warning if only one heart is left, then the rat encourages you
+        bool lostRound = GameManager.instance.battleManager.lostCurrentRound;
+        if (lostRound)
+        {
+            if (player.health == 1) yield return RatSmart.instance.PlayDialogue("OneHeartLeftDial");
+            yield return RatSmart.instance.PlayDialogue("lose");
+        }
+
         // shop tutorial
         if (RatSmart.instance.shopExplained == false)
         {
@@ -335,7 +343,7 @@ public class ShopManager : MonoBehaviour
             RatSmart.instance.shopExplained = true;
         }
         // adding the star if player lost previous round
-        if (GameManager.instance.battleManager.lostCurrentRound)
+        if (lostRound)
         {
             yield return RatSmart.instance.PlayDialogue("PlusStarDial");
             AddShopStar();

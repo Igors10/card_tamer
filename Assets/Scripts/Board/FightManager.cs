@@ -187,6 +187,12 @@ public class FightManager : MonoBehaviour
     public bool IsTarget(Card card) => choosingFor != null && card.player != choosingFor.player && card.player.cardsOnField.Contains(card);
 
     /// <summary>
+    /// The local player is picking an opponent card (attack target or a ChooseCard option) and this card can be picked
+    /// </summary>
+    public bool IsLocalAimTarget(Card card) => card.player != GameManager.instance.player
+        && (IsTarget(card) || (choiceOptions != null && choiceOptions.Contains(card)));
+
+    /// <summary>
     /// Local player clicked a card while choosing a target (or a card to swap places with). Returns true if it was used
     /// </summary>
     public bool TryPickTarget(Card card)
@@ -652,6 +658,7 @@ public class FightManager : MonoBehaviour
         // both cards roll a d6 for their base power at the same time, stickers only give power after both dice landed
         yield return RollBasePower();
         RatBuddy.instance.Comment("ModifiersCom");
+        yield return RatBuddy.instance.WaitUntilQuiet();
 
         // stickers give power (attacker's first, then the defender's)
         if (guessPower > 0) yield return AddPower(attacker, guessPower);
@@ -680,6 +687,7 @@ public class FightManager : MonoBehaviour
         yield return winner.ShowFightResult(true);
         if (attackerPower == defenderPower) RatBuddy.instance.Comment("TieCom");
         RatBuddy.instance.Comment("ClashCom");
+        yield return RatBuddy.instance.WaitUntilQuiet();
         yield return ClashUnits(attacker, defender);
 
         StartCoroutine(RecoilUnit(winner));
@@ -690,6 +698,7 @@ public class FightManager : MonoBehaviour
         // Rat buddy: about your card, the winner or the knocked out one
         if (winner.card.player == gm.player) RatBuddy.instance.Comment("ClashWinCom", winner.card);
         else RatBuddy.instance.Comment("ClashLoseCom", loserCard);
+        yield return RatBuddy.instance.WaitUntilQuiet();
         winner.card.player.lostLastFight = false;
         loserCard.player.lostLastFight = true;
 
@@ -738,8 +747,10 @@ public class FightManager : MonoBehaviour
         int[] attackerRolls = RollBaseDice(attacker);
         int[] defenderRolls = RollBaseDice(defender);
 
-        GameManager.instance.managerUI.NewHint("Click to roll your power!");
+        // the rat explains rolling first, the dice start after
         RatBuddy.instance.Hint("FightHint");
+        yield return RatBuddy.instance.WaitUntilQuiet();
+        GameManager.instance.managerUI.NewHint("Click to roll your power!");
         Coroutine attackerDie = StartCoroutine(attacker.RollBasePower(attackerRolls));
         Coroutine defenderDie = StartCoroutine(defender.RollBasePower(defenderRolls));
         yield return attackerDie;
@@ -861,6 +872,7 @@ public class FightManager : MonoBehaviour
     IEnumerator ScoutReveals(Player turnPlayer)
     {
         Player opponent = GameManager.instance.GetOpponentOfPlayer(turnPlayer);
+        yield return RatBuddy.instance.WaitUntilQuiet();
         foreach (Card scout in new List<Card>(turnPlayer.cardsOnField))
         {
             foreach ((Ability strip, RevealRandomOnTurnEndEffect effect) in scout.GetEffects<RevealRandomOnTurnEndEffect>())
@@ -873,9 +885,11 @@ public class FightManager : MonoBehaviour
                 yield return notifier.Show(strip, "Revealing a card");
                 // a face down scout doesn't pop, that would show the opponent which card it is
                 if (!scout.HiddenFromLocalPlayer) Animations.instance.PopAnim(scout.gameObject, 0.3f, 0.25f);
-                Animations.instance.PopAnim(revealed.gameObject, 0.3f, 0.3f);
+                revealed.targeted = true;
+                revealed.StartCoroutine(revealed.FlashScouted());
                 yield return Reveal(revealed);
-                yield return ShowMessage(scout.cardName + " scouts " + revealed.cardName + "!");
+                yield return ShowMessage(ScoutMessage(turnPlayer, scout, revealed));
+                revealed.targeted = false;
                 notifier.Hide();
             }
         }
@@ -895,8 +909,9 @@ public class FightManager : MonoBehaviour
         Player opponent = GameManager.instance.GetOpponentOfPlayer(turnPlayer);
         foreach (Card card in opponent.cardsOnField) card.SetLocked(false);
 
-        // nobody attacks while the locks are picked
+        // nobody attacks while the locks are picked (and the rat's turn comment is read first)
         fighting = true;
+        yield return RatBuddy.instance.WaitUntilQuiet();
         foreach (Card lockCard in new List<Card>(turnPlayer.cardsOnField))
         {
             foreach ((Ability strip, LockCardEffect effect) in lockCard.GetEffects<LockCardEffect>())
@@ -912,16 +927,37 @@ public class FightManager : MonoBehaviour
                 yield return ChooseCard(turnPlayer, unlocked, "Click an opponent card to lock", false);
                 if (chosenCard != null)
                 {
-                    chosenCard.SetLocked(true);
-                    Animations.instance.PopAnim(chosenCard.gameObject, 0.3f, 0.3f);
+                    Card locked = chosenCard;
+                    locked.targeted = true;
+                    locked.SetLocked(true, true);
                     AudioManager.instance.PlaySFX("UnitMoveSFX");
-                    yield return ShowMessage("A card is locked!");
+                    yield return ShowMessage(LockMessage(turnPlayer, locked));
+                    locked.targeted = false;
                 }
                 notifier.Hide();
             }
         }
         fighting = false;
         onDone();
+    }
+
+    /// <summary>
+    /// "You lock their Rat!" / "Bob locks your Rat!" (an unknown card stays "a hidden card")
+    /// </summary>
+    string LockMessage(Player locker, Card target)
+    {
+        if (locker == GameManager.instance.player) return "You lock " + (target.HiddenFromLocalPlayer ? "a hidden card" : "their " + target.cardName) + "!";
+        return locker.playerName + " locks your " + target.cardName + "!";
+    }
+
+    /// <summary>
+    /// "Your Scout reveals their Rat!" / "Bob's Scout reveals your Rat!" (a face down scout isn't named)
+    /// </summary>
+    string ScoutMessage(Player scouter, Card scout, Card revealed)
+    {
+        if (scouter == GameManager.instance.player) return "Your " + scout.cardName + " reveals their " + revealed.cardName + "!";
+        string source = scout.HiddenFromLocalPlayer ? scouter.playerName : scouter.playerName + "'s " + scout.cardName;
+        return source + " reveals your " + revealed.cardName + "!";
     }
 
     // ===============
@@ -1041,11 +1077,8 @@ public class FightManager : MonoBehaviour
         choiceAnswered = false;
         choiceSent = false;
         bool local = chooser == GameManager.instance.player;
-        if (local)
-        {
-            choiceOptions = options;
-            foreach (Card option in options) option.HighlightCard(true);
-        }
+        // the options don't glow, the hovered one comes forward (Card aim juice), the others don't react
+        if (local) choiceOptions = options;
         GameManager.instance.managerUI.NewHint(local ? hint : chooser.playerName + " is choosing...");
 
         while (!choiceAnswered)
@@ -1161,9 +1194,9 @@ public class FightManager : MonoBehaviour
         copy.isPhantom = true;
         copy.twin = card;
         card.twin = copy;
-        copy.SetFaceDown(card.faceDown);
-
         owner.cardsOnField.Insert(GameRandom.Range(0, owner.cardsOnField.Count + 1), copy);
+        // after it's on the field, the "hidden" icon only shows on field cards
+        copy.SetFaceDown(card.faceDown);
         GameManager.instance.handManager.UpdateHandVisuals(owner);
         Animations.instance.PopAnim(copy.gameObject, 0.4f, 0.3f);
         AudioManager.instance.PlaySFX("CardPlaySFX");

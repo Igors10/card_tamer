@@ -19,7 +19,9 @@ public class HandManager : MonoBehaviour
     [SerializeField] float fanSpread;
     [SerializeField] float defaultCardSpacing = 200f;
     [SerializeField] float verticalSpacing = 10f;
-    [SerializeField] float opponentCardSpacing = 270f; // opponent's row at the top, no fan
+    [SerializeField] float opponentCardSpacing = 270f; // opponent's row at the top
+    [SerializeField] float opponentFanSpread = 2f; // degrees per card, smaller than your fan
+    [SerializeField] float opponentVerticalSpacing = 10f;
 
     [Header("Hand hide params")]
     [SerializeField] RectTransform handShownPos;
@@ -95,8 +97,9 @@ public class HandManager : MonoBehaviour
     {
         foreach (Card card in player.cardsInHand)
         {
-            card.SetFaceDown(true);
+            // added first, the "hidden" icon only shows on field cards
             player.cardsOnField.Add(card);
+            card.SetFaceDown(true);
 
             // your cards fly up to the middle of the screen for arranging
             if (player == GameManager.instance.player) card.transform.SetParent(arrangeRow, true);
@@ -149,12 +152,15 @@ public class HandManager : MonoBehaviour
         // during a round the cards are on the field (same place on the screen as the hand)
         List<Card> cards = (player.cardsOnField.Count > 0) ? player.cardsOnField : player.cardsInHand;
 
-        // opponent's cards are a straight row at the top
+        // opponent's cards are a row at the top with a small upside down fan (middle cards hang lower)
         if (player != GameManager.instance.player)
         {
             for (int a = 0; a < cards.Count; a++)
             {
-                cards[a].SetHandLayout(new Vector3(opponentCardSpacing * (a - (cards.Count - 1) / 2f), 0f, 0f), 0f);
+                float fromMiddle = a - (cards.Count - 1) / 2f;
+                float normalizedPosition = (cards.Count > 1) ? 2f * a / (cards.Count - 1) - 1f : 0f;
+                float verticalOffset = -opponentVerticalSpacing * (1 - normalizedPosition * normalizedPosition);
+                cards[a].SetHandLayout(new Vector3(opponentCardSpacing * fromMiddle, verticalOffset, 0f), opponentFanSpread * fromMiddle);
             }
             return;
         }

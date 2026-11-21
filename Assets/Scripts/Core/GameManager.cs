@@ -405,12 +405,8 @@ public class GameManager : MonoBehaviour
                 readyButton.gameObject.SetActive(true);
                 readyButton.UpdateButtonState();
 
-                // Rat buddy: how to arrange, then the Guard and Cheerer cards if there are any (all go away on Ready)
+                // Rat buddy: how to arrange (all arrange hints go away on Ready, the Guard and Cheerer ones show when the card is clicked, Card)
                 RatBuddy.instance.Hint("ArrangeHint");
-                Card guard = player.cardsOnField.Find(card => card.HasEffect<GuardNeighbourEffect>());
-                if (guard != null) RatBuddy.instance.Hint("ArrangeProtectHint", guard);
-                Card cheerer = player.cardsOnField.Find(card => card.HasEffect<NeighbourPowerUpEffect>());
-                if (cheerer != null) RatBuddy.instance.Hint("ArrangeBuffHint", cheerer);
                 break;
 
             case GameState.BATTLING:

@@ -3044,6 +3044,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ability
       objectReference: {fileID: 0}
+    - target: {fileID: 6080649080678921811, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: -88
+      objectReference: {fileID: 0}
+    - target: {fileID: 6080649080678921811, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 36
+      objectReference: {fileID: 0}
     - target: {fileID: 8193803934883941528, guid: 20dfe5953b241dd4e909a117b84662c3, type: 3}
       propertyPath: m_SizeDelta.x
       value: 111.65

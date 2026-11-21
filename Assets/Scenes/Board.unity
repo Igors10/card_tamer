@@ -17660,6 +17660,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5387bc97033afb84f83e1f49682b909b, type: 2}
   - {fileID: 11400000, guid: 373bdb189278f6b41ac98105f14af17b, type: 2}
   - {fileID: 11400000, guid: 92804d5a91cdd5b4aacf6c1de15b93aa, type: 2}
+  - {fileID: 11400000, guid: 62236d90739fb984d9b63f22a9f471a0, type: 2}
+  - {fileID: 11400000, guid: b907276f4f61b2846a8351f5c5cdef64, type: 2}
   allDialogues:
   - {fileID: 11400000, guid: 79186e23c0800294d9c1f67d2b8cef5f, type: 2}
   - {fileID: 11400000, guid: 728417ce21ad63b4a8bf29d22d4d3fb9, type: 2}
@@ -17670,6 +17672,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7b931e2fac772a243ac3c48b9773b9a0, type: 2}
   - {fileID: 11400000, guid: ccc61f39b0f54e042b8f9e69f99c782c, type: 2}
   - {fileID: 11400000, guid: fca6ba9d913f7414fa5e4b48f7cbe102, type: 2}
+  - {fileID: 11400000, guid: 2215fdae7bcd4a94f89e4778b472ca4e, type: 2}
   defaultDialogue: {fileID: 11400000, guid: 7a064bacbbe331f41a8e0504a5f66fb2, type: 2}
   discardingExplained: 0
   abilitiesExplained: 0
@@ -23985,7 +23988,7 @@ MonoBehaviour:
   effectNotifier: {fileID: 3335539381377845927}
   previewCard: {fileID: 805377894}
   cardPreviewOffset: {x: 0, y: 350, z: 0}
-  zoomScale: 2
+  zoomScale: 1.5
   dimAlpha: 0.6
   dimFadeTime: 0.3
   gameOverScreen: {fileID: 1191521449}

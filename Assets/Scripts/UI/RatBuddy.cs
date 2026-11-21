@@ -89,6 +89,14 @@ public class RatBuddy : MonoBehaviour
     bool playing;
 
     /// <summary>
+    /// The game waits here until the rat is done talking, so the player can read it before the next thing happens
+    /// </summary>
+    public IEnumerator WaitUntilQuiet()
+    {
+        while (IsTalking) yield return null;
+    }
+
+    /// <summary>
     /// For a settings button: turns the comments on/off (hints always show)
     /// </summary>
     public void ToggleComments()
