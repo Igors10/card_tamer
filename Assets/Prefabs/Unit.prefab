@@ -869,7 +869,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 10
@@ -2412,7 +2412,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3543513521919206070, guid: 0864943ccdfbf704f9db1ef9718d9cbe, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5694557412070491447, guid: 0864943ccdfbf704f9db1ef9718d9cbe, type: 3}
       propertyPath: stayTime
@@ -2424,11 +2424,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7824633264220872935, guid: 0864943ccdfbf704f9db1ef9718d9cbe, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 12
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 7824633264220872935, guid: 0864943ccdfbf704f9db1ef9718d9cbe, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 9
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

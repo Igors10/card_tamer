@@ -63,6 +63,8 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         // the player with no cards left loses one heart (however many cards the winner has left)
         Player player = GameManager.instance.player;
         Player opponent = GameManager.instance.opponent;
+        foreach (Card card in player.cardsOnField) card.stats.roundsSurvived++;
+        foreach (Card card in opponent.cardsOnField) card.stats.roundsSurvived++;
         if (player.cardsOnField.Count > 0 && opponent.cardsOnField.Count == 0) yield return BreakHeart(player, opponent);
         else if (opponent.cardsOnField.Count > 0 && player.cardsOnField.Count == 0) yield return BreakHeart(opponent, player);
 

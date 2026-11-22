@@ -10,7 +10,7 @@ public enum DrawTool
     Eraser
 }
 
-public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
+public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IInitializePotentialDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("refs")]
     [SerializeField] PencilButton primaryColorImage;
@@ -37,6 +37,20 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     private Stack<Color[]> undoStack = new Stack<Color[]>();
 
     [HideInInspector] public bool developersMode = false;
+
+    [Header("brush cursor")]
+    [SerializeField] Color eraserOutlineColor = Color.black;
+    [SerializeField] float eraserOutlineWidth = 1.5f; // in screen pixels
+    bool isHovered = false;
+    Texture2D cursorTexture;
+
+    void OnDisable()
+    {
+        isHovered = false;
+        isDrawing = false;
+        ResetCursor();
+    }
+
     void OnEnable()
     {
         // Create a blank white texture
@@ -89,6 +103,8 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         primaryColorImage.SelectPencil(tool == DrawTool.Pencil, false);
         secondaryColorImage.SelectPencil(tool == DrawTool.Marker, false);
         eraserButton.SelectPencil(tool == DrawTool.Eraser, false);
+
+        if (isHovered) SetBrushCursor(tool);
     }
 
     int GetToolBrushSize(DrawTool tool)
@@ -104,6 +120,79 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public void OnPointerUp(PointerEventData eventData)
     {
         isDrawing = false;
+
+        // back to the selected tool after a right click erase, or to the normal cursor if the stroke ended outside the canvas
+        if (isHovered) SetBrushCursor(currentTool);
+        else ResetCursor();
+    }
+
+    // without this small strokes are lost, OnDrag only starts after the pointer moves past the EventSystem drag threshold
+    public void OnInitializePotentialDrag(PointerEventData eventData) => eventData.useDragThreshold = false;
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        isHovered = true;
+        if (!isDrawing) SetBrushCursor(currentTool);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        isHovered = false;
+        if (!isDrawing) ResetCursor(); // keep the brush cursor while a stroke continues outside the canvas
+    }
+
+    // === Brush cursor ===
+    /// <summary>
+    /// Builds a smooth circle cursor with the color and on-screen size of the tool's brush (the eraser is an outline)
+    /// </summary>
+    void SetBrushCursor(DrawTool tool)
+    {
+        // a brush of radius r paints about 2r + 1 texels across
+        float radius = (GetToolBrushSize(tool) + 0.5f) * GetScreenTexelSize();
+        int size = Mathf.CeilToInt(radius * 2f) + 2;
+        float center = size / 2f;
+        bool isEraser = tool == DrawTool.Eraser;
+        Color fill = isEraser ? eraserOutlineColor : new Color(brushColor.r, brushColor.g, brushColor.b, 1f);
+
+        Color[] pixels = new Color[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // distance from the pixel center to the circle edge, used for soft (anti-aliased) edges
+                float distance = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(center, center));
+                float alpha = Mathf.Clamp01(radius - distance + 0.5f);
+                if (isEraser) alpha *= Mathf.Clamp01(distance - (radius - eraserOutlineWidth) + 0.5f); // only the ring
+                pixels[y * size + x] = new Color(fill.r, fill.g, fill.b, fill.a * alpha);
+            }
+        }
+
+        if (cursorTexture != null) Destroy(cursorTexture);
+        // linear: the project is in linear color space and the software cursor is drawn without the sRGB conversion,
+        // so an sRGB texture came out darker (the light marker color looked like the pencil color)
+        cursorTexture = new Texture2D(size, size, TextureFormat.RGBA32, false, true);
+        cursorTexture.SetPixels(pixels);
+        cursorTexture.Apply();
+
+        // software cursor: a hardware cursor gets scaled up to the system cursor size (small brushes looked huge)
+        Cursor.SetCursor(cursorTexture, new Vector2(center, center), CursorMode.ForceSoftware);
+    }
+
+    void ResetCursor() => Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+
+    /// <summary>
+    /// How many screen pixels one texture pixel takes
+    /// </summary>
+    float GetScreenTexelSize()
+    {
+        RectTransform rectTransform = (RectTransform)transform;
+        Canvas canvas = GetComponentInParent<Canvas>().rootCanvas;
+        Camera cam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+
+        Vector3[] corners = new Vector3[4];
+        rectTransform.GetWorldCorners(corners);
+        float screenWidth = Vector2.Distance(RectTransformUtility.WorldToScreenPoint(cam, corners[0]), RectTransformUtility.WorldToScreenPoint(cam, corners[3]));
+        return Mathf.Max(1f, screenWidth / textureSize);
     }
 
     public bool IsCanvasEmpty()
@@ -135,6 +224,7 @@ public class DrawingTool : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         // right click always erases, left click uses the selected tool
         DrawTool activeTool = GetActiveTool(eventData);
         currentBrushSize = GetToolBrushSize(activeTool);
+        if (activeTool != currentTool) SetBrushCursor(activeTool); // right click shows the eraser cursor
 
         if (TryGetPixelPosition(eventData, out Vector2Int currentPixel))
         {

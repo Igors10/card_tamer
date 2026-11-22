@@ -20,7 +20,7 @@ public class ManagerUI : MonoBehaviour
     public Workshop workshop;
     [SerializeField] TextMeshProUGUI stateTransitionText;
     public GameObject stateTransitionObj;
-    [SerializeField] UnitSprite[] gameOverDoodles;
+    [SerializeField] GameOverDoodle[] gameOverDoodles;
     public EffectNotifier effectNotifier; // pops up when a sticker of a card that isn't fighting triggers
 
     [Header("card preview")]
@@ -40,6 +40,12 @@ public class ManagerUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI gameOverText;
     [SerializeField] string lostText;
     [SerializeField] GameObject rematchButton;
+
+    [Header("game over card stats")]
+    [SerializeField] bool hideCardNameInStats = false; // "Knocked out 3 units" instead of "Rat knocked out 3 units"
+    [SerializeField] bool showStatOnClick = false; // a stat only shows when its card is clicked (clicking another card hides it)
+    [SerializeField] float statDelay = 1.3f; // stats fade in this long after the screen appears (the drawings fade in first)
+    [SerializeField] float statFadeTime = 0.5f;
 
     /// <summary>
     /// Makes a readOnly card version above specific unit
@@ -193,11 +199,34 @@ public class ManagerUI : MonoBehaviour
         // online only the host restarts (for both players), and only while the opponent is still there
         if (!GameManager.instance.playerConfig.offlineMatch) EnableRematch(ConnectionScript.connectionManager.networkManager.IsServerStarted && !GameManager.instance.opponentLeft);
 
-        for (int i = 0; i < gameOverDoodles.Length && i < localPlayer.cardsOnField.Count; i++)
+        // every card you still have (knocked out ones too), each with a stat line
+        List<Card> cards = GetAllCards(localPlayer);
+        List<Card> enemyCards = GetAllCards(GameManager.instance.opponent);
+        string[] stats = CardStatTexts.Pick(cards, enemyCards, lostPlayer != localPlayer, hideCardNameInStats);
+        for (int i = 0; i < gameOverDoodles.Length && i < cards.Count; i++)
         {
-            // copying sprites of units to doodles
-            gameOverDoodles[i].gameObject.SetActive(true);
-            gameOverDoodles[i].RefreshSprite(localPlayer.cardsOnField[i].cardData.unitSprite, localPlayer.playerColor, localPlayer.cardsOnField[i].cardData.secondaryColor);
+            gameOverDoodles[i].Show(cards[i], stats[i]);
+            gameOverDoodles[i].onClick = OnGameOverDoodleClicked;
+            if (!showStatOnClick) gameOverDoodles[i].ShowStat(true, statDelay, statFadeTime);
+        }
+    }
+
+    List<Card> GetAllCards(Player p)
+    {
+        List<Card> cards = new List<Card>();
+        cards.AddRange(p.cardsOnField);
+        cards.AddRange(p.cardsInDiscard);
+        cards.AddRange(p.cardsInHand);
+        cards.RemoveAll(card => card == null || card.isPhantom);
+        return cards;
+    }
+
+    void OnGameOverDoodleClicked(GameOverDoodle clicked)
+    {
+        if (!showStatOnClick) return;
+        foreach (GameOverDoodle doodle in gameOverDoodles)
+        {
+            if (doodle.gameObject.activeSelf) doodle.ShowStat(doodle == clicked, 0f, statFadeTime);
         }
     }
 

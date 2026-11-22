@@ -114,6 +114,7 @@ public class Card : MonoBehaviour
     [HideInInspector] public int baseRoll; // base power dice result of the current fight (Lowroll)
     [HideInInspector] public bool startedFightFaceDown; // was face down when its current fight started (Ambush)
     [HideInInspector] public bool locked; // Lock: can't attack until the locking player's next turn
+    [System.NonSerialized] public CardStats stats = new CardStats(); // what the card did this game (game over screen)
     bool specialCostPaid = false;
 
     private void Awake()

@@ -69,6 +69,7 @@ public class HandManager : MonoBehaviour
     {
         player.cardsOnField.Remove(card);
         player.cardsInDiscard.Add(card);
+        card.stats.timesKnockedOut++;
         card.gameObject.SetActive(false);
         UpdateHandVisuals(player);
     }

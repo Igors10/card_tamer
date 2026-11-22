@@ -129,7 +129,11 @@ public class HideAllAndSwapEffect : AbilityEffect
 
     protected override IEnumerator Execute(EffectContext ctx)
     {
-        foreach (Card card in ctx.Owner.cardsOnField) card.SetFaceDown(true);
+        foreach (Card card in ctx.Owner.cardsOnField)
+        {
+            if (!card.faceDown && card != ctx.self.card) ctx.self.card.stats.banditHides++;
+            card.SetFaceDown(true);
+        }
         yield return FightManager.instance.HideAndSwap(ctx.self.card);
     }
 }
@@ -280,6 +284,7 @@ public class HideSelfEffect : AbilityEffect
 
     protected override IEnumerator Execute(EffectContext ctx)
     {
+        ctx.self.card.stats.sneaks++;
         yield return FightManager.instance.HideAndSwap(ctx.self.card);
     }
 }

@@ -627,6 +627,7 @@ public class FightManager : MonoBehaviour
         {
             target.StartCoroutine(target.FlashGuardedShield());
             yield return StickerMessage<GuardNeighbourEffect>(guard, guard.cardName + " guards " + target.cardName + "!");
+            guard.stats.guards++;
             target = guard;
         }
 
@@ -637,6 +638,7 @@ public class FightManager : MonoBehaviour
         {
             yield return Reveal(joker);
             yield return StickerMessage<SwapAttackerEffect>(joker, joker.cardName + " swaps the attacker!");
+            joker.stats.confused++;
             attacker.RemoveFromBoard();
             attackingCard.currentPower = 0;
             StartCoroutine(ReturnCard(attackingCard));
@@ -681,6 +683,9 @@ public class FightManager : MonoBehaviour
         Card attackerCard = attacker.card;
         Card defenderCard = defender.card;
         Card loserCard = loser.card;
+        Card winnerCard = winner.card;
+        attackerCard.stats.RecordPower(attackerPower);
+        defenderCard.stats.RecordPower(defenderPower);
 
         // the power counters show who is stronger (the attacker on a tie), then both units lift up and fly at each other
         StartCoroutine(loser.ShowFightResult(false));
@@ -694,6 +699,7 @@ public class FightManager : MonoBehaviour
         Coroutine celebration = StartCoroutine(CheerAndDiscard(winner, loser, loserCard));
         yield return KnockOutOrRecoil(loser);
         if (loser != null && !loser.knockedOut) StopCoroutine(celebration); // a sticker saved the loser
+        RecordFightStats(winnerCard, loserCard, loser == null || loser.knockedOut);
 
         // Rat buddy: about your card, the winner or the knocked out one
         if (winner.card.player == gm.player) RatBuddy.instance.Comment("ClashWinCom", winner.card);
@@ -739,6 +745,17 @@ public class FightManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Game over screen stats: a phantom copy's wins count for its card
+    /// </summary>
+    void RecordFightStats(Card winnerCard, Card loserCard, bool knockedOut)
+    {
+        winnerCard.stats.RecordFight(true);
+        loserCard.stats.RecordFight(false);
+        if (knockedOut) winnerCard.stats.knockouts++;
+        if (winnerCard.isPhantom && winnerCard.twin != null) winnerCard.twin.stats.phantomWins++;
+    }
+
+    /// <summary>
     /// Both fighting units roll their base power die, each player clicks to stop their own (bot stops by itself)
     /// </summary>
     IEnumerator RollBasePower()
@@ -765,7 +782,11 @@ public class FightManager : MonoBehaviour
     int[] RollBaseDice(Unit unit)
     {
         int[] results = new int[unit.BaseDiceCount];
-        for (int i = 0; i < results.Length; i++) results[i] = GameRandom.Range(1, 7);
+        for (int i = 0; i < results.Length; i++)
+        {
+            results[i] = GameRandom.Range(1, 7);
+            if (results[i] == 6) unit.card.stats.sixes++;
+        }
         return results;
     }
 
@@ -829,6 +850,7 @@ public class FightManager : MonoBehaviour
             foreach ((Ability strip, NeighbourPowerUpEffect effect) in card.GetEffects<NeighbourPowerUpEffect>())
             {
                 GameManager.instance.executeManager.abilityRunner.QueueOnUnit(unit, strip, effect);
+                card.stats.cheers++;
             }
         }
     }
@@ -844,6 +866,7 @@ public class FightManager : MonoBehaviour
         foreach ((Ability strip, SupportLeftEffect effect) in supporter.GetEffects<SupportLeftEffect>())
         {
             GameManager.instance.executeManager.abilityRunner.QueueOnUnit(unit, strip, effect);
+            supporter.stats.supports++;
         }
     }
 
@@ -886,6 +909,7 @@ public class FightManager : MonoBehaviour
                 // a face down scout doesn't pop, that would show the opponent which card it is
                 if (!scout.HiddenFromLocalPlayer) Animations.instance.PopAnim(scout.gameObject, 0.3f, 0.25f);
                 revealed.targeted = true;
+                scout.stats.reveals++;
                 revealed.StartCoroutine(revealed.FlashScouted());
                 yield return Reveal(revealed);
                 yield return ShowMessage(ScoutMessage(turnPlayer, scout, revealed));
@@ -928,6 +952,7 @@ public class FightManager : MonoBehaviour
                 if (chosenCard != null)
                 {
                     Card locked = chosenCard;
+                    lockCard.stats.locks++;
                     locked.targeted = true;
                     locked.SetLocked(true, true);
                     AudioManager.instance.PlaySFX("UnitMoveSFX");
@@ -990,6 +1015,7 @@ public class FightManager : MonoBehaviour
             (field[i], field[j]) = (field[j], field[i]);
         }
         GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.GetOpponentOfPlayer(card.player));
+        card.stats.mixUps++;
         AudioManager.instance.PlaySFX("RerollSFX");
         yield return ShowMessage(card.cardName + " mixes up the cards!");
         notifier.Hide();
@@ -1015,6 +1041,7 @@ public class FightManager : MonoBehaviour
             if (neighbour == null) continue;
 
             Animations.instance.PopAnim(neighbour.gameObject, 0.3f, 0.3f);
+            if (neighbour.faceDown && attacker != null) attacker.card.stats.reveals++;
             yield return Reveal(neighbour);
         }
     }
@@ -1173,7 +1200,9 @@ public class FightManager : MonoBehaviour
         {
             yield return Reveal(dragon);
             yield return StickerMessage<KnockOutSamePositionEffect>(dragon, dragon.cardName + " breathes fire on " + target.cardName + "!");
-            if (target.player.cardsOnField.Contains(target)) yield return KnockOutCard(target);
+            if (!target.player.cardsOnField.Contains(target)) continue;
+            dragon.stats.dragonShots++;
+            yield return KnockOutCard(target);
         }
 
         // a Dragon can end the round before it starts
@@ -1291,6 +1320,7 @@ public class FightManager : MonoBehaviour
 
         yield return StickerMessage<DestroyOnWinEffect>(winner, winner.cardName + " destroys " + loser.cardName + "!");
         winner.destroyedCardThisRound = true;
+        winner.stats.destroyed++;
         loser.player.compensationStars++;
         if (loser.twin != null) RemovePhantom(loser.twin);
 
@@ -1334,6 +1364,8 @@ public class FightManager : MonoBehaviour
         if (guess == target.cardData)
         {
             setPowerUps(seers[0].effect.amount);
+            Card seer = guesser.cardsOnField.Find(card => card.HasEffect<GuessTargetEffect>());
+            if (seer != null) seer.stats.rightGuesses++;
             yield return ShowMessage("Right guess! Power-up!");
         }
         else yield return ShowMessage("Wrong guess!");
