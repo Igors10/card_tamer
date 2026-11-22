@@ -83,10 +83,12 @@ public class RatBuddy : MonoBehaviour
     public bool WasShown(string key) => shown.Contains(key);
 
     /// <summary>
-    /// True while lines are still playing or waiting (a hint holding its last line doesn't count)
+    /// True while lines are still playing or waiting. A hint's last line doesn't count, it's the "do this" line,
+    /// so the game goes on together with it (the line stays until the player does it)
     /// </summary>
-    public bool IsTalking => playing || queue.Count > 0;
+    public bool IsTalking => (playing && !onHintLastLine) || queue.Count > 0;
     bool playing;
+    bool onHintLastLine;
 
     /// <summary>
     /// The game waits here until the rat is done talking, so the player can read it before the next thing happens
@@ -129,8 +131,11 @@ public class RatBuddy : MonoBehaviour
                 if (entry.isHint) activeHints.Add(entry);
                 playing = true;
 
-                foreach (string line in entry.dialogue.line)
+                List<string> lines = entry.dialogue.line;
+                for (int i = 0; i < lines.Count; i++)
                 {
+                    string line = lines[i];
+                    onHintLastLine = entry.isHint && i == lines.Count - 1;
                     ShowLine(line.Replace("{card}", entry.cardName));
 
                     float t = 0;
@@ -143,6 +148,7 @@ public class RatBuddy : MonoBehaviour
                     if (entry.cleared) break;
                 }
                 playing = false;
+                onHintLastLine = false;
             }
             else if (activeHints.Count > 0)
             {

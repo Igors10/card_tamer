@@ -284,7 +284,6 @@ public class HideSelfEffect : AbilityEffect
 
     protected override IEnumerator Execute(EffectContext ctx)
     {
-        ctx.self.card.stats.sneaks++;
         yield return FightManager.instance.HideAndSwap(ctx.self.card);
     }
 }

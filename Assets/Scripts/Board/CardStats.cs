@@ -21,9 +21,6 @@ public class CardStats
     public int guards; // Guard took an attack for its neighbour
     public int reveals; // Scout
     public int locks; // Lock
-    public int rightGuesses; // Seer
-    public int mixUps; // Mixer
-    public int sneaks; // Sneaky
     public int cheers; // Cheerer
     public int supports; // Support
 
@@ -85,9 +82,6 @@ public static class CardStatTexts
         new StatLine(s => s.guards, 1, 1.5f, false, "{name} protected a card {x} time{s}"),
         new StatLine(s => s.reveals, 2, 2.5f, false, "{name} revealed {x} cards"),
         new StatLine(s => s.locks, 2, 2.5f, false, "{name} locked {x} cards"),
-        new StatLine(s => s.rightGuesses, 1, 1.5f, false, "{name} guessed {x} hidden card{s} right"),
-        new StatLine(s => s.mixUps, 1, 1.5f, false, "{name} mixed up the cards {x} time{s}"),
-        new StatLine(s => s.sneaks, 2, 2.5f, false, "{name} sneaked away {x} times"),
         new StatLine(s => s.cheers, 2, 2.5f, false, "{name} cheered for its friends {x} times"),
         new StatLine(s => s.supports, 2, 2.5f, false, "{name} supported a friend {x} times"),
 

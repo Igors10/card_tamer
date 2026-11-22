@@ -1015,7 +1015,6 @@ public class FightManager : MonoBehaviour
             (field[i], field[j]) = (field[j], field[i]);
         }
         GameManager.instance.handManager.UpdateHandVisuals(GameManager.instance.GetOpponentOfPlayer(card.player));
-        card.stats.mixUps++;
         AudioManager.instance.PlaySFX("RerollSFX");
         yield return ShowMessage(card.cardName + " mixes up the cards!");
         notifier.Hide();
@@ -1172,6 +1171,9 @@ public class FightManager : MonoBehaviour
         GameManager gm = GameManager.instance;
         Player first = gm.firstPlayer;
         Player second = gm.GetOpponentOfPlayer(first);
+
+        // the hint from arranging ("It's your opponents turn" after Ready) goes away, the first turn sets its own
+        gm.managerUI.NewHint("");
 
         // Phantom copies appear in a random spot (GameRandom, same on both games online)
         foreach (Player p in new Player[] { first, second })
@@ -1364,8 +1366,6 @@ public class FightManager : MonoBehaviour
         if (guess == target.cardData)
         {
             setPowerUps(seers[0].effect.amount);
-            Card seer = guesser.cardsOnField.Find(card => card.HasEffect<GuessTargetEffect>());
-            if (seer != null) seer.stats.rightGuesses++;
             yield return ShowMessage("Right guess! Power-up!");
         }
         else yield return ShowMessage("Wrong guess!");
