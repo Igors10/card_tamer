@@ -244,6 +244,8 @@ public class HandManager : MonoBehaviour
     /// <summary>
     /// Hides the hand a little below the screen. Shows when player lowers mouse below certain point
     /// </summary>
+    public bool HandHiding { get; private set; } // your cards don't get hovered while the hand goes down
+
     void HandHidingCheck()
     {
         // hides in all phases when the cursor is away from it
@@ -256,6 +258,15 @@ public class HandManager : MonoBehaviour
 
         bool cursorNearHand = Input.mousePosition.y < handHideDistance && Mathf.Abs(hand.transform.position.x - Input.mousePosition.x) < handHideDistanceVertical;
         bool shouldShow = !forceHide && (forceShow || cursorNearHand);
+
+        // a hiding hand drops the hover of your cards, or the raised card keeps jittering under the cursor
+        if (!shouldShow && !HandHiding)
+        {
+            Player localPlayer = GameManager.instance.player;
+            Card hovered = Card.hoveredCard;
+            if (hovered != null && (localPlayer.cardsInHand.Contains(hovered) || localPlayer.cardsOnField.Contains(hovered))) hovered.OnHover(false);
+        }
+        HandHiding = !shouldShow;
         // (the field sits a bit higher than the hand, so the cards can be read)
         float shownY = handShownPos.transform.position.y + ((inRound) ? roundFieldRaise * handRT.lossyScale.y : 0f);
 

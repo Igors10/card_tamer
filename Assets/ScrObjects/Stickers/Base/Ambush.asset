@@ -27,7 +27,7 @@ MonoBehaviour:
       type: {class: PowerUpEffect, ns: , asm: Assembly-CSharp}
       data:
         trigger: 6
-        customText: Ambush!
+        customText: +3 if face down
         showPresentation: 1
         oncePerRound: 0
         condition: 13

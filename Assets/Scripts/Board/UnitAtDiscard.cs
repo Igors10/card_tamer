@@ -123,7 +123,7 @@ public class UnitAtDiscard : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         transform.localScale = (isDiscarded) ? defaultScale * discardedUnitSizeMod : defaultScale;
 
         // disabling cartoon shake animation and hovering functionality
-        cartoonShakeEffect.enabled = !isDiscarded;
+        cartoonShakeEffect.enabled = false;
         hoverEffect.enabled = !isDiscarded;
     }
 

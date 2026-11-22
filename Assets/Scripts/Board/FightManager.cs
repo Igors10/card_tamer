@@ -625,7 +625,7 @@ public class FightManager : MonoBehaviour
         Card guard = FindGuard(target);
         if (guard != null)
         {
-            target.StartCoroutine(target.FlashGuardedShield());
+            guard.StartCoroutine(guard.FlashGuardedShield());
             yield return StickerMessage<GuardNeighbourEffect>(guard, guard.cardName + " guards " + target.cardName + "!");
             guard.stats.guards++;
             target = guard;
@@ -697,7 +697,7 @@ public class FightManager : MonoBehaviour
 
         StartCoroutine(RecoilUnit(winner));
         Coroutine celebration = StartCoroutine(CheerAndDiscard(winner, loser, loserCard));
-        yield return KnockOutOrRecoil(loser);
+        yield return KnockOutOrRecoil(loser, winner);
         if (loser != null && !loser.knockedOut) StopCoroutine(celebration); // a sticker saved the loser
         RecordFightStats(winnerCard, loserCard, loser == null || loser.knockedOut);
 
@@ -1594,9 +1594,9 @@ public class FightManager : MonoBehaviour
     /// <summary>
     /// Losing unit gets knocked out from the hit (it flies away), if a sticker saves it, it recoils like a winner
     /// </summary>
-    IEnumerator KnockOutOrRecoil(Unit unit)
+    IEnumerator KnockOutOrRecoil(Unit unit, Unit winner)
     {
-        yield return unit.KnockOut();
+        yield return unit.KnockOut(winner.transform.position);
         if (unit != null && !unit.knockedOut) yield return RecoilUnit(unit);
     }
 

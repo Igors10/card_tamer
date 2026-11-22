@@ -377,7 +377,10 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         if (GameManager.instance.DebugKeysEnabled && Input.GetKeyDown(KeyCode.K)) StartCoroutine(KnockOut());
     }
 
-    public IEnumerator KnockOut()
+    /// <summary>
+    /// awayFrom: the unit flies away from this point (the winner), without it flies left or right randomly
+    /// </summary>
+    public IEnumerator KnockOut(Vector3? awayFrom = null)
     {
         // abilities like Exoskeleton can react to the knock out or prevent it
         List<IEnumerator> knockOutEffects = new List<IEnumerator>();
@@ -394,15 +397,18 @@ public class Unit : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IB
         // do damage animation, VFX and SFX 
         ParticleManager.instance.SpawnVFX(transform.position, "HitVFX");
         AudioManager.instance.PlaySFX("HitSFX");
-        yield return StartCoroutine(KnockOutEffect());
+        yield return StartCoroutine(KnockOutEffect(awayFrom));
     }
 
-    private IEnumerator KnockOutEffect()
+    private IEnumerator KnockOutEffect(Vector3? awayFrom)
     {
         StopSlide();
 
+        float xSpeed = Random.Range(-moveXSpeed, moveXSpeed); // randomly flies left or right
+        if (awayFrom.HasValue) xSpeed = Random.Range(0.5f, 1f) * moveXSpeed * ((transform.position.x >= awayFrom.Value.x) ? 1f : -1f);
+
         Vector3 velocity = new Vector3(
-            Random.Range(-moveXSpeed, moveXSpeed), // Randomly flies left or right
+            xSpeed,
             jumpForce,
             jumpForce
         );

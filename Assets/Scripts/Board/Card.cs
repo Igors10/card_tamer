@@ -601,6 +601,10 @@ public class Card : MonoBehaviour
 
     public void OnHover(bool mouseOver)
     {
+        Player localPlayer = GameManager.instance.player;
+        bool ownCard = localPlayer.cardsInHand.Contains(this) || localPlayer.cardsOnField.Contains(this);
+        if (mouseOver && ownCard && GameManager.instance.handManager.HandHiding) return;
+
         if (mouseOver) hoveredCard = this;
         else if (hoveredCard == this) hoveredCard = null;
 
@@ -619,8 +623,7 @@ public class Card : MonoBehaviour
             if (transform.parent == aimParent) transform.SetSiblingIndex(hierarchyIndex);
         }
 
-        Player localPlayer = GameManager.instance.player;
-        if (localPlayer.cardsInHand.Contains(this) || localPlayer.cardsOnField.Contains(this))
+        if (ownCard)
         {
             if (GameManager.instance.executeManager.currentCard == this || isDragged) return;
 
