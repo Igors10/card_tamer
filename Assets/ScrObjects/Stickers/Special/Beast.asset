@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Beast
   m_EditorClassIdentifier: Assembly-CSharp::AbilityObj
   power: 5
-  abilityDescription: +2 if attacking. No mercy for units this kills
+  abilityDescription: +3 if attacking. No mercy for units this kills
   isSpecial: 1
   stickerColor: {r: 0.83137256, g: 0.41568628, b: 0.41568628, a: 1}
   hasSide: 0
@@ -32,7 +32,7 @@ MonoBehaviour:
         showPresentation: 1
         oncePerRound: 0
         condition: 1
-        amount: 2
+        amount: 3
         maxAmount: 0
     - rid: 8466844466926059611
       type: {class: DestroyOnWinEffect, ns: , asm: Assembly-CSharp}

@@ -17,6 +17,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] ShopSticker[] stickerOffers; // random stickers for sale, new ones every round
     [SerializeField] Button stickerRefreshButton; // swaps all offered stickers for new ones
     [SerializeField] TextMeshProUGUI stickerRefreshPriceText;
+    [SerializeField] GameObject freeStickerCoupon; // shown while the player still has a free sticker this visit
     [SerializeField] TextMeshProUGUI nextStarAmountText;
     [SerializeField] Player player;
     [SerializeField] Workshop workshop;
@@ -131,6 +132,7 @@ public class ShopManager : MonoBehaviour
             offer.SetDimmed(!affordable);
             offer.Button.interactable = affordable && cardHasRoom;
         }
+        freeStickerCoupon.SetActive(shopLoaded && stickerPriceNow == 0);
 
         // refreshing the sticker refresh button
         stickerRefreshButton.gameObject.SetActive(shopLoaded);
@@ -264,7 +266,7 @@ public class ShopManager : MonoBehaviour
     void RefreshStickers(Player playerToPay)
     {
         RollStickers();
-        foreach (ShopSticker offer in stickerOffers) Animations.instance.PopAnim(offer.gameObject, 0.3f, 0.15f);
+        //foreach (ShopSticker offer in stickerOffers) Animations.instance.PopAnim(offer.gameObject, 0.3f, 0.15f);
         AudioManager.instance.PlaySFX("RerollSFX");
         Pay(playerToPay, stickerRefreshPrice);
     }
@@ -295,6 +297,7 @@ public class ShopManager : MonoBehaviour
         }
         foreach (ShopSticker offer in stickerOffers) offer.gameObject.SetActive(false);
         stickerRefreshButton.gameObject.SetActive(false);
+        freeStickerCoupon.SetActive(false);
 
         // pause while intro text is on the screen
         while (GameManager.instance.managerUI.stateTransitionObj.activeSelf)

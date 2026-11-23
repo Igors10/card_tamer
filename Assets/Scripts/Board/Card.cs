@@ -66,6 +66,13 @@ public class Card : MonoBehaviour
     static Card aimedCard; // opponent card under the mouse while you pick a target
     Transform aimParent; // row the aimed card was in
 
+    [Header("flip")]
+    [SerializeField] float flipTime = 0.3f; // the card turns over when its shown side changes (back <-> front)
+    float flipScaleX = 1f; // squashes the visual sideways on top of the hover/drag scale
+    Coroutine flipRoutine;
+    Vector3 visualScale; // eased hover/drag scale of the visual, without the flip
+    [HideInInspector] public bool holdFace; // a revealed fighter keeps showing its back until its swing to the display spot ends
+
     /// <summary>
     /// Card is the one you're aiming at right now (stops by itself when the picking is over)
     /// </summary>
@@ -136,6 +143,7 @@ public class Card : MonoBehaviour
         highlightedScale = defaultScale * 1.2f;
         dragScale = defaultScale * 1.1f;
         visualRestScale = cardVisual.transform.localScale;
+        visualScale = visualRestScale;
     }
 
     private void Update()
@@ -191,6 +199,12 @@ public class Card : MonoBehaviour
         if (same) return;
         shownBuffTexts.Clear();
         shownBuffTexts.AddRange(buffTexts);
+
+        // the opponent's field is at the top of the screen, so their bonuses go under the card instead of above it
+        RectTransform buffRow = (RectTransform)buffIndicatorTemplate.transform.parent;
+        bool below = player != null && GameManager.instance != null && player != GameManager.instance.player;
+        buffRow.pivot = new Vector2(0.5f, below ? 1f : 0f);
+        buffRow.anchoredPosition = new Vector2(buffRow.anchoredPosition.x, Mathf.Abs(buffRow.anchoredPosition.y) * (below ? -1f : 1f));
 
         while (buffIndicators.Count < buffTexts.Count)
         {
@@ -313,7 +327,8 @@ public class Card : MonoBehaviour
             targetScale = visualRestScale * aimScale;
             targetPosition = transform.InverseTransformVector(new Vector3(0f, -aimOffsetY, 0f));
         }
-        visual.localScale = Vector3.Lerp(visual.localScale, targetScale, easeT);
+        visualScale = Vector3.Lerp(visualScale, targetScale, easeT);
+        visual.localScale = new Vector3(visualScale.x * flipScaleX, visualScale.y, visualScale.z);
         visual.localPosition = Vector3.Lerp(visual.localPosition, targetPosition, easeT);
 
         // tilting towards the direction the card is dragged
@@ -351,7 +366,8 @@ public class Card : MonoBehaviour
         hovered = false;
         dragTilt = 0f;
         dragLift = 0f;
-        cardVisual.transform.localScale = visualRestScale;
+        visualScale = visualRestScale;
+        cardVisual.transform.localScale = new Vector3(visualRestScale.x * flipScaleX, visualRestScale.y, visualRestScale.z);
         cardVisual.transform.localPosition = Vector3.zero;
         cardVisual.transform.localRotation = Quaternion.identity;
         if (dragShadow != null)
@@ -479,7 +495,62 @@ public class Card : MonoBehaviour
     public void SetFaceDown(bool isFaceDown)
     {
         faceDown = isFaceDown;
+        if (!holdFace) ShowFace();
+    }
+
+    /// <summary>
+    /// The side you see catches up with faceDown (turning over if it changes). While holdFace is on, SetFaceDown leaves the shown side as it is
+    /// </summary>
+    public void ShowFace()
+    {
+        // the card turns over when the side you see changes (opponent's cards), it keeps moving meanwhile
+        bool sideChanges = HiddenFromLocalPlayer != cardBack.gameObject.activeSelf;
+        if (sideChanges && gameObject.activeInHierarchy)
+        {
+            if (flipRoutine != null) StopCoroutine(flipRoutine);
+            flipRoutine = StartCoroutine(Flip());
+        }
+        else if (flipRoutine == null) RefreshFace(); // a running flip shows the new side at its middle
+    }
+
+    /// <summary>
+    /// Card squashes sideways to nothing, the other side is put on, then it opens back up
+    /// </summary>
+    IEnumerator Flip()
+    {
+        float halfTime = flipTime / 2f;
+        float startScale = flipScaleX;
+        float t = 0;
+        while (t < halfTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / halfTime);
+            flipScaleX = Mathf.Lerp(startScale, 0f, clampedT * clampedT);
+            yield return null;
+        }
+
         RefreshFace();
+
+        t = 0;
+        while (t < halfTime)
+        {
+            t += Time.deltaTime;
+            float clampedT = Mathf.Clamp01(t / halfTime);
+            flipScaleX = 1 - Mathf.Pow(1 - clampedT, 2);
+            yield return null;
+        }
+        flipScaleX = 1f;
+        flipRoutine = null;
+    }
+
+    void OnDisable()
+    {
+        // a flip cut short (card hidden or destroyed) finishes instantly
+        if (flipRoutine == null) return;
+        flipRoutine = null;
+        flipScaleX = 1f;
+        cardVisual.transform.localScale = visualScale;
+        if (player != null) RefreshFace();
     }
 
     /// <summary>
@@ -562,7 +633,7 @@ public class Card : MonoBehaviour
         // the opponent's face down cards only show the back, your own get a "hidden" icon
         bool showBack = HiddenFromLocalPlayer;
         cardBack.gameObject.SetActive(showBack);
-        cardBack.color = player.playerColor;
+        cardBack.color = Colors.instance.BlendColor(player.playerColor, 0.65f);
         bool onField = GameManager.instance.currentState != GameState.BUYING && player.cardsOnField.Contains(this);
         hiddenIcon.SetActive(faceDown && onField && player == GameManager.instance.player);
 
@@ -645,9 +716,13 @@ public class Card : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// Card scales up and lifts towards the middle of the screen, same as a card picked by a sticker (Lock, Scout)
+    /// </summary>
     public void HighlightCard(bool isHightlighted)
     {
-        glowEffect.SetActive(isHightlighted);
+        //glowEffect.SetActive(isHightlighted);
+        targeted = isHightlighted;
     }
 
     // ====================

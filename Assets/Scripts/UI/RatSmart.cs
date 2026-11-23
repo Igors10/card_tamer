@@ -34,6 +34,7 @@ public class RatSmart : MonoBehaviour
     [HideInInspector] public bool placingExplained;
     [HideInInspector] public bool shopExplained;
     [HideInInspector] public bool specialExplained;
+    [HideInInspector] public bool dialoguesOff; // debug start in placing/shop: no dialogues at all
 
 
     bool clicked;
@@ -78,6 +79,8 @@ public class RatSmart : MonoBehaviour
 
     public IEnumerator PlayDialogueObj(RSDialogueObj dialogue)
     {
+        if (dialoguesOff) yield break;
+
         // Enabling the rat
         RSobj.SetActive(true);
         GameManager.instance.managerUI.DimActivate(screenDarken, true, true);

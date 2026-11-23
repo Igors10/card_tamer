@@ -178,6 +178,7 @@ public class GameManager : MonoBehaviour
         if (DebugKeysEnabled && (debugStartInPlacing || debugStartInShop))
         {
             yield return null; // every Start has run (workshop, bot)
+            RatSmart.instance.dialoguesOff = true;
             managerUI.workshop.DebugSkipStartingSequence();
             managerUI.EnableUI(false);
             TransitionGameState(debugStartInPlacing ? GameState.PLACING : GameState.BUYING);

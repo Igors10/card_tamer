@@ -485,6 +485,10 @@ public class FightManager : MonoBehaviour
         cardTransform.localRotation = Quaternion.Euler(0f, 0f, endAngle);
         cardTransform.localScale = endScale;
 
+        // a revealed card turns over now that it's in its spot
+        card.holdFace = false;
+        card.ShowFace();
+
         // LANDING: thud, shake, particles, a pulse, the other card gets knocked, a split second freeze
         AudioManager.instance.PlaySFX("HitSFX", 0.35f, 1.3f);
         GameManager.instance.mainCamera.Shake(entranceShake, 0.2f);
@@ -517,6 +521,20 @@ public class FightManager : MonoBehaviour
         if (ghost != null) Destroy(ghost.gameObject);
     }
 
+    /// <summary>
+    /// Card back in its row is drawn under the cards on its right again (SetParent put it on top of all of them)
+    /// </summary>
+    void RestoreDrawOrder(Card card)
+    {
+        List<Card> row = card.player.cardsOnField;
+        for (int i = row.IndexOf(card) + 1; i < row.Count; i++)
+        {
+            if (row[i].transform.parent != card.transform.parent) continue;
+            card.transform.SetSiblingIndex(row[i].transform.GetSiblingIndex());
+            return;
+        }
+    }
+
     float EaseOutBack(float t)
     {
         float c = entranceOvershoot;
@@ -547,6 +565,7 @@ public class FightManager : MonoBehaviour
         yield return card.StartCoroutine(CardExit(card));
         card.onDisplay = false;
         card.transform.SetParent(home, true);
+        RestoreDrawOrder(card);
         GameManager.instance.handManager.UpdateHandVisuals(card.player);
         yield return card.StartCoroutine(card.EaseIntoHandLayout(cardReturnTime));
     }
@@ -696,7 +715,7 @@ public class FightManager : MonoBehaviour
         yield return ClashUnits(attacker, defender);
 
         StartCoroutine(RecoilUnit(winner));
-        Coroutine celebration = StartCoroutine(CheerAndDiscard(winner, loser, loserCard));
+        Coroutine celebration = StartCoroutine(CheerAndDiscard(winner, loser, loserCard, winner == attacker && WillDestroyBeatenCard(winner.card, loserCard)));
         yield return KnockOutOrRecoil(loser, winner);
         if (loser != null && !loser.knockedOut) StopCoroutine(celebration); // a sticker saved the loser
         RecordFightStats(winnerCard, loserCard, loser == null || loser.knockedOut);
@@ -1026,6 +1045,7 @@ public class FightManager : MonoBehaviour
     IEnumerator RevealFighter(Card card)
     {
         card.startedFightFaceDown = card.faceDown;
+        card.holdFace = true; // turns over at the end of its swing to the display spot (CardEntrance)
         yield return Reveal(card);
     }
 
@@ -1337,6 +1357,14 @@ public class FightManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Beast will cut the beaten card in half (not a phantom, Lucky saves it), so it isn't discarded with the slide away animation
+    /// </summary>
+    bool WillDestroyBeatenCard(Card winner, Card loser)
+    {
+        return winner.HasEffect<DestroyOnWinEffect>() && !loser.isPhantom && loser.GetStickerWith<ProtectFromDiscardEffect>() == null;
+    }
+
+    /// <summary>
     /// Seer: if the attacking player has a Seer on the field, they guess the face down target from the opponent cards they have seen
     /// </summary>
     IEnumerator GuessTarget(Player guesser, Card target, System.Action<int> setPowerUps)
@@ -1522,11 +1550,11 @@ public class FightManager : MonoBehaviour
     /// <summary>
     /// Once the loser flies off, the winning unit cheers while the losing card is discarded
     /// </summary>
-    IEnumerator CheerAndDiscard(Unit winner, Unit loser, Card loserCard)
+    IEnumerator CheerAndDiscard(Unit winner, Unit loser, Card loserCard, bool beastDestroys)
     {
         yield return new WaitForSeconds(winnerRecoilTime);
         yield return new WaitUntil(() => loser == null || loser.knockedOut);
-        StartCoroutine(DiscardCard(loserCard));
+        if (!beastDestroys) StartCoroutine(DiscardCard(loserCard)); // Beast cuts the card in half instead (DestroyBeatenCard)
         yield return new WaitForSeconds(winnerCheerDelay);
         yield return CheerUnit(winner);
     }

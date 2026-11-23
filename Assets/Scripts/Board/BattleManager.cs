@@ -145,7 +145,7 @@ public class BattleManager : MonoBehaviour // info@entrypoint.lv
         // Ending the phase
         GameManager.instance.player.endStateReady = true;
         GameManager.instance.opponent.endStateReady = true;
-        GameManager.instance.EndTurn();
+        GameManager.instance.CheckEndState(); // not EndTurn, that would show the "opponent's turn" message on the way to the workshop
     }
 
 }

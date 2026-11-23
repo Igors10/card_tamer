@@ -10122,6 +10122,12 @@ MonoBehaviour:
   - {fileID: 620976431}
   - {fileID: 1911845181}
   - {fileID: 1209145229}
+  - {fileID: 1010039256}
+  - {fileID: 359865066}
+  - {fileID: 183592073}
+  - {fileID: 496368282}
+  - {fileID: 971519348}
+  - {fileID: 1237254781}
   doodleAreaMargin: 60
   doodleSpacing: 30
 --- !u!4 &1253801476

@@ -24,6 +24,7 @@ public class EffectNotifier : MonoBehaviour
     Vector3 playerPosition;
     bool playerPositionSaved;
     Unit stickerUnit; // a fighting unit showing its own sticker under itself instead of the notifier (null: the notifier is used)
+    Card highlightedCard; // the sticker's card, lifted in its row while the notifier is up
 
     /// <summary>
     /// Shows the notifier for the sticker strip's card, done after the show time (the effect triggers next).
@@ -46,9 +47,18 @@ public class EffectNotifier : MonoBehaviour
         }
         stickerUnit = null;
 
-        // the opponent's one is mirrored to the right side of the screen (the parent is centered on the screen)
+        // the opponent's one is mirrored to the top right, near their hand (the parent is centered on the screen)
         if (!playerPositionSaved) { playerPosition = transform.localPosition; playerPositionSaved = true; }
-        transform.localPosition = (p == GameManager.instance.player) ? playerPosition : new Vector3(-playerPosition.x, playerPosition.y, playerPosition.z);
+        transform.localPosition = (p == GameManager.instance.player) ? playerPosition : new Vector3(-playerPosition.x, -playerPosition.y, playerPosition.z);
+
+        // the card with the sticker lifts up in its row too (not the opponent's face down one, that would give it away)
+        if (highlightedCard != null) highlightedCard.HighlightCard(false);
+        highlightedCard = null;
+        if (!owner.HiddenFromLocalPlayer)
+        {
+            highlightedCard = owner;
+            owner.HighlightCard(true);
+        }
 
         portraitBG.color = Colors.Lighten(p.playerColor);
         // an unknown card (opponent's face down) shows a question mark instead of its creature
@@ -78,6 +88,12 @@ public class EffectNotifier : MonoBehaviour
             stickerUnit.HideEffectSticker();
             stickerUnit = null;
             return;
+        }
+
+        if (highlightedCard != null)
+        {
+            highlightedCard.HighlightCard(false);
+            highlightedCard = null;
         }
 
         if (gameObject.activeInHierarchy) GetComponent<AutoFade>().FadeOut(fadeOutTime);
